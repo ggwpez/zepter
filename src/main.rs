@@ -1,9 +1,8 @@
-use cargo_metadata::{CargoOpt, DependencyKind, *};
+use cargo_metadata::{CargoOpt, *};
 use clap::Parser;
 use env_logger::Env;
 use feature::DAG;
 use std::{
-	collections::{BTreeMap, BTreeSet},
 	path::PathBuf,
 };
 
@@ -70,10 +69,10 @@ impl ShowCmd {
 			return
 		}
 
-		let mut forward = dag.clone().dag_of(&self.root);
-		let depends = forward.clone().into_transitive_hull_in(&dag);
+		let forward = dag.clone().dag_of(&self.root);
+		let depends = forward.into_transitive_hull_in(&dag);
 
-		match (depends.connected(&self.root, &self.package)) {
+		match depends.connected(&self.root, &self.package) {
 			true => println!("Calculating shortest path from {} to {}...", self.root, self.package),
 			false => {
 				println!("{} does not depend on {}", self.root, self.package);
@@ -96,6 +95,6 @@ impl ShowCmd {
 			cmd.no_deps();
 		}
 		cmd.exec()
-			.expect(format!("Failed to read manifest {:?}", manifest_path).as_str())
+			.unwrap_or_else(|_| panic!("Failed to read manifest {:?}", manifest_path))
 	}
 }

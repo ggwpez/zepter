@@ -1,9 +1,8 @@
-use cargo_metadata::{CargoOpt, *};
-use clap::Parser;
-use env_logger::Env;
+
+
+
 use std::{
 	collections::{BTreeMap, BTreeSet},
-	path::PathBuf,
 };
 
 // Just store the edges
@@ -16,7 +15,7 @@ pub struct DAG {
 
 impl DAG {
 	pub fn add_edge(&mut self, from: String, to: String) {
-		self.edges.entry(from.clone()).or_default().insert(to.clone());
+		self.edges.entry(from).or_default().insert(to);
 	}
 
 	pub fn connected(&self, from: &str, to: &str) -> bool {
@@ -29,7 +28,7 @@ impl DAG {
 
 	pub fn dag_of(&self, from: &str) -> Self {
 		let mut edges = BTreeMap::new();
-		edges.insert(from.to_string(), self.edges.get(from).map(|s| s.clone()).unwrap_or_default());
+		edges.insert(from.to_string(), self.edges.get(from).cloned().unwrap_or_default());
 		Self { edges }
 	}
 
@@ -79,7 +78,7 @@ impl DAG {
 		self
 	}
 
-	pub fn into_inverted(mut self) -> Self {
+	pub fn into_inverted(self) -> Self {
 		let mut new_edges: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
 		for (k, v) in self.edges.iter() {
 			for dep in v {
@@ -115,7 +114,7 @@ impl DAG {
 	/// Find all paths from `from` to `to` and return them, if any.
 	pub fn all_paths(&self, from: &str, to: &str) -> Vec<Vec<String>> {
 		let mut paths: Vec<Vec<String>> = vec![];
-		let mut path = vec![];
+		let path = vec![];
 		Self::dfs(&self.edges, from, to, path, &mut paths);
 		paths
 	}
@@ -132,7 +131,7 @@ impl DAG {
 		} else {
 			for neighbor in edges.get(from).unwrap_or(&BTreeSet::new()) {
 				path.push(neighbor.clone());
-				let mut paths = Self::dfs(edges, neighbor, to, path.clone(), paths);
+				Self::dfs(edges, neighbor, to, path.clone(), paths);
 				path.pop();
 			}
 		}

@@ -4,7 +4,7 @@ use cargo_metadata::{CargoOpt, *};
 use clap::Parser;
 use env_logger::Env;
 use std::path::PathBuf;
-use dag::DAG;
+use dag::Dag;
 
 #[derive(Debug, Parser)]
 struct Command {
@@ -52,7 +52,7 @@ impl TraceCmd {
 
 		log::info!("Using manifest {:?}", self.manifest_path);
 		let meta = self.meta_of(&self.manifest_path, CargoOpt::AllFeatures);
-		let mut dag = DAG::default();
+		let mut dag = Dag::default();
 		for p in meta.packages {
 			for dep in p.dependencies {
 				if dep.kind == DependencyKind::Normal {

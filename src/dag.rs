@@ -3,13 +3,13 @@ use std::collections::{BTreeMap, BTreeSet};
 
 // Just store the edges
 #[derive(Default, Clone)]
-pub struct DAG {
+pub struct Dag {
 	// Dependant -> Dependency
 	// eg: Substrate -> Polkadot and Polkadot -> Cumulus
 	pub edges: BTreeMap<String, BTreeSet<String>>,
 }
 
-impl DAG {
+impl Dag {
 	pub fn add_edge(&mut self, from: String, to: String) {
 		self.edges.entry(from).or_default().insert(to);
 	}
@@ -28,7 +28,7 @@ impl DAG {
 		Self { edges }
 	}
 
-	fn transitive_in(&mut self, topology: &DAG) -> bool {
+	fn transitive_in(&mut self, topology: &Self) -> bool {
 		let mut changed = false;
 		// The edges that are added in this stage.
 		let mut new_edges: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
@@ -179,7 +179,7 @@ mod tests {
 		#[case] edges: Vec<(&str, &str)>,
 		#[case] expected: Vec<(&str, Vec<&str>)>,
 	) {
-		let mut dag = DAG::default();
+		let mut dag = Dag::default();
 		for (from, to) in edges {
 			dag.add_edge(from.into(), to.into());
 		}
@@ -200,7 +200,7 @@ mod tests {
 		#[case] edges: Vec<(&str, &str)>,
 		#[case] expected: Vec<(&str, Vec<&str>)>,
 	) {
-		let mut dag = DAG::default();
+		let mut dag = Dag::default();
 		for (from, to) in edges {
 			dag.add_edge(from.into(), to.into());
 		}

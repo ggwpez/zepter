@@ -2,9 +2,9 @@ mod dag;
 
 use cargo_metadata::{CargoOpt, *};
 use clap::Parser;
+use dag::Dag;
 use env_logger::Env;
 use std::path::PathBuf;
-use dag::Dag;
 
 #[derive(Debug, Parser)]
 struct Command {

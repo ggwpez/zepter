@@ -2,9 +2,7 @@ use cargo_metadata::{CargoOpt, *};
 use clap::Parser;
 use env_logger::Env;
 use feature::DAG;
-use std::{
-	path::PathBuf,
-};
+use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 struct Command {

@@ -15,22 +15,22 @@ struct Command {
 
 #[derive(Debug, clap::Subcommand)]
 enum SubCommand {
-	Show(ShowCmd),
+	Trace(TraceCmd),
 }
 
 #[derive(Debug, Parser)]
-pub struct ShowCmd {
+pub struct TraceCmd {
 	#[arg(long, default_value = "Cargo.toml")]
 	pub manifest_path: PathBuf,
 
 	#[clap(long, action)] // TODO make false default
 	workspace: bool,
 
-	#[clap(long, short)]
-	root: String,
+	#[clap(long, short, index(1))]
+	from: String,
 
-	#[clap(long, short)]
-	package: String,
+	#[clap(long, short, index(2))]
+	to: String,
 }
 
 fn main() {
@@ -38,13 +38,13 @@ fn main() {
 	let cmd = Command::parse();
 
 	match cmd {
-		Command { subcommand: SubCommand::Show(cmd), .. } => {
+		Command { subcommand: SubCommand::Trace(cmd), .. } => {
 			cmd.run();
 		},
 	}
 }
 
-impl ShowCmd {
+impl TraceCmd {
 	fn run(&self) {
 		use cargo_metadata::*;
 
@@ -58,30 +58,29 @@ impl ShowCmd {
 				}
 			}
 		}
-		if !dag.contains(&self.root) {
-			println!("{} is not a dependency of the workspace", self.root);
+		if !dag.contains(&self.from) {
+			println!("{} is not a dependency of the workspace", self.from);
 			return
 		}
-		if !dag.contains(&self.package) {
-			println!("{} is not a dependency of the workspace", self.package);
+		if !dag.contains(&self.to) {
+			println!("{} is not a dependency of the workspace", self.to);
 			return
 		}
 
-		let forward = dag.clone().dag_of(&self.root);
+		let forward = dag.clone().dag_of(&self.from);
 		let depends = forward.into_transitive_hull_in(&dag);
 
-		match depends.connected(&self.root, &self.package) {
-			true => println!("Calculating shortest path from {} to {}...", self.root, self.package),
+		match depends.connected(&self.from, &self.to) {
+			true => log::info!("Calculating shortest path from {} to {}...", self.from, self.to),
 			false => {
-				println!("{} does not depend on {}", self.root, self.package);
-				return
+				panic!("{} does not depend on {}", self.from, self.to);
 			},
 		}
 
-		let paths = dag.all_paths(&self.root, &self.package);
+		let paths = dag.all_paths(&self.from, &self.to);
 		let shortest = paths.iter().min_by_key(|p| p.len()).unwrap();
-		println!("Found {} paths in total", paths.len());
-		println!("{} -> {}", self.root, shortest.join(" -> "));
+		log::info!("The shortest out of {} paths:", paths.len());
+		println!("{} -> {}", self.from, shortest.join(" -> "));
 	}
 
 	fn meta_of(&self, manifest_path: &PathBuf, features: CargoOpt) -> Metadata {

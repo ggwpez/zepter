@@ -5,6 +5,19 @@ edition = "2021"
 description = "See which features are enabled and WHY"
 license = "GPL-3.0-only"
 
+
+[[bin]]
+name = "feature"
+path = "src/main.rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+cargo_metadata = "0.15.2"
+clap = { version = "4.0.9", features = ["derive"] }
+env_logger = "0.10.0"
+log = "0.4.17"
+rstest = "0.16.0"
+
+# Optional dependencies
+rayon = { version = "1.5.1" }

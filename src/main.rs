@@ -63,11 +63,11 @@ impl ShowCmd {
 		}
 		if !dag.contains(&self.root) {
 			println!("{} is not a dependency of the workspace", self.root);
-			return;
+			return
 		}
 		if !dag.contains(&self.package) {
 			println!("{} is not a dependency of the workspace", self.package);
-			return;
+			return
 		}
 
 		let mut forward = dag.clone().dag_of(&self.root);
@@ -95,8 +95,7 @@ impl ShowCmd {
 		if !self.workspace {
 			cmd.no_deps();
 		}
-		cmd
-			.exec()
+		cmd.exec()
 			.expect(format!("Failed to read manifest {:?}", manifest_path).as_str())
 	}
 }

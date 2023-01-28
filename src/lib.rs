@@ -19,19 +19,19 @@ impl DAG {
 		self.edges.entry(from.clone()).or_default().insert(to.clone());
 	}
 
-    pub fn connected(&self, from: &str, to: &str) -> bool {
-        self.edges.get(from).map(|v| v.contains(to)).unwrap_or(false)
-    }
+	pub fn connected(&self, from: &str, to: &str) -> bool {
+		self.edges.get(from).map(|v| v.contains(to)).unwrap_or(false)
+	}
 
 	pub fn contains(&self, from: &str) -> bool {
 		self.edges.contains_key(from)
 	}
 
-    pub fn dag_of(&self, from: &str) -> Self {
+	pub fn dag_of(&self, from: &str) -> Self {
 		let mut edges = BTreeMap::new();
 		edges.insert(from.to_string(), self.edges.get(from).map(|s| s.clone()).unwrap_or_default());
 		Self { edges }
-    }
+	}
 
 	fn transitive_in(&mut self, topology: &DAG) -> bool {
 		let mut changed = false;
@@ -95,11 +95,11 @@ impl DAG {
 		let mut stack = vec![(from.to_string(), vec![from.to_string()])];
 		while let Some((node, mut path)) = stack.pop() {
 			if visited.contains(&node) {
-				continue;
+				continue
 			}
 			visited.insert(node.clone());
 			if node == to {
-				return Some(path);
+				return Some(path)
 			}
 			if let Some(neighbors) = self.edges.get(&node) {
 				for neighbor in neighbors {
@@ -120,7 +120,13 @@ impl DAG {
 		paths
 	}
 
-	fn dfs(edges: &BTreeMap<String, BTreeSet<String>>, from: &str, to: &str, mut path: Vec<String>, paths: &mut Vec<Vec<String>>) {
+	fn dfs(
+		edges: &BTreeMap<String, BTreeSet<String>>,
+		from: &str,
+		to: &str,
+		mut path: Vec<String>,
+		paths: &mut Vec<Vec<String>>,
+	) {
 		if from == to {
 			paths.push(path);
 		} else {

@@ -2,6 +2,12 @@
 
 Check why and how a dependency in your workspace gets enabled. This is useful in cases where you encounter weird build errors which are caused by unintentional inclusion of dependencies or features.
 
+## Install
+
+```bash
+cargo install feature
+```
+
 ## Examples
 
 Using [substrate](https://github.com/paritytech/substrate) as example to find out how `node-cli` depends on `pallet-proxy`:

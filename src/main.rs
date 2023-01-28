@@ -1,8 +1,10 @@
+mod dag;
+
 use cargo_metadata::{CargoOpt, *};
 use clap::Parser;
 use env_logger::Env;
-use feature::DAG;
 use std::path::PathBuf;
+use dag::DAG;
 
 #[derive(Debug, Parser)]
 struct Command {
@@ -59,7 +61,7 @@ impl TraceCmd {
 			}
 		}
 		if !dag.contains(&self.from) {
-			println!("{} is not a dependency of the workspace", self.from);
+			println!("{} is not a in the workspace", self.from);
 			return
 		}
 		if !dag.contains(&self.to) {
@@ -71,7 +73,7 @@ impl TraceCmd {
 		let depends = forward.into_transitive_hull_in(&dag);
 
 		match depends.connected(&self.from, &self.to) {
-			true => log::info!("Calculating shortest path from {} to {}...", self.from, self.to),
+			true => log::info!("Calculating shortest path from '{}' to '{}'", self.from, self.to),
 			false => {
 				panic!("{} does not depend on {}", self.from, self.to);
 			},

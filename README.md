@@ -7,7 +7,7 @@ Check why and how a dependency in your workspace gets enabled. This is useful in
 Using [substrate](https://github.com/paritytech/substrate) as example to find out how `node-cli` depends on `pallet-proxy`:
 
 ```bash
-feature trace node-cli pallet-proxy --manifest-path ../substrate/Cargo.toml
+feature trace node-cli pallet-proxy
 ```
 
 output after a few seconds (currently un-optimized :see_no_evil:):

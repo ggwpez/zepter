@@ -25,7 +25,7 @@ pub struct TraceCmd {
 	#[arg(long, default_value = "Cargo.toml")]
 	pub manifest_path: PathBuf,
 
-	#[clap(long, action)] // TODO make false default
+	#[clap(long, default_value = "false")]
 	workspace: bool,
 
 	#[clap(long, short, index(1))]
@@ -52,7 +52,7 @@ impl TraceCmd {
 
 		log::info!("Using manifest {:?}", self.manifest_path);
 		let meta = self.meta_of(&self.manifest_path, CargoOpt::AllFeatures);
-		let mut dag = Dag::default();
+		let mut dag = Dag::<String>::default();
 		for p in meta.packages {
 			for dep in p.dependencies {
 				if dep.kind == DependencyKind::Normal {
@@ -60,16 +60,16 @@ impl TraceCmd {
 				}
 			}
 		}
-		if !dag.contains(&self.from) {
+		if !dag.lhs_contains(&self.from) {
 			println!("{} is not a in the workspace", self.from);
 			return
 		}
-		if !dag.contains(&self.to) {
+		if !dag.rhs_contains(&self.to) {
 			println!("{} is not a dependency of the workspace", self.to);
 			return
 		}
 
-		let forward = dag.clone().dag_of(&self.from);
+		let forward = dag.clone().dag_of(self.from.clone());
 		let depends = forward.into_transitive_hull_in(&dag);
 
 		match depends.connected(&self.from, &self.to) {
@@ -79,18 +79,16 @@ impl TraceCmd {
 			},
 		}
 
-		let paths = dag.all_paths(&self.from, &self.to);
-		let shortest = paths.iter().min_by_key(|p| p.len()).unwrap();
-		log::info!("The shortest out of {} paths:", paths.len());
-		println!("{} -> {}", self.from, shortest.join(" -> "));
+		let path = dag.path(&self.from, &self.to).expect("Already checked that there is a path");
+		let path = path.iter().map(|n| n.as_str()).collect::<Vec<_>>();
+		println!("{}", path.join(" -> "));
 	}
 
 	fn meta_of(&self, manifest_path: &PathBuf, features: CargoOpt) -> Metadata {
 		let mut cmd = cargo_metadata::MetadataCommand::new();
 		cmd.manifest_path(manifest_path);
 		cmd.features(features);
-		cmd.no_deps();
-		if !self.workspace {
+		if self.workspace {
 			cmd.no_deps();
 		}
 		cmd.exec()

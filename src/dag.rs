@@ -3,35 +3,41 @@ use std::collections::{BTreeMap, BTreeSet};
 
 // Just store the edges
 #[derive(Default, Clone)]
-pub struct Dag {
+pub struct Dag<T> {
 	// Dependant -> Dependency
 	// eg: Substrate -> Polkadot and Polkadot -> Cumulus
-	pub edges: BTreeMap<String, BTreeSet<String>>,
+	pub edges: BTreeMap<T, BTreeSet<T>>,
 }
 
-impl Dag {
-	pub fn add_edge(&mut self, from: String, to: String) {
+impl<T> Dag<T>
+	where T: Ord + PartialEq + Clone {
+	pub fn add_edge(&mut self, from: T, to: T) {
 		self.edges.entry(from).or_default().insert(to);
 	}
 
-	pub fn connected(&self, from: &str, to: &str) -> bool {
+	pub fn connected(&self, from: &T, to: &T) -> bool {
 		self.edges.get(from).map(|v| v.contains(to)).unwrap_or(false)
 	}
 
-	pub fn contains(&self, from: &str) -> bool {
+	pub fn lhs_contains(&self, from: &T) -> bool {
 		self.edges.contains_key(from)
 	}
 
-	pub fn dag_of(&self, from: &str) -> Self {
+	pub fn rhs_contains(&self, to: &T) -> bool {
+		self.edges.values().any(|v| v.contains(to))
+	}
+
+	pub fn dag_of(&self, from: T) -> Self {
 		let mut edges = BTreeMap::new();
-		edges.insert(from.to_string(), self.edges.get(from).cloned().unwrap_or_default());
+		let rhs = self.edges.get(&from).cloned().unwrap_or_default();
+		edges.insert(from, rhs);
 		Self { edges }
 	}
 
 	fn transitive_in(&mut self, topology: &Self) -> bool {
 		let mut changed = false;
 		// The edges that are added in this stage.
-		let mut new_edges: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+		let mut new_edges: BTreeMap<T, BTreeSet<T>> = BTreeMap::new();
 
 		for (k, vs) in self.edges.iter() {
 			for v in vs {
@@ -75,7 +81,7 @@ impl Dag {
 	}
 
 	pub fn into_inverted(self) -> Self {
-		let mut new_edges: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+		let mut new_edges: BTreeMap<T, BTreeSet<T>> = BTreeMap::new();
 		for (k, v) in self.edges.iter() {
 			for dep in v {
 				new_edges.entry(dep.clone()).or_default().insert(k.clone());
@@ -85,21 +91,22 @@ impl Dag {
 	}
 
 	/// Find a path from `from` to `to` and return it.
-	pub fn path(&self, from: &str, to: &str) -> Option<Vec<String>> {
+	pub fn path<'a>(&'a self, from: &'a T, to: &T) -> Option<Vec<&'a T>> {
 		let mut visited = BTreeSet::new();
-		let mut stack = vec![(from.to_string(), vec![from.to_string()])];
+		let mut stack = vec![(from, vec![from])];
+
 		while let Some((node, mut path)) = stack.pop() {
 			if visited.contains(&node) {
 				continue
 			}
-			visited.insert(node.clone());
+			visited.insert(node);
 			if node == to {
 				return Some(path)
 			}
 			if let Some(neighbors) = self.edges.get(&node) {
-				for neighbor in neighbors {
-					path.push(neighbor.clone());
-					stack.push((neighbor.clone(), path.clone()));
+				for neighbor in neighbors.iter() {
+					path.push(neighbor);
+					stack.push((neighbor, path.clone()));
 					path.pop();
 				}
 			}
@@ -107,20 +114,20 @@ impl Dag {
 		None
 	}
 
-	/// Find all paths from `from` to `to` and return them, if any.
-	pub fn all_paths(&self, from: &str, to: &str) -> Vec<Vec<String>> {
-		let mut paths: Vec<Vec<String>> = vec![];
+	/*// Find all paths from `from` to `to` and return them, if any.
+	pub fn all_paths(&self, from: &T, to: &T) -> Vec<Vec<T>> {
+		let mut paths: Vec<Vec<T>> = vec![];
 		let path = vec![];
 		Self::dfs(&self.edges, from, to, path, &mut paths);
 		paths
 	}
 
 	fn dfs(
-		edges: &BTreeMap<String, BTreeSet<String>>,
-		from: &str,
-		to: &str,
-		mut path: Vec<String>,
-		paths: &mut Vec<Vec<String>>,
+		edges: &BTreeMap<T, BTreeSet<T>>,
+		from: &T,
+		to: &T,
+		mut path: Vec<T>,
+		paths: &mut Vec<Vec<T>>,
 	) {
 		if from == to {
 			paths.push(path);
@@ -134,8 +141,8 @@ impl Dag {
 	}
 
 	/// Same as above but using a stack instead of recursion.
-	pub fn all_paths_fast(&self, from: &str, to: &str) -> Vec<Vec<String>> {
-		let mut paths: Vec<Vec<String>> = vec![];
+	pub fn all_paths_fast(&self, from: &T, to: &T) -> Vec<Vec<T>> {
+		let mut paths: Vec<Vec<T>> = vec![];
 		let mut stack = vec![(from.to_string(), vec![from.to_string()])];
 		while let Some((node, mut path)) = stack.pop() {
 			if node == to {
@@ -150,7 +157,7 @@ impl Dag {
 			}
 		}
 		paths
-	}
+	}*/
 
 	pub fn num_edges(&self) -> usize {
 		self.edges.values().map(|v| v.len()).sum()
@@ -165,10 +172,10 @@ mod tests {
 	#[test]
 	fn rayondsf() {
 		use rayon::prelude::*;
-		let test = BTreeSet::<String>::new();
+		let test = BTreeSet::<T>::new();
 		test.par_iter();
 
-		let map = BTreeMap::<String, BTreeSet<String>>::new();
+		let map = BTreeMap::<T, BTreeSet<T>>::new();
 		map.par_iter();
 	}
 

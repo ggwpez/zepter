@@ -13,16 +13,15 @@ cargo install feature
 Using [substrate](https://github.com/paritytech/substrate) as example to find out how `node-cli` depends on `pallet-proxy`:
 
 ```bash
-feature trace node-cli pallet-proxy
+feature trace --manifest-path substrate/Cargo.toml node-cli snow
 ```
 
-output after a few seconds (currently un-optimized :see_no_evil:):
+output:
 
 ```pre
 [INFO  feature] Using manifest "../substrate/Cargo.toml"
-[INFO  feature] Calculating shortest path from node-cli to pallet-proxy...
-[INFO  feature] The shortest out of 2 paths:
-node-cli -> kitchensink-runtime -> pallet-prox
+[INFO  feature] Calculating shortest path from 'node-cli' to 'snow'
+node-cli -> try-runtime-cli -> substrate-rpc-client -> sc-rpc-api -> sc-chain-spec -> sc-telemetry -> libp2p -> libp2p-webrtc -> libp2p-noise -> snow
 ```
 
 ## Roadmap

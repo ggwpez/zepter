@@ -1,8 +1,8 @@
 [package]
 name = "feature"
-version = "0.3.1"
+version = "0.3.2"
 edition = "2021"
-description = "See how features and dependencies got enabled by your crate."
+description = "See out how Rust dependencies and features are enabled."
 license = "GPL-3.0-only"
 source = "https://github.com/ggwpez/feature"
 

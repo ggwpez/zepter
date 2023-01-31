@@ -1,12 +1,61 @@
 #![allow(dead_code)]
-use std::collections::{BTreeMap, BTreeSet};
 
-// Just store the edges
+use std::{
+	borrow::{Cow, ToOwned},
+	collections::{BTreeMap, BTreeSet},
+};
+
+use core::fmt::{Display, Formatter};
+
+/// Represents *Directed Acyclic Graph* through its edge relation.
+///
+/// A "node" in that sense is anything on the left- or right-hand side of this relation.
 #[derive(Default, Clone)]
 pub struct Dag<T> {
-	// Dependant -> Dependency
-	// eg: Substrate -> Polkadot and Polkadot -> Cumulus
+	/// Dependant -> Dependency
+	/// eg: Polkadot -> Substrate or Me -> Rust
 	pub edges: BTreeMap<T, BTreeSet<T>>,
+}
+
+/// A path inside a DAG.
+///
+/// The lifetime is the lifetime of the `Dag`s nodes.
+pub struct Path<'a, T: ToOwned>(Vec<Cow<'a, T>>);
+
+impl<'a, T> Path<'a, T>
+where
+	T: ToOwned,
+{
+	pub fn hops(&self) -> usize {
+		match self.0.len() {
+			0 => unreachable!("Paths cannot be empty"),
+			l => l - 1,
+		}
+	}
+}
+
+impl<'a, T> TryFrom<Vec<&'a T>> for Path<'a, T>
+where
+	T: ToOwned,
+{
+	type Error = ();
+
+	fn try_from(v: Vec<&'a T>) -> Result<Self, Self::Error> {
+		if v.is_empty() {
+			return Err(())
+		}
+
+		Ok(Self(v.into_iter().map(Cow::Borrowed).collect()))
+	}
+}
+
+impl<T> Display for Path<'_, T>
+where
+	T: Display + ToOwned,
+{
+	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+		self.0.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(" -> ").fmt(f)
+	}
 }
 
 impl<T> Dag<T>
@@ -17,23 +66,60 @@ where
 		self.edges.entry(from).or_default().insert(to);
 	}
 
+	/// Whether `from` is directly connected to `to`.
+	///
+	/// *Directly* means with via an edge.
 	pub fn connected(&self, from: &T, to: &T) -> bool {
 		self.edges.get(from).map(|v| v.contains(to)).unwrap_or(false)
 	}
 
+	/// Whether `from` appears on the lhs of the edge relation.
+	///
+	/// Aka: Whether `self` has any dependencies.
 	pub fn lhs_contains(&self, from: &T) -> bool {
 		self.edges.contains_key(from)
 	}
 
+	/// Whether `to` appears on the rhs of the edge relation.
+	///
+	/// Aka: Whether any other node depends on `self`.
 	pub fn rhs_contains(&self, to: &T) -> bool {
 		self.edges.values().any(|v| v.contains(to))
 	}
 
-	pub fn dag_of(&self, from: T) -> Self {
+	/// The `Dag` only containing the node `from` and its direct dependencies.
+	///
+	/// This can be inflated back to the original `Dag` by calling
+	/// `from.into_transitive_hull_in(self)`.
+	pub fn node(&self, from: T) -> Self {
 		let mut edges = BTreeMap::new();
 		let rhs = self.edges.get(&from).cloned().unwrap_or_default();
 		edges.insert(from, rhs);
 		Self { edges }
+	}
+
+	/// Calculate the transitive hull of `self`.
+	pub fn transitive_hull(&mut self) {
+		let topology = self.clone();
+		self.transitive_in(&topology);
+	}
+
+	/// Calculate the transitive hull of `self` while using the connectivity of `topology`.
+	pub fn transitive_hull_in(&mut self, topology: &Self) {
+		self.transitive_in(topology);
+	}
+
+	/// Consume `self` and return the transitive hull.
+	pub fn into_transitive_hull(mut self) -> Self {
+		let topology = self.clone();
+		while self.transitive_in(&topology) {}
+		self
+	}
+
+	/// Consume `self` and return the transitive hull while using the connectivity of `topology`.
+	pub fn into_transitive_hull_in(mut self, topology: &Self) -> Self {
+		while self.transitive_in(topology) {}
+		self
 	}
 
 	fn transitive_in(&mut self, topology: &Self) -> bool {
@@ -62,38 +148,11 @@ where
 		changed
 	}
 
-	pub fn transitive_hull(&mut self) {
-		let topology = self.clone();
-		self.transitive_in(&topology);
-	}
-
-	pub fn transitive_hull_in(&mut self, topology: &Self) {
-		self.transitive_in(topology);
-	}
-
-	pub fn into_transitive_hull(mut self) -> Self {
-		let topology = self.clone();
-		while self.transitive_in(&topology) {}
-		self
-	}
-
-	pub fn into_transitive_hull_in(mut self, topology: &Self) -> Self {
-		while self.transitive_in(topology) {}
-		self
-	}
-
-	pub fn into_inverted(self) -> Self {
-		let mut new_edges: BTreeMap<T, BTreeSet<T>> = BTreeMap::new();
-		for (k, v) in self.edges.iter() {
-			for dep in v {
-				new_edges.entry(dep.clone()).or_default().insert(k.clone());
-			}
-		}
-		Self { edges: new_edges }
-	}
-
-	/// Find a path from `from` to `to` and return it.
-	pub fn path<'a>(&'a self, from: &'a T, to: &T) -> Option<Vec<&'a T>> {
+	/// Find *a* path from `from` to `to` and return it.
+	///
+	/// Note that 1) *the* shortest path does not necessarily exist and 2) this function does not
+	/// give any guarantee about the returned path.
+	pub fn any_path<'a>(&'a self, from: &'a T, to: &T) -> Option<Path<'a, T>> {
 		let mut visited = BTreeSet::new();
 		let mut stack = vec![(from, vec![from])];
 
@@ -103,7 +162,7 @@ where
 			}
 			visited.insert(node);
 			if node == to {
-				return Some(path)
+				return path.try_into().ok()
 			}
 			if let Some(neighbors) = self.edges.get(node) {
 				for neighbor in neighbors.iter() {
@@ -116,51 +175,7 @@ where
 		None
 	}
 
-	/*// Find all paths from `from` to `to` and return them, if any.
-	pub fn all_paths(&self, from: &T, to: &T) -> Vec<Vec<T>> {
-		let mut paths: Vec<Vec<T>> = vec![];
-		let path = vec![];
-		Self::dfs(&self.edges, from, to, path, &mut paths);
-		paths
-	}
-
-	fn dfs(
-		edges: &BTreeMap<T, BTreeSet<T>>,
-		from: &T,
-		to: &T,
-		mut path: Vec<T>,
-		paths: &mut Vec<Vec<T>>,
-	) {
-		if from == to {
-			paths.push(path);
-		} else {
-			for neighbor in edges.get(from).unwrap_or(&BTreeSet::new()) {
-				path.push(neighbor.clone());
-				Self::dfs(edges, neighbor, to, path.clone(), paths);
-				path.pop();
-			}
-		}
-	}
-
-	/// Same as above but using a stack instead of recursion.
-	pub fn all_paths_fast(&self, from: &T, to: &T) -> Vec<Vec<T>> {
-		let mut paths: Vec<Vec<T>> = vec![];
-		let mut stack = vec![(from.to_string(), vec![from.to_string()])];
-		while let Some((node, mut path)) = stack.pop() {
-			if node == to {
-				paths.push(path.clone());
-			}
-			if let Some(neighbors) = self.edges.get(&node) {
-				for neighbor in neighbors {
-					path.push(neighbor.clone());
-					stack.push((neighbor.clone(), path.clone()));
-					path.pop();
-				}
-			}
-		}
-		paths
-	}*/
-
+	/// The number of edges in the graph.
 	pub fn num_edges(&self) -> usize {
 		self.edges.values().map(|v| v.len()).sum()
 	}
@@ -192,23 +207,4 @@ mod tests {
 		let dag2 = dag.clone().into_transitive_hull();
 		assert_eq!(dag.num_edges(), dag2.num_edges());
 	}
-
-	/*#[rstest]
-	#[case(vec![("A", "B"), ("B", "C")], vec![("C", vec!["B"]), ("B", vec!["A"])])]
-	fn dag_invert_works(
-		#[case] edges: Vec<(&str, &str)>,
-		#[case] expected: Vec<(&str, Vec<&str>)>,
-	) {
-		let mut dag = Dag::default();
-		for (from, to) in edges {
-			dag.add_edge(from.into(), to.into());
-		}
-		let dag = dag.invert();
-		for (k, v) in expected {
-			assert_eq!(
-				dag.edges.get(k).unwrap(),
-				&v.into_iter().map(|s| s.into()).collect::<BTreeSet<_>>()
-			);
-		}
-	}*/
 }

@@ -6,13 +6,14 @@ use dag::Dag;
 use env_logger::Env;
 use std::path::PathBuf;
 
+/// See out how Rust dependencies and features are enabled.
 #[derive(Debug, Parser)]
 struct Command {
 	#[clap(subcommand)]
 	subcommand: SubCommand,
 
-	#[clap(long)]
-	verbose: bool,
+	#[clap(long, global = true)]
+	quiet: bool,
 }
 
 #[derive(Debug, clap::Subcommand)]
@@ -20,24 +21,30 @@ enum SubCommand {
 	Trace(TraceCmd),
 }
 
+/// Trace the dependency path one crate to another.
 #[derive(Debug, Parser)]
 pub struct TraceCmd {
+	/// Cargo manifest path.
 	#[arg(long, default_value = "Cargo.toml")]
-	pub manifest_path: PathBuf,
+	manifest_path: PathBuf,
 
+	/// Whether to only consider workspace crates.
 	#[clap(long, default_value = "false")]
 	workspace: bool,
 
+	/// The root crate to start from.
 	#[clap(long, short, index(1))]
 	from: String,
 
+	/// The dependency crate to end at.
 	#[clap(long, short, index(2))]
 	to: String,
 }
 
 fn main() {
-	env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
 	let cmd = Command::parse();
+	let default_log = if cmd.quiet { "warn" } else { "info" };
+	env_logger::Builder::from_env(Env::default().default_filter_or(default_log)).init();
 
 	match cmd {
 		Command { subcommand: SubCommand::Trace(cmd), .. } => {
@@ -51,7 +58,7 @@ impl TraceCmd {
 		use cargo_metadata::*;
 
 		log::info!("Using manifest {:?}", self.manifest_path);
-		let meta = self.meta_of(&self.manifest_path, CargoOpt::AllFeatures);
+		let meta = self.metadata(&self.manifest_path, CargoOpt::AllFeatures);
 		let mut dag = Dag::<String>::default();
 		for p in meta.packages {
 			for dep in p.dependencies {
@@ -61,30 +68,32 @@ impl TraceCmd {
 			}
 		}
 		if !dag.lhs_contains(&self.from) {
-			println!("{} is not a in the workspace", self.from);
+			println!("{} is not in the workspace", self.from);
 			return
 		}
 		if !dag.rhs_contains(&self.to) {
-			println!("{} is not a dependency of the workspace", self.to);
+			println!("{} is not a dependency in the workspace", self.to);
 			return
 		}
 
-		let forward = dag.clone().dag_of(self.from.clone());
-		let depends = forward.into_transitive_hull_in(&dag);
+		log::info!("Calculating path from {} to {}", self.from, self.to);
+		match dag.any_path(&self.from, &self.to) {
+			Some(path) => println!("{path}"),
+			None => {
+				let forward = dag.node(self.from.clone());
+				let depends = forward.into_transitive_hull_in(&dag);
 
-		match depends.connected(&self.from, &self.to) {
-			true => log::info!("Calculating shortest path from '{}' to '{}'", self.from, self.to),
-			false => {
-				panic!("{} does not depend on {}", self.from, self.to);
+				if depends.connected(&self.from, &self.to) {
+					unreachable!(
+						"Sanity check failed: {} depends on {} but no path could be found",
+						self.from, self.to
+					);
+				}
 			},
 		}
-
-		let path = dag.path(&self.from, &self.to).expect("Already checked that there is a path");
-		let path = path.iter().map(|n| n.as_str()).collect::<Vec<_>>();
-		println!("{}", path.join(" -> "));
 	}
 
-	fn meta_of(&self, manifest_path: &PathBuf, features: CargoOpt) -> Metadata {
+	fn metadata(&self, manifest_path: &PathBuf, features: CargoOpt) -> Metadata {
 		let mut cmd = cargo_metadata::MetadataCommand::new();
 		cmd.manifest_path(manifest_path);
 		cmd.features(features);

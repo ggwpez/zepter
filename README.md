@@ -11,6 +11,7 @@ cargo install feature
 ## Examples
 
 Recently there was a build error in the [Substrate](https://github.com/paritytech/substrate) master CI which was caused by a downstream dependency [`snow`](https://github.com/mcginty/snow/issues/146). To investigate this, it is useful to see *how* Substrate depends on it.  
+
 Let's find out how `node-cli` depends on `snow`:
 
 ```bash

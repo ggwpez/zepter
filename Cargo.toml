@@ -1,6 +1,6 @@
 [package]
 name = "feature"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 description = "See which features are enabled and WHY"
 license = "GPL-3.0-only"

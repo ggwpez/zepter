@@ -10,7 +10,9 @@ pub struct Dag<T> {
 }
 
 impl<T> Dag<T>
-	where T: Ord + PartialEq + Clone {
+where
+	T: Ord + PartialEq + Clone,
+{
 	pub fn add_edge(&mut self, from: T, to: T) {
 		self.edges.entry(from).or_default().insert(to);
 	}
@@ -103,7 +105,7 @@ impl<T> Dag<T>
 			if node == to {
 				return Some(path)
 			}
-			if let Some(neighbors) = self.edges.get(&node) {
+			if let Some(neighbors) = self.edges.get(node) {
 				for neighbor in neighbors.iter() {
 					path.push(neighbor);
 					stack.push((neighbor, path.clone()));
@@ -169,16 +171,6 @@ mod tests {
 	use super::*;
 	use rstest::*;
 
-	#[test]
-	fn rayondsf() {
-		use rayon::prelude::*;
-		let test = BTreeSet::<T>::new();
-		test.par_iter();
-
-		let map = BTreeMap::<T, BTreeSet<T>>::new();
-		map.par_iter();
-	}
-
 	#[rstest]
 	#[case(vec![("A", "B"), ("B", "C")], vec![("A", vec!["B", "C"]), ("B", vec!["C"])])]
 	#[case(vec![("A", "B"), ("B", "C"), ("C", "D")], vec![("A", vec!["B", "C", "D"]), ("B", vec!["C", "D"]), ("C", vec!["D"])])]
@@ -186,7 +178,7 @@ mod tests {
 		#[case] edges: Vec<(&str, &str)>,
 		#[case] expected: Vec<(&str, Vec<&str>)>,
 	) {
-		let mut dag = Dag::default();
+		let mut dag = Dag::<String>::default();
 		for (from, to) in edges {
 			dag.add_edge(from.into(), to.into());
 		}

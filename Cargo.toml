@@ -12,10 +12,9 @@ cargo_metadata = "0.15.2"
 clap = { version = "4.0.9", features = ["derive"] }
 env_logger = "0.10.0"
 log = "0.4.17"
-rstest = "0.16.0"
 
-# Optional dependencies
-rayon = { version = "1.5.1" }
+[dev-dependencies]
+rstest = "0.16.0"
 
 [profile.release]
 opt-level = 3

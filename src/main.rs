@@ -92,6 +92,6 @@ impl TraceCmd {
 			cmd.no_deps();
 		}
 		cmd.exec()
-			.unwrap_or_else(|_| panic!("Failed to read manifest {:?}", manifest_path))
+			.unwrap_or_else(|_| panic!("Failed to read manifest {manifest_path:?}"))
 	}
 }

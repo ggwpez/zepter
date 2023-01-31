@@ -10,7 +10,8 @@ cargo install feature
 
 ## Examples
 
-Using [substrate](https://github.com/paritytech/substrate) as example to find out how `node-cli` depends on `pallet-proxy`:
+Recently there was a build error in the [Substrate](https://github.com/paritytech/substrate) master CI which was caused by a downstream dependency [`snow`](https://github.com/mcginty/snow/issues/146). To investigate this, it is useful to see *how* Substrate depends on it.  
+Let's find out how `node-cli` depends on `snow`:
 
 ```bash
 feature trace --manifest-path substrate/Cargo.toml node-cli snow
@@ -18,11 +19,11 @@ feature trace --manifest-path substrate/Cargo.toml node-cli snow
 
 output:
 
-```pre
-[INFO  feature] Using manifest "../substrate/Cargo.toml"
-[INFO  feature] Calculating shortest path from 'node-cli' to 'snow'
-node-cli -> try-runtime-cli -> substrate-rpc-client -> sc-rpc-api -> sc-chain-spec -> sc-telemetry -> libp2p -> libp2p-webrtc -> libp2p-noise -> snow
 ```
+node-cli -> try-runtime-cli -> substrate-rpc-client -> sc-rpc-api ->sc-chain-spec -> sc-telemetry -> libp2p -> libp2p-webrtc -> libp2p-noise -> snow
+```
+
+So it comes from libp2p, okay. Good to know.
 
 ## Roadmap
 

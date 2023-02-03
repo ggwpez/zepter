@@ -10,11 +10,17 @@ use core::fmt::{Display, Formatter};
 /// Represents *Directed Acyclic Graph* through its edge relation.
 ///
 /// A "node" in that sense is anything on the left- or right-hand side of this relation.
-#[derive(Default, Clone)]
+#[derive(Clone)]
 pub struct Dag<T> {
 	/// Dependant -> Dependency
 	/// eg: Polkadot -> Substrate or Me -> Rust
 	pub edges: BTreeMap<T, BTreeSet<T>>,
+}
+
+impl<T> Default for Dag<T> {
+	fn default() -> Self {
+		Self { edges: BTreeMap::new() }
+	}
 }
 
 /// A path inside a DAG.
@@ -178,6 +184,10 @@ where
 	/// The number of edges in the graph.
 	pub fn num_edges(&self) -> usize {
 		self.edges.values().map(|v| v.len()).sum()
+	}
+
+	pub fn num_nodes(&self) -> usize {
+		self.edges.len()
 	}
 }
 

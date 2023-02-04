@@ -6,6 +6,10 @@ description = "See out how Rust dependencies and features are enabled."
 license = "GPL-3.0-only"
 source = "https://github.com/ggwpez/feature"
 
+[[bin]]
+name = "feature"
+src = "src/main.rs"
+
 [dependencies]
 cargo_metadata = "0.15.2"
 clap = { version = "4.0.9", features = ["derive"] }

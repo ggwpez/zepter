@@ -1,5 +1,5 @@
 use crate::Crate;
-use std::collections::{BTreeSet, BTreeMap};
+use std::{collections::{BTreeSet, BTreeMap}, sync::Arc};
 use crate::dag::{Path, Dag};
 use serde_json::Value;
 use cargo_metadata::Metadata;
@@ -32,11 +32,89 @@ impl LintCmd {
 
 impl PropagateFeatureCmd {
 	pub fn run(&self) {
-		let dag = super::common::tree(&self.tree_args);
+		log::info!("Using manifest: {:?}", self.tree_args.manifest_path);
 		let feature = self.tree_args.features.first().unwrap().clone();
+		let meta = self.metadata_of().expect("Loads metadata");
+		let pkgs = meta.packages.iter().map(|pkg| pkg).collect::<Vec<_>>();
+		if let Some(root) = meta.root_package() {
+			println!("Analyzing {:?}", root);
+		} else {
+			println!("Analyzing workspace");
+		}
 
-		
+		// (Crate that is not forwarding the feature) -> (Dependency that it is not forwarded to)
+		let mut propagate_missing = BTreeMap::<&str, BTreeSet<&str>>::new();
+		// (Crate that missing the feature) -> (Dependency that has it)
+		let mut feature_missing = BTreeMap::<&str, BTreeSet<&str>>::new();
+		// Crate that has the feature but does not need it.
+		let mut feature_maybe_unused = BTreeSet::<&str>::new();
 
+		for pkg in pkgs.iter() {
+			let mut feature_used = false;
+			// TODO that it does not enable other features.
+
+			for dep in pkg.dependencies.iter() {
+				// TODO handle default features.
+				// TODO look into the resolve to get the correct version.
+				let Some(dep) = pkgs.iter().find(|pkg| pkg.name == dep.name) else {
+					// TODO ugly code
+					if meta.resolve.as_ref().map_or(false, |r| r.nodes.iter().any(|n| n.id.to_string().starts_with(&format!("{} ", dep.name).to_string()))) {
+						panic!("Sanity check: dependency {:?} of {:?} was resolved but not found", dep.name, pkg.name);
+					} else {
+						log::debug!("Unused dependency {}", dep.name);
+						// This is an edge-case, going to ignore it.
+						feature_used = true;
+						continue;
+					}
+				};
+				if dep.features.contains_key(&feature) {
+					match pkg.features.get(&feature) {
+						None => {
+							feature_missing.entry(&pkg.name).or_default().insert(&dep.name);
+						},
+						Some(enabled) => {
+							if !enabled.contains(&dep.name) {
+								propagate_missing.entry(&pkg.name).or_default().insert(&dep.name);
+							} else {
+								// All ok
+								feature_used = true;
+							}
+						}
+					}
+				}
+			}
+
+			if !feature_used && pkg.features.contains_key(&feature) {
+				feature_maybe_unused.insert(&pkg.name);
+			}
+		}
+		let faulty_crates: BTreeSet::<&str> = propagate_missing.iter().map(|(krate, _)| krate).chain(feature_missing.iter().map(|(krate, _)| krate)).chain(feature_maybe_unused.iter()).cloned().collect();
+
+		let (mut errors, mut warnings) = (0, 0);
+		for krate in faulty_crates {
+			println!("crate {:?}\n  feature {:?}", krate, feature);
+
+			// join
+			if let Some(deps) = feature_missing.get(krate) {
+				let joined = deps.iter().map(|dep| format!("{}", dep)).collect::<Vec<_>>().join("\n      ");
+				println!("    must exit because {} dependencies have it:\n      {}", deps.len(), joined);
+				errors += 1;
+			}
+			if let Some(deps) = propagate_missing.get(krate) {
+				let joined = deps.iter().map(|dep| format!("{}", dep)).collect::<Vec<_>>().join("\n      ");
+				println!("    must be propagated to:\n      {}", joined);
+				errors += 1;
+			}
+			if let Some(dep) = feature_maybe_unused.get(krate) {
+				if !feature_missing.contains_key(krate) && !propagate_missing.contains_key(krate) {
+					println!("    is not used by any dependencies");
+					warnings += 1;
+				}
+			}
+		}
+		if errors > 0 || warnings > 0 {
+			println!("Generated {} errors and {} warnings", errors, warnings);
+		}
 	}
 
 	fn metadata_of(&self) -> cargo_metadata::Result<Metadata> {

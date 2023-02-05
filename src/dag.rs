@@ -38,22 +38,22 @@ impl<'a> Path<'a, crate::Crate>
 	}
 
 	// Compact entries with the same name.
-	pub fn into_compact(self) -> Self {
-		let mut v = Vec::<crate::Crate>::new();
-		for entry in self.0.into_iter().map(|e| e.into_owned()) {
-			match v.last_mut() {
-				Some(mut last) if last.name == entry.name => {
-					if !last.version.is_empty() {
-						panic!("Double version");
-					}
-					last.version = entry.version;
-					last.enabled_features.extend(entry.enabled_features.iter().cloned());
-				},
-				_ => v.push(entry.clone()),
-			}
-		}
-		Self(v.into_iter().map(Cow::Owned).collect())
-	}
+	//pub fn into_compact(self) -> Self {
+	//	let mut v = Vec::<crate::Crate>::new();
+	//	for entry in self.0.into_iter().map(|e| e.into_owned()) {
+	//		match v.last_mut() {
+	//			Some(mut last) if last.name == entry.name => {
+	//				if !last.version.is_empty() {
+	//					panic!("Double version");
+	//				}
+	//				last.version = entry.version;
+	//				last.enabled_features.extend(entry.enabled_features.iter().cloned());
+	//			},
+	//			_ => v.push(entry.clone()),
+	//		}
+	//	}
+	//	Self(v.into_iter().map(Cow::Owned).collect())
+	//}
 }
 
 impl<'a, T> TryFrom<Vec<&'a T>> for Path<'a, T>

@@ -26,7 +26,7 @@ pub struct TraceCmd {
 
 impl TraceCmd {
 	pub(crate) fn run(&self) {
-		let dag = super::common::tree(&self.tree_args);
+		/*let dag = super::common::tree(&self.tree_args);
 
 		let froms = dag.edges.iter().map(|(krate, _)| krate).filter(|krate| krate.name == self.from).collect::<Vec<_>>();
 		if froms.is_empty() {
@@ -71,10 +71,10 @@ impl TraceCmd {
 		log::info!("Found {} distinct paths modulo version and features", paths.len());
 		for path in paths {
 			println!("{}", path);
-		}
+		}*/
 	}
 
-	fn simplify_path(&self, path: &mut Path<'_, Crate>) {
+	/*fn simplify_path(&self, path: &mut Path<'_, Crate>) {
 		path.0.iter_mut().for_each(|krate| {
 			let val = krate.clone().into_owned();
 
@@ -84,5 +84,5 @@ impl TraceCmd {
 				..val
 			})
 		});
-	}
+	}*/
 }

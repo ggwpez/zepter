@@ -11,6 +11,7 @@ name = "feature"
 src = "src/main.rs"
 
 [dependencies]
+btreemultimap = { version = "0.1.0", default-features = false }
 cargo_metadata = "0.15.2"
 clap = { version = "4.0.9", features = ["derive"] }
 env_logger = "0.10.0"

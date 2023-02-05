@@ -17,7 +17,7 @@ pub struct TreeArgs {
 	#[clap(long, global = true)]
 	pub features: Vec<String>,
 }
-
+/*
 pub(crate) fn tree(args: &TreeArgs) -> Dag<Crate> {
 	log::info!("Using manifest {:?}", args.manifest_path);
 	let mut cmd = std::process::Command::new("cargo");
@@ -140,3 +140,4 @@ impl<'a> TreeParser<'a> {
 		false
 	}
 }
+*/

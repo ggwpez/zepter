@@ -108,7 +108,6 @@ impl<'a> TreeParser<'a> {
 			} else {
 				vec![]
 			};
-			log::info!("features: {:?}", features);
 			(Some(features), None, Some(version.to_string()))
 		} else {
 			panic!("cargo tree output was not in the expected format: {:?}", self.line);

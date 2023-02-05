@@ -16,6 +16,7 @@ clap = { version = "4.0.9", features = ["derive"] }
 env_logger = "0.10.0"
 log = "0.4.17"
 regex = "1.7.1"
+serde_json = "1.0.92"
 
 [dev-dependencies]
 rstest = "0.16.0"

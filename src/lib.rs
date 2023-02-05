@@ -12,18 +12,17 @@ pub struct Crate {
 }
 
 impl Crate {
-	fn without_has_features(self) -> Self {
+	fn without_features(self) -> Self {
 		Self {
+			enabled_features: Vec::new(),
 			has_features: Vec::new(),
 			..self
 		}
 	}
 
-	fn without_enabled_features(self) -> Self {
-		Self {
-			enabled_features: Vec::new(),
-			..self
-		}
+	fn remove_features(&mut self) {
+		self.enabled_features.clear();
+		self.has_features.clear();
 	}
 }
 

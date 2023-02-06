@@ -21,23 +21,7 @@ impl Crate {
 		Self { version: Default::default(), ..self }
 	}
 }
-/*
-impl Debug for Crate {
-	fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-		write!(
-			f,
-			"{}{}{}",
-			self.name,
-			if self.version.is_empty() { "".into() } else { format!(" v{}", self.version) },
-			if self.features.is_empty() {
-				"".to_string()
-			} else {
-				format!(" ({:?})", self.features)
-			}
-		)
-	}
-}
-*/
+
 impl Display for Crate {
 	fn fmt(&self, f: &mut Formatter<'_>) -> Result {
 		write!(

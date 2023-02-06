@@ -8,7 +8,7 @@ use std::collections::{BTreeMap, BTreeSet};
 pub struct TraceCmd {
 	#[allow(missing_docs)]
 	#[clap(flatten)]
-	tree_args: super::common::TreeArgs,
+	tree_args: super::TreeArgs,
 
 	/// Simplified output for easier human understanding.
 	#[clap(long, default_value = "false")]
@@ -25,8 +25,8 @@ pub struct TraceCmd {
 
 impl TraceCmd {
 	pub(crate) fn run(&self) {
-		let meta = self.load_metadata().expect("Loads metadata");
-		let (dag, index) = self.build_dag(meta).expect("Loads dependency graph");
+		let meta = self.tree_args.load_metadata().expect("Loads metadata");
+		let (dag, index) = self.build_dag(meta).expect("Builds dependency graph");
 		let lookup = |id: &str| {
 			index
 				.get(id)
@@ -57,7 +57,6 @@ impl TraceCmd {
 		);
 		let mut paths = BTreeSet::new();
 
-		// kartesian product
 		for from in froms.iter() {
 			for to in tos.iter() {
 				if let Some(path) = dag.any_path(from, to) {
@@ -117,25 +116,4 @@ impl TraceCmd {
 
 		Ok((dag, index))
 	}
-
-	fn load_metadata(&self) -> cargo_metadata::Result<Metadata> {
-		let mut cmd = cargo_metadata::MetadataCommand::new();
-		cmd.manifest_path(&self.tree_args.manifest_path);
-		if self.tree_args.workspace {
-			cmd.no_deps();
-		}
-		cmd.exec()
-	}
-
-	/*fn simplify_path(&self, path: &mut Path<'_, Crate>) {
-		path.0.iter_mut().for_each(|krate| {
-			let val = krate.clone().into_owned();
-
-			*krate = Cow::Owned(Crate {
-				version: if self.simple { "".into() } else { val.version },
-				enabled_features: if self.simple { vec![] } else { val.enabled_features },
-				..val
-			})
-		});
-	}*/
 }

@@ -1,26 +1,32 @@
 #![allow(dead_code)]
 
+use core::fmt::{Display, Formatter};
 use std::{
 	borrow::{Cow, ToOwned},
 	collections::{BTreeMap, BTreeSet},
 };
 
-use core::fmt::{Display, Formatter};
-
 /// Represents *Directed Acyclic Graph* through its edge relation.
 ///
 /// A "node" in that sense is anything on the left- or right-hand side of this relation.
-#[derive(Default, Clone)]
+#[derive(Clone)]
 pub struct Dag<T> {
 	/// Dependant -> Dependency
 	/// eg: Polkadot -> Substrate or Me -> Rust
 	pub edges: BTreeMap<T, BTreeSet<T>>,
 }
 
+impl<T> Default for Dag<T> {
+	fn default() -> Self {
+		Self { edges: BTreeMap::new() }
+	}
+}
+
 /// A path inside a DAG.
 ///
 /// The lifetime is the lifetime of the `Dag`s nodes.
-pub struct Path<'a, T: ToOwned>(Vec<Cow<'a, T>>);
+#[derive(Ord, PartialOrd, Eq, PartialEq, Hash)]
+pub struct Path<'a, T: ToOwned>(pub Vec<Cow<'a, T>>);
 
 impl<'a, T> Path<'a, T>
 where
@@ -31,6 +37,41 @@ where
 			0 => unreachable!("Paths cannot be empty"),
 			l => l - 1,
 		}
+	}
+
+	// Compact entries with the same name.
+	//pub fn into_compact(self) -> Self {
+	//	let mut v = Vec::<crate::Crate>::new();
+	//	for entry in self.0.into_iter().map(|e| e.into_owned()) {
+	//		match v.last_mut() {
+	//			Some(mut last) if last.name == entry.name => {
+	//				if !last.version.is_empty() {
+	//					panic!("Double version");
+	//				}
+	//				last.version = entry.version;
+	//				last.enabled_features.extend(entry.enabled_features.iter().cloned());
+	//			},
+	//			_ => v.push(entry.clone()),
+	//		}
+	//	}
+	//	Self(v.into_iter().map(Cow::Owned).collect())
+	//}
+
+	/// Translate self by applying `f` to all hops.
+	pub fn translate_borrowed<'b, F, U>(&'a self, f: F) -> Path<'b, U>
+	where
+		F: Fn(&'a T) -> &'b U,
+		U: ToOwned<Owned = U>,
+	{
+		Path(self.0.iter().map(|e| Cow::Borrowed(f(e.as_ref()))).collect())
+	}
+
+	pub fn translate_owned<'b, F, U>(self, f: F) -> Path<'b, U>
+	where
+		F: Fn(&T) -> U,
+		U: ToOwned<Owned = U>,
+	{
+		Path(self.0.into_iter().map(|e| Cow::Owned(f(e.as_ref()))).collect())
 	}
 }
 
@@ -54,7 +95,7 @@ where
 	T: Display + ToOwned,
 {
 	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-		self.0.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(" -> ").fmt(f)
+		self.0.iter().map(|e| e.to_string()).collect::<Vec<_>>().join(" -> ").fmt(f)
 	}
 }
 
@@ -62,8 +103,17 @@ impl<T> Dag<T>
 where
 	T: Ord + PartialEq + Clone,
 {
+	/// Create a new empty [Dag].
+	pub fn new() -> Self {
+		Self::default()
+	}
+
 	pub fn add_edge(&mut self, from: T, to: T) {
 		self.edges.entry(from).or_default().insert(to);
+	}
+
+	pub fn add_node(&mut self, node: T) {
+		self.edges.entry(node).or_default();
 	}
 
 	/// Whether `from` is directly connected to `to`.
@@ -91,11 +141,16 @@ where
 	///
 	/// This can be inflated back to the original `Dag` by calling
 	/// `from.into_transitive_hull_in(self)`.
-	pub fn node(&self, from: T) -> Self {
+	pub fn dag_of(&self, from: T) -> Self {
 		let mut edges = BTreeMap::new();
 		let rhs = self.edges.get(&from).cloned().unwrap_or_default();
 		edges.insert(from, rhs);
 		Self { edges }
+	}
+
+	/// Get get a ref to the a LHS node.
+	pub fn lhs_node<'a>(&'a self, from: &T) -> Option<&'a T> {
+		self.edges.get_key_value(from).map(|(k, _)| k)
 	}
 
 	/// Calculate the transitive hull of `self`.
@@ -178,6 +233,10 @@ where
 	/// The number of edges in the graph.
 	pub fn num_edges(&self) -> usize {
 		self.edges.values().map(|v| v.len()).sum()
+	}
+
+	pub fn num_nodes(&self) -> usize {
+		self.edges.len()
 	}
 }
 

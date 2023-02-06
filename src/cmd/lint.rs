@@ -20,7 +20,7 @@ pub struct PropagateFeatureCmd {
 	tree_args: super::TreeArgs,
 
 	#[clap(long, required = true)]
-	pub features: Vec<String>,
+	pub feature: String,
 
 	/// Show crate versions.
 	#[clap(long)]
@@ -38,7 +38,7 @@ impl LintCmd {
 impl PropagateFeatureCmd {
 	pub fn run(&self) {
 		log::info!("Using manifest: {:?}", self.tree_args.manifest_path);
-		let feature = self.features.first().unwrap().clone();
+		let feature = self.feature.clone();
 		let meta = self.tree_args.load_metadata().expect("Loads metadata");
 		let pkgs = meta.packages.iter().collect::<Vec<_>>();
 		if let Some(root) = meta.root_package() {

@@ -102,7 +102,7 @@ impl PropagateFeatureCmd {
 			}
 			if let Some(deps) = propagate_missing.get(krate) {
 				let joined = deps.iter().map(|dep| format!("{}", dep)).collect::<Vec<_>>().join("\n      ");
-				println!("    must be propagated to:\n      {}", joined);
+				println!("    must propagate to:\n      {}", joined);
 				errors += 1;
 			}
 			if let Some(dep) = feature_maybe_unused.get(krate) {

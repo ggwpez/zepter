@@ -4,7 +4,7 @@ version = "0.4.0"
 edition = "2021"
 description = "See out how Rust dependencies and features are enabled."
 license = "GPL-3.0-only"
-source = "https://github.com/ggwpez/feature"
+repository = "https://github.com/ggwpez/feature"
 
 [[bin]]
 name = "feature"

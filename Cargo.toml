@@ -1,6 +1,6 @@
 [package]
 name = "feature"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2021"
 description = "See out how Rust dependencies and features are enabled."
 license = "GPL-3.0-only"

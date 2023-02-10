@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+mod autofix;
 pub mod cmd;
 pub mod dag;
 

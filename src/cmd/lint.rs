@@ -1,6 +1,9 @@
-use crate::CrateId;
+use crate::{autofix::AutoFixer, cmd::resolve_dep, CrateId};
 use cargo_metadata::PackageId;
-use std::collections::{BTreeMap, BTreeSet};
+use std::{
+	collections::{BTreeMap, BTreeSet},
+	fs::canonicalize,
+};
 
 #[derive(Debug, clap::Parser)]
 pub struct LintCmd {
@@ -20,11 +23,26 @@ pub struct PropagateFeatureCmd {
 	tree_args: super::TreeArgs,
 
 	#[clap(long, required = true)]
-	pub feature: String,
+	feature: String,
+
+	#[clap(long, short, num_args(0..))]
+	packages: Vec<String>,
 
 	/// Show crate versions.
 	#[clap(long)]
 	crate_versions: bool,
+
+	/// Try to automatically fix the problems.
+	#[clap(long)]
+	fix: bool,
+
+	/// Fix only issues with this package as dependency.
+	#[clap(long)]
+	fix_dependency: Option<String>,
+
+	/// Fix only issues with this package as feature source.
+	#[clap(long)]
+	fix_package: Option<String>,
 }
 
 impl LintCmd {
@@ -38,9 +56,21 @@ impl LintCmd {
 impl PropagateFeatureCmd {
 	pub fn run(&self) {
 		log::info!("Using manifest: {:?}", self.tree_args.manifest_path);
+		// Allowed dir that we can write to.
+		let allowed_dir = canonicalize(&self.tree_args.manifest_path).unwrap();
+		let allowed_dir = allowed_dir.parent().unwrap();
 		let feature = self.feature.clone();
 		let meta = self.tree_args.load_metadata().expect("Loads metadata");
 		let pkgs = meta.packages.iter().collect::<Vec<_>>();
+		let mut to_check = pkgs.clone();
+		if !self.packages.is_empty() {
+			to_check =
+				pkgs.iter().filter(|pkg| self.packages.contains(&pkg.name)).cloned().collect();
+		}
+		if to_check.is_empty() {
+			panic!("No packages found: {:?}", self.packages);
+		}
+
 		if let Some(root) = meta.root_package() {
 			println!("Analyzing {root:?}");
 		} else {
@@ -60,32 +90,16 @@ impl PropagateFeatureCmd {
 		// Crate that has the feature but does not need it.
 		let mut feature_maybe_unused = BTreeSet::<CrateId>::new();
 
-		for pkg in pkgs.iter() {
+		for pkg in to_check.iter() {
 			let mut feature_used = false;
 			// TODO that it does not enable other features.
 
 			for dep in pkg.dependencies.iter() {
 				// TODO handle default features.
 				// Resolve the dep according to the metadata.
-				let resolved = if self.tree_args.workspace {
-					// TODO horrible code
-					meta.workspace_members
-						.iter()
-						.find(|id| id.to_string().starts_with(format!("{} ", dep.name).as_str()))
-						.map(|id| lookup(id.to_string().as_str()))
-				} else {
-					meta.resolve
-						.as_ref()
-						.and_then(|resolve| {
-							resolve.nodes.iter().find(|node| {
-								node.id.to_string().starts_with(format!("{} ", dep.name).as_str())
-							})
-						})
-						.map(|node| lookup(node.id.to_string().as_str()))
-				};
+				let resolved = resolve_dep(pkg, &dep, &meta);
 
 				let Some(dep) = resolved else {
-					assert!(meta.workspace_members.iter().find(|id| id.to_string().starts_with(format!("{} ", dep.name).as_str())).map(|id| lookup(id.to_string().as_str())).is_none(), "Impossible resolve must not resolve to a workspace member.");
 					// Either outside workspace or not resolved, possibly due to not being used at all because of the target or whatever.
 					feature_used = true;
 					continue;
@@ -125,12 +139,26 @@ impl PropagateFeatureCmd {
 			.cloned()
 			.collect();
 
-		let (mut errors, mut warnings) = (0, 0);
+		let (mut errors, warnings) = (0, 0);
+		let mut fixes = 0;
 		for krate in faulty_crates {
-			println!("crate {:?}\n  feature {:?}", lookup(&krate).name, feature);
+			let krate = lookup(&krate);
+			// check if we can modify in allowed_dir
+			let krate_path = canonicalize(krate.manifest_path.clone().into_std_path_buf()).unwrap();
+			let mut fixer = if krate_path.starts_with(&allowed_dir) {
+				Some(AutoFixer::from_manifest(&krate_path).unwrap())
+			} else {
+				log::info!(
+					"Cannot fix {} because it is not in the allowed directory {}",
+					krate.name,
+					allowed_dir.display()
+				);
+				None
+			};
+			println!("crate {:?}\n  feature {:?}", krate.name, feature);
 
 			// join
-			if let Some(deps) = feature_missing.get(&krate) {
+			if let Some(deps) = feature_missing.get(&krate.id.to_string()) {
 				let joined = deps
 					.iter()
 					.map(|d| lookup(d))
@@ -144,7 +172,7 @@ impl PropagateFeatureCmd {
 				);
 				errors += 1;
 			}
-			if let Some(deps) = propagate_missing.get(&krate) {
+			if let Some(deps) = propagate_missing.get(&krate.id.to_string()) {
 				let joined = deps
 					.iter()
 					.map(|d| lookup(d))
@@ -152,18 +180,42 @@ impl PropagateFeatureCmd {
 					.collect::<Vec<_>>()
 					.join("\n      ");
 				println!("    must propagate to:\n      {joined}");
+
+				if self.fix && self.fix_package.as_ref().map_or(true, |p| p == &krate.name) {
+					for dep in deps {
+						let dep_name = &lookup(dep).name;
+						if self.fix_dependency.as_ref().map_or(true, |d| d == dep_name) {
+							if let Some(fixer) = fixer.as_mut() {
+								fixer
+									.add_to_feature(
+										&feature,
+										format!("{}/{}", dep_name, feature).as_str(),
+									)
+									.unwrap();
+								log::warn!(
+									"Added feature {feature} to {dep_name} in {}",
+									krate.name
+								);
+								fixes += 1;
+							}
+						}
+					}
+				}
 				errors += 1;
 			}
-			if let Some(_dep) = feature_maybe_unused.get(&krate) {
-				if !feature_missing.contains_key(&krate) && !propagate_missing.contains_key(&krate)
-				{
-					println!("    is not used by any dependencies");
-					warnings += 1;
-				}
+			if fixes > 0 {
+				fixer.unwrap().save().unwrap();
 			}
+			//if let Some(_dep) = feature_maybe_unused.get(&krate.id.to_string()) {
+			//	if !feature_missing.contains_key(&krate.id.to_string()) &&
+			// !propagate_missing.contains_key(&krate.id.to_string()) 	{
+			//		println!("    is not used by any dependencies");
+			//		warnings += 1;
+			//	}
+			//}
 		}
 		if errors > 0 || warnings > 0 {
-			println!("Generated {errors} errors and {warnings} warnings");
+			println!("Generated {errors} errors and {warnings} warnings and fixed {fixes} issues.");
 		}
 	}
 }

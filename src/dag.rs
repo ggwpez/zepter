@@ -55,6 +55,16 @@ where
 	{
 		Path(self.0.into_iter().map(|e| Cow::Owned(f(e.as_ref()))).collect())
 	}
+
+	// Map to a vector
+	pub fn for_each<F>(&self, mut f: F)
+	where
+		F: FnMut(&T),
+	{
+		for e in self.0.iter() {
+			f(e.as_ref())
+		}
+	}
 }
 
 impl<'a, T> TryFrom<Vec<&'a T>> for Path<'a, T>

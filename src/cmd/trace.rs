@@ -1,5 +1,6 @@
-use crate::{dag::Dag, Crate, CrateId};
-use cargo_metadata::Metadata;
+use super::*;
+use crate::{dag::Dag, CrateId};
+use cargo_metadata::{Metadata, Package};
 use clap::Parser;
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -11,8 +12,23 @@ pub struct TraceCmd {
 	tree_args: super::TreeArgs,
 
 	/// Simplified output for easier human understanding.
-	#[clap(long, default_value = "false")]
-	simple: bool,
+	#[clap(long)]
+	show_source: bool,
+
+	/// Show the version of the crate.
+	#[clap(long)]
+	show_version: bool,
+
+	/// Delimiter for rendering dependency paths.
+	#[clap(long, default_value = " -> ")]
+	path_delimiter: String,
+
+	/// Do not unify versions but treat `(id, version)` as a unique crate in the dependency graph.
+	///
+	/// Unifying the versions would mean that they are factored out and only `id` is used to
+	/// identify a crate.
+	#[clap(long)]
+	unique_versions: bool,
 
 	/// The root crate to start from.
 	#[clap(index(1))]
@@ -39,7 +55,7 @@ impl TraceCmd {
 			.map(|(id, _)| id)
 			.collect::<Vec<_>>();
 		if froms.is_empty() {
-			panic!("Could not find crate {} in the dependency graph", self.from);
+			panic!("Could not find crate {} in the left dependency graph", self.from);
 		}
 
 		let tos = index
@@ -48,7 +64,7 @@ impl TraceCmd {
 			.map(|(id, _)| id)
 			.collect::<Vec<_>>();
 		if tos.is_empty() {
-			panic!("Could not find crate {} in the dependency graph", self.to);
+			panic!("Could not find crate {} in the right dependency graph", self.to);
 		}
 
 		log::info!(
@@ -68,10 +84,31 @@ impl TraceCmd {
 			panic!("No path found");
 		}
 		log::info!("Found {} distinct paths", paths.len());
+		// Unescape the delimiter.
+		let delimiter = self.path_delimiter.replace("\\n", "\n").replace("\\t", "\t");
+
 		for path in paths {
-			// The path uses CrateId, so first translate it to Crates.
-			let path = path.translate_owned(|id| lookup(id).clone().strip_version());
-			println!("{path}");
+			let mut out = String::new();
+			let mut is_first = true;
+
+			path.for_each(|id| {
+				let krate = lookup(id);
+				if !is_first {
+					out.push_str(&delimiter);
+				}
+				is_first = false;
+				out.push_str(&krate.name);
+				if self.show_version {
+					out.push_str(&format!(" v{}", krate.version));
+				}
+				if self.show_source {
+					if let Some(source) = krate.source.as_ref() {
+						out.push_str(&format!(" ({})", source.repr));
+					}
+				}
+			});
+
+			println!("{out}");
 		}
 	}
 
@@ -79,37 +116,19 @@ impl TraceCmd {
 	fn build_dag(
 		&self,
 		meta: Metadata,
-	) -> Result<(Dag<CrateId>, BTreeMap<CrateId, Crate>), String> {
+	) -> Result<(Dag<CrateId>, BTreeMap<CrateId, Package>), String> {
 		let mut dag = Dag::new();
 		let mut index = BTreeMap::new();
 
-		for pkg in meta.packages.into_iter() {
-			dag.add_node(pkg.id.to_string());
-			index.insert(
-				pkg.id.to_string(),
-				Crate {
-					id: pkg.id.to_string(),
-					name: pkg.name,
-					version: pkg.version.to_string(),
-					features: pkg.features,
-				},
-			);
+		for pkg in meta.packages.clone().into_iter() {
+			let id = pkg.id.to_string();
+			dag.add_node(id.clone());
+			index.insert(pkg.id.to_string(), pkg.clone());
 
-			for dep in pkg.dependencies {
-				// Resolve dep to its ID, otherwise we dont know which version it is.
-				let dep = meta
-					.resolve
-					.as_ref()
-					// TODO horrible code
-					.and_then(|resolve| {
-						resolve.nodes.iter().find(|node| {
-							node.id.to_string().starts_with(format!("{} ", dep.name).as_str())
-						})
-					});
-				if let Some(dep) = dep {
-					dag.add_edge(pkg.id.to_string(), dep.id.to_string());
-				} else {
-					// Can happen for unused deps.
+			for dep in pkg.dependencies.iter() {
+				if let Some(dep) = resolve_dep(&pkg, &dep, &meta) {
+					let did = dep.id.to_string();
+					dag.add_edge(id.clone(), did);
 				}
 			}
 		}

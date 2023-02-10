@@ -1,6 +1,6 @@
 # Features
 
-Check why and how a dependency in your workspace gets enabled. This is useful in cases where you encounter weird build errors which are caused by unintentional inclusion of dependencies or features.
+Understand why and how features are enabled in a rust workspace. `Feature` is able to automatically fix missing feature propagation to dependencies. Eventually it will be ready for CI use to check an MR for consistent feature usage.
 
 ## Install
 
@@ -29,9 +29,7 @@ crate "frame-support"
 Generated 1 errors and 0 warnings and fixed 0 issues.
 ```
 
-Without the `--workspace` it even detects 243 violations.
-
-Now you can verify this for the [frame-support](https://github.com/paritytech/substrate/blob/ce2cee35f8f0fc5968ea6ffaffa6660dcd008804/frame/support/Cargo.toml#L71) which is indeed missing the feature for `sp-runtime` while that is clearly [sp-runtime](https://github.com/paritytech/substrate/blob/0b6aec52a90870c999856cd37f7d04789cdd8dfc/primitives/runtime/Cargo.toml#L43) it 🤔.
+Without the `-p` it will detect many more problems. You can verify this for the [frame-support](https://github.com/paritytech/substrate/blob/ce2cee35f8f0fc5968ea6ffaffa6660dcd008804/frame/support/Cargo.toml#L71) which is indeed missing the feature for `sp-runtime` while that is clearly [sp-runtime](https://github.com/paritytech/substrate/blob/0b6aec52a90870c999856cd37f7d04789cdd8dfc/primitives/runtime/Cargo.toml#L43) it 🤔.
 
 This can be fixed by applying the `--fix` flag like:  
 

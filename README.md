@@ -5,35 +5,52 @@ Check why and how a dependency in your workspace gets enabled. This is useful in
 ## Install
 
 ```bash
-cargo install feature
+cargo install -f feature
 ```
 
-## Example - Feature Propagation Lint
+## Example - Fixing feature propagation
 
-Let's check that the `runtime-benchmarks` feature is properly passed down to all the dependencies of all crates in the workspace of [Cumulus]:  
+Let's check that the `runtime-benchmarks` feature is properly passed down to all the dependencies of the `frame-support` crate in the workspace of [Substrate]:  
 
 ```bash
-feature lint propagate-feature --manifest-path ../cumulus/Cargo.toml --feature runtime-benchmarks --workspace
+feature lint propagate-feature --manifest-path ../substrate/Cargo.toml --feature runtime-benchmarks --workspace -p frame-support
 ```
 
-The output reveals that there are a lot of crates that violate this assumption:  
+The output reveals that there are some dependencies that expose the feature but don't get it passed down:  
 
 ```pre
-crate "asset-test-utils"
-  feature "runtime-benchmarks"
-    must exit because 1 dependencies have it:
-      pallet-collator-selection
-crate "bridge-hub-kusama-runtime"
+Analyzing workspace
+crate "frame-support"
   feature "runtime-benchmarks"
     must propagate to:
-      cumulus-pallet-parachain-system
-...
-Generated 24 errors
+      frame-system
+      sp-runtime
+      sp-staking
+Generated 1 errors and 0 warnings and fixed 0 issues.
 ```
 
-Without the `--workspace` it even detects 243 violations. Automatic fixing will be helpful here (TBD).
+Without the `--workspace` it even detects 243 violations.
 
-Now you can verify this for the [bridge-hub-kusama-runtime](https://github.com/paritytech/cumulus/blob/f754f03e550666e9124e7dc5cade20d20abc99d4/parachains/runtimes/bridge-hubs/bridge-hub-kusama/Cargo.toml#L143) which is indeed missing the feature for `cumulus-pallet-parachain-system` while that is clearly [providing](https://github.com/paritytech/cumulus/blob/f754f03e550666e9124e7dc5cade20d20abc99d4/pallets/parachain-system/Cargo.toml#L78) this feature 🤔. There will probably be some false-positive/negatives currently, since I did not properly test it yet.
+Now you can verify this for the [frame-support](https://github.com/paritytech/substrate/blob/ce2cee35f8f0fc5968ea6ffaffa6660dcd008804/frame/support/Cargo.toml#L71) which is indeed missing the feature for `sp-runtime` while that is clearly [sp-runtime](https://github.com/paritytech/substrate/blob/0b6aec52a90870c999856cd37f7d04789cdd8dfc/primitives/runtime/Cargo.toml#L43) it 🤔.
+
+This can be fixed by applying the `--fix` flag like:  
+
+```bash
+feature lint propagate-feature --manifest-path ../substrate/Cargo.toml --feature runtime-benchmarks --workspace -p frame-support --fix
+```
+
+Which results in this diff:
+
+```patch
+-runtime-benchmarks = []
++runtime-benchmarks = [
++       "frame-system/runtime-benchmarks",
++       "sp-runtime/runtime-benchmarks",
++       "sp-staking/runtime-benchmarks"
++]
+```
+
+The auto-fix is currently a bit coarse, and does not check for optional dependencies. It will also not add the feature to crates that do not have it, but need it because of a dependency. This will be fixed soon.
 
 ## Example - Dependency tracing
 
@@ -63,3 +80,4 @@ So it comes from libp2p, okay. Good to know.
 
 <!-- LINKS -->
 [Cumulus]: https://github.com/paritytech/cumulus
+[Substrate]: https://github.com/paritytech/substrate

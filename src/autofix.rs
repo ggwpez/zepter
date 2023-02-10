@@ -9,17 +9,13 @@ pub struct AutoFixer {
 impl AutoFixer {
 	pub fn from_manifest(manifest: &Path) -> Result<Self, String> {
 		let raw = std::fs::read_to_string(manifest)
-			.map_err(|e| format!("Failed to read manifest: {}", e))?;
-		let doc = raw
-			.parse::<Document>()
-			.map_err(|e| format!("Failed to parse manifest: {}", e))?;
+			.map_err(|e| format!("Failed to read manifest: {e}"))?;
+		let doc = raw.parse::<Document>().map_err(|e| format!("Failed to parse manifest: {e}"))?;
 		Ok(Self { manifest: Some(manifest.to_path_buf()), doc: Some(doc) })
 	}
 
 	pub fn from_raw(raw: &str) -> Result<Self, String> {
-		let doc = raw
-			.parse::<Document>()
-			.map_err(|e| format!("Failed to parse manifest: {}", e))?;
+		let doc = raw.parse::<Document>().map_err(|e| format!("Failed to parse manifest: {e}"))?;
 		Ok(Self { manifest: None, doc: Some(doc) })
 	}
 
@@ -65,8 +61,8 @@ impl AutoFixer {
 
 	pub fn save(&mut self) -> Result<(), String> {
 		if let (Some(doc), Some(path)) = (self.doc.take(), &self.manifest) {
-			std::fs::write(&path, doc.to_string())
-				.map_err(|e| format!("Failed to write manifest: {}", e))?;
+			std::fs::write(path, doc.to_string())
+				.map_err(|e| format!("Failed to write manifest: {e}"))?;
 			log::warn!("Wrote manifest to {}", path.display());
 		}
 		Ok(())

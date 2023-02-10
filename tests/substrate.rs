@@ -32,7 +32,7 @@ fn substrate_trace_works() {
 	let stdout = String::from_utf8_lossy(&output.stdout);
 	let want = "node-cli -> try-runtime-cli -> substrate-rpc-client -> sp-runtime -> substrate-test-runtime-client -> substrate-test-runtime -> sc-service -> sc-telemetry -> libp2p -> libp2p-webrtc -> libp2p-noise -> snow";
 	if !stdout.contains(want) {
-		panic!("Unexpected output: {}", stdout);
+		panic!("Unexpected output: {stdout}");
 	}
 }
 
@@ -58,7 +58,7 @@ fn substrate_lint_works() {
 	let stdout = String::from_utf8_lossy(&output.stdout);
 	let want = "Generated 185 errors and 0 warnings and fixed 0 issues.";
 	if !stdout.contains(want) {
-		panic!("Unexpected output: {}", stdout);
+		panic!("Unexpected output: {stdout}");
 	}
 }
 
@@ -68,17 +68,17 @@ fn clone_repo(repo: &str, rev: &str) -> Result<PathBuf, Box<dyn std::error::Erro
 
 	// Check if the repo is already cloned
 	if std::path::Path::new(&dir).exists() {
-		println!("Using existing repo at {:?}", dir);
+		println!("Using existing repo at {dir:?}");
 		return Ok(dir)
 	}
 
-	println!("Cloning {} into {:?}", repo, dir);
+	println!("Cloning {repo} into {dir:?}");
 	std::fs::create_dir_all(&dir)?;
 
 	let mut cmd = std::process::Command::new("git");
 	cmd.current_dir(&dir);
 	cmd.arg("clone");
-	cmd.arg(format!("https://github.com/paritytech/{}", repo));
+	cmd.arg(format!("https://github.com/paritytech/{repo}"));
 	cmd.arg(".");
 	cmd.arg("--depth");
 	cmd.arg("1");

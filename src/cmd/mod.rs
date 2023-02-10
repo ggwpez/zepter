@@ -62,7 +62,7 @@ impl TreeArgs {
 			cmd.other_options(vec!["--offline".to_string()]);
 		}
 
-		cmd.exec().map_err(|e| format!("Failed to load metadata: {}", e))
+		cmd.exec().map_err(|e| format!("Failed to load metadata: {e}"))
 	}
 }
 
@@ -87,7 +87,7 @@ pub(crate) fn resolve_dep_from_graph(
 	dep: &Dependency,
 	(meta, resolve): (&Metadata, &Resolve),
 ) -> Option<Package> {
-	let dep_name = dep.name.replace("-", "_");
+	let dep_name = dep.name.replace('-', "_");
 	let resolved_pkg = resolve.nodes.iter().find(|node| node.id == pkg.id)?;
 	let resolved_dep_id = resolved_pkg.deps.iter().find(|node| node.name == dep_name)?;
 	let resolve_dep = meta.packages.iter().find(|pkg| pkg.id == resolved_dep_id.pkg)?;

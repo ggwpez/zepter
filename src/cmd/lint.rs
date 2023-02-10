@@ -97,7 +97,7 @@ impl PropagateFeatureCmd {
 			for dep in pkg.dependencies.iter() {
 				// TODO handle default features.
 				// Resolve the dep according to the metadata.
-				let resolved = resolve_dep(pkg, &dep, &meta);
+				let resolved = resolve_dep(pkg, dep, &meta);
 
 				let Some(dep) = resolved else {
 					// Either outside workspace or not resolved, possibly due to not being used at all because of the target or whatever.
@@ -145,7 +145,7 @@ impl PropagateFeatureCmd {
 			let krate = lookup(&krate);
 			// check if we can modify in allowed_dir
 			let krate_path = canonicalize(krate.manifest_path.clone().into_std_path_buf()).unwrap();
-			let mut fixer = if krate_path.starts_with(&allowed_dir) {
+			let mut fixer = if krate_path.starts_with(allowed_dir) {
 				Some(AutoFixer::from_manifest(&krate_path).unwrap())
 			} else {
 				log::info!(
@@ -189,7 +189,7 @@ impl PropagateFeatureCmd {
 								fixer
 									.add_to_feature(
 										&feature,
-										format!("{}/{}", dep_name, feature).as_str(),
+										format!("{dep_name}/{feature}").as_str(),
 									)
 									.unwrap();
 								log::warn!(

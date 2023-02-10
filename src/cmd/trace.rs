@@ -126,7 +126,7 @@ impl TraceCmd {
 			index.insert(pkg.id.to_string(), pkg.clone());
 
 			for dep in pkg.dependencies.iter() {
-				if let Some(dep) = resolve_dep(&pkg, &dep, &meta) {
+				if let Some(dep) = resolve_dep(&pkg, dep, &meta) {
 					let did = dep.id.to_string();
 					dag.add_edge(id.clone(), did);
 				}

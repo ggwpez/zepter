@@ -1,0 +1,33 @@
+name: TOML
+
+on:
+  push:
+    branches: [master, dev]
+  pull_request:
+    types: [review_requested, ready_for_review]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  lint:
+    name: "Lint"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Skip if unchanged
+        id: changed-files-specific
+        uses: tj-actions/changed-files@v20
+        with:
+          files: |
+            *.toml
+            *.tml
+      - name: Install Cargo TOML linter
+        if: steps.changed-files-specific.outputs.only_changed == 'true'
+        run: cargo install cargo-toml-lint --version 0.1.1
+
+      - name: Lint Cargo.toml
+        if: steps.changed-files-specific.outputs.only_changed == 'true'
+        run: cargo-toml-lint Cargo.toml

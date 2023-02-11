@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
+
 use crate::{autofix::AutoFixer, cmd::resolve_dep, CrateId};
 use cargo_metadata::PackageId;
 use std::{

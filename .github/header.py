@@ -3,6 +3,8 @@
 import os
 import sys
 
+print("CWD: " + os.getcwd())
+
 def main():
 	# args are the paths to check
 	header = sys.argv[1]

@@ -7,11 +7,11 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build:
+  header:
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
-    - name: File Header
-      run: python HEADER ../ 
+    - name: SPDX Header
+      run: python .github/HEADER . 

@@ -220,7 +220,7 @@ where
 	///
 	/// This returns `Some` if (and only if) `to` is *reachable* from `from`.
 	pub fn any_path<'a>(&'a self, from: &'a T, to: &T) -> Option<Path<'a, T>> {
-		let mut visited = BTreeSet::new();
+		let mut visited = HashSet::new();
 		let mut stack = vec![(from, vec![from])];
 
 		while let Some((node, mut path)) = stack.pop() {

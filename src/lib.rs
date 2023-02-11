@@ -81,6 +81,13 @@ pub mod autofix;
 pub mod cmd;
 pub mod dag;
 
+pub mod prelude {
+	pub use super::{
+		dag::{Dag, Path},
+		CrateId,
+	};
+}
+
 /// Unique Id of a Rust crate.
 ///
 /// These come in the form of:

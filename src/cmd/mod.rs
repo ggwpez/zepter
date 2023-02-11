@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
+//! Sub-command definition and implementation.
+
 pub mod lint;
 pub mod trace;
 
@@ -16,6 +18,7 @@ pub struct Command {
 	quiet: bool,
 }
 
+/// Sub-commands of the [Root](Command) command.
 #[derive(Debug, clap::Subcommand)]
 enum SubCommand {
 	Trace(trace::TraceCmd),
@@ -37,25 +40,35 @@ impl Command {
 	}
 }
 
+/// Arguments for how to load cargo metadata from a workspace.
 #[derive(Debug, clap::Parser)]
 pub struct TreeArgs {
-	/// Cargo manifest path.
+	/// Cargo manifest path or directory.
+	/// 
+	/// For directories it appends a `Cargo.toml`.
 	#[arg(long, global = true, default_value = "Cargo.toml")]
 	pub manifest_path: std::path::PathBuf,
 
 	/// Whether to only consider workspace crates.
-	#[clap(long, global = true, default_value = "false")]
+	#[clap(long, global = true)]
 	pub workspace: bool,
 
 	/// Whether to use offline mode.
-	#[clap(long, global = true, default_value = "false")]
+	#[clap(long, global = true)]
 	pub offline: bool,
 }
 
 impl TreeArgs {
+	/// Load the metadata of the rust project.
 	pub fn load_metadata(&self) -> Result<Metadata, String> {
 		let mut cmd = MetadataCommand::new();
-		cmd.manifest_path(&self.manifest_path);
+		let manifest_path = if self.manifest_path.is_dir() {
+			self.manifest_path.join("Cargo.toml")
+		} else {
+			self.manifest_path.clone()
+		};
+		log::debug!("Using manifest path: {:?}", manifest_path);
+		cmd.manifest_path(&manifest_path);
 		cmd.features(cargo_metadata::CargoOpt::AllFeatures);
 
 		if self.workspace {
@@ -69,6 +82,9 @@ impl TreeArgs {
 	}
 }
 
+/// Resolve the dependency `dep` of `pkg` within the metadata.
+/// 
+/// This checks whether the dependency is a workspace or external crate and resolves it accordingly.
 pub(crate) fn resolve_dep(pkg: &Package, dep: &Dependency, meta: &Metadata) -> Option<Package> {
 	match meta.resolve.as_ref() {
 		Some(resolve) => resolve_dep_from_graph(pkg, dep, (meta, resolve)),
@@ -76,6 +92,9 @@ pub(crate) fn resolve_dep(pkg: &Package, dep: &Dependency, meta: &Metadata) -> O
 	}
 }
 
+/// Resolve the dependency `dep` within the workspace.
+/// 
+/// Errors if `dep` is not a workspace member.
 pub(crate) fn resolve_dep_from_workspace(dep: &Dependency, meta: &Metadata) -> Option<Package> {
 	for work in meta.workspace_packages() {
 		if work.name == dep.name {
@@ -85,6 +104,9 @@ pub(crate) fn resolve_dep_from_workspace(dep: &Dependency, meta: &Metadata) -> O
 	None
 }
 
+/// Resolve the dependency `dep` of `pkg` within the resolve graph.
+/// 
+/// The resolve graph should only be used for external crates. I did not try what happens for workspace members - better don't do it.
 pub(crate) fn resolve_dep_from_graph(
 	pkg: &Package,
 	dep: &Dependency,

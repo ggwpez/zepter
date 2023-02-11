@@ -1,3 +1,5 @@
+![crates.io](https://img.shields.io/crates/v/feature.svg)
+![docs.rs](https://img.shields.io/docsrs/feature)
 # Features
 
 Understand why and how features are enabled in a rust workspace. `Feature` is able to automatically fix missing feature propagation to dependencies. Eventually it will be ready for CI use to check an MR for consistent feature usage.

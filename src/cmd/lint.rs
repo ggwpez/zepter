@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
+//! Lint your feature usage by analyzing crate metadata.
+
 use crate::{autofix::AutoFixer, cmd::resolve_dep, CrateId};
 use cargo_metadata::PackageId;
 use std::{
@@ -8,30 +10,36 @@ use std::{
 	fs::canonicalize,
 };
 
+/// Lint your feature usage by analyzing crate metadata.
 #[derive(Debug, clap::Parser)]
 pub struct LintCmd {
 	#[clap(subcommand)]
 	subcommand: SubCommand,
 }
 
+/// Sub-commands of the [Lint](LintCmd) command.
 #[derive(Debug, clap::Subcommand)]
 pub enum SubCommand {
+	/// Check whether features are properly propagated.
 	PropagateFeature(PropagateFeatureCmd),
 }
 
+/// Verifies that rust features are properly propagated.
 #[derive(Debug, clap::Parser)]
 pub struct PropagateFeatureCmd {
 	#[allow(missing_docs)]
 	#[clap(flatten)]
 	tree_args: super::TreeArgs,
 
+	/// The feature to check.
 	#[clap(long, required = true)]
 	feature: String,
 
+	/// The packages to check. If empty, all packages are checked.
 	#[clap(long, short, num_args(0..))]
 	packages: Vec<String>,
 
-	/// Show crate versions.
+	/// Show crate versions in the output.
 	#[clap(long)]
 	crate_versions: bool,
 

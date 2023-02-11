@@ -1,24 +1,26 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
+//! Trace the dependency path from one crate to another.
+
 use super::*;
 use crate::{dag::Dag, CrateId};
 use cargo_metadata::{Metadata, Package};
 use clap::Parser;
 use std::collections::{BTreeMap, BTreeSet};
 
-/// Trace the dependency path one crate to another.
+/// Trace the dependency path from one crate to another.
 #[derive(Debug, Parser)]
 pub struct TraceCmd {
 	#[allow(missing_docs)]
 	#[clap(flatten)]
 	tree_args: super::TreeArgs,
 
-	/// Simplified output for easier human understanding.
+	/// Show the source location of crates in the output.
 	#[clap(long)]
 	show_source: bool,
 
-	/// Show the version of the crate.
+	/// Show the version of the crates in the output.
 	#[clap(long)]
 	show_version: bool,
 

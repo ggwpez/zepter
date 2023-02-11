@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
+//! Directed Acyclic Graphs ([Dag]) and [Path]s through them.
+//! 
+//! Can be used to build and trace dependencies in a rust workspace.
+
 #![allow(dead_code)]
 
 use core::fmt::{Display, Formatter};
@@ -25,9 +29,9 @@ impl<T> Default for Dag<T> {
 	}
 }
 
-/// A path inside a DAG.
+/// A path inside a 8Dag].
 ///
-/// The lifetime is the lifetime of the `Dag`s nodes.
+/// Tries to use borrowing when possible to mitigate copy overhead. Paths cannot be empty.
 #[derive(Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct Path<'a, T: ToOwned>(pub Vec<Cow<'a, T>>);
 
@@ -35,14 +39,21 @@ impl<'a, T> Path<'a, T>
 where
 	T: ToOwned,
 {
-	pub fn hops(&self) -> usize {
+	/// The number of hops (edges) in the path.
+	///
+	/// This is one less than the number of nodes.
+	pub fn num_hops(&self) -> usize {
 		match self.0.len() {
 			0 => unreachable!("Paths cannot be empty"),
 			l => l - 1,
 		}
 	}
 
-	/// Translate self by applying `f` to all hops.
+	pub fn num_nodes(&self) -> usize {
+		self.0.len()
+	}
+
+	/// Translate self by applying `f` to all hops and borrowing the returned reference.
 	pub fn translate_borrowed<'b, F, U>(&'a self, f: F) -> Path<'b, U>
 	where
 		F: Fn(&'a T) -> &'b U,
@@ -51,6 +62,7 @@ where
 		Path(self.0.iter().map(|e| Cow::Borrowed(f(e.as_ref()))).collect())
 	}
 
+	/// Translate self by applying `f` to all hops and owning the returned value.
 	pub fn translate_owned<'b, F, U>(self, f: F) -> Path<'b, U>
 	where
 		F: Fn(&T) -> U,
@@ -59,7 +71,7 @@ where
 		Path(self.0.into_iter().map(|e| Cow::Owned(f(e.as_ref()))).collect())
 	}
 
-	// Map to a vector
+	/// Run `f` on all nodes in the path.
 	pub fn for_each<F>(&self, mut f: F)
 	where
 		F: FnMut(&T),
@@ -103,10 +115,12 @@ where
 		Self::default()
 	}
 
+	/// Connect two nodes.
 	pub fn add_edge(&mut self, from: T, to: T) {
 		self.edges.entry(from).or_default().insert(to);
 	}
 
+	/// Add a node to the Dag without any edges.
 	pub fn add_node(&mut self, node: T) {
 		self.edges.entry(node).or_default();
 	}
@@ -120,7 +134,7 @@ where
 
 	/// Whether `from` appears on the lhs of the edge relation.
 	///
-	/// Aka: Whether `self` has any dependencies.
+	/// Aka: Whether `self` has any dependencies nodes.
 	pub fn lhs_contains(&self, from: &T) -> bool {
 		self.edges.contains_key(from)
 	}
@@ -172,6 +186,7 @@ where
 		self
 	}
 
+	/// Calculate the transitive hull of `self` by using the connectivity of `topology`.
 	fn transitive_in(&mut self, topology: &Self) -> bool {
 		let mut changed = false;
 		// The edges that are added in this stage.
@@ -198,10 +213,12 @@ where
 		changed
 	}
 
-	/// Find *a* path from `from` to `to` and return it.
+	/// Find *any* path from `from` to `to`.
 	///
 	/// Note that 1) *the* shortest path does not necessarily exist and 2) this function does not
 	/// give any guarantee about the returned path.
+	///
+	/// This returns `Some` if (and only if) `to` is *reachable* from `from`.
 	pub fn any_path<'a>(&'a self, from: &'a T, to: &T) -> Option<Path<'a, T>> {
 		let mut visited = BTreeSet::new();
 		let mut stack = vec![(from, vec![from])];
@@ -230,6 +247,7 @@ where
 		self.edges.values().map(|v| v.len()).sum()
 	}
 
+	/// The number of nodes in the graph.
 	pub fn num_nodes(&self) -> usize {
 		self.edges.len()
 	}

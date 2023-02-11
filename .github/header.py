@@ -1,4 +1,3 @@
-#/usr/bin/env python3
 # Check that all rust files in the paths have a license header
 
 import os

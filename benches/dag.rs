@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
+
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use feature::prelude::*;
 use rand::{Rng, SeedableRng};

@@ -1,4 +1,4 @@
-name: License
+name: Rust
 
 on:
   push:
@@ -6,12 +6,17 @@ on:
   pull_request:
     branches: [ "master" ]
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
-  header:
+  build:
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
-    - name: SPDX Header
-      run: python .github/header.py .github/HEADER . 
+    - name: Build
+      run: cargo build
+    - name: Run tests
+      run: cargo test

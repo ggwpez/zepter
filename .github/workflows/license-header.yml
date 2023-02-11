@@ -1,0 +1,17 @@
+name: License
+
+on:
+  push:
+    branches: [ "master", "dev" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  header:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: SPDX Header
+      run: python .github/header.py .github/HEADER . 

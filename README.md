@@ -1,6 +1,6 @@
 [![Rust](https://github.com/ggwpez/feature/actions/workflows/rust.yml/badge.svg)](https://github.com/ggwpez/feature/actions/workflows/rust.yml)
-![crates.io](https://img.shields.io/crates/v/feature.svg)
-![docs.rs](https://img.shields.io/docsrs/feature)
+[![crates.io](https://img.shields.io/crates/v/feature.svg)](https://crates.io/crates/feature)
+[![docs.rs](https://img.shields.io/docsrs/feature)](https://docs.rs/feature/latest/feature)
 
 # Features
 

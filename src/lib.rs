@@ -4,9 +4,9 @@
 //! Understand why and how features are enabled in a rust workspace. `Feature` is able to
 //! automatically fix missing feature propagation to dependencies. Eventually it will be ready for
 //! CI use to check an MR for consistent feature usage.
-//! 
+//!
 //! ## Install
-//! 
+//!
 //! ```bash
 //! cargo install -f feature
 //! ```

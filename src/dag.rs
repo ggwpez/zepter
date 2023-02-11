@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
 //! Directed Acyclic Graphs ([Dag]) and [Path]s through them.
-//! 
+//!
 //! Can be used to build and trace dependencies in a rust workspace.
 
 #![allow(dead_code)]

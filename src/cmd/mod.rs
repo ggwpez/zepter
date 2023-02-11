@@ -44,7 +44,7 @@ impl Command {
 #[derive(Debug, clap::Parser)]
 pub struct TreeArgs {
 	/// Cargo manifest path or directory.
-	/// 
+	///
 	/// For directories it appends a `Cargo.toml`.
 	#[arg(long, global = true, default_value = "Cargo.toml")]
 	pub manifest_path: std::path::PathBuf,
@@ -83,7 +83,7 @@ impl TreeArgs {
 }
 
 /// Resolve the dependency `dep` of `pkg` within the metadata.
-/// 
+///
 /// This checks whether the dependency is a workspace or external crate and resolves it accordingly.
 pub(crate) fn resolve_dep(pkg: &Package, dep: &Dependency, meta: &Metadata) -> Option<Package> {
 	match meta.resolve.as_ref() {
@@ -93,7 +93,7 @@ pub(crate) fn resolve_dep(pkg: &Package, dep: &Dependency, meta: &Metadata) -> O
 }
 
 /// Resolve the dependency `dep` within the workspace.
-/// 
+///
 /// Errors if `dep` is not a workspace member.
 pub(crate) fn resolve_dep_from_workspace(dep: &Dependency, meta: &Metadata) -> Option<Package> {
 	for work in meta.workspace_packages() {
@@ -105,8 +105,9 @@ pub(crate) fn resolve_dep_from_workspace(dep: &Dependency, meta: &Metadata) -> O
 }
 
 /// Resolve the dependency `dep` of `pkg` within the resolve graph.
-/// 
-/// The resolve graph should only be used for external crates. I did not try what happens for workspace members - better don't do it.
+///
+/// The resolve graph should only be used for external crates. I did not try what happens for
+/// workspace members - better don't do it.
 pub(crate) fn resolve_dep_from_graph(
 	pkg: &Package,
 	dep: &Dependency,

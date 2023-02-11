@@ -22,3 +22,7 @@ jobs:
       run: cargo build
     - name: Run tests
       run: cargo test
+    - name: Format
+      run: |
+        rustup component add rustfmt --toolchain nightly
+        cargo +nightly fmt --check

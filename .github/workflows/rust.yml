@@ -1,13 +1,10 @@
-name: Rust
+name: License
 
 on:
   push:
     branches: [ "master", "dev" ]
   pull_request:
     branches: [ "master" ]
-
-env:
-  CARGO_TERM_COLOR: always
 
 jobs:
   build:
@@ -16,7 +13,5 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Build
-      run: cargo build
-    - name: Run tests
-      run: cargo test
+    - name: File Header
+      run: python HEADER ../ 

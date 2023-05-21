@@ -59,7 +59,7 @@ fn substrate_lint_works() {
 		);
 	}
 	let stdout = String::from_utf8_lossy(&output.stdout);
-	let want = "Generated 185 errors and 0 warnings and fixed 0 issues.";
+	let want = "Generated 193 errors, 0 warnings and fixed 0 issues.";
 	if !stdout.contains(want) {
 		panic!("Unexpected output: {stdout}");
 	}

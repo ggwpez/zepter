@@ -23,7 +23,6 @@ toml_edit = "0.19.3"
 version = "3.0.0"
 
 [dev-dependencies]
-anyhow = "1.0.71"
 assert_cmd = "2.0.8"
 criterion = "0.4"
 glob = "0.3.1"

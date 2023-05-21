@@ -1,0 +1,28 @@
+crates:
+- name: A
+  deps:
+  - B
+  features:
+    F0: null
+- name: B
+  features:
+    F0: null
+cases:
+- cmd: lint propagate-feature --feature F0
+  stdout: |
+    crate "A"
+      feature "F0"
+        must propagate to:
+          B
+    Generated 1 errors, 0 warnings and fixed 0 issues.
+- cmd: lint propagate-feature -p A --feature F0
+  stdout: |
+    crate "A"
+      feature "F0"
+        must propagate to:
+          B
+    Generated 1 errors, 0 warnings and fixed 0 issues.
+- cmd: lint propagate-feature -p B --feature F0
+  stdout: ''
+- cmd: lint propagate-feature -p B --feature F1
+  stdout: ''

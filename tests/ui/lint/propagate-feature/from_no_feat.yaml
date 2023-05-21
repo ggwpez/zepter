@@ -1,0 +1,15 @@
+crates:
+- name: A
+  deps:
+  - B
+- name: B
+  features:
+    F0: null
+cases:
+- cmd: lint propagate-feature --feature F0
+  stdout: |
+    crate "A"
+      feature "F0"
+        must exit because 1 dependencies have it:
+          B
+    Generated 1 errors, 0 warnings and fixed 0 issues.

@@ -23,7 +23,6 @@ feature lint propagate-feature --manifest-path ../substrate/Cargo.toml --feature
 The output reveals that there are some dependencies that expose the feature but don't get it passed down:  
 
 ```pre
-Analyzing workspace
 crate "frame-support"
   feature "runtime-benchmarks"
     must propagate to:
@@ -53,6 +52,22 @@ Which results in this diff:
 ```
 
 The auto-fix is currently a bit coarse, and does not check for optional dependencies. It will also not add the feature to crates that do not have it, but need it because of a dependency. This will be fixed soon.
+
+## Example - Feature tracing
+
+Let's say you want to ensure that specific features are never enabled by default. For this example we will use the `try-runtime` feature of [Substrate]. Check out branch `oty-faulty-feature-demo` and try:
+
+```bash
+feature lint never-implies --manifest-path ../substrate/Cargo.toml --precondition default --stays-disabled try-runtime --offline --workspace
+```
+
+Errors correctly with:
+```pre
+Feature 'default' implies 'try-runtime' via path:
+  frame-benchmarking/default -> frame-benchmarking/std -> frame-system/std -> frame-support/wrong -> frame-support/wrong2 -> frame-support/try-runtime
+```
+
+This functionality currently only shows the first path that it found as optimization.
 
 ## Example - Dependency tracing
 

@@ -1,0 +1,22 @@
+crates:
+- name: A
+  deps:
+  - B
+- name: B
+- name: A-dash
+  deps:
+  - B_underscore
+- name: B_underscore
+cases:
+- cmd: trace A B --show-version
+  stdout: |
+    A v0.1.0 -> B v0.1.0
+- cmd: trace A B --path-delimiter=>
+  stdout: |
+    A>B
+- cmd: trace A B --path-delimiter=> --workspace --offline
+  stdout: |
+    A>B
+- cmd: trace A-dash B_underscore
+  stdout: |
+    A-dash -> B_underscore

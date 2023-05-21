@@ -1,0 +1,24 @@
+crates:
+- name: A
+  deps:
+  - B
+- name: B
+  deps:
+  - C
+- name: C
+  deps:
+  - D
+- name: D
+cases:
+- cmd: trace A B
+  stdout: |
+    A -> B
+- cmd: trace A C
+  stdout: |
+    A -> B -> C
+- cmd: trace B D
+  stdout: |
+    B -> C -> D
+- cmd: trace A D
+  stdout: |
+    A -> B -> C -> D

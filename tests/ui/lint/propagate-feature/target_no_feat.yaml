@@ -1,0 +1,12 @@
+crates:
+- name: A
+  deps:
+  - B
+  features:
+    F0:
+    - - B
+      - F0
+- name: B
+cases:
+- cmd: lint propagate-feature --feature F0
+  stdout: ''

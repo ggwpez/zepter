@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
+
 use assert_cmd::Command;
 use std::{collections::HashMap, fs, io::Write, path::PathBuf};
 use std::path::Path;

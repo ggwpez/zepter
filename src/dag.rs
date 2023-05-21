@@ -171,7 +171,9 @@ where
 	}
 
 	pub fn inverse_lookup<'a>(&'a self, to: &'a T) -> impl Iterator<Item = &'a T> {
-		self.edges.iter().filter_map(move |(k, v)| if v.contains(to) { Some(k) } else { None })
+		self.edges
+			.iter()
+			.filter_map(move |(k, v)| if v.contains(to) { Some(k) } else { None })
 	}
 
 	/// Calculate the transitive hull of `self`.

@@ -4,14 +4,15 @@
 //! Lint your feature usage by analyzing crate metadata.
 
 use crate::{autofix::AutoFixer, cmd::resolve_dep, prelude::*, CrateId};
-use cargo_metadata::{PackageId, Package, Metadata};
+use cargo_metadata::{Metadata, Package, PackageId};
 use core::{
 	fmt,
 	fmt::{Display, Formatter},
 };
 use std::{
 	collections::{BTreeMap, BTreeSet},
-	fs::canonicalize, path::PathBuf,
+	fs::canonicalize,
+	path::PathBuf,
 };
 
 /// Lint your feature usage by analyzing crate metadata.
@@ -190,8 +191,8 @@ impl NeverImpliesCmd {
 
 				// TODO cleanup this cluster fuck
 				let lookup = |id: &str| {
-					pkgs
-						.iter().find(|pkg| pkg.id.to_string() == id)
+					pkgs.iter()
+						.find(|pkg| pkg.id.to_string() == id)
 						.unwrap_or_else(|| panic!("Could not find crate {id} in the metadata"))
 				};
 
@@ -215,8 +216,10 @@ impl NeverImpliesCmd {
 						}
 					}
 				});
-				println!("Feature '{}' implies '{}' via path:\n  {}", self.precondition,
-				 self.stays_disabled, out);
+				println!(
+					"Feature '{}' implies '{}' via path:\n  {}",
+					self.precondition, self.stays_disabled, out
+				);
 
 				std::process::exit(1);
 			}
@@ -361,9 +364,11 @@ impl PropagateFeatureCmd {
 			let krate = lookup(&krate);
 			// check if we can modify in allowed_dir
 			let krate_path = canonicalize(krate.manifest_path.clone().into_std_path_buf()).unwrap();
-			
+
 			let mut fixer = if self.fix {
-				if krate_path.starts_with(allowed_dir) || self.modify_paths.iter().any(|p| krate_path.starts_with(p)) {
+				if krate_path.starts_with(allowed_dir) ||
+					self.modify_paths.iter().any(|p| krate_path.starts_with(p))
+				{
 					Some(AutoFixer::from_manifest(&krate_path).unwrap())
 				} else {
 					log::info!(
@@ -448,10 +453,7 @@ impl OnlyImpliesCmd {
 		let dag = build_feature_dag(&meta, &pkgs);
 		let mut found = false;
 
-		let lookup = |id: &str| {
-			pkgs
-				.iter().find(|pkg| pkg.id.to_string() == id)
-		};
+		let lookup = |id: &str| pkgs.iter().find(|pkg| pkg.id.to_string() == id);
 		let resolved = pkgs.iter().find(|pkg| pkg.name == self.package).unwrap();
 		let to = CrateAndFeature(resolved.id.to_string().clone(), self.feature.clone());
 		log::info!("Looking for paths to {}/{}", to.0, to.1);
@@ -493,13 +495,10 @@ impl WhyEnabledCmd {
 		let mut found_crate = false;
 		let mut enabled_by = vec![];
 
-		let lookup = |id: &str| {
-			pkgs
-				.iter().find(|pkg| pkg.id.to_string() == id)
-		};
-		
+		let lookup = |id: &str| pkgs.iter().find(|pkg| pkg.id.to_string() == id);
+
 		for (lhs, rhs) in dag.edges.iter() {
-			for rhs in rhs.iter()  {
+			for rhs in rhs.iter() {
 				// A bit ghetto, but i don't want to loose unresolved rhs crates.
 				let resolved = lookup(&rhs.0).map(|r| r.name.clone()).unwrap_or(rhs.0.clone());
 				if resolved == self.package {
@@ -533,7 +532,7 @@ impl WhyEnabledCmd {
 
 fn build_feature_dag(meta: &Metadata, pkgs: &Vec<Package>) -> Dag<CrateAndFeature> {
 	let mut dag = Dag::new();
-	
+
 	for pkg in pkgs.iter() {
 		for dep in &pkg.dependencies {
 			if dep.uses_default_features {
@@ -578,13 +577,13 @@ fn build_feature_dag(meta: &Metadata, pkgs: &Vec<Package>) -> Dag<CrateAndFeatur
 						CrateAndFeature(dep_id.clone(), dep_feature.into()),
 					);
 
-					//log::info!(
-					//	"Adding: ({}, {}) -> ({}, {})",
-					//	pkg.name,
-					//	feature,
-					//	dep.name,
-					//	dep_feature
-					//);
+				//log::info!(
+				//	"Adding: ({}, {}) -> ({}, {})",
+				//	pkg.name,
+				//	feature,
+				//	dep.name,
+				//	dep_feature
+				//);
 				} else if dep.contains("/") {
 					let mut splits = dep.split("/");
 					let dep = splits.next().unwrap().replace("?", "");
@@ -614,13 +613,13 @@ fn build_feature_dag(meta: &Metadata, pkgs: &Vec<Package>) -> Dag<CrateAndFeatur
 						CrateAndFeature(dep_id.clone(), dep_feature.into()),
 					);
 
-					//log::info!(
-					//	"Adding: ({}, {}) -> ({}, {})",
-					//	pkg.name,
-					//	feature,
-					//	dep.name,
-					//	dep_feature
-					//);
+				//log::info!(
+				//	"Adding: ({}, {}) -> ({}, {})",
+				//	pkg.name,
+				//	feature,
+				//	dep.name,
+				//	dep_feature
+				//);
 				} else {
 					let dep_feature = dep;
 					// Sanity check

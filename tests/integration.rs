@@ -2,8 +2,12 @@
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
 use assert_cmd::Command;
-use std::{collections::HashMap, fs, io::Write, path::PathBuf};
-use std::path::Path;
+use std::{
+	collections::HashMap,
+	fs,
+	io::Write,
+	path::{Path, PathBuf},
+};
 
 pub type ModuleName = String;
 pub type FeatureName = String;
@@ -92,7 +96,10 @@ fn integration_test() {
 		CrateConfig {
 			name: "mod1".into(),
 			deps: Some(vec!["mod0".into()]),
-			features: Some(HashMap::from([("f0".into(), Some(vec![("mod0".into(), "f0".into())]))])),
+			features: Some(HashMap::from([(
+				"f0".into(),
+				Some(vec![("mod0".into(), "f0".into())]),
+			)])),
 		},
 		CrateConfig {
 			name: "mod2".into(),
@@ -141,7 +148,7 @@ fn ui() {
 			// remove empty trailing and suffix lines
 			let res = cmd.output().unwrap();
 			match res.stdout == case.stdout.as_bytes() {
-				true => {}
+				true => {},
 				false if !overwrite => {
 					pretty_assertions::assert_eq!(
 						&String::from_utf8_lossy(&res.stdout),
@@ -151,13 +158,13 @@ fn ui() {
 				false => {
 					overwrites.insert(i, String::from_utf8_lossy(&res.stdout).to_string());
 					failed += 1;
-				}
+				},
 			}
 		}
 
 		if std::env::var("OVERWRITE").is_ok() {
 			if overwrites.is_empty() {
-				continue;
+				continue
 			}
 
 			for (i, stdout) in overwrites.into_iter() {

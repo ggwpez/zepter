@@ -10,7 +10,7 @@ use std::path::PathBuf;
 
 // mutex for repo init by default
 lazy_static::lazy_static! {
-	static ref SUBSTRATE: std::sync::Mutex<PathBuf> = std::sync::Mutex::new(clone_repo("substrate", "master").unwrap());
+	static ref SUBSTRATE: std::sync::Mutex<PathBuf> = std::sync::Mutex::new(clone_repo("substrate", "2000147ad910f594a998fd6444f259a234013f27").unwrap());
 }
 
 #[test]

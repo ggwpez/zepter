@@ -221,7 +221,7 @@ impl NeverImpliesCmd {
 					self.precondition, self.stays_disabled, out
 				);
 
-				std::process::exit(1);
+				std::process::exit(0);
 			}
 		}
 	}

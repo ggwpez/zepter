@@ -8,6 +8,7 @@ use std::{
 	io::Write,
 	path::{Path, PathBuf},
 };
+use assert_cmd::assert::OutputAssertExt;
 
 pub type ModuleName = String;
 pub type FeatureName = String;
@@ -32,8 +33,7 @@ impl Context {
 		// Add the deps
 		let mut out_deps = String::from("");
 		for dep in module.deps.iter().into_iter().flatten() {
-			out_deps
-				.push_str(&format!("{} = {{ version = \"*\", path = \"../{}\" }}\n", &dep, &dep));
+			out_deps.push_str(&dep.def());
 		}
 
 		let mut txt = String::from("[features]\n");
@@ -86,43 +86,6 @@ impl Context {
 }
 
 #[test]
-fn integration_test() {
-	let modules = vec![
-		CrateConfig {
-			name: "mod0".into(),
-			deps: None,
-			features: Some(HashMap::from([("f0".into(), None)])),
-		},
-		CrateConfig {
-			name: "mod1".into(),
-			deps: Some(vec!["mod0".into()]),
-			features: Some(HashMap::from([(
-				"f0".into(),
-				Some(vec![("mod0".into(), "f0".into())]),
-			)])),
-		},
-		CrateConfig {
-			name: "mod2".into(),
-			deps: Some(vec!["mod0".into(), "mod1".into()]),
-			features: None,
-		},
-	];
-
-	let ctx = Context::new();
-	for module in modules.iter() {
-		ctx.create_crate(&module).unwrap();
-	}
-	ctx.create_workspace(&modules).unwrap();
-	let check = ctx.cargo("check", None);
-
-	if std::env::var("PERSIST").is_ok() {
-		let path = ctx.persist();
-		println!("Persisted to {:?}", path);
-	}
-	check.unwrap();
-}
-
-#[test]
 fn ui() {
 	let filter = std::env::var("UI_FILTER").unwrap_or_else(|_| "**".into());
 	let regex = format!("tests/ui/{}/*.yaml", filter);
@@ -139,27 +102,43 @@ fn ui() {
 
 		for (i, case) in config.cases.iter().enumerate() {
 			// pad with spaces to len 30
-			println!("Testing {}/{}", file.display(), i);
+			colour::white!("Testing {} / {} .. ", file.display(), i);
 			let mut cmd = Command::cargo_bin("feature").unwrap();
 			for arg in case.cmd.split_whitespace() {
 				cmd.arg(arg);
 			}
 			cmd.args(&["--manifest-path", workspace.root.path().to_str().unwrap()]);
+			
 			// remove empty trailing and suffix lines
 			let res = cmd.output().unwrap();
+			if let Some(code) = case.code {
+				res.clone().assert().code(code);
+			} else {
+				res.clone().assert().success();
+			}
+
 			match res.stdout == case.stdout.as_bytes() {
-				true => {},
+				true => {
+					colour::green_ln!("OK");
+				},
 				false if !overwrite => {
+					colour::red_ln!("FAILED");
 					pretty_assertions::assert_eq!(
 						&String::from_utf8_lossy(&res.stdout),
 						&normalize(&case.stdout)
 					);
 				},
 				false => {
+					colour::yellow_ln!("OVERWRITE");
 					overwrites.insert(i, String::from_utf8_lossy(&res.stdout).to_string());
 					failed += 1;
 				},
 			}
+		}
+
+		if std::env::var("PERSIST").is_ok() {
+			let path = workspace.persist();
+			println!("Persisted to {:?}", path);
 		}
 
 		if std::env::var("OVERWRITE").is_ok() {
@@ -190,6 +169,8 @@ fn ui() {
 pub struct Case {
 	pub cmd: String,
 	pub stdout: String,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub code: Option<i32>,
 }
 
 impl CaseFile {
@@ -227,15 +208,39 @@ pub struct CaseFile {
 pub struct CrateConfig {
 	name: ModuleName,
 	#[serde(skip_serializing_if = "Option::is_none")]
-	deps: Option<Vec<String>>,
+	deps: Option<Vec<Dependency>>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	features: Option<HashMap<String, Option<Vec<(String, String)>>>>,
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
+#[serde(untagged)]
+pub enum Dependency {
+	Normal(String),
+	Renamed { name: String, rename: String},
 }
 
 impl CaseFile {
 	pub fn from_file(path: &Path) -> Self {
 		let content = fs::read_to_string(path).unwrap();
 		let content = content.replace("\t", "  ");
-		serde_yaml::from_str(&content).unwrap()
+		serde_yaml::from_str(&content).expect(&format!("Failed to parse: {}", &path.display()))
+	}
+}
+
+impl Dependency {
+	fn def(&self) -> String {
+		let mut ret = match &self {
+			Self::Renamed{name, rename} => format!("{} = {{ package = \"{}\", ", rename, name),
+			Self::Normal(name) => format!("{} = {{ ", name),
+		};
+		ret.push_str(&format!("version = \"*\", path = \"../{}\" }}\n", self.name()));
+		ret
+	}
+
+	fn name(&self) -> String {
+		match self {
+			Self::Renamed{name, .. } | Self::Normal(name) => name.clone(),
+		}
 	}
 }

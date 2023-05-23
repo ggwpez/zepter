@@ -1,0 +1,15 @@
+crates:
+- name: A
+  deps:
+  - name: B
+    rename: b
+  features:
+    F0:
+    - - b
+      - G0
+- name: B
+  features:
+    G0: null
+cases:
+- cmd: lint never-enables --precondition F0 --stays-disabled G0
+  stdout: 'wrong'

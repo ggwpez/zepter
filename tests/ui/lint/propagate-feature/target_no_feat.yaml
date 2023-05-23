@@ -7,6 +7,8 @@ crates:
     - - B
       - F0
 - name: B
+  features:
+    F0: null
 cases:
 - cmd: lint propagate-feature --feature F0
   stdout: ''

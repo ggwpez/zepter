@@ -19,6 +19,7 @@ cargo_metadata = "0.15.3"
 clap = { version = "4.1.4", features = ["derive"] }
 env_logger = "0.10.0"
 log = "0.4.17"
+serde = "1.0.163"
 toml_edit = "0.19.3"
 version = "3.0.0"
 

@@ -11,8 +11,8 @@ crates:
       - G1
 - name: B
   features:
-    G1: null
     G0: null
+    G1: null
 cases:
 - cmd: lint never-enables --precondition F0 --stays-disabled G0
   stdout: |

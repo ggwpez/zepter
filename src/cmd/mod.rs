@@ -86,7 +86,7 @@ impl CargoArgs {
 /// Resolve the dependency `dep` of `pkg` within the metadata.
 ///
 /// This checks whether the dependency is a workspace or external crate and resolves it accordingly.
-pub(crate) fn resolve_dep(pkg: &Package, dep: &Dependency, meta: &Metadata) -> Option<Package> {
+pub(crate) fn resolve_dep(pkg: &Package, dep: &Dependency, meta: &Metadata) -> Option<RenamedPackage> {
 	match meta.resolve.as_ref() {
 		Some(resolve) => resolve_dep_from_graph(pkg, dep, (meta, resolve)),
 		None => resolve_dep_from_workspace(dep, meta),
@@ -96,10 +96,11 @@ pub(crate) fn resolve_dep(pkg: &Package, dep: &Dependency, meta: &Metadata) -> O
 /// Resolve the dependency `dep` within the workspace.
 ///
 /// Errors if `dep` is not a workspace member.
-pub(crate) fn resolve_dep_from_workspace(dep: &Dependency, meta: &Metadata) -> Option<Package> {
+pub(crate) fn resolve_dep_from_workspace(dep: &Dependency, meta: &Metadata) -> Option<RenamedPackage> {
 	for work in meta.workspace_packages() {
 		if work.name == dep.name {
-			return meta.packages.iter().find(|pkg| pkg.id == work.id).cloned()
+			let pkg = meta.packages.iter().find(|pkg| pkg.id == work.id).cloned();
+			return pkg.map(|pkg| RenamedPackage::new(pkg, dep.rename.clone()));
 		}
 	}
 	None
@@ -113,11 +114,39 @@ pub(crate) fn resolve_dep_from_graph(
 	pkg: &Package,
 	dep: &Dependency,
 	(meta, resolve): (&Metadata, &Resolve),
-) -> Option<Package> {
-	let dep_name = dep.name.replace('-', "_");
+) -> Option<RenamedPackage> {
+	let dep_name = dep.rename.clone().unwrap_or(dep.name.clone()).replace('-', "_");
 	let resolved_pkg = resolve.nodes.iter().find(|node| node.id == pkg.id)?;
 	let resolved_dep_id = resolved_pkg.deps.iter().find(|node| node.name == dep_name)?;
 	let resolve_dep = meta.packages.iter().find(|pkg| pkg.id == resolved_dep_id.pkg)?;
 
-	Some(resolve_dep.clone())
+	Some(RenamedPackage::new(resolve_dep.clone(), dep.rename.clone()))
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct RenamedPackage {
+	pub pkg: Package,
+	pub rename: Option<String>,
+}
+
+impl RenamedPackage {
+	pub fn new(pkg: Package, rename: Option<String>) -> Self {
+		Self { pkg, rename }
+	}
+
+	pub fn name(&self) -> String {
+		self.rename.clone().unwrap_or(self.pkg.name.clone())
+	}
+}
+
+impl From<Package> for RenamedPackage {
+	fn from(pkg: Package) -> Self {
+		Self::new(pkg, None)
+	}
+}
+
+impl core::hash::Hash for RenamedPackage {
+	fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
+		self.pkg.id.hash(state);
+	}
 }

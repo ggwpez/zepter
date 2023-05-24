@@ -87,12 +87,12 @@ impl Context {
 
 #[test]
 fn ui() {
-	let filter = std::env::var("UI_FILTER").unwrap_or_else(|_| "**".into());
-	let regex = format!("tests/ui/{}/*.yaml", filter);
+	let filter = std::env::var("UI_FILTER").unwrap_or_else(|_| "**/*.yaml".into());
+	let regex = format!("tests/ui/{}", filter);
 	// Loop through all files in tests/ recursively
 	let files = glob::glob(&regex).unwrap();
 	let overwrite = std::env::var("OVERWRITE").is_ok();
-	let mut failed = 0;
+	let (mut failed, mut good) = (0, 0);
 
 	// Update each time you add a test.
 	for file in files.filter_map(Result::ok) {
@@ -102,7 +102,7 @@ fn ui() {
 
 		for (i, case) in config.cases.iter().enumerate() {
 			// pad with spaces to len 30
-			colour::white!("Testing {} / {} .. ", file.display(), i);
+			colour::white!("Testing {} #{} .. ", file.display(), i);
 			let mut cmd = Command::cargo_bin("feature").unwrap();
 			for arg in case.cmd.split_whitespace() {
 				cmd.arg(arg);
@@ -120,6 +120,7 @@ fn ui() {
 			match res.stdout == case.stdout.as_bytes() {
 				true => {
 					colour::green_ln!("OK");
+					good += 1;
 				},
 				false if !overwrite => {
 					colour::red_ln!("FAILED");
@@ -162,6 +163,9 @@ fn ui() {
 		} else {
 			panic!("{} test(s) failed", failed);
 		}
+	}
+	if failed == 0 && good == 0 {
+		panic!("No tests found");
 	}
 }
 

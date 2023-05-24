@@ -132,6 +132,7 @@ impl TraceCmd {
 
 			for dep in pkg.dependencies.iter() {
 				if let Some(dep) = resolve_dep(&pkg, dep, &meta) {
+					let dep = dep.pkg; // TODO account for renaming
 					let did = dep.id.to_string();
 					dag.add_edge(id.clone(), did);
 				}

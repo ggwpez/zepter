@@ -12,4 +12,14 @@ crates:
     G0: null
 cases:
 - cmd: lint never-enables --precondition F0 --stays-disabled G0
-  stdout: 'wrong'
+  stdout: |
+    crate "A"
+      feature "F0"
+        enables feature "G0" on dependencies:
+          B (renamed from b)
+- cmd: lint never-enables --precondition F0 --stays-disabled G0 --workspace
+  stdout: |
+    crate "A"
+      feature "F0"
+        enables feature "G0" on dependencies:
+          B (renamed from b)

@@ -3,14 +3,14 @@
 
 //! Lint your feature usage by analyzing crate metadata.
 
-use crate::{autofix::AutoFixer, cmd::resolve_dep, prelude::*, CrateId};
+use crate::{autofix::AutoFixer, cmd::{resolve_dep, RenamedPackage}, prelude::*, CrateId};
 use cargo_metadata::{Metadata, Package, PackageId};
 use core::{
 	fmt,
 	fmt::{Display, Formatter},
 };
 use std::{
-	collections::{BTreeMap, BTreeSet},
+	collections::{BTreeMap, HashSet, BTreeSet},
 	fs::canonicalize,
 	path::PathBuf,
 };
@@ -236,45 +236,44 @@ impl NeverEnablesCmd {
 			self.stays_disabled
 		);
 		let pkgs = meta.packages.clone();
-		// Crate -> dependencies that invalidate the assumption.
-		let mut offenders = BTreeMap::<CrateId, BTreeSet<CrateId>>::new();
+		// (Crate -> dependencies) that invalidate the assumption.
+		let mut offenders = BTreeMap::<CrateId, HashSet<RenamedPackage>>::new();
 
-		for pkg in pkgs.iter() {
-			let Some(enabled) = pkg.features.get(&self.precondition) else {
+		for lhs in pkgs.iter() {
+			let Some(enabled) = lhs.features.get(&self.precondition) else {
 				continue;
 			};
 			// TODO do the same in other command.
 			if enabled.contains(&format!("{}", self.stays_disabled)) {
-				offenders.entry(pkg.id.to_string()).or_default().insert(pkg.id.to_string());
+				offenders.entry(lhs.id.to_string()).or_default().insert((*lhs).clone().into());
 			}
 
-			for dep in pkg.dependencies.iter() {
-				let Some(dep) = resolve_dep(&pkg, dep, &meta) else {
+			for rhs in lhs.dependencies.iter() {
+				let Some(rhs) = resolve_dep(&lhs, rhs, &meta) else {
 					continue;
 				};
 
-				if enabled.contains(&format!("{}/{}", dep.name, self.stays_disabled)) {
-					offenders.entry(pkg.id.to_string()).or_default().insert(dep.id.to_string());
+				if enabled.contains(&format!("{}/{}", rhs.name(), self.stays_disabled)) {
+					offenders.entry(lhs.id.to_string()).or_default().insert(rhs);
 				}
 			}
 		}
 
-		let lookup = |id: &str| {
-			let id = PackageId { repr: id.to_string() }; // TODO optimize
-			pkgs.iter()
-				.find(|pkg| pkg.id == id)
-				.unwrap_or_else(|| panic!("Could not find crate {id} in the metadata"))
-		};
-
-		for (id, deps) in offenders {
-			let krate = lookup(&id);
-
-			println!("crate {:?}\n  feature {:?}", krate.name, self.precondition);
+		for (lhs, rhss) in offenders {
+			// TODO hack
+			println!("crate {:?}\n  feature {:?}", lhs.split(' ').next().unwrap(), self.precondition);
 			// TODO support multiple left/right side features.
 			println!("    enables feature {:?} on dependencies:", self.stays_disabled);
 
-			for dep in deps {
-				println!("      {}", lookup(&dep).name);
+			for rhs in rhss {
+				match &rhs.rename {
+					Some(_) => {
+						println!("      {} (renamed from {})", rhs.pkg.name, rhs.name());
+					}
+					None => {
+						println!("      {}", rhs.name());
+					}
+				}
 			}
 		}
 	}
@@ -323,6 +322,7 @@ impl PropagateFeatureCmd {
 					feature_used = true;
 					continue;
 				};
+				let dep = dep.pkg; // TODO account for renaming
 
 				if dep.features.contains_key(&feature) {
 					match pkg.features.get(&feature) {
@@ -570,7 +570,7 @@ fn build_feature_dag(meta: &Metadata, pkgs: &Vec<Package>) -> Dag<CrateAndFeatur
 							// In this case we just go by name. It is a dead-end anyway.
 							dep.name.clone()
 						},
-						Some(dep) => dep.id.to_string(),
+						Some(dep) => dep.pkg.id.to_string(), // TODO rename
 					};
 					dag.add_edge(
 						CrateAndFeature(pkg.id.to_string(), feature.clone()),
@@ -606,7 +606,7 @@ fn build_feature_dag(meta: &Metadata, pkgs: &Vec<Package>) -> Dag<CrateAndFeatur
 							// In this case we just go by name. It is a dead-end anyway.
 							dep.name.clone()
 						},
-						Some(dep) => dep.id.to_string(),
+						Some(dep) => dep.pkg.id.to_string(), // TODO rename
 					};
 					dag.add_edge(
 						CrateAndFeature(pkg.id.to_string(), feature.clone()),

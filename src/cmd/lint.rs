@@ -10,7 +10,7 @@ use core::{
 	fmt::{Display, Formatter},
 };
 use std::{
-	collections::{BTreeMap, HashSet, BTreeSet},
+	collections::{BTreeMap, BTreeSet},
 	fs::canonicalize,
 	path::PathBuf,
 };
@@ -237,7 +237,7 @@ impl NeverEnablesCmd {
 		);
 		let pkgs = meta.packages.clone();
 		// (Crate -> dependencies) that invalidate the assumption.
-		let mut offenders = BTreeMap::<CrateId, HashSet<RenamedPackage>>::new();
+		let mut offenders = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
 
 		for lhs in pkgs.iter() {
 			let Some(enabled) = lhs.features.get(&self.precondition) else {
@@ -304,9 +304,9 @@ impl PropagateFeatureCmd {
 		};
 
 		// (Crate that is not forwarding the feature) -> (Dependency that it is not forwarded to)
-		let mut propagate_missing = BTreeMap::<CrateId, BTreeSet<CrateId>>::new();
+		let mut propagate_missing = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
 		// (Crate that missing the feature) -> (Dependency that has it)
-		let mut feature_missing = BTreeMap::<CrateId, BTreeSet<CrateId>>::new();
+		let mut feature_missing = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
 		// Crate that has the feature but does not need it.
 		let mut feature_maybe_unused = BTreeSet::<CrateId>::new();
 
@@ -317,27 +317,33 @@ impl PropagateFeatureCmd {
 			for dep in pkg.dependencies.iter() {
 				// TODO handle default features.
 				// Resolve the dep according to the metadata.
+				let optional = dep.optional;
 				let Some(dep) = resolve_dep(pkg, dep, &meta) else {
 					// Either outside workspace or not resolved, possibly due to not being used at all because of the target or whatever.
 					feature_used = true;
 					continue;
 				};
-				let dep = dep.pkg; // TODO account for renaming
 
-				if dep.features.contains_key(&feature) {
+				if dep.pkg.features.contains_key(&feature) {
 					match pkg.features.get(&feature) {
 						None => {
 							feature_missing
 								.entry(pkg.id.to_string())
 								.or_default()
-								.insert(dep.id.to_string());
+								.insert(dep);
 						},
 						Some(enabled) => {
-							if !enabled.contains(&format!("{}/{}", dep.name, feature)) {
+							let want = if optional {
+								format!("{}?/{}", dep.name(), feature)
+							} else {
+								format!("{}/{}", dep.name(), feature)
+							};
+
+							if !enabled.contains(&want) {
 								propagate_missing
 									.entry(pkg.id.to_string())
 									.or_default()
-									.insert(dep.id.to_string());
+									.insert(dep);
 							} else {
 								// All ok
 								feature_used = true;
@@ -387,8 +393,7 @@ impl PropagateFeatureCmd {
 			if let Some(deps) = feature_missing.get(&krate.id.to_string()) {
 				let joined = deps
 					.iter()
-					.map(|d| lookup(d))
-					.map(|dep| dep.name.to_string())
+					.map(|dep| dep.display_name())
 					.collect::<Vec<_>>()
 					.join("\n      ");
 				println!(
@@ -396,21 +401,20 @@ impl PropagateFeatureCmd {
 					deps.len(),
 					joined
 				);
-				errors += 1;
+				errors += deps.len();
 			}
 			if let Some(deps) = propagate_missing.get(&krate.id.to_string()) {
 				let joined = deps
 					.iter()
-					.map(|d| lookup(d))
-					.map(|dep| dep.name.to_string())
+					.map(|dep| dep.display_name())
 					.collect::<Vec<_>>()
 					.join("\n      ");
 				println!("    must propagate to:\n      {joined}");
 
 				if self.fix && self.fix_package.as_ref().map_or(true, |p| p == &krate.name) {
 					for dep in deps {
-						let dep_name = &lookup(dep).name;
-						if self.fix_dependency.as_ref().map_or(true, |d| d == dep_name) {
+						let dep_name = dep.name();
+						if self.fix_dependency.as_ref().map_or(true, |d| d == &dep_name) {
 							if let Some(fixer) = fixer.as_mut() {
 								fixer
 									.add_to_feature(
@@ -427,7 +431,7 @@ impl PropagateFeatureCmd {
 						}
 					}
 				}
-				errors += 1;
+				errors += deps.len();
 			}
 			if let Some(fixer) = fixer.as_mut() {
 				fixer.save().unwrap();
@@ -440,9 +444,37 @@ impl PropagateFeatureCmd {
 			//	}
 			//}
 		}
-		if errors > 0 || warnings > 0 {
-			println!("Generated {errors} errors, {warnings} warnings and fixed {fixes} issues.");
-		}
+		error_stats(errors, warnings, fixes).map(|s| println!("{}.", s));
+	}
+}
+
+fn error_stats(errors: usize, warnings: usize, fixes: usize) -> Option<String> {
+	let mut ret = String::new();
+	if errors + warnings + fixes > 0 {
+		ret.push_str("Found ");
+	}
+
+	if errors > 0 {
+		ret.push_str(&format!("{} issues{}", errors, plural(errors)));
+	}
+	if warnings > 0 {
+		ret.push_str(&format!(", {} warning{}", warnings, plural(warnings)));
+	}
+	if fixes > 0 {
+		ret.push_str(&format!(", fixed {} issue{}", fixes, plural(fixes)));
+	}
+	if ret.is_empty() {
+		None
+	} else {
+		Some(ret)
+	}
+}
+
+fn plural(n: usize) -> &'static str {
+	if n == 1 {
+		""
+	} else {
+		"s"
 	}
 }
 
@@ -576,14 +608,6 @@ fn build_feature_dag(meta: &Metadata, pkgs: &Vec<Package>) -> Dag<CrateAndFeatur
 						CrateAndFeature(pkg.id.to_string(), feature.clone()),
 						CrateAndFeature(dep_id.clone(), dep_feature.into()),
 					);
-
-				//log::info!(
-				//	"Adding: ({}, {}) -> ({}, {})",
-				//	pkg.name,
-				//	feature,
-				//	dep.name,
-				//	dep_feature
-				//);
 				} else if dep.contains("/") {
 					let mut splits = dep.split("/");
 					let dep = splits.next().unwrap().replace("?", "");

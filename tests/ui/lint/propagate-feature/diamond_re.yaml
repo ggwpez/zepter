@@ -1,16 +1,20 @@
 crates:
 - name: A
   deps:
-  - B
-  - C
+  - name: B
+    rename: b
+  - name: C
+    rename: c
   features:
     F0: null
 - name: B
   deps:
-  - D
+  - name: D
+    rename: d
 - name: C
   deps:
-  - D
+  - name: D
+    rename: dd
   features:
     F0: null
 - name: D
@@ -24,40 +28,39 @@ cases:
     crate "A"
       feature "F0"
         must propagate to:
-          C
+          c (renamed from C)
     crate "B"
       feature "F0"
         must exit because 1 dependencies have it:
-          D
+          d (renamed from D)
     crate "C"
       feature "F0"
         must propagate to:
-          D
+          dd (renamed from D)
     Generated 3 errors, 0 warnings and fixed 0 issues.
 - cmd: lint propagate-feature -p A --feature F0
   stdout: |
     crate "A"
       feature "F0"
         must propagate to:
-          C
+          c (renamed from C)
     Generated 1 errors, 0 warnings and fixed 0 issues.
 - cmd: lint propagate-feature -p B --feature F0
   stdout: |
     crate "B"
       feature "F0"
         must exit because 1 dependencies have it:
-          D
+          d (renamed from D)
     Generated 1 errors, 0 warnings and fixed 0 issues.
 - cmd: lint propagate-feature -p C --feature F0
   stdout: |
     crate "C"
       feature "F0"
         must propagate to:
-          D
+          dd (renamed from D)
     Generated 1 errors, 0 warnings and fixed 0 issues.
 - cmd: lint propagate-feature -p D --feature F0
   stdout: ''
-
 - cmd: lint propagate-feature --feature F1 --workspace
   stdout: ''
 - cmd: lint propagate-feature --feature F0 --workspace
@@ -65,36 +68,36 @@ cases:
     crate "A"
       feature "F0"
         must propagate to:
-          C
+          c (renamed from C)
     crate "B"
       feature "F0"
         must exit because 1 dependencies have it:
-          D
+          d (renamed from D)
     crate "C"
       feature "F0"
         must propagate to:
-          D
+          dd (renamed from D)
     Generated 3 errors, 0 warnings and fixed 0 issues.
 - cmd: lint propagate-feature -p A --feature F0 --workspace
   stdout: |
     crate "A"
       feature "F0"
         must propagate to:
-          C
+          c (renamed from C)
     Generated 1 errors, 0 warnings and fixed 0 issues.
 - cmd: lint propagate-feature -p B --feature F0 --workspace
   stdout: |
     crate "B"
       feature "F0"
         must exit because 1 dependencies have it:
-          D
+          d (renamed from D)
     Generated 1 errors, 0 warnings and fixed 0 issues.
 - cmd: lint propagate-feature -p C --feature F0 --workspace
   stdout: |
     crate "C"
       feature "F0"
         must propagate to:
-          D
+          dd (renamed from D)
     Generated 1 errors, 0 warnings and fixed 0 issues.
 - cmd: lint propagate-feature -p D --feature F0 --workspace
   stdout: ''

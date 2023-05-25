@@ -15,3 +15,7 @@ cases:
   stdout: ''
 - cmd: lint propagate-feature -p A --feature F0
   stdout: ''
+- cmd: lint propagate-feature --feature F0 --workspace
+  stdout: ''
+- cmd: lint propagate-feature -p A --feature F0 --workspace
+  stdout: ''

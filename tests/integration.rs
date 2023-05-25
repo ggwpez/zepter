@@ -1,94 +1,44 @@
-// SPDX-License-Identifier: GPL-3.0-only
-// SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
-
 use assert_cmd::Command;
 use std::{
 	collections::HashMap,
 	fs,
-	io::Write,
 	path::{Path, PathBuf},
 };
+use feature::mock::*;
 use assert_cmd::assert::OutputAssertExt;
 
 pub type ModuleName = String;
 pub type FeatureName = String;
 
-pub struct Context {
-	root: tempfile::TempDir,
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
+pub struct Repo {
+	pub name: String,
+	#[serde(rename = "ref")]
+	pub ref_spec: String,
 }
 
-impl Context {
-	fn new() -> Self {
-		Self { root: tempfile::tempdir().unwrap() }
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
+pub struct CaseFile {
+	pub repo: Repo,
+	pub cases: Vec<Case>,
+}
+
+impl CaseFile {
+	pub fn from_file(path: &Path) -> Self {
+		let content = fs::read_to_string(path).unwrap();
+		let content = content.replace("\t", "  ");
+		serde_yaml::from_str(&content).expect(&format!("Failed to parse: {}", &path.display()))
 	}
 
-	fn persist(self) -> PathBuf {
-		self.root.into_path()
-	}
-
-	fn create_crate(&self, module: &CrateConfig) -> Result<(), anyhow::Error> {
-		self.cargo(&format!("new --lib {}", module.name), None)?;
-		let toml_path = self.root.path().join(&module.name).join("Cargo.toml");
-		assert!(toml_path.exists(), "Crate must exist");
-		// Add the deps
-		let mut out_deps = String::from("");
-		for dep in module.deps.iter().into_iter().flatten() {
-			out_deps.push_str(&dep.def());
-		}
-
-		let mut txt = String::from("[features]\n");
-		for (feature, enables) in module.features.iter().into_iter().flatten() {
-			txt.push_str(&format!("{} = [\n", feature));
-			for (dep, feat) in enables.iter().into_iter().flatten() {
-				txt.push_str(&format!("\"{}/{}\",\n", dep, feat));
-			}
-			txt.push_str("]\n");
-		}
-
-		let output = format!("{}\n{}", out_deps, txt);
-		// Append to the toml
-		let mut file = fs::OpenOptions::new().append(true).open(toml_path).unwrap();
-		file.write_all(output.as_bytes()).unwrap();
-		Ok(())
-	}
-
-	fn create_workspace(&self, subs: &[CrateConfig]) -> Result<(), anyhow::Error> {
-		let mut txt = String::from("[workspace]\nmembers = [");
-		for sub in subs.iter() {
-			txt.push_str(&format!("\"{}\",", sub.name));
-		}
-		txt.push_str("]");
-		let toml_path = self.root.path().join("Cargo.toml");
-		fs::write(toml_path, txt)?;
-		Ok(())
-	}
-
-	fn cargo(&self, cmd: &str, sub_dir: Option<&str>) -> Result<(), anyhow::Error> {
-		assert!(self.root.path().exists());
-		let dir = match sub_dir {
-			Some(sub_dir) => self.root.path().join(sub_dir),
-			None => self.root.path().to_owned(),
-		};
-
-		let args = cmd.split_whitespace().collect::<Vec<_>>();
-		let output = Command::new("cargo")
-			.args(&args)
-			.current_dir(&dir)
-			.output()
-			.expect("failed to execute cargo");
-
-		if !output.status.success() {
-			Err(anyhow::Error::msg(String::from_utf8(output.stderr).unwrap()))
-		} else {
-			Ok(())
-		}
+	pub fn init(&self) -> Result<PathBuf, Box<dyn std::error::Error>> {
+		clone_repo(&self.repo.name, &self.repo.ref_spec)
 	}
 }
 
 #[test]
-fn ui() {
+fn integration() {
 	let filter = std::env::var("UI_FILTER").unwrap_or_else(|_| "**/*.yaml".into());
-	let regex = format!("tests/ui/{}", filter);
+	let regex = format!("tests/integration/{}", filter);
 	// Loop through all files in tests/ recursively
 	let files = glob::glob(&regex).unwrap();
 	let overwrite = std::env::var("OVERWRITE").is_ok();
@@ -97,17 +47,19 @@ fn ui() {
 	// Update each time you add a test.
 	for file in files.filter_map(Result::ok) {
 		let mut config = CaseFile::from_file(&file);
-		let workspace = config.init();
+		let workspace = config.init().unwrap();
+		println!("Cloned into {}", workspace.display());
 		let mut overwrites = HashMap::new();
+		let m = config.cases.len();
 
 		for (i, case) in config.cases.iter().enumerate() {
 			// pad with spaces to len 30
-			colour::white!("Testing {} #{} .. ", file.display(), i);
+			colour::white!("Testing {} {}/{} .. ", file.display(), i + 1, m);
 			let mut cmd = Command::cargo_bin("feature").unwrap();
 			for arg in case.cmd.split_whitespace() {
 				cmd.arg(arg);
 			}
-			cmd.args(&["--manifest-path", workspace.root.path().to_str().unwrap()]);
+			cmd.args(&["--manifest-path", workspace.as_path().to_str().unwrap()]);
 			
 			// remove empty trailing and suffix lines
 			let res = cmd.output().unwrap();
@@ -137,11 +89,6 @@ fn ui() {
 			}
 		}
 
-		if std::env::var("PERSIST").is_ok() {
-			let path = workspace.persist();
-			println!("Persisted to {:?}", path);
-		}
-
 		if std::env::var("OVERWRITE").is_ok() {
 			if overwrites.is_empty() {
 				continue
@@ -169,82 +116,36 @@ fn ui() {
 	}
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
-pub struct Case {
-	pub cmd: String,
-	pub stdout: String,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub code: Option<i32>,
-}
+pub(crate) fn clone_repo(repo: &str, rev: &str) -> Result<PathBuf, Box<dyn std::error::Error>> {
+	let dir = std::env::var("CARGO_TARGET_DIR").unwrap_or_else(|_| "target".into());
+	let repos_dir = std::path::Path::new(&dir).join("test-repos");
+	let dir = repos_dir.join(repo);
 
-impl CaseFile {
-	pub fn init(&self) -> Context {
-		let ctx = Context::new();
-		for module in self.crates.iter() {
-			ctx.create_crate(&module).unwrap();
-		}
-		ctx.create_workspace(&self.crates).unwrap();
-		//let check = ctx.cargo("check", None);
-		//check.unwrap();
-		ctx
-	}
-}
+	// Check if the repo is already cloned
+	if std::path::Path::new(&dir).exists() {
+		println!("Using existing repo at {dir:?}");
+	} else {
+		println!("Cloning {repo} into {dir:?}");
+		std::fs::create_dir_all(&dir)?;
 
-/// Removes leading and trailing empty lines.
-fn normalize(s: &str) -> String {
-	let mut lines = s.lines().collect::<Vec<_>>();
-	while lines.first().map(|l| l.is_empty()).is_some() {
-		lines.remove(0);
-	}
-	while lines.last().map(|l| l.is_empty()).is_some() {
-		lines.pop();
-	}
-	format!("{}\n", lines.join("\n"))
-}
-
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
-pub struct CaseFile {
-	pub crates: Vec<CrateConfig>,
-	pub cases: Vec<Case>,
-}
-
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
-pub struct CrateConfig {
-	name: ModuleName,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	deps: Option<Vec<Dependency>>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	features: Option<HashMap<String, Option<Vec<(String, String)>>>>,
-}
-
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
-#[serde(untagged)]
-pub enum Dependency {
-	Normal(String),
-	Renamed { name: String, rename: String},
-}
-
-impl CaseFile {
-	pub fn from_file(path: &Path) -> Self {
-		let content = fs::read_to_string(path).unwrap();
-		let content = content.replace("\t", "  ");
-		serde_yaml::from_str(&content).expect(&format!("Failed to parse: {}", &path.display()))
-	}
-}
-
-impl Dependency {
-	fn def(&self) -> String {
-		let mut ret = match &self {
-			Self::Renamed{name, rename} => format!("{} = {{ package = \"{}\", ", rename, name),
-			Self::Normal(name) => format!("{} = {{ ", name),
-		};
-		ret.push_str(&format!("version = \"*\", path = \"../{}\" }}\n", self.name()));
-		ret
+		let mut cmd = std::process::Command::new("git");
+		cmd.current_dir(&dir);
+		cmd.arg("clone");
+		cmd.arg(format!("https://github.com/paritytech/{repo}"));
+		cmd.arg(".");
+		cmd.arg("--branch");
+		cmd.arg("master");
+		cmd.status()?;
 	}
 
-	fn name(&self) -> String {
-		match self {
-			Self::Renamed{name, .. } | Self::Normal(name) => name.clone(),
-		}
-	}
+	// checkout
+	println!("Checking out {rev} in {dir:?}");
+	let mut cmd = std::process::Command::new("git");
+	cmd.current_dir(&dir);
+	cmd.arg("checkout");
+	cmd.arg(rev);
+	cmd.arg("--quiet");
+	cmd.status()?;
+
+	Ok(dir.clone())
 }

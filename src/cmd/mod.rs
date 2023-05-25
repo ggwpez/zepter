@@ -123,7 +123,7 @@ pub(crate) fn resolve_dep_from_graph(
 	Some(RenamedPackage::new(resolve_dep.clone(), dep.rename.clone()))
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, serde::Serialize, PartialEq, Eq)]
 pub struct RenamedPackage {
 	pub pkg: Package,
 	pub rename: Option<String>,
@@ -137,6 +137,13 @@ impl RenamedPackage {
 	pub fn name(&self) -> String {
 		self.rename.clone().unwrap_or(self.pkg.name.clone())
 	}
+
+	pub fn display_name(&self) -> String {
+		match &self.rename {
+			Some(rename) => format!("{} (renamed from {})", rename, self.pkg.name),
+			None => self.pkg.name.clone(),
+		}
+	}
 }
 
 impl From<Package> for RenamedPackage {
@@ -145,8 +152,16 @@ impl From<Package> for RenamedPackage {
 	}
 }
 
-impl core::hash::Hash for RenamedPackage {
-	fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
-		self.pkg.id.hash(state);
+impl Ord for RenamedPackage {
+	fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+		// Yikes...
+		bincode::serialize(self).unwrap().cmp(&bincode::serialize(other).unwrap())
+	}
+}
+
+
+impl PartialOrd for RenamedPackage {
+	fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+		Some(self.cmp(other))
 	}
 }

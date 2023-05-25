@@ -1,7 +1,8 @@
 crates:
 - name: A
   deps:
-  - B
+  - name: B
+    rename: b
 - name: B
   features:
     F0: null
@@ -11,12 +12,12 @@ cases:
     crate "A"
       feature "F0"
         must exit because 1 dependencies have it:
-          B
+          b (renamed from B)
     Generated 1 errors, 0 warnings and fixed 0 issues.
 - cmd: lint propagate-feature --feature F0 --workspace
   stdout: |
     crate "A"
       feature "F0"
         must exit because 1 dependencies have it:
-          B
+          b (renamed from B)
     Generated 1 errors, 0 warnings and fixed 0 issues.

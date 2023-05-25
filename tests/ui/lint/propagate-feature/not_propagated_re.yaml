@@ -1,7 +1,8 @@
 crates:
 - name: A
   deps:
-  - B
+  - name: B
+    rename: b
   features:
     F0: null
 - name: B
@@ -13,14 +14,14 @@ cases:
     crate "A"
       feature "F0"
         must propagate to:
-          B
+          b (renamed from B)
     Generated 1 errors, 0 warnings and fixed 0 issues.
 - cmd: lint propagate-feature -p A --feature F0
   stdout: |
     crate "A"
       feature "F0"
         must propagate to:
-          B
+          b (renamed from B)
     Generated 1 errors, 0 warnings and fixed 0 issues.
 - cmd: lint propagate-feature -p B --feature F0
   stdout: ''
@@ -32,14 +33,14 @@ cases:
     crate "A"
       feature "F0"
         must propagate to:
-          B
+          b (renamed from B)
     Generated 1 errors, 0 warnings and fixed 0 issues.
 - cmd: lint propagate-feature -p A --feature F0 --workspace
   stdout: |
     crate "A"
       feature "F0"
         must propagate to:
-          B
+          b (renamed from B)
     Generated 1 errors, 0 warnings and fixed 0 issues.
 - cmd: lint propagate-feature -p B --feature F0 --workspace
   stdout: ''

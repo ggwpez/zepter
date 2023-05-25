@@ -28,7 +28,7 @@ impl Context {
 	}
 
 	fn create_crate(&self, module: &CrateConfig) -> Result<(), anyhow::Error> {
-		self.cargo(&format!("new --lib {}", module.name), None)?;
+		self.cargo(&format!("new --vcs=none --offline --lib {}", module.name), None)?;
 		let toml_path = self.root.path().join(&module.name).join("Cargo.toml");
 		assert!(toml_path.exists(), "Crate must exist");
 		// Add the deps
@@ -100,6 +100,7 @@ fn ui() {
 		let mut config = CaseFile::from_file(&file);
 		let workspace = config.init();
 		let mut overwrites = HashMap::new();
+		let mut diff_overwrites = HashMap::new();		
 		let m = config.cases.len();
 
 		for (i, case) in config.cases.iter().enumerate() {
@@ -140,6 +141,23 @@ fn ui() {
 					failed += 1;
 				},
 			}
+
+			let got = git_diff(&workspace.root.path()).unwrap();
+			if got != case.diff {
+				if std::env::var("OVERWRITE").is_ok() {
+					diff_overwrites.insert(i, got);
+					colour::yellow_ln!("OVERWRITE");
+					colour::white!("");
+				} else {
+					colour::red_ln!("FAILED");
+					colour::white!("");
+					pretty_assertions::assert_eq!(got, case.diff);
+				}
+			} else {
+				colour::green_ln!("OK");
+				colour::white!("");
+			}
+			git_reset(&workspace.root.path()).unwrap();
 		}
 
 		if std::env::var("PERSIST").is_ok() {
@@ -148,13 +166,16 @@ fn ui() {
 		}
 
 		if std::env::var("OVERWRITE").is_ok() {
-			if overwrites.is_empty() {
+			if overwrites.is_empty() && diff_overwrites.is_empty() {
 				continue
 			}
 
 			for (i, stdout) in overwrites.into_iter() {
 				config.cases[i].stdout = stdout;
 			}
+			for (i, diff) in diff_overwrites.into_iter() {
+				config.cases[i].diff = diff;
+			}			
 
 			let mut fd = fs::File::create(&file).unwrap();
 			serde_yaml::to_writer(&mut fd, &config).unwrap();
@@ -162,13 +183,6 @@ fn ui() {
 		}
 	}
 
-	if failed > 0 {
-		if std::env::var("OVERWRITE").is_ok() {
-			println!("Updated {} test(s)", failed);
-		} else {
-			panic!("{} test(s) failed", failed);
-		}
-	}
 	if failed == 0 && good == 0 {
 		panic!("No tests found");
 	}
@@ -181,9 +195,7 @@ impl CaseFile {
 			ctx.create_crate(&module).unwrap();
 		}
 		ctx.create_workspace(&self.crates).unwrap();
-		if self.cases.iter().any(|c| c.diff.is_some()) {
-			git_init(&ctx.root.path()).unwrap();
-		}
+		git_init(&ctx.root.path()).unwrap();
 		ctx
 	}
 }

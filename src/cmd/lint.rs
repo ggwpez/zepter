@@ -250,7 +250,7 @@ impl NeverEnablesCmd {
 			};
 			// TODO do the same in other command.
 			if enabled.contains(&format!("{}", self.stays_disabled)) {
-				offenders.entry(lhs.id.to_string()).or_default().insert((*lhs).clone().into());
+				offenders.entry(lhs.id.to_string()).or_default().insert(RenamedPackage::new((*lhs).clone(), None, false)); // TODO
 			}
 
 			for rhs in lhs.dependencies.iter() {
@@ -415,27 +415,37 @@ impl PropagateFeatureCmd {
 				if self.fix && self.fix_package.as_ref().map_or(true, |p| p == &krate.name) {
 					for dep in deps {
 						let dep_name = dep.name();
-						if self.fix_dependency.as_ref().map_or(true, |d| d == &dep_name) {
-							if let Some(fixer) = fixer.as_mut() {
-								fixer
-									.add_to_feature(
-										&feature,
-										format!("{dep_name}/{feature}").as_str(),
-									)
-									.unwrap();
-								log::warn!(
-									"Added feature {feature} to {dep_name} in {}",
-									krate.name
-								);
-								fixes += 1;
-							}
+						if !self.fix_dependency.as_ref().map_or(true, |d| d == &dep_name) {
+							continue;
 						}
+						let Some(fixer) = fixer.as_mut() else {
+							continue;
+						};
+						let opt = if dep.optional {
+							"?"
+						} else {
+							""
+						};
+
+						fixer
+							.add_to_feature(
+								&feature,
+								format!("{}{}/{}", dep_name, opt, feature).as_str(),
+							)
+							.unwrap();
+						log::info!(
+							"Added feature {feature} to {dep_name} in {}",
+							krate.name
+						);
+						fixes += 1;
 					}
 				}
 				errors += deps.len();
 			}
 			if let Some(fixer) = fixer.as_mut() {
-				fixer.save().unwrap();
+				if fixes > 0 {
+					fixer.save().unwrap();
+				}
 			}
 			//if let Some(_dep) = feature_maybe_unused.get(&krate.id.to_string()) {
 			//	if !feature_missing.contains_key(&krate.id.to_string()) &&
@@ -462,12 +472,10 @@ fn error_stats(errors: usize, warnings: usize, fixes: usize, fix: bool) -> Strin
 	if warnings > 0 {
 		ret.push_str(&format!(", {} warning{}", warnings, plural(warnings)));
 	}
-	if fixes > 0 {
-		if warnings + errors > 0 {
-			ret.push_str(" and");
-		}
-		ret.push_str(&format!(" fixed {} issue{}", fixes, plural(fixes)));
+	if warnings + errors > 0 {
+		ret.push_str(" and");
 	}
+	ret.push_str(&format!(" fixed {} issue{}", fixes, plural(fixes)));
 	if fix && fixes < errors {
 		ret.push_str(&format!(" ({} could not be fixed)", errors - fixes));
 	}

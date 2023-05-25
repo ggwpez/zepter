@@ -122,8 +122,8 @@ fn ui() {
 
 			match res.stdout == case.stdout.as_bytes() {
 				true => {
-					colour::green_ln!("OK");
-					colour::white!("");
+					colour::green!("std:OK");
+					colour::white!(" ");
 					good += 1;
 				},
 				false if !overwrite => {
@@ -134,8 +134,8 @@ fn ui() {
 					);
 				},
 				false => {
-					colour::yellow_ln!("OVERWRITE");
-					colour::white!("");
+					colour::yellow_ln!("std:OVERWRITE");
+					colour::white!(" ");
 					overwrites.insert(i, String::from_utf8_lossy(&res.stdout).to_string());
 					failed += 1;
 				},
@@ -145,7 +145,7 @@ fn ui() {
 			if got != case.diff {
 				if std::env::var("OVERWRITE").is_ok() {
 					diff_overwrites.insert(i, got);
-					colour::yellow_ln!("OVERWRITE");
+					colour::yellow_ln!("diff:OVERWRITE");
 					colour::white!("");
 				} else {
 					colour::red_ln!("FAILED");
@@ -153,7 +153,7 @@ fn ui() {
 					pretty_assertions::assert_eq!(got, case.diff);
 				}
 			} else {
-				colour::green_ln!("OK");
+				colour::green_ln!("diff:OK");
 				colour::white!("");
 			}
 			git_reset(&workspace.root.path()).unwrap();
@@ -217,8 +217,14 @@ pub struct CrateConfig {
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 #[serde(untagged)]
 pub enum Dependency {
-	Normal(String),
-	Renamed { name: String, rename: String },
+	Implicit(String),
+	Explicit {
+		name: String,
+		#[serde(skip_serializing_if = "Option::is_none")]
+		rename: Option<String>,
+		#[serde(skip_serializing_if = "is_false")]
+		optional: Option<bool>
+	},
 }
 
 impl CaseFile {
@@ -231,17 +237,40 @@ impl CaseFile {
 
 impl Dependency {
 	fn def(&self) -> String {
-		let mut ret = match &self {
-			Self::Renamed { name, rename } => format!("{} = {{ package = \"{}\", ", rename, name),
-			Self::Normal(name) => format!("{} = {{ ", name),
+		let option = if self.optional() {
+			format!(", optional = true")
+		} else {
+			String::new()
 		};
-		ret.push_str(&format!("version = \"*\", path = \"../{}\" }}\n", self.name()));
+		let mut ret = match self.rename() {
+			Some(rename) => format!("{} = {{ package = \"{}\", ", rename, self.name()),
+			None => format!("{} = {{ ", self.name()),
+		};
+		ret.push_str(&format!("version = \"*\", path = \"../{}\"{}}}\n", self.name(), option));
 		ret
 	}
 
 	fn name(&self) -> String {
 		match self {
-			Self::Renamed { name, .. } | Self::Normal(name) => name.clone(),
+			Self::Explicit { name, .. } | Self::Implicit(name) => name.clone(),
 		}
 	}
+
+	fn rename(&self) -> Option<String> {
+		match self {
+			Self::Explicit { rename, .. } => rename.clone(),
+			_ => None,
+		}
+	}
+
+	fn optional(&self) -> bool {
+		match self {
+			Self::Explicit { optional, .. } => optional.unwrap_or_default(),
+			_ => false,
+		}
+	}
+}
+
+fn is_false(b: &Option<bool>) -> bool {
+    !b.unwrap_or_default()
 }

@@ -3,6 +3,7 @@ crates:
   deps:
   - name: B
     rename: b
+    optional: true
   features:
     F0: null
 - name: B
@@ -16,7 +17,7 @@ cases:
         must propagate to:
           b (renamed from B)
     Found 1 issue and fixed 1 issue.
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 32139a6..60c5cb7 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,6 @@ b = { package = \"B\", version = \"*\", path = \"../B\"}\n \n [features]\n F0 = [\n+\t\"b/F0\"\n+\n ]\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex ada36d9..8a08766 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,6 @@ b = { package = \"B\", version = \"*\", path = \"../B\", optional = true}\n \n [features]\n F0 = [\n+\t\"b?/F0\"\n+\n ]\n"
 - cmd: lint propagate-feature -p A --feature F0 --fix
   stdout: |
     crate "A"
@@ -24,7 +25,7 @@ cases:
         must propagate to:
           b (renamed from B)
     Found 1 issue and fixed 1 issue.
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 32139a6..60c5cb7 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,6 @@ b = { package = \"B\", version = \"*\", path = \"../B\"}\n \n [features]\n F0 = [\n+\t\"b/F0\"\n+\n ]\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex ada36d9..8a08766 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,6 @@ b = { package = \"B\", version = \"*\", path = \"../B\", optional = true}\n \n [features]\n F0 = [\n+\t\"b?/F0\"\n+\n ]\n"
 - cmd: lint propagate-feature -p B --feature F0 --fix
   stdout: |
     Found no issues.
@@ -38,7 +39,7 @@ cases:
         must propagate to:
           b (renamed from B)
     Found 1 issue and fixed 1 issue.
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 32139a6..60c5cb7 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,6 @@ b = { package = \"B\", version = \"*\", path = \"../B\"}\n \n [features]\n F0 = [\n+\t\"b/F0\"\n+\n ]\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex ada36d9..8a08766 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,6 @@ b = { package = \"B\", version = \"*\", path = \"../B\", optional = true}\n \n [features]\n F0 = [\n+\t\"b?/F0\"\n+\n ]\n"
 - cmd: lint propagate-feature -p A --feature F0 --workspace --fix
   stdout: |
     crate "A"
@@ -46,7 +47,7 @@ cases:
         must propagate to:
           b (renamed from B)
     Found 1 issue and fixed 1 issue.
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 32139a6..60c5cb7 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,6 @@ b = { package = \"B\", version = \"*\", path = \"../B\"}\n \n [features]\n F0 = [\n+\t\"b/F0\"\n+\n ]\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex ada36d9..8a08766 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,6 @@ b = { package = \"B\", version = \"*\", path = \"../B\", optional = true}\n \n [features]\n F0 = [\n+\t\"b?/F0\"\n+\n ]\n"
 - cmd: lint propagate-feature -p B --feature F0 --workspace --fix
   stdout: |
     Found no issues.

@@ -107,7 +107,7 @@ pub(crate) fn resolve_dep_from_workspace(
 	for work in meta.workspace_packages() {
 		if work.name == dep.name {
 			let pkg = meta.packages.iter().find(|pkg| pkg.id == work.id).cloned();
-			return pkg.map(|pkg| RenamedPackage::new(pkg, dep.rename.clone()))
+			return pkg.map(|pkg| RenamedPackage::new(pkg, dep.rename.clone(), dep.optional))
 		}
 	}
 	None
@@ -127,18 +127,19 @@ pub(crate) fn resolve_dep_from_graph(
 	let resolved_dep_id = resolved_pkg.deps.iter().find(|node| node.name == dep_name)?;
 	let resolve_dep = meta.packages.iter().find(|pkg| pkg.id == resolved_dep_id.pkg)?;
 
-	Some(RenamedPackage::new(resolve_dep.clone(), dep.rename.clone()))
+	Some(RenamedPackage::new(resolve_dep.clone(), dep.rename.clone(), dep.optional))
 }
 
 #[derive(Clone, Debug, serde::Serialize, PartialEq, Eq)]
 pub struct RenamedPackage {
 	pub pkg: Package,
 	pub rename: Option<String>,
+	pub optional: bool,
 }
 
 impl RenamedPackage {
-	pub fn new(pkg: Package, rename: Option<String>) -> Self {
-		Self { pkg, rename }
+	pub fn new(pkg: Package, rename: Option<String>, optional: bool) -> Self {
+		Self { pkg, rename, optional }
 	}
 
 	pub fn name(&self) -> String {
@@ -150,12 +151,6 @@ impl RenamedPackage {
 			Some(rename) => format!("{} (renamed from {})", rename, self.pkg.name),
 			None => self.pkg.name.clone(),
 		}
-	}
-}
-
-impl From<Package> for RenamedPackage {
-	fn from(pkg: Package) -> Self {
-		Self::new(pkg, None)
 	}
 }
 

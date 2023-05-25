@@ -3,7 +3,12 @@
 
 //! Lint your feature usage by analyzing crate metadata.
 
-use crate::{autofix::AutoFixer, cmd::{resolve_dep, RenamedPackage}, prelude::*, CrateId};
+use crate::{
+	autofix::AutoFixer,
+	cmd::{resolve_dep, RenamedPackage},
+	prelude::*,
+	CrateId,
+};
 use cargo_metadata::{Metadata, Package, PackageId};
 use core::{
 	fmt,
@@ -261,7 +266,11 @@ impl NeverEnablesCmd {
 
 		for (lhs, rhss) in offenders {
 			// TODO hack
-			println!("crate {:?}\n  feature {:?}", lhs.split(' ').next().unwrap(), self.precondition);
+			println!(
+				"crate {:?}\n  feature {:?}",
+				lhs.split(' ').next().unwrap(),
+				self.precondition
+			);
 			// TODO support multiple left/right side features.
 			println!("    enables feature {:?} on dependencies:", self.stays_disabled);
 
@@ -269,10 +278,10 @@ impl NeverEnablesCmd {
 				match &rhs.rename {
 					Some(_) => {
 						println!("      {} (renamed from {})", rhs.pkg.name, rhs.name());
-					}
+					},
 					None => {
 						println!("      {}", rhs.name());
-					}
+					},
 				}
 			}
 		}
@@ -327,10 +336,7 @@ impl PropagateFeatureCmd {
 				if dep.pkg.features.contains_key(&feature) {
 					match pkg.features.get(&feature) {
 						None => {
-							feature_missing
-								.entry(pkg.id.to_string())
-								.or_default()
-								.insert(dep);
+							feature_missing.entry(pkg.id.to_string()).or_default().insert(dep);
 						},
 						Some(enabled) => {
 							let want = if optional {
@@ -391,11 +397,8 @@ impl PropagateFeatureCmd {
 
 			// join
 			if let Some(deps) = feature_missing.get(&krate.id.to_string()) {
-				let joined = deps
-					.iter()
-					.map(|dep| dep.display_name())
-					.collect::<Vec<_>>()
-					.join("\n      ");
+				let joined =
+					deps.iter().map(|dep| dep.display_name()).collect::<Vec<_>>().join("\n      ");
 				println!(
 					"    is required by {} dependenc{}:\n      {}",
 					deps.len(),
@@ -405,11 +408,8 @@ impl PropagateFeatureCmd {
 				errors += deps.len();
 			}
 			if let Some(deps) = propagate_missing.get(&krate.id.to_string()) {
-				let joined = deps
-					.iter()
-					.map(|dep| dep.display_name())
-					.collect::<Vec<_>>()
-					.join("\n      ");
+				let joined =
+					deps.iter().map(|dep| dep.display_name()).collect::<Vec<_>>().join("\n      ");
 				println!("    must propagate to:\n      {joined}");
 
 				if self.fix && self.fix_package.as_ref().map_or(true, |p| p == &krate.name) {
@@ -451,10 +451,10 @@ impl PropagateFeatureCmd {
 
 fn error_stats(errors: usize, warnings: usize, fixes: usize, fix: bool) -> String {
 	let mut ret: String = "Found ".into();
-	
+
 	if errors + warnings + fixes == 0 {
 		ret.push_str("no issues");
-		return ret;
+		return ret
 	}
 	if errors > 0 {
 		ret.push_str(&format!("{} issue{}", errors, plural(errors)));

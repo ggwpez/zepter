@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
-use assert_cmd::Command;
+use assert_cmd::{assert::OutputAssertExt, Command};
+use feature::mock::*;
 use std::{
 	collections::HashMap,
 	fs,
 	io::Write,
 	path::{Path, PathBuf},
 };
-use feature::mock::*;
-use assert_cmd::assert::OutputAssertExt;
 
 pub type ModuleName = String;
 pub type FeatureName = String;
@@ -100,7 +99,7 @@ fn ui() {
 		let mut config = CaseFile::from_file(&file);
 		let workspace = config.init();
 		let mut overwrites = HashMap::new();
-		let mut diff_overwrites = HashMap::new();		
+		let mut diff_overwrites = HashMap::new();
 		let m = config.cases.len();
 
 		for (i, case) in config.cases.iter().enumerate() {
@@ -112,7 +111,7 @@ fn ui() {
 			}
 			cmd.args(&["--manifest-path", workspace.root.path().to_str().unwrap()]);
 			cmd.arg("--offline");
-			
+
 			// remove empty trailing and suffix lines
 			let res = cmd.output().unwrap();
 			if let Some(code) = case.code {
@@ -175,7 +174,7 @@ fn ui() {
 			}
 			for (i, diff) in diff_overwrites.into_iter() {
 				config.cases[i].diff = diff;
-			}			
+			}
 
 			let mut fd = fs::File::create(&file).unwrap();
 			serde_yaml::to_writer(&mut fd, &config).unwrap();
@@ -219,7 +218,7 @@ pub struct CrateConfig {
 #[serde(untagged)]
 pub enum Dependency {
 	Normal(String),
-	Renamed { name: String, rename: String},
+	Renamed { name: String, rename: String },
 }
 
 impl CaseFile {
@@ -233,7 +232,7 @@ impl CaseFile {
 impl Dependency {
 	fn def(&self) -> String {
 		let mut ret = match &self {
-			Self::Renamed{name, rename} => format!("{} = {{ package = \"{}\", ", rename, name),
+			Self::Renamed { name, rename } => format!("{} = {{ package = \"{}\", ", rename, name),
 			Self::Normal(name) => format!("{} = {{ ", name),
 		};
 		ret.push_str(&format!("version = \"*\", path = \"../{}\" }}\n", self.name()));
@@ -242,7 +241,7 @@ impl Dependency {
 
 	fn name(&self) -> String {
 		match self {
-			Self::Renamed{name, .. } | Self::Normal(name) => name.clone(),
+			Self::Renamed { name, .. } | Self::Normal(name) => name.clone(),
 		}
 	}
 }

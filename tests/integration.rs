@@ -1,11 +1,10 @@
-use assert_cmd::Command;
+use assert_cmd::{assert::OutputAssertExt, Command};
+use feature::mock::*;
 use std::{
 	collections::HashMap,
 	fs,
 	path::{Path, PathBuf},
 };
-use feature::mock::*;
-use assert_cmd::assert::OutputAssertExt;
 
 pub type ModuleName = String;
 pub type FeatureName = String;
@@ -62,7 +61,7 @@ fn integration() {
 			if i > 0 {
 				cmd.arg("--offline");
 			}
-			
+
 			// remove empty trailing and suffix lines
 			let res = cmd.output().unwrap();
 			if let Some(code) = case.code {

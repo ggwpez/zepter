@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
+
 use assert_cmd::{assert::OutputAssertExt, Command};
 use feature::mock::*;
 use std::{

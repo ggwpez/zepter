@@ -1,6 +1,6 @@
 [package]
 name = "feature"
-version = "0.5.1"
+version = "0.6.0"
 edition = "2021"
 description = "See out how Rust dependencies and features are enabled."
 license = "GPL-3.0-only"
@@ -40,6 +40,9 @@ serde_yaml = "0.9.21"
 tempfile = "3.3.0"
 void = "1.0.2"
 
+[features]
+testing = []
+
 [profile.release]
 opt-level = 3
 lto = true
@@ -47,6 +50,3 @@ codegen-units = 1
 
 [profile.dev]
 opt-level = 3
-
-[features]
-testing = []

@@ -10,4 +10,4 @@ cases:
           sp-runtime
           sp-staking
           frame-system
-    Found 3 errors.
+    Found 3 issues.

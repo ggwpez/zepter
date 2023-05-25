@@ -14,7 +14,7 @@ cases:
 - cmd: trace A B --path-delimiter=>
   stdout: |
     A>B
-- cmd: trace A B --path-delimiter=> --workspace --offline
+- cmd: trace A B --path-delimiter=> --workspace
   stdout: |
     A>B
 - cmd: trace A-dash B_underscore

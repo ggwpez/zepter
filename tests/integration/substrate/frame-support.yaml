@@ -1,0 +1,48 @@
+repo:
+  name: substrate
+  ref: 2cc2e05e78b1e9109669dc959ac7656eb46b3492
+cases:
+- cmd: lint propagate-feature -p frame-support --feature runtime-benchmarks
+  stdout: |
+    Found no issues.
+- cmd: lint propagate-feature -p frame-support --feature runtime-benchmarks --workspace
+  stdout: |
+    Found no issues.
+- cmd: lint propagate-feature -p frame-support --feature std
+  stdout: |
+    crate "frame-support"
+      feature "std"
+        must propagate to:
+          serde
+          once_cell
+          serde_json
+          frame-system
+          sp-debug-derive
+          sp-state-machine
+          pretty_assertions
+    Found 7 issues.
+- cmd: lint propagate-feature -p frame-support --feature std --workspace
+  stdout: |
+    crate "frame-support"
+      feature "std"
+        must propagate to:
+          frame-system
+          sp-debug-derive
+          sp-state-machine
+    Found 3 issues.
+- cmd: lint propagate-feature -p frame-support --feature try-runtime
+  stdout: |
+    crate "frame-support"
+      feature "try-runtime"
+        must propagate to:
+          sp-runtime
+          frame-system
+    Found 2 issues.
+- cmd: lint propagate-feature -p frame-support --feature try-runtime --workspace
+  stdout: |
+    crate "frame-support"
+      feature "try-runtime"
+        must propagate to:
+          sp-runtime
+          frame-system
+    Found 2 issues.

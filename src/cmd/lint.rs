@@ -397,8 +397,9 @@ impl PropagateFeatureCmd {
 					.collect::<Vec<_>>()
 					.join("\n      ");
 				println!(
-					"    must exit because {} dependencies have it:\n      {}",
+					"    is required by {} dependenc{}:\n      {}",
 					deps.len(),
+					if deps.len() == 1 { "y" } else { "ies" },
 					joined
 				);
 				errors += deps.len();
@@ -444,30 +445,33 @@ impl PropagateFeatureCmd {
 			//	}
 			//}
 		}
-		error_stats(errors, warnings, fixes).map(|s| println!("{}.", s));
+		println!("{}.", error_stats(errors, warnings, fixes, self.fix));
 	}
 }
 
-fn error_stats(errors: usize, warnings: usize, fixes: usize) -> Option<String> {
-	let mut ret = String::new();
-	if errors + warnings + fixes > 0 {
-		ret.push_str("Found ");
+fn error_stats(errors: usize, warnings: usize, fixes: usize, fix: bool) -> String {
+	let mut ret: String = "Found ".into();
+	
+	if errors + warnings + fixes == 0 {
+		ret.push_str("no issues");
+		return ret;
 	}
-
 	if errors > 0 {
-		ret.push_str(&format!("{} issues{}", errors, plural(errors)));
+		ret.push_str(&format!("{} issue{}", errors, plural(errors)));
 	}
 	if warnings > 0 {
 		ret.push_str(&format!(", {} warning{}", warnings, plural(warnings)));
 	}
 	if fixes > 0 {
-		ret.push_str(&format!(", fixed {} issue{}", fixes, plural(fixes)));
+		if warnings + errors > 0 {
+			ret.push_str(" and");
+		}
+		ret.push_str(&format!(" fixed {} issue{}", fixes, plural(fixes)));
 	}
-	if ret.is_empty() {
-		None
-	} else {
-		Some(ret)
+	if fix && fixes < errors {
+		ret.push_str(&format!(" ({} could not be fixed)", errors - fixes));
 	}
+	ret
 }
 
 fn plural(n: usize) -> &'static str {

@@ -15,34 +15,37 @@ cases:
       feature "F0"
         must propagate to:
           b (renamed from B)
-    Generated 1 errors, 0 warnings and fixed 0 issues.
+    Found 1 issue.
 - cmd: lint propagate-feature -p A --feature F0
   stdout: |
     crate "A"
       feature "F0"
         must propagate to:
           b (renamed from B)
-    Generated 1 errors, 0 warnings and fixed 0 issues.
+    Found 1 issue.
 - cmd: lint propagate-feature -p B --feature F0
-  stdout: ''
+  stdout: |
+    Found no issues.
 - cmd: lint propagate-feature -p B --feature F1
-  stdout: ''
-
+  stdout: |
+    Found no issues.
 - cmd: lint propagate-feature --feature F0 --workspace
   stdout: |
     crate "A"
       feature "F0"
         must propagate to:
           b (renamed from B)
-    Generated 1 errors, 0 warnings and fixed 0 issues.
+    Found 1 issue.
 - cmd: lint propagate-feature -p A --feature F0 --workspace
   stdout: |
     crate "A"
       feature "F0"
         must propagate to:
           b (renamed from B)
-    Generated 1 errors, 0 warnings and fixed 0 issues.
+    Found 1 issue.
 - cmd: lint propagate-feature -p B --feature F0 --workspace
-  stdout: ''
+  stdout: |
+    Found no issues.
 - cmd: lint propagate-feature -p B --feature F1 --workspace
-  stdout: ''
+  stdout: |
+    Found no issues.

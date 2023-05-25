@@ -13,11 +13,11 @@ cases:
       feature "F0"
         must exit because 1 dependencies have it:
           b (renamed from B)
-    Generated 1 errors, 0 warnings and fixed 0 issues.
+    Found 1 issue.
 - cmd: lint propagate-feature --feature F0 --workspace
   stdout: |
     crate "A"
       feature "F0"
         must exit because 1 dependencies have it:
           b (renamed from B)
-    Generated 1 errors, 0 warnings and fixed 0 issues.
+    Found 1 issue.

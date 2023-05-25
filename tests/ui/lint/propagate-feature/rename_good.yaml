@@ -12,10 +12,14 @@ crates:
     F0: null
 cases:
 - cmd: lint propagate-feature --feature F0
-  stdout: ''
+  stdout: |
+    Found no issues.
 - cmd: lint propagate-feature -p A --feature F0
-  stdout: ''
+  stdout: |
+    Found no issues.
 - cmd: lint propagate-feature --feature F0 --workspace
-  stdout: ''
+  stdout: |
+    Found no issues.
 - cmd: lint propagate-feature -p A --feature F0 --workspace
-  stdout: ''
+  stdout: |
+    Found no issues.

@@ -8,10 +8,10 @@ crates:
   features:
     F0: null
 cases:
-- cmd: lint propagate-feature --show-version --offline --workspace --feature F0
+- cmd: lint propagate-feature --show-version --workspace --feature F0
   stdout: |
     crate "A"
       feature "F0"
         must propagate to:
           B
-    Generated 1 errors, 0 warnings and fixed 0 issues.
+    Found 1 issue.

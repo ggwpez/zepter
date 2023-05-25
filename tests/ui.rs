@@ -223,7 +223,7 @@ pub enum Dependency {
 		#[serde(skip_serializing_if = "Option::is_none")]
 		rename: Option<String>,
 		#[serde(skip_serializing_if = "is_false")]
-		optional: Option<bool>
+		optional: Option<bool>,
 	},
 }
 
@@ -237,11 +237,7 @@ impl CaseFile {
 
 impl Dependency {
 	fn def(&self) -> String {
-		let option = if self.optional() {
-			format!(", optional = true")
-		} else {
-			String::new()
-		};
+		let option = if self.optional() { format!(", optional = true") } else { String::new() };
 		let mut ret = match self.rename() {
 			Some(rename) => format!("{} = {{ package = \"{}\", ", rename, self.name()),
 			None => format!("{} = {{ ", self.name()),
@@ -272,5 +268,5 @@ impl Dependency {
 }
 
 fn is_false(b: &Option<bool>) -> bool {
-    !b.unwrap_or_default()
+	!b.unwrap_or_default()
 }

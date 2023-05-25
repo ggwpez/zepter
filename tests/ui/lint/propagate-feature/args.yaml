@@ -14,4 +14,4 @@ cases:
       feature "F0"
         must propagate to:
           B
-    Found 1 issue.
+    Found 1 issue and fixed 0 issues.

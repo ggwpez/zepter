@@ -250,7 +250,11 @@ impl NeverEnablesCmd {
 			};
 			// TODO do the same in other command.
 			if enabled.contains(&format!("{}", self.stays_disabled)) {
-				offenders.entry(lhs.id.to_string()).or_default().insert(RenamedPackage::new((*lhs).clone(), None, false)); // TODO
+				offenders.entry(lhs.id.to_string()).or_default().insert(RenamedPackage::new(
+					(*lhs).clone(),
+					None,
+					false,
+				)); // TODO
 			}
 
 			for rhs in lhs.dependencies.iter() {
@@ -416,16 +420,12 @@ impl PropagateFeatureCmd {
 					for dep in deps {
 						let dep_name = dep.name();
 						if !self.fix_dependency.as_ref().map_or(true, |d| d == &dep_name) {
-							continue;
+							continue
 						}
 						let Some(fixer) = fixer.as_mut() else {
 							continue;
 						};
-						let opt = if dep.optional {
-							"?"
-						} else {
-							""
-						};
+						let opt = if dep.optional { "?" } else { "" };
 
 						fixer
 							.add_to_feature(
@@ -433,10 +433,7 @@ impl PropagateFeatureCmd {
 								format!("{}{}/{}", dep_name, opt, feature).as_str(),
 							)
 							.unwrap();
-						log::info!(
-							"Added feature {feature} to {dep_name} in {}",
-							krate.name
-						);
+						log::info!("Added feature {feature} to {dep_name} in {}", krate.name);
 						fixes += 1;
 					}
 				}

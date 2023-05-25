@@ -32,7 +32,7 @@ cases:
           c (renamed from C)
     crate "B"
       feature "F0"
-        must exit because 1 dependencies have it:
+        is required by 1 dependency:
           d (renamed from D)
     crate "C"
       feature "F0"
@@ -50,7 +50,7 @@ cases:
   stdout: |
     crate "B"
       feature "F0"
-        must exit because 1 dependencies have it:
+        is required by 1 dependency:
           d (renamed from D)
     Found 1 issue.
 - cmd: lint propagate-feature -p C --feature F0
@@ -74,7 +74,7 @@ cases:
           c (renamed from C)
     crate "B"
       feature "F0"
-        must exit because 1 dependencies have it:
+        is required by 1 dependency:
           d (renamed from D)
     crate "C"
       feature "F0"
@@ -92,7 +92,7 @@ cases:
   stdout: |
     crate "B"
       feature "F0"
-        must exit because 1 dependencies have it:
+        is required by 1 dependency:
           d (renamed from D)
     Found 1 issue.
 - cmd: lint propagate-feature -p C --feature F0 --workspace

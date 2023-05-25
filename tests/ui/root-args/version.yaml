@@ -2,4 +2,4 @@ crates: []
 cases:
 - cmd: --version
   stdout: |
-    feature 0.5.1
+    feature 0.6.0

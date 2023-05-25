@@ -123,6 +123,7 @@ fn ui() {
 			match res.stdout == case.stdout.as_bytes() {
 				true => {
 					colour::green_ln!("OK");
+					colour::white!("");
 					good += 1;
 				},
 				false if !overwrite => {
@@ -134,6 +135,7 @@ fn ui() {
 				},
 				false => {
 					colour::yellow_ln!("OVERWRITE");
+					colour::white!("");
 					overwrites.insert(i, String::from_utf8_lossy(&res.stdout).to_string());
 					failed += 1;
 				},
@@ -179,6 +181,9 @@ impl CaseFile {
 			ctx.create_crate(&module).unwrap();
 		}
 		ctx.create_workspace(&self.crates).unwrap();
+		if self.cases.iter().any(|c| c.diff.is_some()) {
+			git_init(&ctx.root.path()).unwrap();
+		}
 		ctx
 	}
 }

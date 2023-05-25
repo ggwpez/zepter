@@ -13,28 +13,28 @@ cases:
   stdout: |
     crate "A"
       feature "F0"
-        must exit because 1 dependencies have it:
+        is required by 1 dependency:
           B
     crate "a"
       feature "F0"
-        must exit because 1 dependencies have it:
+        is required by 1 dependency:
           B
     Found 2 issues.
 - cmd: lint propagate-feature -p a --feature F0
   stdout: |
     crate "a"
       feature "F0"
-        must exit because 1 dependencies have it:
+        is required by 1 dependency:
           B
     Found 1 issue.
 - cmd: lint propagate-feature -p a A --feature F0
   stdout: |
     crate "A"
       feature "F0"
-        must exit because 1 dependencies have it:
+        is required by 1 dependency:
           B
     crate "a"
       feature "F0"
-        must exit because 1 dependencies have it:
+        is required by 1 dependency:
           B
     Found 2 issues.

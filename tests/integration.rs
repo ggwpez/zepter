@@ -48,7 +48,6 @@ fn integration() {
 	for file in files.filter_map(Result::ok) {
 		let mut config = CaseFile::from_file(&file);
 		let workspace = config.init().unwrap();
-		println!("Cloned into {}", workspace.display());
 		let mut overwrites = HashMap::new();
 		let m = config.cases.len();
 
@@ -60,6 +59,9 @@ fn integration() {
 				cmd.arg(arg);
 			}
 			cmd.args(&["--manifest-path", workspace.as_path().to_str().unwrap()]);
+			if i > 0 {
+				cmd.arg("--offline");
+			}
 			
 			// remove empty trailing and suffix lines
 			let res = cmd.output().unwrap();
@@ -72,6 +74,7 @@ fn integration() {
 			match res.stdout == case.stdout.as_bytes() {
 				true => {
 					colour::green_ln!("OK");
+					colour::white!("");
 					good += 1;
 				},
 				false if !overwrite => {
@@ -83,6 +86,7 @@ fn integration() {
 				},
 				false => {
 					colour::yellow_ln!("OVERWRITE");
+					colour::white!("");
 					overwrites.insert(i, String::from_utf8_lossy(&res.stdout).to_string());
 					failed += 1;
 				},
@@ -114,6 +118,7 @@ fn integration() {
 	if failed == 0 && good == 0 {
 		panic!("No tests found");
 	}
+	colour::white!("");
 }
 
 pub(crate) fn clone_repo(repo: &str, rev: &str) -> Result<PathBuf, Box<dyn std::error::Error>> {
@@ -123,29 +128,51 @@ pub(crate) fn clone_repo(repo: &str, rev: &str) -> Result<PathBuf, Box<dyn std::
 
 	// Check if the repo is already cloned
 	if std::path::Path::new(&dir).exists() {
-		println!("Using existing repo at {dir:?}");
 	} else {
-		println!("Cloning {repo} into {dir:?}");
 		std::fs::create_dir_all(&dir)?;
 
 		let mut cmd = std::process::Command::new("git");
 		cmd.current_dir(&dir);
-		cmd.arg("clone");
-		cmd.arg(format!("https://github.com/paritytech/{repo}"));
-		cmd.arg(".");
-		cmd.arg("--branch");
-		cmd.arg("master");
+		cmd.arg("init");
 		cmd.status()?;
+
+		// add remote
+		let mut cmd = std::process::Command::new("git");
+		cmd.current_dir(&dir);
+		cmd.arg("remote");
+		cmd.arg("add");
+		cmd.arg("origin");
+		cmd.arg(&format!("https://github.com/paritytech/{}", repo));
+		cmd.status()?;
+
+		// git fetch --depth 1 origin
+		fetch(&dir, rev)?;
 	}
 
-	// checkout
-	println!("Checking out {rev} in {dir:?}");
+	if checkout(&dir, rev).is_err() {
+		fetch(&dir, rev)?;
+		checkout(&dir, rev)?;
+	}
+	Ok(dir.clone())
+}
+
+fn fetch(dir: &PathBuf, rev: &str) -> Result<(), Box<dyn std::error::Error>> {
 	let mut cmd = std::process::Command::new("git");
+	cmd.current_dir(&dir);
+	cmd.arg("fetch");
+	cmd.arg("--depth");
+	cmd.arg("1");
+	cmd.arg("origin");
+	cmd.arg(rev);
+	cmd.assert().try_code(0)?;
+	Ok(())
+}
+
+fn checkout(dir: &PathBuf, rev: &str) -> Result<(), Box<dyn std::error::Error>> {
+	let mut cmd = Command::new("git");
 	cmd.current_dir(&dir);
 	cmd.arg("checkout");
 	cmd.arg(rev);
-	cmd.arg("--quiet");
-	cmd.status()?;
-
-	Ok(dir.clone())
+	cmd.assert().try_code(0)?;
+	Ok(())
 }

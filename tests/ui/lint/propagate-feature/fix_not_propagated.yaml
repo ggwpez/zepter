@@ -1,0 +1,18 @@
+crates:
+- name: A
+  deps:
+  - B
+  features:
+    F0: null
+- name: B
+  features:
+    F0: null
+cases:
+- cmd: lint propagate-feature --feature F0
+  stdout: |
+    crate "A"
+      feature "F0"
+        must propagate to:
+          B
+    Found 1 issue.
+  diff: "asdf"

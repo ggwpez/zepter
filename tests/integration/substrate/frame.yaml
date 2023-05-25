@@ -12,7 +12,7 @@ cases:
   stdout: |
     crate "frame"
       feature "runtime-benchmarks"
-        must exit because 3 dependencies have it:
+        is required by 3 dependencies:
           sp-runtime
           frame-system
           frame-support
@@ -21,7 +21,7 @@ cases:
   stdout: |
     crate "frame"
       feature "runtime-benchmarks"
-        must exit because 3 dependencies have it:
+        is required by 3 dependencies:
           sp-runtime
           frame-system
           frame-support
@@ -30,7 +30,7 @@ cases:
   stdout: |
     crate "frame"
       feature "try-runtime"
-        must exit because 4 dependencies have it:
+        is required by 4 dependencies:
           sp-runtime
           frame-system
           frame-support
@@ -40,7 +40,7 @@ cases:
   stdout: |
     crate "frame"
       feature "try-runtime"
-        must exit because 4 dependencies have it:
+        is required by 4 dependencies:
           sp-runtime
           frame-system
           frame-support

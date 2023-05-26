@@ -20,7 +20,7 @@ cases:
           sp-debug-derive
           sp-state-machine
           pretty_assertions
-    Found 7 issues.
+    Found 7 issues and fixed 0 issues.
 - cmd: lint propagate-feature -p frame-support --feature std --workspace
   stdout: |
     crate "frame-support"
@@ -29,7 +29,7 @@ cases:
           frame-system
           sp-debug-derive
           sp-state-machine
-    Found 3 issues.
+    Found 3 issues and fixed 0 issues.
 - cmd: lint propagate-feature -p frame-support --feature try-runtime
   stdout: |
     crate "frame-support"
@@ -37,7 +37,7 @@ cases:
         must propagate to:
           sp-runtime
           frame-system
-    Found 2 issues.
+    Found 2 issues and fixed 0 issues.
 - cmd: lint propagate-feature -p frame-support --feature try-runtime --workspace
   stdout: |
     crate "frame-support"
@@ -45,4 +45,4 @@ cases:
         must propagate to:
           sp-runtime
           frame-system
-    Found 2 issues.
+    Found 2 issues and fixed 0 issues.

@@ -55,8 +55,9 @@ cases:
           pallet-balances
     crate "frame-remote-externalities"
       feature "runtime-benchmarks"
-        is required by 3 dependencies:
+        is required by 4 dependencies:
           sp-runtime
+          frame-support
           frame-support
           pallet-elections-phragmen
     crate "frame-support-test"
@@ -531,6 +532,7 @@ cases:
           sp-runtime
           frame-system
           frame-support
+          pallet-balances
           pallet-balances
     crate "pallet-nomination-pools-benchmarking"
       feature "runtime-benchmarks"
@@ -1153,7 +1155,7 @@ cases:
         is required by 2 dependencies:
           sc-service
           sp-runtime
-    Found 549 issues.
+    Found 551 issues and fixed 0 issues.
 - cmd: lint propagate-feature --feature runtime-benchmarks --workspace
   stdout: |
     crate "binary-merkle-tree"
@@ -1207,8 +1209,9 @@ cases:
           pallet-balances
     crate "frame-remote-externalities"
       feature "runtime-benchmarks"
-        is required by 3 dependencies:
+        is required by 4 dependencies:
           sp-runtime
+          frame-support
           frame-support
           pallet-elections-phragmen
     crate "frame-support-test"
@@ -1683,6 +1686,7 @@ cases:
           sp-runtime
           frame-system
           frame-support
+          pallet-balances
           pallet-balances
     crate "pallet-nomination-pools-benchmarking"
       feature "runtime-benchmarks"
@@ -2305,7 +2309,7 @@ cases:
         is required by 2 dependencies:
           sc-service
           sp-runtime
-    Found 549 issues.
+    Found 551 issues and fixed 0 issues.
 - cmd: lint propagate-feature --feature std
   stdout: |
     crate "Inflector"
@@ -2667,11 +2671,12 @@ cases:
           log
     crate "criterion"
       feature "std"
-        is required by 8 dependencies:
+        is required by 9 dependencies:
           cast
           clap
           regex
           serde
+          futures
           futures
           ciborium
           num-traits
@@ -2691,15 +2696,17 @@ cases:
           crossbeam-utils
     crate "crypto-bigint"
       feature "std"
-        is required by 3 dependencies:
+        is required by 4 dependencies:
           subtle
           zeroize
           rand_core
+          rand_core
     crate "crypto-bigint"
       feature "std"
-        is required by 3 dependencies:
+        is required by 4 dependencies:
           subtle
           zeroize
+          rand_core
           rand_core
     crate "crypto-common"
       feature "std"
@@ -2891,6 +2898,7 @@ cases:
         must propagate to:
           log
           rand
+          rand
           futures
           scale-info
           parity-scale-codec
@@ -2902,8 +2910,9 @@ cases:
           rustc-hex
     crate "flate2"
       feature "std"
-        is required by 2 dependencies:
+        is required by 3 dependencies:
           crc32fast
+          miniz_oxide
           miniz_oxide
     crate "float-cmp"
       feature "std"
@@ -2987,13 +2996,14 @@ cases:
           scale-info
     crate "frame-remote-externalities"
       feature "std"
-        is required by 10 dependencies:
+        is required by 11 dependencies:
           log
           serde
           sp-io
           futures
           sp-core
           sp-runtime
+          frame-support
           frame-support
           codec (renamed from parity-scale-codec)
           tracing-subscriber
@@ -4167,6 +4177,8 @@ cases:
       feature "std"
         must propagate to:
           sp-tracing
+          sp-tracing
+          pallet-balances
           pallet-balances
     crate "pallet-nomination-pools-benchmarking"
       feature "std"
@@ -4302,6 +4314,7 @@ cases:
           serde
           sp-core
           sp-tracing
+          rand_chacha
           rand_chacha
           pallet-balances
           pallet-bags-list
@@ -4604,6 +4617,7 @@ cases:
           libc
           winapi
           once_cell
+          once_cell
     crate "rocksdb"
       feature "std"
         is required by 1 dependency:
@@ -4645,24 +4659,30 @@ cases:
       feature "std"
         must propagate to:
           libc
+          libc
+          libc_errno (renamed from errno)
           libc_errno (renamed from errno)
           linux-raw-sys
     crate "rustix"
       feature "std"
         must propagate to:
           libc
+          libc
+          libc_errno (renamed from errno)
           libc_errno (renamed from errno)
           linux-raw-sys
     crate "rustls"
       feature "std"
-        is required by 4 dependencies:
+        is required by 5 dependencies:
+          log
           log
           ring
           base64
           webpki
     crate "rustls"
       feature "std"
-        is required by 3 dependencies:
+        is required by 4 dependencies:
+          log
           log
           ring
           webpki
@@ -5512,6 +5532,7 @@ cases:
         must propagate to:
           bs58
           rand
+          rand
           regex
           serde
           blake2
@@ -5594,6 +5615,7 @@ cases:
       feature "std"
         must propagate to:
           rand
+          rand
           serde
           sp-api
           serde_json
@@ -5633,6 +5655,7 @@ cases:
     crate "sp-state-machine"
       feature "std"
         must propagate to:
+          rand
           rand
           tracing
           trie-db
@@ -5875,6 +5898,7 @@ cases:
       feature "std"
         must propagate to:
           serde
+          serde
     crate "tiny-bip39"
       feature "std"
         is required by 10 dependencies:
@@ -5899,7 +5923,8 @@ cases:
           serde_json
     crate "tokio"
       feature "std"
-        is required by 2 dependencies:
+        is required by 3 dependencies:
+          libc
           libc
           bytes
     crate "tokio-retry"
@@ -5959,6 +5984,7 @@ cases:
       feature "std"
         must propagate to:
           log
+          log
     crate "tracing-core"
       feature "std"
         must propagate to:
@@ -5975,20 +6001,26 @@ cases:
           tracing-core
     crate "tracing-subscriber"
       feature "std"
-        is required by 7 dependencies:
+        is required by 10 dependencies:
+          regex
           regex
           serde
           chrono
           tracing
+          tracing
           serde_json
+          tracing-log
           tracing-log
           tracing-core
     crate "tracing-subscriber"
       feature "std"
         must propagate to:
           regex
+          regex
+          tracing
           tracing
           once_cell
+          tracing-log
           tracing-log
     crate "trie-bench"
       feature "std"
@@ -6419,7 +6451,7 @@ cases:
       feature "std"
         must propagate to:
           libc
-    Found 2230 issues.
+    Found 2258 issues and fixed 0 issues.
 - cmd: lint propagate-feature --feature std --workspace
   stdout: |
     crate "binary-merkle-tree"
@@ -6482,10 +6514,11 @@ cases:
           pallet-transaction-payment
     crate "frame-remote-externalities"
       feature "std"
-        is required by 5 dependencies:
+        is required by 6 dependencies:
           sp-io
           sp-core
           sp-runtime
+          frame-support
           frame-support
           pallet-elections-phragmen
     crate "frame-support"
@@ -6907,6 +6940,8 @@ cases:
       feature "std"
         must propagate to:
           sp-tracing
+          sp-tracing
+          pallet-balances
           pallet-balances
     crate "pallet-nomination-pools-benchmarking"
       feature "std"
@@ -7737,7 +7772,7 @@ cases:
           sp-consensus-aura
           sp-consensus-babe
           sp-transaction-storage-proof
-    Found 757 issues.
+    Found 760 issues and fixed 0 issues.
 - cmd: lint propagate-feature --feature try-runtime
   stdout: |
     crate "binary-merkle-tree"
@@ -7790,8 +7825,9 @@ cases:
           pallet-transaction-payment
     crate "frame-remote-externalities"
       feature "try-runtime"
-        is required by 3 dependencies:
+        is required by 4 dependencies:
           sp-runtime
+          frame-support
           frame-support
           pallet-elections-phragmen
     crate "frame-support"
@@ -7927,6 +7963,7 @@ cases:
           pallet-balances
           pallet-identity
           pallet-collective
+          pallet-collective
     crate "pallet-asset-rate"
       feature "try-runtime"
         must propagate to:
@@ -7986,6 +8023,7 @@ cases:
         must propagate to:
           sp-runtime
           frame-system
+          pallet-balances
           pallet-balances
     crate "pallet-bags-list-fuzzer"
       feature "try-runtime"
@@ -8250,6 +8288,7 @@ cases:
         must propagate to:
           sp-runtime
           frame-system
+          pallet-balances
           pallet-balances
     crate "pallet-nomination-pools-benchmarking"
       feature "try-runtime"
@@ -8847,7 +8886,7 @@ cases:
         must propagate to:
           sp-runtime
           frame-try-runtime
-    Found 510 issues.
+    Found 514 issues and fixed 0 issues.
 - cmd: lint propagate-feature --feature try-runtime --workspace
   stdout: |
     crate "binary-merkle-tree"
@@ -8900,8 +8939,9 @@ cases:
           pallet-transaction-payment
     crate "frame-remote-externalities"
       feature "try-runtime"
-        is required by 3 dependencies:
+        is required by 4 dependencies:
           sp-runtime
+          frame-support
           frame-support
           pallet-elections-phragmen
     crate "frame-support"
@@ -9037,6 +9077,7 @@ cases:
           pallet-balances
           pallet-identity
           pallet-collective
+          pallet-collective
     crate "pallet-asset-rate"
       feature "try-runtime"
         must propagate to:
@@ -9096,6 +9137,7 @@ cases:
         must propagate to:
           sp-runtime
           frame-system
+          pallet-balances
           pallet-balances
     crate "pallet-bags-list-fuzzer"
       feature "try-runtime"
@@ -9360,6 +9402,7 @@ cases:
         must propagate to:
           sp-runtime
           frame-system
+          pallet-balances
           pallet-balances
     crate "pallet-nomination-pools-benchmarking"
       feature "try-runtime"
@@ -9957,4 +10000,4 @@ cases:
         must propagate to:
           sp-runtime
           frame-try-runtime
-    Found 510 issues.
+    Found 514 issues and fixed 0 issues.

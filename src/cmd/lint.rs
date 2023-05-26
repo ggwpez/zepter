@@ -37,7 +37,7 @@ pub enum SubCommand {
 	/// A specific feature never implies a specific other feature.
 	NeverImplies(NeverImpliesCmd),
 	/// A specific feature is only implied by a specific set of other features.
-	OnlyImplies(OnlyImpliesCmd),
+	OnlyEnables(OnlyEnablesCmd),
 	WhyEnabled(WhyEnabledCmd),
 }
 
@@ -55,19 +55,16 @@ pub struct WhyEnabledCmd {
 }
 
 #[derive(Debug, clap::Parser)]
-pub struct OnlyImpliesCmd {
+pub struct OnlyEnablesCmd {
 	#[allow(missing_docs)]
 	#[clap(flatten)]
 	cargo_args: super::CargoArgs,
 
-	#[clap(long, short)]
-	package: String,
+	#[clap(long)]
+	precondition: String,
 
 	#[clap(long)]
-	feature: String,
-
-	#[clap(long)]
-	preconditions: Vec<String>,
+	only_enables: String,
 }
 
 #[derive(Debug, clap::Parser)]
@@ -162,7 +159,7 @@ impl LintCmd {
 			SubCommand::NeverEnables(cmd) => cmd.run(),
 			SubCommand::NeverImplies(cmd) => cmd.run(),
 			SubCommand::WhyEnabled(cmd) => cmd.run(),
-			SubCommand::OnlyImplies(cmd) => cmd.run(),
+			SubCommand::OnlyEnables(cmd) => cmd.run(),
 		}
 	}
 }
@@ -487,42 +484,36 @@ fn plural(n: usize) -> &'static str {
 	}
 }
 
-impl OnlyImpliesCmd {
+impl OnlyEnablesCmd {
 	pub fn run(&self) {
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
 		let pkgs = meta.packages.clone();
-		let dag = build_feature_dag(&meta, &pkgs);
-		let mut found = false;
 
-		let lookup = |id: &str| pkgs.iter().find(|pkg| pkg.id.to_string() == id);
-		let resolved = pkgs.iter().find(|pkg| pkg.name == self.package).unwrap();
-		let to = CrateAndFeature(resolved.id.to_string().clone(), self.feature.clone());
-		log::info!("Looking for paths to {}/{}", to.0, to.1);
+		for pkg in pkgs.iter() {
+			for dep in pkg.dependencies.iter() {
+				let Some(dep) = resolve_dep(pkg, dep, &meta) else {
+					continue;
+				};
+				if !dep.pkg.features.contains_key(&self.only_enables) {
+					continue;
+				}
 
-		for lhs in dag.lhs_nodes() {
-			if let Some(path) = dag.any_path(&lhs, &to) {
-				if !self.preconditions.contains(&lhs.1) {
-					let mut out = String::new();
-					let mut is_first = true;
+				for (feat, imply) in pkg.features.iter() {
+					if feat == &self.precondition {
+						continue;
+					}
 
-					let delimiter = " -> ";
-					path.for_each(|CrateAndFeature(id, feature)| {
-						let krate = lookup(id).unwrap();
-						if !is_first {
-							out.push_str(&delimiter);
-						}
-						is_first = false;
-						out.push_str(&format!("{}/{}", krate.name, feature));
-					});
-
-					println!("Found path: {out}");
-					found = true;
+					let opt = if dep.optional { "?" } else { "" };
+					let bad_opt = format!("{}{}/{}", dep.name(), opt, self.only_enables);
+					let bad = format!("{}/{}", dep.name(), self.only_enables);
+					if imply.contains(&bad) || imply.contains(&bad_opt) {
+						println!(
+							"{}/{} enables {}/{}",
+							pkg.name, feat, dep.name(), self.only_enables
+						);
+					}
 				}
 			}
-		}
-
-		if found {
-			std::process::exit(1);
 		}
 	}
 }

@@ -11,6 +11,7 @@ use std::{path::Path, process::Command};
 pub struct Case {
 	pub cmd: String,
 	#[serde(skip_serializing_if = "String::is_empty")]
+	#[serde(default)]
 	pub stdout: String,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub code: Option<i32>,

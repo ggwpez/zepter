@@ -12,4 +12,4 @@ cases:
           sp-mmr-primitives
           beefy-primitives (renamed from sp-consensus-beefy)
           polkadot-runtime-parachains
-    Found 5 issues.
+    Found 5 issues and fixed 0 issues.

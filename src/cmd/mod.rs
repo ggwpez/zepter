@@ -57,6 +57,9 @@ pub struct CargoArgs {
 	/// Whether to use offline mode.
 	#[clap(long, global = true)]
 	pub offline: bool,
+
+	#[clap(long, global = true)]
+	pub all_features: bool,
 }
 
 impl CargoArgs {

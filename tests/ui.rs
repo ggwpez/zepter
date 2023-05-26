@@ -2,13 +2,13 @@
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
 use assert_cmd::{assert::OutputAssertExt, Command};
-use feature::mock::*;
 use std::{
 	collections::HashMap,
 	fs,
 	io::Write,
 	path::{Path, PathBuf},
 };
+use zepter::mock::*;
 
 pub type ModuleName = String;
 pub type FeatureName = String;

@@ -2,14 +2,14 @@
 [![crates.io](https://img.shields.io/crates/v/feature.svg)](https://crates.io/crates/feature)
 [![docs.rs](https://img.shields.io/docsrs/feature)](https://docs.rs/feature/latest/feature)
 
-# Features
+# Zepter
 
-Understand why and how features are enabled in a rust workspace. `Feature` is able to automatically fix missing feature propagation to dependencies. Eventually it will be ready for CI use to check an MR for consistent feature usage.
+Understand why and how features are enabled in a rust workspace. `Zepter` is able to automatically fix missing feature propagation to dependencies. Eventually it will be ready for CI use to check an MR for consistent feature usage.
 
 ## Install
 
 ```bash
-cargo install -f feature
+cargo install -f zepter
 ```
 
 ## Example - Fixing feature propagation
@@ -17,7 +17,7 @@ cargo install -f feature
 Let's check that the `runtime-benchmarks` feature is properly passed down to all the dependencies of the `frame-support` crate in the workspace of [Substrate]:  
 
 ```bash
-feature lint propagate-feature --manifest-path ../substrate/Cargo.toml --feature runtime-benchmarks --workspace -p frame-support
+zepter lint propagate-feature --manifest-path ../substrate/Cargo.toml --feature runtime-benchmarks --workspace -p frame-support
 ```
 
 The output reveals that there are some dependencies that expose the feature but don't get it passed down:  
@@ -37,7 +37,7 @@ Without the `-p` it will detect many more problems. You can verify this for the 
 This can be fixed by applying the `--fix` flag like:  
 
 ```bash
-feature lint propagate-feature --manifest-path ../substrate/Cargo.toml --feature runtime-benchmarks --workspace -p frame-support --fix
+zepter lint propagate-feature --manifest-path ../substrate/Cargo.toml --feature runtime-benchmarks --workspace -p frame-support --fix
 ```
 
 Which results in this diff:
@@ -58,7 +58,7 @@ The auto-fix is currently a bit coarse, and does not check for optional dependen
 Let's say you want to ensure that specific features are never enabled by default. For this example we will use the `try-runtime` feature of [Substrate]. Check out branch `oty-faulty-feature-demo` and try:
 
 ```bash
-feature lint never-implies --manifest-path ../substrate/Cargo.toml --precondition default --stays-disabled try-runtime --offline --workspace
+zepter lint never-implies --manifest-path ../substrate/Cargo.toml --precondition default --stays-disabled try-runtime --offline --workspace
 ```
 
 Errors correctly with:
@@ -76,7 +76,7 @@ Recently there was a build error in the [Substrate](https://github.com/paritytec
 Let's find out how `node-cli` depends on `snow`:
 
 ```bash
-feature trace --manifest-path substrate/Cargo.toml node-cli snow
+zepter trace --manifest-path substrate/Cargo.toml node-cli snow
 ```
 
 output:

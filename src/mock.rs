@@ -46,6 +46,22 @@ pub fn git_init(dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
 	cmd.arg("--all");
 	cmd.status()?;
 
+	// git config user.email "you@example.com"
+	// git config user.name "Your Name"
+	let mut cmd = Command::new("git");
+	cmd.current_dir(dir);
+	cmd.arg("config");
+	cmd.arg("user.email");
+	cmd.arg("you@example.com");
+	cmd.status()?;
+
+	let mut cmd = Command::new("git");
+	cmd.current_dir(dir);
+	cmd.arg("config");
+	cmd.arg("user.name");
+	cmd.arg("Your Name");
+	cmd.status()?;
+
 	let mut cmd = Command::new("git");
 	cmd.current_dir(dir);
 	cmd.arg("commit");

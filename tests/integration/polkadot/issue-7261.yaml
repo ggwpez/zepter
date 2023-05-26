@@ -7,9 +7,9 @@ cases:
     crate "polkadot-test-runtime"
       feature "std"
         must propagate to:
-          sp-trie
-          serde_json
-          sp-mmr-primitives
-          beefy-primitives (renamed from sp-consensus-beefy)
           polkadot-runtime-parachains
+          serde_json
+          beefy-primitives (renamed from sp-consensus-beefy)
+          sp-mmr-primitives
+          sp-trie
     Found 5 issues and fixed 0 issues.

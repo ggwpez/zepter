@@ -7,7 +7,7 @@ cases:
     crate "frame-support"
       feature "runtime-benchmarks"
         must propagate to:
+          frame-system
           sp-runtime
           sp-staking
-          frame-system
     Found 3 issues and fixed 0 issues.

@@ -13,13 +13,13 @@ cases:
     crate "frame-support"
       feature "std"
         must propagate to:
-          serde
-          once_cell
-          serde_json
           frame-system
+          once_cell
+          pretty_assertions
+          serde
+          serde_json
           sp-debug-derive
           sp-state-machine
-          pretty_assertions
     Found 7 issues and fixed 0 issues.
 - cmd: lint propagate-feature -p frame-support --feature std --workspace
   stdout: |
@@ -35,14 +35,14 @@ cases:
     crate "frame-support"
       feature "try-runtime"
         must propagate to:
-          sp-runtime
           frame-system
+          sp-runtime
     Found 2 issues and fixed 0 issues.
 - cmd: lint propagate-feature -p frame-support --feature try-runtime --workspace
   stdout: |
     crate "frame-support"
       feature "try-runtime"
         must propagate to:
-          sp-runtime
           frame-system
+          sp-runtime
     Found 2 issues and fixed 0 issues.

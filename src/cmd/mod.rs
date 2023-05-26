@@ -160,7 +160,9 @@ impl RenamedPackage {
 impl Ord for RenamedPackage {
 	fn cmp(&self, other: &Self) -> std::cmp::Ordering {
 		// Yikes...
-		bincode::serialize(self).unwrap().cmp(&bincode::serialize(other).unwrap())
+		//bincode::serialize(self).unwrap().cmp(&bincode::serialize(other).unwrap())
+
+		self.pkg.id.cmp(&other.pkg.id)
 	}
 }
 

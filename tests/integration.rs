@@ -56,7 +56,7 @@ fn integration() {
 		for (i, case) in config.cases.iter().enumerate() {
 			// pad with spaces to len 30
 			colour::white!("Testing {} {}/{} .. ", file.display(), i + 1, m);
-			let mut cmd = Command::cargo_bin("feature").unwrap();
+			let mut cmd = Command::cargo_bin("zepter").unwrap();
 			for arg in case.cmd.split_whitespace() {
 				cmd.arg(arg);
 			}
@@ -136,6 +136,7 @@ pub(crate) fn clone_repo(repo: &str, rev: &str) -> Result<PathBuf, Box<dyn std::
 		let mut cmd = std::process::Command::new("git");
 		cmd.current_dir(&dir);
 		cmd.arg("init");
+		cmd.arg("--quiet");
 		cmd.status()?;
 
 		// add remote

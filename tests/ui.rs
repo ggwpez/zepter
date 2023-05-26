@@ -105,7 +105,7 @@ fn ui() {
 		for (i, case) in config.cases.iter().enumerate() {
 			// pad with spaces to len 30
 			colour::white!("Testing {} {}/{} .. ", file.display(), i + 1, m);
-			let mut cmd = Command::cargo_bin("feature").unwrap();
+			let mut cmd = Command::cargo_bin("zepter").unwrap();
 			for arg in case.cmd.split_whitespace() {
 				cmd.arg(arg);
 			}
@@ -122,7 +122,7 @@ fn ui() {
 
 			match res.stdout == case.stdout.as_bytes() {
 				true => {
-					colour::green!("std:OK");
+					colour::green!("cout:OK");
 					colour::white!(" ");
 					good += 1;
 				},

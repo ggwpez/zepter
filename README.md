@@ -1,6 +1,6 @@
-[![Rust](https://github.com/ggwpez/feature/actions/workflows/rust.yml/badge.svg)](https://github.com/ggwpez/feature/actions/workflows/rust.yml)
-[![crates.io](https://img.shields.io/crates/v/feature.svg)](https://crates.io/crates/feature)
-[![docs.rs](https://img.shields.io/docsrs/feature)](https://docs.rs/feature/latest/feature)
+[![Rust](https://github.com/ggwpez/zepter/actions/workflows/rust.yml/badge.svg)](https://github.com/ggwpez/zepter/actions/workflows/rust.yml)
+[![crates.io](https://img.shields.io/crates/v/zepter.svg)](https://crates.io/crates/zepter)
+[![docs.rs](https://img.shields.io/docsrs/zepter)](https://docs.rs/zepter/latest/zepter)
 
 # Zepter
 

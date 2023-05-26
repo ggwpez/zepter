@@ -1,0 +1,14 @@
+crates:
+- name: A
+  deps:
+  - name: B
+    rename: b
+  features:
+    F0:
+    - - b
+      - F0
+- name: B
+  features:
+    F0: null
+cases:
+- cmd: lint only-enables --precondition F0 --only-enables F0

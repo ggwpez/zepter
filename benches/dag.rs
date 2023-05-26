@@ -2,8 +2,8 @@
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use feature::prelude::*;
 use rand::{Rng, SeedableRng};
+use zepter::prelude::*;
 
 fn build_dag(nodes: usize, edges: usize) -> Dag<usize> {
 	let mut rng = rand::rngs::StdRng::seed_from_u64(42);

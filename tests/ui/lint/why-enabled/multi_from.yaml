@@ -1,0 +1,24 @@
+crates:
+- name: A
+  deps:
+  - B
+  features:
+    F0:
+    - - B
+      - F0
+- name: a
+  deps:
+  - B
+  features:
+    f0:
+    - - B
+      - F0
+- name: B
+  features:
+    F0: null
+cases:
+- cmd: lint why-enabled -p B --feature F0
+  stdout: |
+    Feature F0/B is enabled by:
+      A/F0
+      a/f0

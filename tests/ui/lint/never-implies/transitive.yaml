@@ -1,0 +1,46 @@
+crates:
+- name: A
+  deps:
+  - B
+  - b
+  features:
+    F0:
+    - - B
+      - G0
+    - - b
+      - G1
+- name: B
+  deps:
+  - C
+  features:
+    G0:
+    - - C
+      - H0
+- name: b
+  deps:
+  - C
+  features:
+    G1:
+    - - C
+      - H1
+- name: C
+  features:
+    H1: null
+    H0: null
+cases:
+- cmd: lint never-implies --precondition F0 --stays-disabled H1
+  stdout: |
+    Feature 'F0' implies 'H1' via path:
+      A/F0 -> b/G1 -> C/H1
+- cmd: lint never-implies --precondition F0 --stays-disabled H0
+  stdout: |
+    Feature 'F0' implies 'H0' via path:
+      A/F0 -> B/G0 -> C/H0
+- cmd: lint never-implies --precondition G0 --stays-disabled H0
+  stdout: |
+    Feature 'G0' implies 'H0' via path:
+      B/G0 -> C/H0
+- cmd: lint never-implies --precondition G1 --stays-disabled H1
+  stdout: |
+    Feature 'G1' implies 'H1' via path:
+      b/G1 -> C/H1

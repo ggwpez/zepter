@@ -1,0 +1,13 @@
+repo:
+  name: substrate
+  ref: e94cb0dafd4f30ff29512c1c00ec513ada7d2b5d
+cases:
+- cmd: lint propagate-feature -p frame-support --feature runtime-benchmarks
+  stdout: |
+    crate "frame-support"
+      feature "runtime-benchmarks"
+        must propagate to:
+          frame-system
+          sp-runtime
+          sp-staking
+    Found 3 issues and fixed 0 issues.

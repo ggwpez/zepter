@@ -1,0 +1,24 @@
+crates:
+- name: A
+  deps:
+  - B
+  features:
+    F0:
+    - - B
+      - F0
+- name: B
+  features:
+    F0: null
+cases:
+- cmd: lint why-enabled -p A --feature F0
+  code: 1
+  stdout: |
+    Did not find package A on the rhs of the dependency tree
+- cmd: lint why-enabled --package B --feature F0
+  stdout: |
+    Feature F0/B is enabled by:
+      A/F0
+- cmd: lint why-enabled -p B --feature F1
+  code: 1
+  stdout: |
+    Package B does not have feature F1

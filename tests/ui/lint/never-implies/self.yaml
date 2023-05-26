@@ -1,0 +1,7 @@
+crates:
+- name: A
+  features:
+    F0: null
+cases:
+- cmd: lint never-implies --precondition F0 --stays-disabled F0
+  stdout: ''

@@ -1,0 +1,52 @@
+repo:
+  name: substrate
+  ref: da3c1d6477c0725b2cfd0b17c85763431b855e66
+cases:
+- cmd: lint propagate-feature -p frame --feature std
+  stdout: |
+    Found no issues.
+- cmd: lint propagate-feature -p frame --feature std --workspace
+  stdout: |
+    Found no issues.
+- cmd: lint propagate-feature -p frame --feature runtime-benchmarks
+  stdout: |
+    crate "frame"
+      feature "runtime-benchmarks"
+        is required by 3 dependencies:
+          frame-support
+          frame-system
+          sp-runtime
+    Found 3 issues and fixed 0 issues.
+- cmd: lint propagate-feature -p frame --feature runtime-benchmarks --workspace
+  stdout: |
+    crate "frame"
+      feature "runtime-benchmarks"
+        is required by 3 dependencies:
+          frame-support
+          frame-system
+          sp-runtime
+    Found 3 issues and fixed 0 issues.
+- cmd: lint propagate-feature -p frame --feature try-runtime
+  stdout: |
+    crate "frame"
+      feature "try-runtime"
+        is required by 4 dependencies:
+          frame-executive
+          frame-support
+          frame-system
+          sp-runtime
+    Found 4 issues and fixed 0 issues.
+- cmd: lint propagate-feature -p frame --feature try-runtime --workspace
+  stdout: |
+    crate "frame"
+      feature "try-runtime"
+        is required by 4 dependencies:
+          frame-executive
+          frame-support
+          frame-system
+          sp-runtime
+    Found 4 issues and fixed 0 issues.
+- cmd: lint never-enables --precondition default --stays-disabled runtime-benchmarks
+- cmd: lint never-enables --precondition default --stays-disabled try-runtime
+- cmd: lint never-enables --precondition default --stays-disabled runtime-benchmarks --workspace
+- cmd: lint never-enables --precondition default --stays-disabled try-runtime --workspace

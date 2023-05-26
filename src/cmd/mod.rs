@@ -10,6 +10,7 @@ use cargo_metadata::{Dependency, Metadata, MetadataCommand, Package, Resolve};
 
 /// See out how Rust dependencies and features are enabled.
 #[derive(Debug, clap::Parser)]
+#[command(author, version, about, long_about = None)]
 pub struct Command {
 	#[clap(subcommand)]
 	subcommand: SubCommand,
@@ -42,7 +43,7 @@ impl Command {
 
 /// Arguments for how to load cargo metadata from a workspace.
 #[derive(Debug, clap::Parser)]
-pub struct TreeArgs {
+pub struct CargoArgs {
 	/// Cargo manifest path or directory.
 	///
 	/// For directories it appends a `Cargo.toml`.
@@ -56,9 +57,12 @@ pub struct TreeArgs {
 	/// Whether to use offline mode.
 	#[clap(long, global = true)]
 	pub offline: bool,
+
+	#[clap(long, global = true)]
+	pub all_features: bool,
 }
 
-impl TreeArgs {
+impl CargoArgs {
 	/// Load the metadata of the rust project.
 	pub fn load_metadata(&self) -> Result<Metadata, String> {
 		let mut cmd = MetadataCommand::new();
@@ -67,7 +71,7 @@ impl TreeArgs {
 		} else {
 			self.manifest_path.clone()
 		};
-		log::debug!("Using manifest path: {:?}", manifest_path);
+		log::debug!("Manifest at: {:?}", manifest_path);
 		cmd.manifest_path(&manifest_path);
 		cmd.features(cargo_metadata::CargoOpt::AllFeatures);
 
@@ -85,7 +89,11 @@ impl TreeArgs {
 /// Resolve the dependency `dep` of `pkg` within the metadata.
 ///
 /// This checks whether the dependency is a workspace or external crate and resolves it accordingly.
-pub(crate) fn resolve_dep(pkg: &Package, dep: &Dependency, meta: &Metadata) -> Option<Package> {
+pub(crate) fn resolve_dep(
+	pkg: &Package,
+	dep: &Dependency,
+	meta: &Metadata,
+) -> Option<RenamedPackage> {
 	match meta.resolve.as_ref() {
 		Some(resolve) => resolve_dep_from_graph(pkg, dep, (meta, resolve)),
 		None => resolve_dep_from_workspace(dep, meta),
@@ -95,10 +103,14 @@ pub(crate) fn resolve_dep(pkg: &Package, dep: &Dependency, meta: &Metadata) -> O
 /// Resolve the dependency `dep` within the workspace.
 ///
 /// Errors if `dep` is not a workspace member.
-pub(crate) fn resolve_dep_from_workspace(dep: &Dependency, meta: &Metadata) -> Option<Package> {
+pub(crate) fn resolve_dep_from_workspace(
+	dep: &Dependency,
+	meta: &Metadata,
+) -> Option<RenamedPackage> {
 	for work in meta.workspace_packages() {
 		if work.name == dep.name {
-			return meta.packages.iter().find(|pkg| pkg.id == work.id).cloned()
+			let pkg = meta.packages.iter().find(|pkg| pkg.id == work.id).cloned();
+			return pkg.map(|pkg| RenamedPackage::new(pkg, dep.rename.clone(), dep.optional))
 		}
 	}
 	None
@@ -112,11 +124,50 @@ pub(crate) fn resolve_dep_from_graph(
 	pkg: &Package,
 	dep: &Dependency,
 	(meta, resolve): (&Metadata, &Resolve),
-) -> Option<Package> {
-	let dep_name = dep.name.replace('-', "_");
+) -> Option<RenamedPackage> {
+	let dep_name = dep.rename.clone().unwrap_or(dep.name.clone()).replace('-', "_");
 	let resolved_pkg = resolve.nodes.iter().find(|node| node.id == pkg.id)?;
 	let resolved_dep_id = resolved_pkg.deps.iter().find(|node| node.name == dep_name)?;
 	let resolve_dep = meta.packages.iter().find(|pkg| pkg.id == resolved_dep_id.pkg)?;
 
-	Some(resolve_dep.clone())
+	Some(RenamedPackage::new(resolve_dep.clone(), dep.rename.clone(), dep.optional))
+}
+
+#[derive(Clone, Debug, serde::Serialize, PartialEq, Eq)]
+pub struct RenamedPackage {
+	pub pkg: Package,
+	pub rename: Option<String>,
+	pub optional: bool,
+}
+
+impl RenamedPackage {
+	pub fn new(pkg: Package, rename: Option<String>, optional: bool) -> Self {
+		Self { pkg, rename, optional }
+	}
+
+	pub fn name(&self) -> String {
+		self.rename.clone().unwrap_or(self.pkg.name.clone())
+	}
+
+	pub fn display_name(&self) -> String {
+		match &self.rename {
+			Some(rename) => format!("{} (renamed from {})", rename, self.pkg.name),
+			None => self.pkg.name.clone(),
+		}
+	}
+}
+
+impl Ord for RenamedPackage {
+	fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+		// Yikes...
+		//bincode::serialize(self).unwrap().cmp(&bincode::serialize(other).unwrap())
+
+		self.pkg.id.cmp(&other.pkg.id)
+	}
+}
+
+impl PartialOrd for RenamedPackage {
+	fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+		Some(self.cmp(other))
+	}
 }

@@ -1,0 +1,43 @@
+crates:
+- name: A
+  deps:
+  - B
+  - b
+  features:
+    F0:
+    - - B
+      - G0
+    - - b
+      - G0
+- name: B
+  deps:
+  - C
+  features:
+    G0:
+    - - C
+      - G0
+- name: b
+  deps:
+  - C
+  features:
+    G0:
+    - - C
+      - G0
+- name: C
+  features:
+    G0: null
+cases:
+- cmd: lint never-enables --precondition F0 --stays-disabled G0
+  stdout: |
+    crate "A"
+      feature "F0"
+        enables feature "G0" on dependencies:
+          B
+          b
+- cmd: lint never-enables --precondition F0 --stays-disabled G0 --workspace
+  stdout: |
+    crate "A"
+      feature "F0"
+        enables feature "G0" on dependencies:
+          B
+          b

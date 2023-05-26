@@ -24,7 +24,6 @@
 //! passed down:
 //!
 //! ```pre
-//! Analyzing workspace
 //! crate "frame-support"
 //!   feature "runtime-benchmarks"
 //!     must propagate to:
@@ -80,6 +79,7 @@
 pub mod autofix;
 pub mod cmd;
 pub mod dag;
+pub mod mock;
 
 pub mod prelude {
 	pub use super::{

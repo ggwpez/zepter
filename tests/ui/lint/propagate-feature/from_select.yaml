@@ -1,0 +1,40 @@
+crates:
+- name: a
+  deps:
+  - B
+- name: A
+  deps:
+  - B
+- name: B
+  features:
+    F0: null
+cases:
+- cmd: lint propagate-feature --feature F0
+  stdout: |
+    crate "A"
+      feature "F0"
+        is required by 1 dependency:
+          B
+    crate "a"
+      feature "F0"
+        is required by 1 dependency:
+          B
+    Found 2 issues and fixed 0 issues.
+- cmd: lint propagate-feature -p a --feature F0
+  stdout: |
+    crate "a"
+      feature "F0"
+        is required by 1 dependency:
+          B
+    Found 1 issue and fixed 0 issues.
+- cmd: lint propagate-feature -p a A --feature F0
+  stdout: |
+    crate "A"
+      feature "F0"
+        is required by 1 dependency:
+          B
+    crate "a"
+      feature "F0"
+        is required by 1 dependency:
+          B
+    Found 2 issues and fixed 0 issues.

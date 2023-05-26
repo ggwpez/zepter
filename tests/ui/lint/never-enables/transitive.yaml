@@ -1,0 +1,21 @@
+crates:
+- name: A
+  deps:
+  - B
+  features:
+    F0:
+    - - B
+      - G0
+- name: B
+  deps:
+  - C
+  features:
+    G0:
+    - - C
+      - H0
+- name: C
+  features:
+    H0: null
+cases:
+- cmd: lint never-enables --precondition F0 --stays-disabled H0
+  stdout: ''

@@ -4,7 +4,7 @@
 //! Entry point of the program.
 
 use clap::Parser;
-use feature::cmd::Command;
+use zepter::cmd::Command;
 
 fn main() {
 	let cmd = Command::parse();

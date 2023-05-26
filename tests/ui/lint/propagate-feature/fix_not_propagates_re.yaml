@@ -1,0 +1,55 @@
+crates:
+- name: A
+  deps:
+  - name: B
+    rename: b
+  features:
+    F0: null
+- name: B
+  features:
+    F0: null
+cases:
+- cmd: lint propagate-feature --feature F0 --fix
+  stdout: |
+    crate "A"
+      feature "F0"
+        must propagate to:
+          b (renamed from B)
+    Found 1 issue and fixed 1 issue.
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 32139a6..60c5cb7 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,6 @@ b = { package = \"B\", version = \"*\", path = \"../B\"}\n \n [features]\n F0 = [\n+\t\"b/F0\"\n+\n ]\n"
+- cmd: lint propagate-feature -p A --feature F0 --fix
+  stdout: |
+    crate "A"
+      feature "F0"
+        must propagate to:
+          b (renamed from B)
+    Found 1 issue and fixed 1 issue.
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 32139a6..60c5cb7 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,6 @@ b = { package = \"B\", version = \"*\", path = \"../B\"}\n \n [features]\n F0 = [\n+\t\"b/F0\"\n+\n ]\n"
+- cmd: lint propagate-feature -p B --feature F0 --fix
+  stdout: |
+    Found no issues.
+- cmd: lint propagate-feature -p B --feature F1 --fix
+  stdout: |
+    Found no issues.
+- cmd: lint propagate-feature --feature F0 --workspace --fix
+  stdout: |
+    crate "A"
+      feature "F0"
+        must propagate to:
+          b (renamed from B)
+    Found 1 issue and fixed 1 issue.
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 32139a6..60c5cb7 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,6 @@ b = { package = \"B\", version = \"*\", path = \"../B\"}\n \n [features]\n F0 = [\n+\t\"b/F0\"\n+\n ]\n"
+- cmd: lint propagate-feature -p A --feature F0 --workspace --fix
+  stdout: |
+    crate "A"
+      feature "F0"
+        must propagate to:
+          b (renamed from B)
+    Found 1 issue and fixed 1 issue.
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 32139a6..60c5cb7 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,6 @@ b = { package = \"B\", version = \"*\", path = \"../B\"}\n \n [features]\n F0 = [\n+\t\"b/F0\"\n+\n ]\n"
+- cmd: lint propagate-feature -p B --feature F0 --workspace --fix
+  stdout: |
+    Found no issues.
+- cmd: lint propagate-feature -p B --feature F1 --workspace --fix
+  stdout: |
+    Found no issues.

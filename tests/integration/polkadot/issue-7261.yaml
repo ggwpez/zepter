@@ -1,0 +1,15 @@
+repo:
+  name: polkadot
+  ref: dbff1eb1bda7a70d8eef3e9662b369e2188ca563
+cases:
+- cmd: lint propagate-feature -p polkadot-test-runtime --feature std
+  stdout: |
+    crate "polkadot-test-runtime"
+      feature "std"
+        must propagate to:
+          polkadot-runtime-parachains
+          serde_json
+          beefy-primitives (renamed from sp-consensus-beefy)
+          sp-mmr-primitives
+          sp-trie
+    Found 5 issues and fixed 0 issues.

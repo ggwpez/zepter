@@ -1,0 +1,25 @@
+crates:
+- name: A
+  deps:
+  - name: B
+    rename: b
+  features:
+    F0:
+    - - b
+      - F0
+- name: B
+  features:
+    F0: null
+cases:
+- cmd: lint propagate-feature --feature F0
+  stdout: |
+    Found no issues.
+- cmd: lint propagate-feature -p A --feature F0
+  stdout: |
+    Found no issues.
+- cmd: lint propagate-feature --feature F0 --workspace
+  stdout: |
+    Found no issues.
+- cmd: lint propagate-feature -p A --feature F0 --workspace
+  stdout: |
+    Found no issues.

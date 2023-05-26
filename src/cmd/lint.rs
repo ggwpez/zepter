@@ -495,12 +495,12 @@ impl OnlyEnablesCmd {
 					continue;
 				};
 				if !dep.pkg.features.contains_key(&self.only_enables) {
-					continue;
+					continue
 				}
 
 				for (feat, imply) in pkg.features.iter() {
 					if feat == &self.precondition {
-						continue;
+						continue
 					}
 
 					let opt = if dep.optional { "?" } else { "" };
@@ -509,7 +509,10 @@ impl OnlyEnablesCmd {
 					if imply.contains(&bad) || imply.contains(&bad_opt) {
 						println!(
 							"{}/{} enables {}/{}",
-							pkg.name, feat, dep.name(), self.only_enables
+							pkg.name,
+							feat,
+							dep.name(),
+							self.only_enables
 						);
 					}
 				}

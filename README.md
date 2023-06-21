@@ -81,7 +81,7 @@ zepter trace --manifest-path substrate/Cargo.toml node-cli snow
 
 output:
 
-```
+```pre
 node-cli -> try-runtime-cli -> substrate-rpc-client -> sc-rpc-api -> sc-chain-spec -> sc-telemetry -> libp2p -> libp2p-webrtc -> libp2p-noise -> snow
 ```
 

@@ -26,13 +26,25 @@ fn any_path(dag: &Dag<usize>) {
 
 fn criterion_benchmark(c: &mut Criterion) {
 	let dag = build_dag(1000, 1000);
-	c.bench_function("DAG 1k/1k", |b| b.iter(|| black_box(any_path(&dag))));
+	c.bench_function("DAG 1k/1k", |b| b.iter(|| {
+     any_path(&dag);
+     black_box(())
+ }));
 	let dag = build_dag(1000, 5000);
-	c.bench_function("DAG 1k/5k", |b| b.iter(|| black_box(any_path(&dag))));
+	c.bench_function("DAG 1k/5k", |b| b.iter(|| {
+     any_path(&dag);
+     black_box(())
+ }));
 	let dag = build_dag(10000, 1000);
-	c.bench_function("DAG 10k/1k", |b| b.iter(|| black_box(any_path(&dag))));
+	c.bench_function("DAG 10k/1k", |b| b.iter(|| {
+     any_path(&dag);
+     black_box(())
+ }));
 	let dag = build_dag(10000, 50000);
-	c.bench_function("DAG 10k/50k", |b| b.iter(|| black_box(any_path(&dag))));
+	c.bench_function("DAG 10k/50k", |b| b.iter(|| {
+     any_path(&dag);
+     black_box(())
+ }));
 }
 
 criterion_group!(benches, criterion_benchmark);

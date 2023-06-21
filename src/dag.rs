@@ -158,15 +158,15 @@ where
 	}
 
 	/// Get get a ref to the a LHS node.
-	pub fn lhs_node<'a>(&'a self, from: &T) -> Option<&'a T> {
+	pub fn lhs_node(&self, from: &T) -> Option<&T> {
 		self.edges.get_key_value(from).map(|(k, _)| k)
 	}
 
-	pub fn lhs_nodes<'a>(&'a self) -> impl Iterator<Item = &'a T> {
+	pub fn lhs_nodes(&self) -> impl Iterator<Item = &T> {
 		self.edges.keys()
 	}
 
-	pub fn rhs_nodes<'a>(&'a self) -> impl Iterator<Item = &'a T> {
+	pub fn rhs_nodes(&self) -> impl Iterator<Item = &T> {
 		self.edges.values().flat_map(|v| v.iter())
 	}
 

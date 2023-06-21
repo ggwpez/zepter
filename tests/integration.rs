@@ -28,8 +28,9 @@ pub struct CaseFile {
 impl CaseFile {
 	pub fn from_file(path: &Path) -> Self {
 		let content = fs::read_to_string(path).unwrap();
-		let content = content.replace("\t", "  ");
-		serde_yaml::from_str(&content).expect(&format!("Failed to parse: {}", &path.display()))
+		let content = content.replace('\t', "  ");
+		serde_yaml::from_str(&content)
+			.unwrap_or_else(|_| panic!("Failed to parse: {}", &path.display()))
 	}
 
 	pub fn init(&self) -> Result<PathBuf, Box<dyn std::error::Error>> {
@@ -60,7 +61,7 @@ fn integration() {
 			for arg in case.cmd.split_whitespace() {
 				cmd.arg(arg);
 			}
-			cmd.args(&["--manifest-path", workspace.as_path().to_str().unwrap()]);
+			cmd.args(["--manifest-path", workspace.as_path().to_str().unwrap()]);
 			if i > 0 {
 				cmd.arg("--offline");
 			}
@@ -156,12 +157,12 @@ pub(crate) fn clone_repo(repo: &str, rev: &str) -> Result<PathBuf, Box<dyn std::
 		fetch(&dir, rev)?;
 		checkout(&dir, rev)?;
 	}
-	Ok(dir.clone())
+	Ok(dir)
 }
 
 fn fetch(dir: &PathBuf, rev: &str) -> Result<(), Box<dyn std::error::Error>> {
 	let mut cmd = std::process::Command::new("git");
-	cmd.current_dir(&dir);
+	cmd.current_dir(dir);
 	cmd.arg("fetch");
 	cmd.arg("--depth");
 	cmd.arg("1");
@@ -173,7 +174,7 @@ fn fetch(dir: &PathBuf, rev: &str) -> Result<(), Box<dyn std::error::Error>> {
 
 fn checkout(dir: &PathBuf, rev: &str) -> Result<(), Box<dyn std::error::Error>> {
 	let mut cmd = Command::new("git");
-	cmd.current_dir(&dir);
+	cmd.current_dir(dir);
 	cmd.arg("checkout");
 	cmd.arg(rev);
 	cmd.assert().try_code(0)?;

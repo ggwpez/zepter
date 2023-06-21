@@ -1,0 +1,24 @@
+# Smokescreen testing that it can be installed via cargo and runs.
+name: Cargo install
+
+on:
+  push:
+    branches: [master, dev]
+    tags: ["v*.*.*"]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  install:
+    name: "Smokescreen Install"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Cargo install
+        run: cargo install --git ${{ github.server_url }}/${{ github.repository }} zepter --rev $GITHUB_SHA
+      
+      - name: CLI works
+        run: zepter --version && zepter --help

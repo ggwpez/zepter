@@ -32,14 +32,14 @@ impl Context {
 		assert!(toml_path.exists(), "Crate must exist");
 		// Add the deps
 		let mut out_deps = String::from("");
-		for dep in module.deps.iter().into_iter().flatten() {
+		for dep in module.deps.iter().flatten() {
 			out_deps.push_str(&dep.def());
 		}
 
 		let mut txt = String::from("[features]\n");
-		for (feature, enables) in module.features.iter().into_iter().flatten() {
+		for (feature, enables) in module.features.iter().flatten() {
 			txt.push_str(&format!("{} = [\n", feature));
-			for (dep, feat) in enables.iter().into_iter().flatten() {
+			for (dep, feat) in enables.iter().flatten() {
 				txt.push_str(&format!("\"{}/{}\",\n", dep, feat));
 			}
 			txt.push_str("]\n");
@@ -57,7 +57,7 @@ impl Context {
 		for sub in subs.iter() {
 			txt.push_str(&format!("\"{}\",", sub.name));
 		}
-		txt.push_str("]");
+		txt.push(']');
 		let toml_path = self.root.path().join("Cargo.toml");
 		fs::write(toml_path, txt)?;
 		Ok(())
@@ -109,7 +109,7 @@ fn ui() {
 			for arg in case.cmd.split_whitespace() {
 				cmd.arg(arg);
 			}
-			cmd.args(&["--manifest-path", workspace.root.path().to_str().unwrap()]);
+			cmd.args(["--manifest-path", workspace.root.path().to_str().unwrap()]);
 			cmd.arg("--offline");
 
 			// remove empty trailing and suffix lines
@@ -141,7 +141,7 @@ fn ui() {
 				},
 			}
 
-			let got = git_diff(&workspace.root.path()).unwrap();
+			let got = git_diff(workspace.root.path()).unwrap();
 			if got != case.diff {
 				if std::env::var("OVERWRITE").is_ok() {
 					diff_overwrites.insert(i, got);
@@ -156,7 +156,7 @@ fn ui() {
 				colour::green_ln!("diff:OK");
 				colour::white!("");
 			}
-			git_reset(&workspace.root.path()).unwrap();
+			git_reset(workspace.root.path()).unwrap();
 		}
 
 		if std::env::var("PERSIST").is_ok() {
@@ -191,10 +191,10 @@ impl CaseFile {
 	pub fn init(&self) -> Context {
 		let ctx = Context::new();
 		for module in self.crates.iter() {
-			ctx.create_crate(&module).unwrap();
+			ctx.create_crate(module).unwrap();
 		}
 		ctx.create_workspace(&self.crates).unwrap();
-		git_init(&ctx.root.path()).unwrap();
+		git_init(ctx.root.path()).unwrap();
 		ctx
 	}
 }
@@ -230,14 +230,15 @@ pub enum Dependency {
 impl CaseFile {
 	pub fn from_file(path: &Path) -> Self {
 		let content = fs::read_to_string(path).unwrap();
-		let content = content.replace("\t", "  ");
-		serde_yaml::from_str(&content).expect(&format!("Failed to parse: {}", &path.display()))
+		let content = content.replace('\t', "  ");
+		serde_yaml::from_str(&content)
+			.unwrap_or_else(|_| panic!("Failed to parse: {}", &path.display()))
 	}
 }
 
 impl Dependency {
 	fn def(&self) -> String {
-		let option = if self.optional() { format!(", optional = true") } else { String::new() };
+		let option = if self.optional() { ", optional = true".to_string() } else { String::new() };
 		let mut ret = match self.rename() {
 			Some(rename) => format!("{} = {{ package = \"{}\", ", rename, self.name()),
 			None => format!("{} = {{ ", self.name()),

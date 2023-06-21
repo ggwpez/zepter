@@ -181,8 +181,8 @@ impl NeverImpliesCmd {
 			self.precondition,
 			self.stays_disabled
 		);
-		let pkgs = meta.packages.clone();
-		let dag = build_feature_dag(&meta, &pkgs);
+		let pkgs = &meta.packages;
+		let dag = build_feature_dag(&meta, pkgs);
 
 		for CrateAndFeature(pkg, feature) in dag.lhs_nodes() {
 			let crate_and_feature = CrateAndFeature(pkg.clone(), feature.clone());
@@ -237,7 +237,7 @@ impl NeverEnablesCmd {
 			self.precondition,
 			self.stays_disabled
 		);
-		let pkgs = meta.packages.clone();
+		let pkgs = &meta.packages;
 		// (Crate -> dependencies) that invalidate the assumption.
 		let mut offenders = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
 
@@ -255,7 +255,7 @@ impl NeverEnablesCmd {
 			}
 
 			for rhs in lhs.dependencies.iter() {
-				let Some(rhs) = resolve_dep(&lhs, rhs, &meta) else {
+				let Some(rhs) = resolve_dep(lhs, rhs, &meta) else {
 					continue;
 				};
 
@@ -487,7 +487,7 @@ fn plural(n: usize) -> &'static str {
 impl OnlyEnablesCmd {
 	pub fn run(&self) {
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
-		let pkgs = meta.packages.clone();
+		let pkgs = &meta.packages;
 
 		for pkg in pkgs.iter() {
 			for dep in pkg.dependencies.iter() {
@@ -524,8 +524,8 @@ impl OnlyEnablesCmd {
 impl WhyEnabledCmd {
 	pub fn run(&self) {
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
-		let pkgs = meta.packages.clone();
-		let dag = build_feature_dag(&meta, &pkgs);
+		let dag = build_feature_dag(&meta, &meta.packages);
+		let pkgs = meta.packages;
 		let mut found_crate_and_feature = false;
 		let mut found_crate = false;
 		let mut enabled_by = vec![];
@@ -565,7 +565,7 @@ impl WhyEnabledCmd {
 	}
 }
 
-fn build_feature_dag(meta: &Metadata, pkgs: &Vec<Package>) -> Dag<CrateAndFeature> {
+fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeature> {
 	let mut dag = Dag::new();
 
 	for pkg in pkgs.iter() {
@@ -586,8 +586,8 @@ fn build_feature_dag(meta: &Metadata, pkgs: &Vec<Package>) -> Dag<CrateAndFeatur
 
 		for (feature, deps) in pkg.features.iter() {
 			for dep in deps {
-				if dep.contains(":") {
-					let mut splits = dep.split(":");
+				if dep.contains(':') {
+					let mut splits = dep.split(':');
 					let dep = splits.nth(1).unwrap();
 					let dep_feature = "default";
 					//log::info!("Resolving '{}' as dependency of {}: {:?}", dep, pkg.name,
@@ -598,7 +598,7 @@ fn build_feature_dag(meta: &Metadata, pkgs: &Vec<Package>) -> Dag<CrateAndFeatur
 						.find(|d| d.rename.clone().unwrap_or(d.name.clone()) == dep)
 						.unwrap();
 
-					let dep_id = match resolve_dep(pkg, dep, &meta) {
+					let dep_id = match resolve_dep(pkg, dep, meta) {
 						None => {
 							// This can happen for optional dependencies who are not enabled, or
 							// a weird `target` is specified or it is a dev dependency.
@@ -611,22 +611,20 @@ fn build_feature_dag(meta: &Metadata, pkgs: &Vec<Package>) -> Dag<CrateAndFeatur
 						CrateAndFeature(pkg.id.to_string(), feature.clone()),
 						CrateAndFeature(dep_id.clone(), dep_feature.into()),
 					);
-				} else if dep.contains("/") {
-					let mut splits = dep.split("/");
-					let dep = splits.next().unwrap().replace("?", "");
+				} else if dep.contains('/') {
+					let mut splits = dep.split('/');
+					let dep = splits.next().unwrap().replace('?', "");
 					let dep_feature = splits.next().unwrap();
 
 					let dep = pkg
 						.dependencies
 						.iter()
 						.find(|d| d.rename.clone().unwrap_or(d.name.clone()) == dep)
-						.expect(&format!(
-							"Could not resolve dep {} of {}",
-							dep,
-							pkg.id.to_string()
-						));
+						.unwrap_or_else(|| {
+							panic!("Could not resolve dep {} of {}", dep, pkg.id.to_string())
+						});
 
-					let dep_id = match resolve_dep(pkg, dep, &meta) {
+					let dep_id = match resolve_dep(pkg, dep, meta) {
 						None => {
 							// This can happen for optional dependencies who are not enabled, or
 							// a weird `target` is specified or it is a dev dependency.

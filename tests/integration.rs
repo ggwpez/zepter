@@ -29,7 +29,8 @@ impl CaseFile {
 	pub fn from_file(path: &Path) -> Self {
 		let content = fs::read_to_string(path).unwrap();
 		let content = content.replace('\t', "  ");
-		serde_yaml::from_str(&content).unwrap_or_else(|_| panic!("Failed to parse: {}", &path.display()))
+		serde_yaml::from_str(&content)
+			.unwrap_or_else(|_| panic!("Failed to parse: {}", &path.display()))
 	}
 
 	pub fn init(&self) -> Result<PathBuf, Box<dyn std::error::Error>> {

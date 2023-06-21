@@ -620,11 +620,9 @@ fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeature> 
 						.dependencies
 						.iter()
 						.find(|d| d.rename.clone().unwrap_or(d.name.clone()) == dep)
-						.unwrap_or_else(|| panic!(
-							"Could not resolve dep {} of {}",
-							dep,
-							pkg.id.to_string()
-						));
+						.unwrap_or_else(|| {
+							panic!("Could not resolve dep {} of {}", dep, pkg.id.to_string())
+						});
 
 					let dep_id = match resolve_dep(pkg, dep, meta) {
 						None => {

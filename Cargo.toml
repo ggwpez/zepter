@@ -1,8 +1,8 @@
 [package]
 name = "zepter"
-version = "0.6.0"
+version = "0.6.1"
 edition = "2021"
-description = "See out how Rust dependencies and features are enabled."
+description = "Check if features are correctly propagated in your workspace."
 license = "GPL-3.0-only"
 repository = "https://github.com/ggwpez/zepter"
 
@@ -18,7 +18,7 @@ anyhow = "1.0.71"
 bincode = "1.3.3"
 cargo_metadata = "0.15.4"
 clap = { version = "4.3.5", features = ["derive"] }
-env_logger = "0.10.0"
+env_logger = { version = "0.10.0", features = [ "auto-color", "humantime" ] }
 log = "0.4.19"
 serde = "1.0.164"
 toml_edit = "0.19.10"

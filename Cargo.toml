@@ -2,6 +2,7 @@
 name = "zepter"
 version = "0.6.1"
 edition = "2021"
+authors = [ "Oliver Tale-Yazdi" ]
 description = "Check if features are correctly propagated in your workspace."
 license = "GPL-3.0-only"
 repository = "https://github.com/ggwpez/zepter"
@@ -43,10 +44,16 @@ void = "1.0.2"
 [features]
 testing = []
 
-[profile.release]
-opt-level = 3
-lto = true
-codegen-units = 1
-
 [profile.dev]
 opt-level = 3
+
+[profile.release]
+opt-level = 3
+
+# Improves speed of the DAG logic by 4-20%, but since normally `cargo metadata`
+# takes magnitudes longer than that, there is no real reason to sacrifice human
+# time here when waiting on `cargo install`. So it is disabled by default.
+[profile.optimized]
+inherits = "release"
+lto = true
+codegen-units = 1

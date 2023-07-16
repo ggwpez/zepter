@@ -32,7 +32,7 @@ pub fn normalize(s: &str) -> String {
 	format!("{}\n", lines.join("\n"))
 }
 
-pub fn git_init(dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
+pub fn git_init(dir: &Path) -> Result<(), anyhow::Error> {
 	let mut cmd = Command::new("git");
 	cmd.current_dir(dir);
 	cmd.arg("init");

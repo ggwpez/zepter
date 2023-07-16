@@ -19,7 +19,7 @@ pub struct Context {
 
 impl Context {
 	fn new() -> Self {
-		Self { root: tempfile::tempdir().unwrap() }
+		Self { root: tempfile::tempdir().expect("Must create a temporary directory") }
 	}
 
 	fn persist(self) -> PathBuf {
@@ -27,8 +27,11 @@ impl Context {
 	}
 
 	fn create_crate(&self, module: &CrateConfig) -> Result<(), anyhow::Error> {
-		self.cargo(&format!("new --vcs=none --offline --lib {}", module.name), None)?;
-		let toml_path = self.root.path().join(&module.name).join("Cargo.toml");
+		self.cargo(
+			&format!("new --vcs=none --offline --lib --name {} {}", module.name, module.path()),
+			None,
+		)?;
+		let toml_path = self.root.path().join(&module.path()).join("Cargo.toml");
 		assert!(toml_path.exists(), "Crate must exist");
 		// Add the deps
 		let mut out_deps = String::from("");
@@ -55,7 +58,7 @@ impl Context {
 	fn create_workspace(&self, subs: &[CrateConfig]) -> Result<(), anyhow::Error> {
 		let mut txt = String::from("[workspace]\nmembers = [");
 		for sub in subs.iter() {
-			txt.push_str(&format!("\"{}\",", sub.name));
+			txt.push_str(&format!("\"{}\",", sub.path()));
 		}
 		txt.push(']');
 		let toml_path = self.root.path().join("Cargo.toml");
@@ -97,7 +100,7 @@ fn ui() {
 	// Update each time you add a test.
 	for file in files.filter_map(Result::ok) {
 		let mut config = CaseFile::from_file(&file);
-		let workspace = config.init();
+		let workspace = config.init().expect(&format!("Failed to run test case {file:?}"));
 		let mut overwrites = HashMap::new();
 		let mut diff_overwrites = HashMap::new();
 		let m = config.cases.len();
@@ -188,14 +191,14 @@ fn ui() {
 }
 
 impl CaseFile {
-	pub fn init(&self) -> Context {
+	pub fn init(&self) -> Result<Context, anyhow::Error> {
 		let ctx = Context::new();
 		for module in self.crates.iter() {
-			ctx.create_crate(module).unwrap();
+			ctx.create_crate(module)?;
 		}
-		ctx.create_workspace(&self.crates).unwrap();
-		git_init(ctx.root.path()).unwrap();
-		ctx
+		ctx.create_workspace(&self.crates)?;
+		git_init(ctx.root.path())?;
+		Ok(ctx)
 	}
 }
 
@@ -212,6 +215,23 @@ pub struct CrateConfig {
 	deps: Option<Vec<Dependency>>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	features: Option<HashMap<String, Option<Vec<(String, String)>>>>,
+}
+
+impl CrateConfig {
+	/// Return the file path of this crate.
+	pub fn path(&self) -> String {
+		crate_name_to_path(&self.name)
+	}
+}
+
+/// Convert a crate's name to a file path.
+///
+/// This is needed for case-insensitive file systems like on MacOS. It prefixes all lower-case
+/// letters with an `l` and turns the upper case.
+pub(crate) fn crate_name_to_path(n: &str) -> String {
+	n.chars()
+		.map(|c| if c.is_lowercase() { format!("l{}", c.to_uppercase()) } else { c.into() })
+		.collect()
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
@@ -243,8 +263,12 @@ impl Dependency {
 			Some(rename) => format!("{} = {{ package = \"{}\", ", rename, self.name()),
 			None => format!("{} = {{ ", self.name()),
 		};
-		ret.push_str(&format!("version = \"*\", path = \"../{}\"{}}}\n", self.name(), option));
+		ret.push_str(&format!("version = \"*\", path = \"../{}\"{}}}\n", self.path(), option));
 		ret
+	}
+
+	fn path(&self) -> String {
+		crate_name_to_path(&self.name())
 	}
 
 	fn name(&self) -> String {

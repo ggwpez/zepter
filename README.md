@@ -4,20 +4,20 @@
 
 # Zepter
 
-Understand why and how features are enabled in a rust workspace. `Zepter` is able to automatically fix missing feature propagation to dependencies. Eventually it will be ready for CI use to check an MR for consistent feature usage.
+Analyze and fix feature propagation in your Rust workspace. The goal for this tool is to automatically lint and fix feature propagation in CI runs.
 
 ## Install
 
 ```bash
-cargo install -f zepter
+cargo install -f zepter --locked
 ```
 
 ## Example - Fixing feature propagation
 
-Let's check that the `runtime-benchmarks` feature is properly passed down to all the dependencies of the `frame-support` crate in the workspace of [Substrate]:  
+Let's check that the `runtime-benchmarks` feature is properly passed down to all the dependencies of the `frame-support` crate in the workspace of [Substrate]. You can use commit `395853ac15` to verify it yourself:  
 
 ```bash
-zepter lint propagate-feature --manifest-path ../substrate/Cargo.toml --feature runtime-benchmarks --workspace -p frame-support
+zepter lint propagate-feature --feature runtime-benchmarks -p frame-support --workspace
 ```
 
 The output reveals that there are some dependencies that expose the feature but don't get it passed down:  
@@ -29,18 +29,12 @@ crate "frame-support"
       frame-system
       sp-runtime
       sp-staking
-Generated 1 errors and 0 warnings and fixed 0 issues.
+Found 3 issues and fixed 0 issues.
 ```
 
 Without the `-p` it will detect many more problems. You can verify this for the [frame-support](https://github.com/paritytech/substrate/blob/ce2cee35f8f0fc5968ea6ffaffa6660dcd008804/frame/support/Cargo.toml#L71) which is indeed missing the feature for `sp-runtime` while that is clearly [sp-runtime](https://github.com/paritytech/substrate/blob/0b6aec52a90870c999856cd37f7d04789cdd8dfc/primitives/runtime/Cargo.toml#L43) it 🤔.
 
-This can be fixed by applying the `--fix` flag like:  
-
-```bash
-zepter lint propagate-feature --manifest-path ../substrate/Cargo.toml --feature runtime-benchmarks --workspace -p frame-support --fix
-```
-
-Which results in this diff:
+This can be fixed by appending the `--fix` flag, which results in this diff:
 
 ```patch
 -runtime-benchmarks = []
@@ -51,15 +45,17 @@ Which results in this diff:
 +]
 ```
 
-The auto-fix is currently a bit coarse, and does not check for optional dependencies. It will also not add the feature to crates that do not have it, but need it because of a dependency. This will be fixed soon.
+The auto-fix always enables the features of optional dependencies as optionally features. This is a noninvasive default, but may not correctly enable the dependency itself.
 
 ## Example - Feature tracing
 
 Let's say you want to ensure that specific features are never enabled by default. For this example we will use the `try-runtime` feature of [Substrate]. Check out branch `oty-faulty-feature-demo` and try:
 
 ```bash
-zepter lint never-implies --manifest-path ../substrate/Cargo.toml --precondition default --stays-disabled try-runtime --offline --workspace
+zepter lint never-implies --precondition default --stays-disabled try-runtime --offline --workspace
 ```
+
+The `precondition` defines the feature on the left side of the implication and `stays-disabled` expresses that the precondition never enables the this.
 
 Errors correctly with:
 ```pre
@@ -67,32 +63,30 @@ Feature 'default' implies 'try-runtime' via path:
   frame-benchmarking/default -> frame-benchmarking/std -> frame-system/std -> frame-support/wrong -> frame-support/wrong2 -> frame-support/try-runtime
 ```
 
-This functionality currently only shows the first path that it found as optimization.
+Only the first path is shown in case that there are multiple.
 
 ## Example - Dependency tracing
 
 Recently there was a build error in the [Substrate](https://github.com/paritytech/substrate) master CI which was caused by a downstream dependency [`snow`](https://github.com/mcginty/snow/issues/146). To investigate this, it is useful to see *how* Substrate depends on it.  
 
-Let's find out how `node-cli` depends on `snow`:
+Let's find out how `node-cli` depends on `snow` (example on commit `dd6aedee3b8d5`):
 
 ```bash
-zepter trace --manifest-path substrate/Cargo.toml node-cli snow
+zepter trace node-cli snow
 ```
 
-output:
+It reports that `snow` is pulled in from libp2p - good do know. In this case all paths are displayed.
 
 ```pre
 node-cli -> try-runtime-cli -> substrate-rpc-client -> sc-rpc-api -> sc-chain-spec -> sc-telemetry -> libp2p -> libp2p-webrtc -> libp2p-noise -> snow
 ```
 
-So it comes from libp2p, okay. Good to know.
-
 ## Roadmap
 
-- [ ] Add feature information to the enabled deps
+- [x] Add feature information to the enabled deps
 - [ ] Allow manual skipping of dev dependencies (currently always skipped)
 - [ ] Introduce filters for versions and features for argument `to`
-- [ ] Optimize `shortest_path` function
+- [x] Optimize `shortest_path` function
 - [ ] Create lint rules which can be used to validate that certain constraints in the work-space hold
 
 <!-- LINKS -->

@@ -29,7 +29,7 @@ jobs:
         
       - name: Install Cargo TOML linter
         if: steps.changed-files-specific.outputs.only_changed == 'true'
-        run: cargo install cargo-toml-lint --version 0.1.1
+        run: cargo install cargo-toml-lint --version 0.1.1 --locked
 
       - name: Lint Cargo.toml
         if: steps.changed-files-specific.outputs.only_changed == 'true'

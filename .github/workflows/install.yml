@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Cargo install
-        run: cargo install --git ${{ github.server_url }}/${{ github.repository }} zepter --rev $GITHUB_SHA
+        run: cargo install --git ${{ github.server_url }}/${{ github.repository }} zepter --rev $GITHUB_SHA --locked
       
       - name: CLI works
         run: zepter --version && zepter --help

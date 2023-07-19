@@ -32,6 +32,7 @@ pub fn normalize(s: &str) -> String {
 	format!("{}\n", lines.join("\n"))
 }
 
+/// Create a mocked git repository.
 pub fn git_init(dir: &Path) -> Result<(), anyhow::Error> {
 	let mut cmd = Command::new("git");
 	cmd.current_dir(dir);

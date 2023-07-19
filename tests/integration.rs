@@ -55,7 +55,6 @@ fn integration() {
 		let m = config.cases.len();
 
 		for (i, case) in config.cases.iter().enumerate() {
-			// pad with spaces to len 30
 			colour::white!("Testing {} {}/{} .. ", file.display(), i + 1, m);
 			let mut cmd = Command::cargo_bin("zepter").unwrap();
 			for arg in case.cmd.split_whitespace() {
@@ -149,7 +148,6 @@ pub(crate) fn clone_repo(repo: &str, rev: &str) -> Result<PathBuf, Box<dyn std::
 		cmd.arg(&format!("https://github.com/paritytech/{}", repo));
 		cmd.status()?;
 
-		// git fetch --depth 1 origin
 		fetch(&dir, rev)?;
 	}
 

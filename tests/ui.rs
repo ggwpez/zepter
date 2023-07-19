@@ -137,7 +137,7 @@ fn ui() {
 					);
 				},
 				false => {
-					colour::yellow_ln!("std:OVERWRITE");
+					colour::yellow_ln!("cout:OVERWRITE");
 					colour::white!(" ");
 					overwrites.insert(i, String::from_utf8_lossy(&res.stdout).to_string());
 					failed += 1;
@@ -292,6 +292,7 @@ impl Dependency {
 	}
 }
 
+/// Predicate for serde to skip serialization of default values.
 fn is_false(b: &Option<bool>) -> bool {
 	!b.unwrap_or_default()
 }

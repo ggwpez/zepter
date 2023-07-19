@@ -1,6 +1,6 @@
 [package]
 name = "zepter"
-version = "0.6.1"
+version = "0.6.2"
 edition = "2021"
 authors = [ "Oliver Tale-Yazdi" ]
 description = "Check if features are correctly propagated in your workspace."

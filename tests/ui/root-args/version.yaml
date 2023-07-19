@@ -2,4 +2,4 @@ crates: []
 cases:
 - cmd: --version
   stdout: |
-    zepter 0.6.1
+    zepter 0.6.2

@@ -84,6 +84,7 @@ pub fn git_diff(dir: &Path) -> Result<String, Box<dyn std::error::Error>> {
 	let mut cmd = Command::new("git");
 	cmd.current_dir(dir);
 	cmd.arg("diff");
+	cmd.arg("--abbrev=6"); // Pick a deterministic commit hash len.
 	cmd.arg("--patch");
 	cmd.arg("--no-color");
 	cmd.arg("--minimal");

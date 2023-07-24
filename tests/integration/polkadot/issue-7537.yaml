@@ -10,7 +10,7 @@ cases:
           environmental
           frame-benchmarking
     Found 2 issues and fixed 2.
-  diff: "diff --git xcm/xcm-executor/Cargo.toml xcm/xcm-executor/Cargo.toml\nindex 41463bb..5a57a13 100644\n--- xcm/xcm-executor/Cargo.toml\n+++ xcm/xcm-executor/Cargo.toml\n@@ -36,4 +36,7 @@ std = [\n \t\"sp-weights/std\",\n \t\"frame-support/std\",\n \t\"log/std\",\n+\t\"environmental/std\",\n+\t\"frame-benchmarking?/std\"\n+,\n ]\n"
+  diff: "diff --git xcm/xcm-executor/Cargo.toml xcm/xcm-executor/Cargo.toml\nindex 41463b..5a57a1 100644\n--- xcm/xcm-executor/Cargo.toml\n+++ xcm/xcm-executor/Cargo.toml\n@@ -36,4 +36,7 @@ std = [\n \t\"sp-weights/std\",\n \t\"frame-support/std\",\n \t\"log/std\",\n+\t\"environmental/std\",\n+\t\"frame-benchmarking?/std\"\n+,\n ]\n"
 - cmd: lint propagate-feature -p xcm-executor --feature runtime-benchmarks --fix
   stdout: |
     crate "xcm-executor"
@@ -19,7 +19,7 @@ cases:
           frame-support
           sp-runtime
     Found 2 issues and fixed 2.
-  diff: "diff --git xcm/xcm-executor/Cargo.toml xcm/xcm-executor/Cargo.toml\nindex 41463bb..e330e8f 100644\n--- xcm/xcm-executor/Cargo.toml\n+++ xcm/xcm-executor/Cargo.toml\n@@ -24,6 +24,9 @@ frame-benchmarking = { git = \"https://github.com/paritytech/substrate\", branch =\n default = [\"std\"]\n runtime-benchmarks = [\n \t\"frame-benchmarking/runtime-benchmarks\",\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\n+,\n ]\n std = [\n \t\"parity-scale-codec/std\",\n"
+  diff: "diff --git xcm/xcm-executor/Cargo.toml xcm/xcm-executor/Cargo.toml\nindex 41463b..e330e8 100644\n--- xcm/xcm-executor/Cargo.toml\n+++ xcm/xcm-executor/Cargo.toml\n@@ -24,6 +24,9 @@ frame-benchmarking = { git = \"https://github.com/paritytech/substrate\", branch =\n default = [\"std\"]\n runtime-benchmarks = [\n \t\"frame-benchmarking/runtime-benchmarks\",\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\n+,\n ]\n std = [\n \t\"parity-scale-codec/std\",\n"
 - cmd: lint propagate-feature -p xcm-executor --feature runtime-benchmarks --fix --feature-enables-dep "runtime-benchmarks:frame-benchmarking"
   stdout: |
     crate "xcm-executor"
@@ -28,4 +28,4 @@ cases:
           frame-support
           sp-runtime
     Found 2 issues and fixed 2.
-  diff: "diff --git xcm/xcm-executor/Cargo.toml xcm/xcm-executor/Cargo.toml\nindex 41463bb..e330e8f 100644\n--- xcm/xcm-executor/Cargo.toml\n+++ xcm/xcm-executor/Cargo.toml\n@@ -24,6 +24,9 @@ frame-benchmarking = { git = \"https://github.com/paritytech/substrate\", branch =\n default = [\"std\"]\n runtime-benchmarks = [\n \t\"frame-benchmarking/runtime-benchmarks\",\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\n+,\n ]\n std = [\n \t\"parity-scale-codec/std\",\n"
+  diff: "diff --git xcm/xcm-executor/Cargo.toml xcm/xcm-executor/Cargo.toml\nindex 41463b..e330e8 100644\n--- xcm/xcm-executor/Cargo.toml\n+++ xcm/xcm-executor/Cargo.toml\n@@ -24,6 +24,9 @@ frame-benchmarking = { git = \"https://github.com/paritytech/substrate\", branch =\n default = [\"std\"]\n runtime-benchmarks = [\n \t\"frame-benchmarking/runtime-benchmarks\",\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\n+,\n ]\n std = [\n \t\"parity-scale-codec/std\",\n"

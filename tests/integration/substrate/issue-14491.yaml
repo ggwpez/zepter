@@ -11,4 +11,14 @@ cases:
           frame-system
           pallet-balances
           sp-runtime
+    Found 4 issues and fixed 0.
+- cmd: lint propagate-feature -p pallet-name-service --feature try-runtime --fix
+  stdout: |
+    crate "pallet-name-service"
+      feature "try-runtime"
+        is required by 4 dependencies:
+          frame-support
+          frame-system
+          pallet-balances
+          sp-runtime
     Found 4 issues and fixed 0 (4 could not be fixed).

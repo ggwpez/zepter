@@ -14,14 +14,14 @@ cases:
       feature "F0"
         must propagate to:
           B
-    Found 1 issue and fixed 0 issues.
+    Found 1 issue and fixed 0.
 - cmd: lint propagate-feature -p A --feature F0
   stdout: |
     crate "A"
       feature "F0"
         must propagate to:
           B
-    Found 1 issue and fixed 0 issues.
+    Found 1 issue and fixed 0.
 - cmd: lint propagate-feature -p B --feature F0
   stdout: |
     Found no issues.
@@ -34,14 +34,14 @@ cases:
       feature "F0"
         must propagate to:
           B
-    Found 1 issue and fixed 0 issues.
+    Found 1 issue and fixed 0.
 - cmd: lint propagate-feature -p A --feature F0 --workspace
   stdout: |
     crate "A"
       feature "F0"
         must propagate to:
           B
-    Found 1 issue and fixed 0 issues.
+    Found 1 issue and fixed 0.
 - cmd: lint propagate-feature -p B --feature F0 --workspace
   stdout: |
     Found no issues.

@@ -469,13 +469,14 @@ fn error_stats(errors: usize, warnings: usize, fixes: usize, fix: bool) -> Strin
 	if warnings + errors > 0 {
 		ret.push_str(" and");
 	}
-	ret.push_str(&format!(" fixed {} issue{}", fixes, plural(fixes)));
+	ret.push_str(&format!(" fixed {}", fixes));
 	if fix && fixes < errors {
 		ret.push_str(&format!(" ({} could not be fixed)", errors - fixes));
 	}
 	ret
 }
 
+/// Add an plural `s` for English grammar iff `n != 1`.
 fn plural(n: usize) -> &'static str {
 	if n == 1 {
 		""

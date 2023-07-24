@@ -16,7 +16,7 @@ cases:
       feature "F0"
         must propagate to:
           b (renamed from B)
-    Found 1 issue and fixed 1 issue.
+    Found 1 issue and fixed 1.
   diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex ada36d9..8a08766 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,6 @@ b = { package = \"B\", version = \"*\", path = \"../B\", optional = true}\n \n [features]\n F0 = [\n+\t\"b?/F0\"\n+\n ]\n"
 - cmd: lint propagate-feature -p A --feature F0 --fix
   stdout: |
@@ -24,7 +24,7 @@ cases:
       feature "F0"
         must propagate to:
           b (renamed from B)
-    Found 1 issue and fixed 1 issue.
+    Found 1 issue and fixed 1.
   diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex ada36d9..8a08766 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,6 @@ b = { package = \"B\", version = \"*\", path = \"../B\", optional = true}\n \n [features]\n F0 = [\n+\t\"b?/F0\"\n+\n ]\n"
 - cmd: lint propagate-feature -p B --feature F0 --fix
   stdout: |
@@ -38,7 +38,7 @@ cases:
       feature "F0"
         must propagate to:
           b (renamed from B)
-    Found 1 issue and fixed 1 issue.
+    Found 1 issue and fixed 1.
   diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex ada36d9..8a08766 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,6 @@ b = { package = \"B\", version = \"*\", path = \"../B\", optional = true}\n \n [features]\n F0 = [\n+\t\"b?/F0\"\n+\n ]\n"
 - cmd: lint propagate-feature -p A --feature F0 --workspace --fix
   stdout: |
@@ -46,7 +46,7 @@ cases:
       feature "F0"
         must propagate to:
           b (renamed from B)
-    Found 1 issue and fixed 1 issue.
+    Found 1 issue and fixed 1.
   diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex ada36d9..8a08766 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,6 @@ b = { package = \"B\", version = \"*\", path = \"../B\", optional = true}\n \n [features]\n F0 = [\n+\t\"b?/F0\"\n+\n ]\n"
 - cmd: lint propagate-feature -p B --feature F0 --workspace --fix
   stdout: |

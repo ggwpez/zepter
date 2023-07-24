@@ -38,28 +38,28 @@ cases:
       feature "F0"
         must propagate to:
           dd (renamed from D)
-    Found 3 issues and fixed 0 issues.
+    Found 3 issues and fixed 0.
 - cmd: lint propagate-feature -p A --feature F0
   stdout: |
     crate "A"
       feature "F0"
         must propagate to:
           c (renamed from C)
-    Found 1 issue and fixed 0 issues.
+    Found 1 issue and fixed 0.
 - cmd: lint propagate-feature -p B --feature F0
   stdout: |
     crate "B"
       feature "F0"
         is required by 1 dependency:
           d (renamed from D)
-    Found 1 issue and fixed 0 issues.
+    Found 1 issue and fixed 0.
 - cmd: lint propagate-feature -p C --feature F0
   stdout: |
     crate "C"
       feature "F0"
         must propagate to:
           dd (renamed from D)
-    Found 1 issue and fixed 0 issues.
+    Found 1 issue and fixed 0.
 - cmd: lint propagate-feature -p D --feature F0
   stdout: |
     Found no issues.
@@ -80,28 +80,28 @@ cases:
       feature "F0"
         must propagate to:
           dd (renamed from D)
-    Found 3 issues and fixed 0 issues.
+    Found 3 issues and fixed 0.
 - cmd: lint propagate-feature -p A --feature F0 --workspace
   stdout: |
     crate "A"
       feature "F0"
         must propagate to:
           c (renamed from C)
-    Found 1 issue and fixed 0 issues.
+    Found 1 issue and fixed 0.
 - cmd: lint propagate-feature -p B --feature F0 --workspace
   stdout: |
     crate "B"
       feature "F0"
         is required by 1 dependency:
           d (renamed from D)
-    Found 1 issue and fixed 0 issues.
+    Found 1 issue and fixed 0.
 - cmd: lint propagate-feature -p C --feature F0 --workspace
   stdout: |
     crate "C"
       feature "F0"
         must propagate to:
           dd (renamed from D)
-    Found 1 issue and fixed 0 issues.
+    Found 1 issue and fixed 0.
 - cmd: lint propagate-feature -p D --feature F0 --workspace
   stdout: |
     Found no issues.

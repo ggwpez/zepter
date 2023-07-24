@@ -1,0 +1,12 @@
+repo:
+  name: polkadot
+  ref: 30a0be939e09c3ad9c471960091b32a5b3f9c622
+cases:
+- cmd: lint propagate-feature -p xcm-executor --feature std
+  stdout: |
+    crate "xcm-executor"
+      feature "std"
+        must propagate to:
+          environmental
+          frame-benchmarking
+    Found 2 issues and fixed 0.

@@ -16,7 +16,7 @@ cases:
           frame-support
           frame-system
           sp-runtime
-    Found 3 issues and fixed 0 issues.
+    Found 3 issues and fixed 0.
 - cmd: lint propagate-feature -p frame --feature runtime-benchmarks --workspace
   stdout: |
     crate "frame"
@@ -25,7 +25,7 @@ cases:
           frame-support
           frame-system
           sp-runtime
-    Found 3 issues and fixed 0 issues.
+    Found 3 issues and fixed 0.
 - cmd: lint propagate-feature -p frame --feature try-runtime
   stdout: |
     crate "frame"
@@ -35,7 +35,7 @@ cases:
           frame-support
           frame-system
           sp-runtime
-    Found 4 issues and fixed 0 issues.
+    Found 4 issues and fixed 0.
 - cmd: lint propagate-feature -p frame --feature try-runtime --workspace
   stdout: |
     crate "frame"
@@ -45,7 +45,7 @@ cases:
           frame-support
           frame-system
           sp-runtime
-    Found 4 issues and fixed 0 issues.
+    Found 4 issues and fixed 0.
 - cmd: lint never-enables --precondition default --stays-disabled runtime-benchmarks
 - cmd: lint never-enables --precondition default --stays-disabled try-runtime
 - cmd: lint never-enables --precondition default --stays-disabled runtime-benchmarks --workspace

@@ -132,6 +132,16 @@ pub struct PropagateFeatureCmd {
 	#[clap(long, short, num_args(0..))]
 	packages: Vec<String>,
 
+	/// The auto-fixer will enables the feature of the dependencies as non-optional.
+	///
+	/// This can be used in case that a dependency should not be enabled like `dep?/feature` but
+	/// like `dep/feature` instead. In this case you would pass `--feature-enables-dep
+	/// feature:dep`. The option can be passed multiple times, or multiple key-value pairs can be
+	/// passed at once by separating them with a comma like: `--feature-enables-dep
+	/// feature:dep,feature2:dep2`. (TODO: Duplicate entries are undefined).
+	#[clap(long, value_parser = parse_key_val::<String, String>, value_delimiter = ',')]
+	pub feature_enables_dep: Option<Vec<(String, String)>>,
+
 	/// Show crate versions in the output.
 	#[clap(long)]
 	show_version: bool,
@@ -327,7 +337,6 @@ impl PropagateFeatureCmd {
 			for dep in pkg.dependencies.iter() {
 				// TODO handle default features.
 				// Resolve the dep according to the metadata.
-				let optional = dep.optional;
 				let Some(dep) = resolve_dep(pkg, dep, &meta) else {
 					// Either outside workspace or not resolved, possibly due to not being used at all because of the target or whatever.
 					feature_used = true;
@@ -340,13 +349,12 @@ impl PropagateFeatureCmd {
 							feature_missing.entry(pkg.id.to_string()).or_default().insert(dep);
 						},
 						Some(enabled) => {
-							let want = if optional {
-								format!("{}?/{}", dep.name(), feature)
-							} else {
-								format!("{}/{}", dep.name(), feature)
-							};
+							let want_opt = format!("{}?/{}", dep.name(), feature);
+							let want_req = format!("{}/{}", dep.name(), feature);
+							// TODO check that optional deps are only enabled as optional unless
+							// overwritten with `--feature-enables-dep`.
 
-							if !enabled.contains(&want) {
+							if !enabled.contains(&want_opt) && !enabled.contains(&want_req) {
 								propagate_missing
 									.entry(pkg.id.to_string())
 									.or_default()
@@ -422,7 +430,11 @@ impl PropagateFeatureCmd {
 						let Some(fixer) = fixer.as_mut() else {
 							continue;
 						};
-						let opt = if dep.optional { "?" } else { "" };
+						let non_optional = self
+							.feature_enables_dep
+							.as_ref()
+							.map_or(false, |v| v.contains(&(feature.clone(), dep_name.clone())));
+						let opt = if !non_optional && dep.optional { "?" } else { "" };
 
 						fixer
 							.add_to_feature(
@@ -451,6 +463,23 @@ impl PropagateFeatureCmd {
 		}
 		println!("{}.", error_stats(errors, warnings, fixes, self.fix));
 	}
+}
+
+/// Parse a single key-value pair
+///
+/// Copy & paste from <https://github.com/clap-rs/clap/blob/master/examples/typed-derive.rs>
+fn parse_key_val<T, U>(
+	s: &str,
+) -> Result<(T, U), Box<dyn std::error::Error + Send + Sync + 'static>>
+where
+	T: std::str::FromStr,
+	T::Err: std::error::Error + Send + Sync + 'static,
+	U: std::str::FromStr,
+	U::Err: std::error::Error + Send + Sync + 'static,
+{
+	let s = s.trim_matches('"');
+	let pos = s.find(':').ok_or_else(|| format!("invalid KEY=value: no `:` found in `{s}`"))?;
+	Ok((s[..pos].parse()?, s[pos + 1..].parse()?))
 }
 
 fn error_stats(errors: usize, warnings: usize, fixes: usize, fix: bool) -> String {

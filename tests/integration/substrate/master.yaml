@@ -97,14 +97,9 @@ cases:
       feature "runtime-benchmarks"
         must propagate to:
           frame-election-provider-support
-          frame-system-benchmarking
           pallet-asset-tx-payment
-          pallet-election-provider-support-benchmarking
           pallet-nomination-pools
-          pallet-nomination-pools-benchmarking
           pallet-offences
-          pallet-offences-benchmarking
-          pallet-session-benchmarking
           sp-staking
     crate "mmr-gadget"
       feature "runtime-benchmarks"
@@ -122,7 +117,6 @@ cases:
     crate "node-cli"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking-cli
           frame-system
           pallet-asset-tx-payment
           pallet-assets
@@ -171,11 +165,6 @@ cases:
           frame-system
           sc-service
           sp-runtime
-    crate "node-template-runtime"
-      feature "runtime-benchmarks"
-        must propagate to:
-          frame-benchmarking
-          frame-system-benchmarking
     crate "node-testing"
       feature "runtime-benchmarks"
         is required by 7 dependencies:
@@ -189,25 +178,20 @@ cases:
     crate "pallet-alliance"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
-          pallet-collective
     crate "pallet-asset-rate"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
     crate "pallet-asset-tx-payment"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           pallet-assets
           pallet-balances
     crate "pallet-assets"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           pallet-balances
     crate "pallet-atomic-swap"
@@ -239,7 +223,6 @@ cases:
     crate "pallet-babe"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-election-provider-support
           frame-support
           frame-system
@@ -252,10 +235,8 @@ cases:
     crate "pallet-bags-list"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
-          pallet-balances
           sp-runtime
     crate "pallet-bags-list-fuzzer"
       feature "runtime-benchmarks"
@@ -274,7 +255,6 @@ cases:
     crate "pallet-balances"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           sp-runtime
@@ -301,7 +281,6 @@ cases:
     crate "pallet-bounties"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           pallet-treasury
           sp-runtime
@@ -313,14 +292,9 @@ cases:
           pallet-bounties
           pallet-treasury
           sp-runtime
-    crate "pallet-collective"
-      feature "runtime-benchmarks"
-        must propagate to:
-          frame-benchmarking
     crate "pallet-contracts"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           pallet-balances
@@ -335,17 +309,11 @@ cases:
     crate "pallet-conviction-voting"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           pallet-scheduler
-    crate "pallet-core-fellowship"
-      feature "runtime-benchmarks"
-        must propagate to:
-          frame-benchmarking
     crate "pallet-democracy"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           pallet-preimage
           pallet-scheduler
@@ -372,7 +340,6 @@ cases:
     crate "pallet-election-provider-multi-phase"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           pallet-balances
@@ -381,19 +348,16 @@ cases:
     crate "pallet-election-provider-support-benchmarking"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-system
           sp-runtime
     crate "pallet-elections-phragmen"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           sp-runtime
     crate "pallet-example-basic"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           pallet-balances
@@ -407,7 +371,6 @@ cases:
     crate "pallet-fast-unstake"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-election-provider-support
           frame-support
           pallet-balances
@@ -417,13 +380,11 @@ cases:
     crate "pallet-glutton"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           pallet-balances
     crate "pallet-grandpa"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-election-provider-support
           frame-support
           frame-system
@@ -436,13 +397,11 @@ cases:
     crate "pallet-identity"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           sp-runtime
     crate "pallet-im-online"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           sp-runtime
@@ -450,7 +409,6 @@ cases:
     crate "pallet-indices"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           sp-runtime
     crate "pallet-insecure-randomness-collective-flip"
@@ -462,35 +420,26 @@ cases:
     crate "pallet-lottery"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           sp-runtime
-    crate "pallet-membership"
-      feature "runtime-benchmarks"
-        must propagate to:
-          frame-benchmarking
     crate "pallet-message-queue"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           sp-runtime
     crate "pallet-mmr"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           sp-runtime
     crate "pallet-multisig"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           sp-runtime
     crate "pallet-nft-fractionalization"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           pallet-assets
           pallet-balances
@@ -498,7 +447,6 @@ cases:
     crate "pallet-nfts"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           pallet-balances
     crate "pallet-nfts-runtime-api"
@@ -516,7 +464,6 @@ cases:
     crate "pallet-nis"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           sp-runtime
     crate "pallet-node-authorization"
@@ -593,14 +540,9 @@ cases:
     crate "pallet-proxy"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           pallet-utility
           sp-runtime
-    crate "pallet-ranked-collective"
-      feature "runtime-benchmarks"
-        must propagate to:
-          frame-benchmarking
     crate "pallet-recovery"
       feature "runtime-benchmarks"
         must propagate to:
@@ -616,7 +558,6 @@ cases:
     crate "pallet-remark"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           sp-runtime
@@ -637,10 +578,6 @@ cases:
           frame-support
           frame-system
           sp-runtime
-    crate "pallet-salary"
-      feature "runtime-benchmarks"
-        must propagate to:
-          frame-benchmarking
     crate "pallet-scheduler"
       feature "runtime-benchmarks"
         must propagate to:
@@ -680,7 +617,6 @@ cases:
     crate "pallet-staking"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           pallet-bags-list
@@ -709,26 +645,22 @@ cases:
     crate "pallet-sudo"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
     crate "pallet-template"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           sp-runtime
     crate "pallet-timestamp"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           sp-runtime
     crate "pallet-tips"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           pallet-treasury
           sp-runtime
@@ -750,7 +682,6 @@ cases:
     crate "pallet-transaction-storage"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           pallet-balances
@@ -758,27 +689,23 @@ cases:
     crate "pallet-treasury"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           pallet-utility
           sp-runtime
     crate "pallet-uniques"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           pallet-balances
     crate "pallet-utility"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           pallet-timestamp
           sp-runtime
     crate "pallet-vesting"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           pallet-balances
@@ -1153,7 +1080,7 @@ cases:
         is required by 2 dependencies:
           sc-service
           sp-runtime
-    Found 549 issues and fixed 0.
+    Found 494 issues and fixed 0.
 - cmd: lint propagate-feature --feature runtime-benchmarks --workspace
   stdout: |
     crate "binary-merkle-tree"
@@ -1249,14 +1176,9 @@ cases:
       feature "runtime-benchmarks"
         must propagate to:
           frame-election-provider-support
-          frame-system-benchmarking
           pallet-asset-tx-payment
-          pallet-election-provider-support-benchmarking
           pallet-nomination-pools
-          pallet-nomination-pools-benchmarking
           pallet-offences
-          pallet-offences-benchmarking
-          pallet-session-benchmarking
           sp-staking
     crate "mmr-gadget"
       feature "runtime-benchmarks"
@@ -1274,7 +1196,6 @@ cases:
     crate "node-cli"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking-cli
           frame-system
           pallet-asset-tx-payment
           pallet-assets
@@ -1323,11 +1244,6 @@ cases:
           frame-system
           sc-service
           sp-runtime
-    crate "node-template-runtime"
-      feature "runtime-benchmarks"
-        must propagate to:
-          frame-benchmarking
-          frame-system-benchmarking
     crate "node-testing"
       feature "runtime-benchmarks"
         is required by 7 dependencies:
@@ -1341,25 +1257,20 @@ cases:
     crate "pallet-alliance"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
-          pallet-collective
     crate "pallet-asset-rate"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
     crate "pallet-asset-tx-payment"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           pallet-assets
           pallet-balances
     crate "pallet-assets"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           pallet-balances
     crate "pallet-atomic-swap"
@@ -1391,7 +1302,6 @@ cases:
     crate "pallet-babe"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-election-provider-support
           frame-support
           frame-system
@@ -1404,10 +1314,8 @@ cases:
     crate "pallet-bags-list"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
-          pallet-balances
           sp-runtime
     crate "pallet-bags-list-fuzzer"
       feature "runtime-benchmarks"
@@ -1426,7 +1334,6 @@ cases:
     crate "pallet-balances"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           sp-runtime
@@ -1453,7 +1360,6 @@ cases:
     crate "pallet-bounties"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           pallet-treasury
           sp-runtime
@@ -1465,14 +1371,9 @@ cases:
           pallet-bounties
           pallet-treasury
           sp-runtime
-    crate "pallet-collective"
-      feature "runtime-benchmarks"
-        must propagate to:
-          frame-benchmarking
     crate "pallet-contracts"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           pallet-balances
@@ -1487,17 +1388,11 @@ cases:
     crate "pallet-conviction-voting"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           pallet-scheduler
-    crate "pallet-core-fellowship"
-      feature "runtime-benchmarks"
-        must propagate to:
-          frame-benchmarking
     crate "pallet-democracy"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           pallet-preimage
           pallet-scheduler
@@ -1524,7 +1419,6 @@ cases:
     crate "pallet-election-provider-multi-phase"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           pallet-balances
@@ -1533,19 +1427,16 @@ cases:
     crate "pallet-election-provider-support-benchmarking"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-system
           sp-runtime
     crate "pallet-elections-phragmen"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           sp-runtime
     crate "pallet-example-basic"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           pallet-balances
@@ -1559,7 +1450,6 @@ cases:
     crate "pallet-fast-unstake"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-election-provider-support
           frame-support
           pallet-balances
@@ -1569,13 +1459,11 @@ cases:
     crate "pallet-glutton"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           pallet-balances
     crate "pallet-grandpa"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-election-provider-support
           frame-support
           frame-system
@@ -1588,13 +1476,11 @@ cases:
     crate "pallet-identity"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           sp-runtime
     crate "pallet-im-online"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           sp-runtime
@@ -1602,7 +1488,6 @@ cases:
     crate "pallet-indices"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           sp-runtime
     crate "pallet-insecure-randomness-collective-flip"
@@ -1614,35 +1499,26 @@ cases:
     crate "pallet-lottery"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           sp-runtime
-    crate "pallet-membership"
-      feature "runtime-benchmarks"
-        must propagate to:
-          frame-benchmarking
     crate "pallet-message-queue"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           sp-runtime
     crate "pallet-mmr"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           sp-runtime
     crate "pallet-multisig"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           sp-runtime
     crate "pallet-nft-fractionalization"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           pallet-assets
           pallet-balances
@@ -1650,7 +1526,6 @@ cases:
     crate "pallet-nfts"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           pallet-balances
     crate "pallet-nfts-runtime-api"
@@ -1668,7 +1543,6 @@ cases:
     crate "pallet-nis"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           sp-runtime
     crate "pallet-node-authorization"
@@ -1745,14 +1619,9 @@ cases:
     crate "pallet-proxy"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           pallet-utility
           sp-runtime
-    crate "pallet-ranked-collective"
-      feature "runtime-benchmarks"
-        must propagate to:
-          frame-benchmarking
     crate "pallet-recovery"
       feature "runtime-benchmarks"
         must propagate to:
@@ -1768,7 +1637,6 @@ cases:
     crate "pallet-remark"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           sp-runtime
@@ -1789,10 +1657,6 @@ cases:
           frame-support
           frame-system
           sp-runtime
-    crate "pallet-salary"
-      feature "runtime-benchmarks"
-        must propagate to:
-          frame-benchmarking
     crate "pallet-scheduler"
       feature "runtime-benchmarks"
         must propagate to:
@@ -1832,7 +1696,6 @@ cases:
     crate "pallet-staking"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           pallet-bags-list
@@ -1861,26 +1724,22 @@ cases:
     crate "pallet-sudo"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
     crate "pallet-template"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           sp-runtime
     crate "pallet-timestamp"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           sp-runtime
     crate "pallet-tips"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           pallet-treasury
           sp-runtime
@@ -1902,7 +1761,6 @@ cases:
     crate "pallet-transaction-storage"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           pallet-balances
@@ -1910,27 +1768,23 @@ cases:
     crate "pallet-treasury"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           pallet-utility
           sp-runtime
     crate "pallet-uniques"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           pallet-balances
     crate "pallet-utility"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           pallet-timestamp
           sp-runtime
     crate "pallet-vesting"
       feature "runtime-benchmarks"
         must propagate to:
-          frame-benchmarking
           frame-support
           frame-system
           pallet-balances
@@ -2305,17 +2159,13 @@ cases:
         is required by 2 dependencies:
           sc-service
           sp-runtime
-    Found 549 issues and fixed 0.
+    Found 494 issues and fixed 0.
 - cmd: lint propagate-feature --feature std
   stdout: |
     crate "Inflector"
       feature "std"
         is required by 1 dependency:
           regex
-    crate "aead"
-      feature "std"
-        must propagate to:
-          rand_core
     crate "aes"
       feature "std"
         is required by 1 dependency:
@@ -2483,7 +2333,6 @@ cases:
     crate "binary-merkle-tree"
       feature "std"
         must propagate to:
-          log
           sp-core
           sp-runtime
     crate "bincode"
@@ -2560,7 +2409,6 @@ cases:
     crate "chacha20"
       feature "std"
         must propagate to:
-          cipher
           zeroize
     crate "chacha20poly1305"
       feature "std"
@@ -2596,7 +2444,6 @@ cases:
       feature "std"
         must propagate to:
           core2
-          multibase
           serde
     crate "clang-sys"
       feature "std"
@@ -2680,15 +2527,6 @@ cases:
       feature "std"
         is required by 1 dependency:
           cast
-    crate "crossbeam-channel"
-      feature "std"
-        must propagate to:
-          crossbeam-utils
-    crate "crossbeam-deque"
-      feature "std"
-        must propagate to:
-          crossbeam-epoch
-          crossbeam-utils
     crate "crypto-bigint"
       feature "std"
         is required by 3 dependencies:
@@ -2806,8 +2644,6 @@ cases:
     crate "ed25519-dalek"
       feature "std"
         must propagate to:
-          rand
-          serde_crate (renamed from serde)
           zeroize
     crate "ed25519-zebra"
       feature "std"
@@ -2891,15 +2727,7 @@ cases:
         must propagate to:
           futures
           log
-          parity-scale-codec
           rand
-          scale-info
-    crate "fixed-hash"
-      feature "std"
-        must propagate to:
-          byteorder
-          rand
-          rustc-hex
     crate "flate2"
       feature "std"
         is required by 2 dependencies:
@@ -2980,11 +2808,6 @@ cases:
           pallet-transaction-payment
           sp-inherents
           sp-version
-    crate "frame-metadata"
-      feature "std"
-        must propagate to:
-          scale-info
-          serde
     crate "frame-remote-externalities"
       feature "std"
         is required by 10 dependencies:
@@ -3007,7 +2830,6 @@ cases:
           serde
           serde_json
           sp-debug-derive
-          sp-state-machine
     crate "frame-support-test"
       feature "std"
         must propagate to:
@@ -3097,9 +2919,7 @@ cases:
     crate "gimli"
       feature "std"
         must propagate to:
-          fallible-iterator
           indexmap
-          stable_deref_trait
     crate "git2"
       feature "std"
         is required by 2 dependencies:
@@ -3320,7 +3140,6 @@ cases:
     crate "k256"
       feature "std"
         must propagate to:
-          ecdsa-core (renamed from ecdsa)
           sha2
     crate "keccak-hasher"
       feature "std"
@@ -3496,7 +3315,6 @@ cases:
       feature "std"
         must propagate to:
           digest
-          sha2
     crate "libsecp256k1-core"
       feature "std"
         must propagate to:
@@ -3617,7 +3435,6 @@ cases:
           blake3
           core2
           digest
-          multihash-derive
           sha-2 (renamed from sha2)
           sha-3 (renamed from sha3)
     crate "multihash"
@@ -3625,7 +3442,6 @@ cases:
         must propagate to:
           core2
           digest
-          multihash-derive
           sha-2 (renamed from sha2)
     crate "multistream-select"
       feature "std"
@@ -3840,10 +3656,6 @@ cases:
       feature "std"
         is required by 1 dependency:
           winapi
-    crate "num"
-      feature "std"
-        must propagate to:
-          num-bigint
     crate "num-format"
       feature "std"
         must propagate to:
@@ -3880,19 +3692,15 @@ cases:
     crate "p256"
       feature "std"
         must propagate to:
-          ecdsa-core (renamed from ecdsa)
           sha2
     crate "p384"
       feature "std"
         must propagate to:
-          ecdsa-core (renamed from ecdsa)
           sha2
     crate "pallet-alliance"
       feature "std"
         must propagate to:
           pallet-balances
-          pallet-collective
-          sp-core-hashing
     crate "pallet-asset-rate"
       feature "std"
         must propagate to:
@@ -3939,14 +3747,6 @@ cases:
           pallet-balances
           pallet-offences
           pallet-staking
-    crate "pallet-bags-list"
-      feature "std"
-        must propagate to:
-          frame-benchmarking
-          pallet-balances
-          sp-core
-          sp-io
-          sp-tracing
     crate "pallet-bags-list-fuzzer"
       feature "std"
         is required by 3 dependencies:
@@ -4006,7 +3806,6 @@ cases:
           pallet-timestamp
           pallet-utility
           pretty_assertions
-          rand
           serde
           sp-api
           sp-keystore
@@ -4058,11 +3857,8 @@ cases:
     crate "pallet-election-provider-multi-phase"
       feature "std"
         must propagate to:
-          frame-benchmarking
           pallet-balances
-          rand
           sp-tracing
-          strum
     crate "pallet-elections-phragmen"
       feature "std"
         must propagate to:
@@ -4079,7 +3875,6 @@ cases:
     crate "pallet-fast-unstake"
       feature "std"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           pallet-staking
           pallet-timestamp
@@ -4094,7 +3889,6 @@ cases:
       feature "std"
         must propagate to:
           grandpa (renamed from finality-grandpa)
-          frame-benchmarking
           frame-election-provider-support
           pallet-balances
           pallet-offences
@@ -4143,7 +3937,6 @@ cases:
     crate "pallet-nft-fractionalization"
       feature "std"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           sp-core
           sp-io
@@ -4224,7 +4017,6 @@ cases:
       feature "std"
         must propagate to:
           pallet-balances
-          sp-core
     crate "pallet-proxy"
       feature "std"
         must propagate to:
@@ -4275,10 +4067,6 @@ cases:
         must propagate to:
           pallet-balances
           sp-core
-    crate "pallet-session"
-      feature "std"
-        must propagate to:
-          sp-trie
     crate "pallet-session-benchmarking"
       feature "std"
         must propagate to:
@@ -4299,7 +4087,6 @@ cases:
     crate "pallet-staking"
       feature "std"
         must propagate to:
-          frame-benchmarking
           pallet-bags-list
           pallet-balances
           pallet-timestamp
@@ -4337,7 +4124,6 @@ cases:
       feature "std"
         must propagate to:
           sp-core
-          sp-io
     crate "pallet-tips"
       feature "std"
         must propagate to:
@@ -4526,7 +4312,6 @@ cases:
       feature "std"
         must propagate to:
           libc
-          rand_chacha
     crate "rand_chacha"
       feature "std"
         must propagate to:
@@ -4535,14 +4320,6 @@ cases:
       feature "std"
         must propagate to:
           rand_core
-    crate "rand_core"
-      feature "std"
-        must propagate to:
-          getrandom
-    crate "rand_core"
-      feature "std"
-        must propagate to:
-          getrandom
     crate "rand_distr"
       feature "std"
         must propagate to:
@@ -5320,7 +5097,6 @@ cases:
           arrayvec
           getrandom
           merlin
-          rand
           rand_core
           sha2
           subtle
@@ -5341,7 +5117,6 @@ cases:
       feature "std"
         must propagate to:
           base16ct
-          der
           pkcs8
           subtle
           zeroize
@@ -5392,7 +5167,6 @@ cases:
           approx
           num-complex
           num-traits
-          wide
     crate "snow"
       feature "std"
         is required by 7 dependencies:
@@ -5422,9 +5196,7 @@ cases:
         must propagate to:
           hash-db
           sp-api-proc-macro
-          sp-state-machine
           sp-test-primitives
-          sp-trie
     crate "sp-api-proc-macro"
       feature "std"
         must propagate to:
@@ -5441,10 +5213,6 @@ cases:
           sp-state-machine
           sp-tracing
           sp-version
-    crate "sp-application-crypto"
-      feature "std"
-        must propagate to:
-          serde
     crate "sp-application-crypto-test"
       feature "std"
         is required by 5 dependencies:
@@ -5458,7 +5226,6 @@ cases:
         must propagate to:
           primitive-types
           rand
-          serde
           sp-core
     crate "sp-arithmetic-fuzzer"
       feature "std"
@@ -5489,39 +5256,24 @@ cases:
     crate "sp-consensus-babe"
       feature "std"
         must propagate to:
-          serde
           sp-keystore
           sp-timestamp
     crate "sp-consensus-beefy"
       feature "std"
         must propagate to:
-          serde
           sp-keystore
           strum
     crate "sp-consensus-grandpa"
       feature "std"
         must propagate to:
-          serde
           sp-keystore
-    crate "sp-consensus-slots"
-      feature "std"
-        must propagate to:
-          serde
     crate "sp-core"
       feature "std"
         must propagate to:
-          blake2
-          bs58
-          ed25519-zebra
           futures
-          impl-serde
-          libsecp256k1
           rand
           regex
-          secp256k1
-          serde
           serde_json
-          sp-core-hashing
           sp-externalities
           w3f-bls
           zeroize
@@ -5533,7 +5285,6 @@ cases:
       feature "std"
         must propagate to:
           futures
-          sp-runtime
     crate "sp-io"
       feature "std"
         must propagate to:
@@ -5544,8 +5295,6 @@ cases:
           log
           secp256k1
           sp-keystore
-          sp-state-machine
-          sp-trie
     crate "sp-keyring"
       feature "std"
         is required by 3 dependencies:
@@ -5563,12 +5312,10 @@ cases:
       feature "std"
         must propagate to:
           scale-info
-          serde
     crate "sp-npos-elections"
       feature "std"
         must propagate to:
           rand
-          serde
     crate "sp-npos-elections-fuzzer"
       feature "std"
         is required by 6 dependencies:
@@ -5594,7 +5341,6 @@ cases:
       feature "std"
         must propagate to:
           rand
-          serde
           serde_json
           sp-api
           sp-state-machine
@@ -5622,10 +5368,6 @@ cases:
       feature "std"
         must propagate to:
           bytes
-    crate "sp-session"
-      feature "std"
-        must propagate to:
-          sp-runtime
     crate "sp-staking"
       feature "std"
         must propagate to:
@@ -5643,15 +5385,6 @@ cases:
         must propagate to:
           log
           sp-externalities
-    crate "sp-storage"
-      feature "std"
-        must propagate to:
-          impl-serde
-          serde
-    crate "sp-test-primitives"
-      feature "std"
-        must propagate to:
-          serde
     crate "sp-timestamp"
       feature "std"
         must propagate to:
@@ -5661,7 +5394,6 @@ cases:
         must propagate to:
           log
           sp-core
-          sp-trie
     crate "sp-trie"
       feature "std"
         must propagate to:
@@ -5672,9 +5404,7 @@ cases:
     crate "sp-version"
       feature "std"
         must propagate to:
-          impl-serde
           parity-wasm
-          serde
     crate "sp-version-proc-macro"
       feature "std"
         is required by 2 dependencies:
@@ -5686,10 +5416,6 @@ cases:
           anyhow
           log
           wasmi
-    crate "sp-weights"
-      feature "std"
-        must propagate to:
-          serde
     crate "spinners"
       feature "std"
         is required by 1 dependency:
@@ -6419,7 +6145,7 @@ cases:
       feature "std"
         must propagate to:
           libc
-    Found 2230 issues and fixed 0.
+    Found 2150 issues and fixed 0.
 - cmd: lint propagate-feature --feature std --workspace
   stdout: |
     crate "binary-merkle-tree"
@@ -6493,7 +6219,6 @@ cases:
         must propagate to:
           frame-system
           sp-debug-derive
-          sp-state-machine
     crate "frame-support-test"
       feature "std"
         must propagate to:
@@ -6657,8 +6382,6 @@ cases:
       feature "std"
         must propagate to:
           pallet-balances
-          pallet-collective
-          sp-core-hashing
     crate "pallet-asset-rate"
       feature "std"
         must propagate to:
@@ -6703,14 +6426,6 @@ cases:
           pallet-balances
           pallet-offences
           pallet-staking
-    crate "pallet-bags-list"
-      feature "std"
-        must propagate to:
-          frame-benchmarking
-          pallet-balances
-          sp-core
-          sp-io
-          sp-tracing
     crate "pallet-bags-list-fuzzer"
       feature "std"
         is required by 2 dependencies:
@@ -6809,7 +6524,6 @@ cases:
     crate "pallet-election-provider-multi-phase"
       feature "std"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           sp-tracing
     crate "pallet-elections-phragmen"
@@ -6828,7 +6542,6 @@ cases:
     crate "pallet-fast-unstake"
       feature "std"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           pallet-staking
           pallet-timestamp
@@ -6841,7 +6554,6 @@ cases:
     crate "pallet-grandpa"
       feature "std"
         must propagate to:
-          frame-benchmarking
           frame-election-provider-support
           pallet-balances
           pallet-offences
@@ -6884,7 +6596,6 @@ cases:
     crate "pallet-nft-fractionalization"
       feature "std"
         must propagate to:
-          frame-benchmarking
           pallet-balances
           sp-core
           sp-io
@@ -6956,7 +6667,6 @@ cases:
       feature "std"
         must propagate to:
           pallet-balances
-          sp-core
     crate "pallet-proxy"
       feature "std"
         must propagate to:
@@ -7001,10 +6711,6 @@ cases:
         must propagate to:
           pallet-balances
           sp-core
-    crate "pallet-session"
-      feature "std"
-        must propagate to:
-          sp-trie
     crate "pallet-session-benchmarking"
       feature "std"
         must propagate to:
@@ -7023,7 +6729,6 @@ cases:
     crate "pallet-staking"
       feature "std"
         must propagate to:
-          frame-benchmarking
           pallet-bags-list
           pallet-balances
           pallet-timestamp
@@ -7057,7 +6762,6 @@ cases:
       feature "std"
         must propagate to:
           sp-core
-          sp-io
     crate "pallet-tips"
       feature "std"
         must propagate to:
@@ -7515,9 +7219,7 @@ cases:
       feature "std"
         must propagate to:
           sp-api-proc-macro
-          sp-state-machine
           sp-test-primitives
-          sp-trie
     crate "sp-api-test"
       feature "std"
         must propagate to:
@@ -7573,22 +7275,15 @@ cases:
     crate "sp-core"
       feature "std"
         must propagate to:
-          sp-core-hashing
           sp-externalities
     crate "sp-core-hashing-proc-macro"
       feature "std"
         is required by 1 dependency:
           sp-core-hashing
-    crate "sp-inherents"
-      feature "std"
-        must propagate to:
-          sp-runtime
     crate "sp-io"
       feature "std"
         must propagate to:
           sp-keystore
-          sp-state-machine
-          sp-trie
     crate "sp-keyring"
       feature "std"
         is required by 2 dependencies:
@@ -7626,10 +7321,6 @@ cases:
           sp-runtime-interface-test-wasm
           sp-runtime-interface-test-wasm-deprecated
           sp-state-machine
-    crate "sp-session"
-      feature "std"
-        must propagate to:
-          sp-runtime
     crate "sp-state-machine"
       feature "std"
         must propagate to:
@@ -7642,7 +7333,6 @@ cases:
       feature "std"
         must propagate to:
           sp-core
-          sp-trie
     crate "sp-trie"
       feature "std"
         must propagate to:
@@ -7737,7 +7427,7 @@ cases:
           sp-transaction-storage-proof
           sp-version
           sp-weights
-    Found 757 issues and fixed 0.
+    Found 733 issues and fixed 0.
 - cmd: lint propagate-feature --feature try-runtime
   stdout: |
     crate "binary-merkle-tree"
@@ -7785,7 +7475,6 @@ cases:
       feature "try-runtime"
         must propagate to:
           frame-system
-          frame-try-runtime
           pallet-balances
           pallet-transaction-payment
     crate "frame-remote-externalities"
@@ -7839,7 +7528,6 @@ cases:
       feature "try-runtime"
         must propagate to:
           frame-election-provider-support
-          frame-try-runtime
           sp-runtime
     crate "mmr-gadget"
       feature "try-runtime"
@@ -7865,7 +7553,6 @@ cases:
           pallet-timestamp
           pallet-transaction-payment
           sp-runtime
-          try-runtime-cli
     crate "node-executor"
       feature "try-runtime"
         is required by 13 dependencies:
@@ -7905,11 +7592,9 @@ cases:
           frame-system
           pallet-transaction-payment
           sp-runtime
-          try-runtime-cli
     crate "node-template-runtime"
       feature "try-runtime"
         must propagate to:
-          frame-try-runtime
           sp-runtime
     crate "node-testing"
       feature "try-runtime"
@@ -8845,9 +8530,8 @@ cases:
     crate "try-runtime-cli"
       feature "try-runtime"
         must propagate to:
-          frame-try-runtime
           sp-runtime
-    Found 510 issues and fixed 0.
+    Found 504 issues and fixed 0.
 - cmd: lint propagate-feature --feature try-runtime --workspace
   stdout: |
     crate "binary-merkle-tree"
@@ -8895,7 +8579,6 @@ cases:
       feature "try-runtime"
         must propagate to:
           frame-system
-          frame-try-runtime
           pallet-balances
           pallet-transaction-payment
     crate "frame-remote-externalities"
@@ -8949,7 +8632,6 @@ cases:
       feature "try-runtime"
         must propagate to:
           frame-election-provider-support
-          frame-try-runtime
           sp-runtime
     crate "mmr-gadget"
       feature "try-runtime"
@@ -8975,7 +8657,6 @@ cases:
           pallet-timestamp
           pallet-transaction-payment
           sp-runtime
-          try-runtime-cli
     crate "node-executor"
       feature "try-runtime"
         is required by 13 dependencies:
@@ -9015,11 +8696,9 @@ cases:
           frame-system
           pallet-transaction-payment
           sp-runtime
-          try-runtime-cli
     crate "node-template-runtime"
       feature "try-runtime"
         must propagate to:
-          frame-try-runtime
           sp-runtime
     crate "node-testing"
       feature "try-runtime"
@@ -9955,6 +9634,5 @@ cases:
     crate "try-runtime-cli"
       feature "try-runtime"
         must propagate to:
-          frame-try-runtime
           sp-runtime
-    Found 510 issues and fixed 0.
+    Found 504 issues and fixed 0.

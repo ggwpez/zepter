@@ -19,8 +19,7 @@ cases:
           serde
           serde_json
           sp-debug-derive
-          sp-state-machine
-    Found 7 issues and fixed 0.
+    Found 6 issues and fixed 0.
 - cmd: lint propagate-feature -p frame-support --feature std --workspace
   stdout: |
     crate "frame-support"
@@ -28,8 +27,7 @@ cases:
         must propagate to:
           frame-system
           sp-debug-derive
-          sp-state-machine
-    Found 3 issues and fixed 0.
+    Found 2 issues and fixed 0.
 - cmd: lint propagate-feature -p frame-support --feature try-runtime
   stdout: |
     crate "frame-support"

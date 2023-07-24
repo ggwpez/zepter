@@ -1,0 +1,49 @@
+repo:
+  name: substrate
+  ref: 1a1c32a1cc7c56e88485f146977ba0fb32026c0a
+cases:
+- cmd: lint propagate-feature -p frame-support --feature runtime-benchmarks -p pallet-referenda --fix --feature-enables-dep runtime-benchmarks:frame-benchmarking
+  stdout: |
+    crate "pallet-referenda"
+      feature "runtime-benchmarks"
+        must propagate to:
+          frame-benchmarking
+          pallet-balances
+          pallet-preimage
+          pallet-scheduler
+    Found 4 issues and fixed 4.
+  diff: "diff --git frame/referenda/Cargo.toml frame/referenda/Cargo.toml\nindex a89f641..800a171 100644\n--- frame/referenda/Cargo.toml\n+++ frame/referenda/Cargo.toml\n@@ -56,5 +56,10 @@ runtime-benchmarks = [\n \t\"frame-support/runtime-benchmarks\",\n \t\"frame-system/runtime-benchmarks\",\n \t\"sp-runtime/runtime-benchmarks\",\n+\t\"frame-benchmarking/runtime-benchmarks\",\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"pallet-preimage/runtime-benchmarks\",\n+\t\"pallet-scheduler/runtime-benchmarks\"\n+,\n ]\n try-runtime = [\"frame-support/try-runtime\"]\n"
+- cmd: lint propagate-feature -p frame-support --feature runtime-benchmarks -p pallet-referenda --fix --feature-enables-dep "runtime-benchmarks:frame-benchmarking"
+  stdout: |
+    crate "pallet-referenda"
+      feature "runtime-benchmarks"
+        must propagate to:
+          frame-benchmarking
+          pallet-balances
+          pallet-preimage
+          pallet-scheduler
+    Found 4 issues and fixed 4.
+  diff: "diff --git frame/referenda/Cargo.toml frame/referenda/Cargo.toml\nindex a89f641..800a171 100644\n--- frame/referenda/Cargo.toml\n+++ frame/referenda/Cargo.toml\n@@ -56,5 +56,10 @@ runtime-benchmarks = [\n \t\"frame-support/runtime-benchmarks\",\n \t\"frame-system/runtime-benchmarks\",\n \t\"sp-runtime/runtime-benchmarks\",\n+\t\"frame-benchmarking/runtime-benchmarks\",\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"pallet-preimage/runtime-benchmarks\",\n+\t\"pallet-scheduler/runtime-benchmarks\"\n+,\n ]\n try-runtime = [\"frame-support/try-runtime\"]\n"
+- cmd: lint propagate-feature -p frame-support --feature runtime-benchmarks -p pallet-referenda --fix
+  stdout: |
+    crate "pallet-referenda"
+      feature "runtime-benchmarks"
+        must propagate to:
+          frame-benchmarking
+          pallet-balances
+          pallet-preimage
+          pallet-scheduler
+    Found 4 issues and fixed 4.
+  diff: "diff --git frame/referenda/Cargo.toml frame/referenda/Cargo.toml\nindex a89f641..1f52488 100644\n--- frame/referenda/Cargo.toml\n+++ frame/referenda/Cargo.toml\n@@ -56,5 +56,10 @@ runtime-benchmarks = [\n \t\"frame-support/runtime-benchmarks\",\n \t\"frame-system/runtime-benchmarks\",\n \t\"sp-runtime/runtime-benchmarks\",\n+\t\"frame-benchmarking?/runtime-benchmarks\",\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"pallet-preimage/runtime-benchmarks\",\n+\t\"pallet-scheduler/runtime-benchmarks\"\n+,\n ]\n try-runtime = [\"frame-support/try-runtime\"]\n"
+- cmd: lint propagate-feature --feature try-runtime -p pallet-referenda --fix
+  stdout: |
+    crate "pallet-referenda"
+      feature "try-runtime"
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-preimage
+          pallet-scheduler
+          sp-runtime
+    Found 5 issues and fixed 5.
+  diff: "diff --git frame/referenda/Cargo.toml frame/referenda/Cargo.toml\nindex a89f641..405baea 100644\n--- frame/referenda/Cargo.toml\n+++ frame/referenda/Cargo.toml\n@@ -57,4 +57,11 @@ runtime-benchmarks = [\n \t\"frame-system/runtime-benchmarks\",\n \t\"sp-runtime/runtime-benchmarks\",\n ]\n-try-runtime = [\"frame-support/try-runtime\"]\n+try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"frame-system/try-runtime\",\n+\t\"pallet-balances/try-runtime\",\n+\t\"pallet-preimage/try-runtime\",\n+\t\"pallet-scheduler/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\n+]\n"

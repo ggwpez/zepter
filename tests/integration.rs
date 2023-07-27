@@ -201,13 +201,6 @@ fn checkout(dir: &PathBuf, rev: &str) -> Result<(), Box<dyn std::error::Error>> 
 	let mut cmd = Command::new("git");
 	cmd.current_dir(dir);
 	cmd.arg("checkout");
-	cmd.arg("--");
-	cmd.arg(".");
-	cmd.assert().try_code(0)?;
-
-	let mut cmd = Command::new("git");
-	cmd.current_dir(dir);
-	cmd.arg("checkout");
 	cmd.arg(rev);
 	cmd.assert().try_code(0)?;
 	Ok(())

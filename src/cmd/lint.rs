@@ -216,8 +216,12 @@ impl NeverImpliesCmd {
 		for CrateAndFeature(pkg, feature) in dag.lhs_nodes() {
 			let crate_and_feature = CrateAndFeature(pkg.clone(), feature.clone());
 			if feature == &self.precondition {
-				let Some(path) = dag.reachable_predicate(&crate_and_feature, |CrateAndFeature(_, enabled)| enabled == &self.stays_disabled) else {
-					continue;
+				let Some(path) = dag
+					.reachable_predicate(&crate_and_feature, |CrateAndFeature(_, enabled)| {
+						enabled == &self.stays_disabled
+					})
+				else {
+					continue
 				};
 
 				// TODO cleanup this cluster fuck
@@ -271,9 +275,7 @@ impl NeverEnablesCmd {
 		let mut offenders = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
 
 		for lhs in pkgs.iter() {
-			let Some(enabled) = lhs.features.get(&self.precondition) else {
-				continue;
-			};
+			let Some(enabled) = lhs.features.get(&self.precondition) else { continue };
 			// TODO do the same in other command.
 			if enabled.contains(&format!("{}", self.stays_disabled)) {
 				offenders.entry(lhs.id.to_string()).or_default().insert(RenamedPackage::new(
@@ -284,9 +286,7 @@ impl NeverEnablesCmd {
 			}
 
 			for rhs in lhs.dependencies.iter() {
-				let Some(rhs) = resolve_dep(lhs, rhs, &meta) else {
-					continue;
-				};
+				let Some(rhs) = resolve_dep(lhs, rhs, &meta) else { continue };
 
 				if enabled.contains(&format!("{}/{}", rhs.name(), self.stays_disabled)) {
 					offenders.entry(lhs.id.to_string()).or_default().insert(rhs);
@@ -357,9 +357,10 @@ impl PropagateFeatureCmd {
 				// TODO handle default features.
 				// Resolve the dep according to the metadata.
 				let Some(dep) = resolve_dep(pkg, dep, &meta) else {
-					// Either outside workspace or not resolved, possibly due to not being used at all because of the target or whatever.
+					// Either outside workspace or not resolved, possibly due to not being used at
+					// all because of the target or whatever.
 					feature_used = true;
-					continue;
+					continue
 				};
 
 				if dep.pkg.features.contains_key(&feature) {
@@ -447,9 +448,7 @@ impl PropagateFeatureCmd {
 						if !self.fix_dependency.as_ref().map_or(true, |d| d == &dep_name) {
 							continue
 						}
-						let Some(fixer) = fixer.as_mut() else {
-							continue;
-						};
+						let Some(fixer) = fixer.as_mut() else { continue };
 						let non_optional = self
 							.feature_enables_dep
 							.as_ref()
@@ -541,9 +540,7 @@ impl OnlyEnablesCmd {
 
 		for pkg in pkgs.iter() {
 			for dep in pkg.dependencies.iter() {
-				let Some(dep) = resolve_dep(pkg, dep, &meta) else {
-					continue;
-				};
+				let Some(dep) = resolve_dep(pkg, dep, &meta) else { continue };
 				if !dep.pkg.features.contains_key(&self.only_enables) {
 					continue
 				}

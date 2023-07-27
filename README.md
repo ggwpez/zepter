@@ -21,11 +21,11 @@ Let's check that the `runtime-benchmarks` feature is properly passed down to all
 zepter lint propagate-feature --feature runtime-benchmarks -p frame-support --workspace
 ```
 
-The output reveals that there are some dependencies that expose the feature but don't get it passed down:  
+The output reveals that some dependencies expose the feature but don't get it passed down:  
 
 ```pre
-crate "frame-support"
-  feature "runtime-benchmarks"
+crate 'frame-support'
+  feature 'runtime-benchmarks'
     must propagate to:
       frame-system
       sp-runtime
@@ -42,7 +42,7 @@ This can be fixed by appending the `--fix` flag, which results in this diff:
 +runtime-benchmarks = [
 +       "frame-system/runtime-benchmarks",
 +       "sp-runtime/runtime-benchmarks",
-+       "sp-staking/runtime-benchmarks"
++       "sp-staking/runtime-benchmarks",
 +]
 ```
 

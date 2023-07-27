@@ -139,8 +139,18 @@ pub struct PropagateFeatureCmd {
 	/// feature:dep`. The option can be passed multiple times, or multiple key-value pairs can be
 	/// passed at once by separating them with a comma like: `--feature-enables-dep
 	/// feature:dep,feature2:dep2`. (TODO: Duplicate entries are undefined).
-	#[clap(long, value_parser = parse_key_val::<String, String>, value_delimiter = ',')]
-	pub feature_enables_dep: Option<Vec<(String, String)>>,
+	#[clap(long, value_name = "FEATURE:CRATE", value_parser = parse_key_val::<String, String>, value_delimiter = ',', verbatim_doc_comment)]
+	feature_enables_dep: Option<Vec<(String, String)>>,
+
+	/// Overwrite the behaviour when the left side dependency is missing the feature.
+	///
+	/// This can be used to ignore missing features, treat them as warning or error. A "missing
+	/// feature" here means that if `A` has a dependency `B` which has a feature `F`, and the
+	/// propagation is checked then normally it would error if `A` is not forwarding `F` to `B`.
+	/// Now this option modifies the behaviour if `A` does not have the feature in the first place.
+	/// The default behaviour is to require `A` to also have `F`.
+	#[clap(long, value_enum, value_name = "MUTE_SETTING", default_value_t = MuteSetting::Error, verbatim_doc_comment)]
+	left_side_feature_missing: MuteSetting,
 
 	/// Show crate versions in the output.
 	#[clap(long)]
@@ -160,6 +170,15 @@ pub struct PropagateFeatureCmd {
 	/// Fix only issues with this package as feature source.
 	#[clap(long)]
 	fix_package: Option<String>,
+}
+
+/// Can be used to change the default error reporting behaviour of a lint.
+#[derive(Debug, Clone, PartialEq, clap::ValueEnum)]
+pub enum MuteSetting {
+	/// Ignore this behaviour.
+	Ignore,
+	/// Treat as error.
+	Error,
 }
 
 impl LintCmd {
@@ -187,7 +206,7 @@ impl NeverImpliesCmd {
 	pub fn run(&self) {
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
 		log::info!(
-			"Checking that feature {:?} never implies {:?}",
+			"Checking that feature '{}' never implies '{}'",
 			self.precondition,
 			self.stays_disabled
 		);
@@ -205,7 +224,7 @@ impl NeverImpliesCmd {
 				let lookup = |id: &str| {
 					pkgs.iter()
 						.find(|pkg| pkg.id.to_string() == id)
-						.unwrap_or_else(|| panic!("Could not find crate {id} in the metadata"))
+						.unwrap_or_else(|| panic!("Could not find crate '{id}' in the metadata"))
 				};
 
 				let delimiter = self.path_delimiter.replace("\\n", "\n").replace("\\t", "\t");
@@ -345,9 +364,10 @@ impl PropagateFeatureCmd {
 
 				if dep.pkg.features.contains_key(&feature) {
 					match pkg.features.get(&feature) {
-						None => {
-							feature_missing.entry(pkg.id.to_string()).or_default().insert(dep);
-						},
+						None =>
+							if self.left_side_feature_missing == MuteSetting::Error {
+								feature_missing.entry(pkg.id.to_string()).or_default().insert(dep);
+							},
 						Some(enabled) => {
 							let want_opt = format!("{}?/{}", dep.name(), feature);
 							let want_req = format!("{}/{}", dep.name(), feature);
@@ -402,7 +422,7 @@ impl PropagateFeatureCmd {
 			} else {
 				None
 			};
-			println!("crate {:?}\n  feature {:?}", krate.name, feature);
+			println!("crate '{}'\n  feature '{}'", krate.name, feature);
 
 			// join
 			if let Some(deps) = feature_missing.get(&krate.id.to_string()) {
@@ -442,7 +462,7 @@ impl PropagateFeatureCmd {
 								format!("{}{}/{}", dep_name, opt, feature).as_str(),
 							)
 							.unwrap();
-						log::info!("Added feature {feature} to {dep_name} in {}", krate.name);
+						log::info!("Added '{dep_name}/{feature}' to '{}'", krate.name);
 						fixes += 1;
 					}
 				}

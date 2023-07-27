@@ -4,8 +4,8 @@ repo:
 cases:
 - cmd: lint propagate-feature -p frame-support --feature runtime-benchmarks
   stdout: |
-    crate "frame-support"
-      feature "runtime-benchmarks"
+    crate 'frame-support'
+      feature 'runtime-benchmarks'
         must propagate to:
           frame-system
           sp-runtime

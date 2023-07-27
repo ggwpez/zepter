@@ -11,20 +11,20 @@ crates:
 cases:
 - cmd: lint propagate-feature --feature F0 --fix
   stdout: |
-    crate "A"
-      feature "F0"
+    crate 'A'
+      feature 'F0'
         must propagate to:
           B
     Found 1 issue and fixed 1.
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex b30994..2b554d 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,6 @@ B = { version = \"*\", path = \"../B\", optional = true}\n \n [features]\n F0 = [\n+\t\"B?/F0\"\n+\n ]\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex b30994..a5c6b3 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,5 @@ B = { version = \"*\", path = \"../B\", optional = true}\n \n [features]\n F0 = [\n+\t\"B?/F0\"\n ]\n"
 - cmd: lint propagate-feature -p A --feature F0 --fix
   stdout: |
-    crate "A"
-      feature "F0"
+    crate 'A'
+      feature 'F0'
         must propagate to:
           B
     Found 1 issue and fixed 1.
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex b30994..2b554d 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,6 @@ B = { version = \"*\", path = \"../B\", optional = true}\n \n [features]\n F0 = [\n+\t\"B?/F0\"\n+\n ]\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex b30994..a5c6b3 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,5 @@ B = { version = \"*\", path = \"../B\", optional = true}\n \n [features]\n F0 = [\n+\t\"B?/F0\"\n ]\n"
 - cmd: lint propagate-feature -p B --feature F0 --fix
   stdout: |
     Found no issues.
@@ -33,20 +33,20 @@ cases:
     Found no issues.
 - cmd: lint propagate-feature --feature F0 --workspace --fix
   stdout: |
-    crate "A"
-      feature "F0"
+    crate 'A'
+      feature 'F0'
         must propagate to:
           B
     Found 1 issue and fixed 1.
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex b30994..2b554d 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,6 @@ B = { version = \"*\", path = \"../B\", optional = true}\n \n [features]\n F0 = [\n+\t\"B?/F0\"\n+\n ]\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex b30994..a5c6b3 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,5 @@ B = { version = \"*\", path = \"../B\", optional = true}\n \n [features]\n F0 = [\n+\t\"B?/F0\"\n ]\n"
 - cmd: lint propagate-feature -p A --feature F0 --workspace --fix
   stdout: |
-    crate "A"
-      feature "F0"
+    crate 'A'
+      feature 'F0'
         must propagate to:
           B
     Found 1 issue and fixed 1.
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex b30994..2b554d 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,6 @@ B = { version = \"*\", path = \"../B\", optional = true}\n \n [features]\n F0 = [\n+\t\"B?/F0\"\n+\n ]\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex b30994..a5c6b3 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,5 @@ B = { version = \"*\", path = \"../B\", optional = true}\n \n [features]\n F0 = [\n+\t\"B?/F0\"\n ]\n"
 - cmd: lint propagate-feature -p B --feature F0 --workspace --fix
   stdout: |
     Found no issues.

@@ -4,8 +4,8 @@ repo:
 cases:
 - cmd: lint propagate-feature -p polkadot-test-runtime --feature std --fix
   stdout: |
-    crate "polkadot-test-runtime"
-      feature "std"
+    crate 'polkadot-test-runtime'
+      feature 'std'
         must propagate to:
           polkadot-runtime-parachains
           serde_json
@@ -13,4 +13,4 @@ cases:
           sp-mmr-primitives
           sp-trie
     Found 5 issues and fixed 5.
-  diff: "diff --git runtime/test-runtime/Cargo.toml runtime/test-runtime/Cargo.toml\nindex 6d38a0..4637df 100644\n--- runtime/test-runtime/Cargo.toml\n+++ runtime/test-runtime/Cargo.toml\n@@ -128,6 +128,12 @@ std = [\n \t\"log/std\",\n \t\"frame-election-provider-support/std\",\n \t\"pallet-sudo/std\",\n+\t\"polkadot-runtime-parachains/std\",\n+\t\"serde_json/std\",\n+\t\"beefy-primitives/std\",\n+\t\"sp-mmr-primitives/std\",\n+\t\"sp-trie/std\"\n+,\n ]\n \n runtime-benchmarks = [\n"
+  diff: "diff --git runtime/test-runtime/Cargo.toml runtime/test-runtime/Cargo.toml\nindex 6d38a0..29b95c 100644\n--- runtime/test-runtime/Cargo.toml\n+++ runtime/test-runtime/Cargo.toml\n@@ -128,6 +128,11 @@ std = [\n \t\"log/std\",\n \t\"frame-election-provider-support/std\",\n \t\"pallet-sudo/std\",\n+\t\"polkadot-runtime-parachains/std\",\n+\t\"serde_json/std\",\n+\t\"beefy-primitives/std\",\n+\t\"sp-mmr-primitives/std\",\n+\t\"sp-trie/std\",\n ]\n \n runtime-benchmarks = [\n"

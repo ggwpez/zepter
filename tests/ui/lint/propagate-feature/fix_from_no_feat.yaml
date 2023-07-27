@@ -8,15 +8,15 @@ crates:
 cases:
 - cmd: lint propagate-feature --feature F0 --fix
   stdout: |
-    crate "A"
-      feature "F0"
+    crate 'A'
+      feature 'F0'
         is required by 1 dependency:
           B
     Found 1 issue and fixed 0 (1 could not be fixed).
 - cmd: lint propagate-feature --feature F0 --workspace --fix
   stdout: |
-    crate "A"
-      feature "F0"
+    crate 'A'
+      feature 'F0'
         is required by 1 dependency:
           B
     Found 1 issue and fixed 0 (1 could not be fixed).

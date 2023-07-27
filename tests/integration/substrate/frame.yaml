@@ -10,8 +10,8 @@ cases:
     Found no issues.
 - cmd: lint propagate-feature -p frame --feature runtime-benchmarks
   stdout: |
-    crate "frame"
-      feature "runtime-benchmarks"
+    crate 'frame'
+      feature 'runtime-benchmarks'
         is required by 3 dependencies:
           frame-support
           frame-system
@@ -19,8 +19,8 @@ cases:
     Found 3 issues and fixed 0.
 - cmd: lint propagate-feature -p frame --feature runtime-benchmarks --workspace
   stdout: |
-    crate "frame"
-      feature "runtime-benchmarks"
+    crate 'frame'
+      feature 'runtime-benchmarks'
         is required by 3 dependencies:
           frame-support
           frame-system
@@ -28,8 +28,8 @@ cases:
     Found 3 issues and fixed 0.
 - cmd: lint propagate-feature -p frame --feature try-runtime
   stdout: |
-    crate "frame"
-      feature "try-runtime"
+    crate 'frame'
+      feature 'try-runtime'
         is required by 4 dependencies:
           frame-executive
           frame-support
@@ -38,8 +38,8 @@ cases:
     Found 4 issues and fixed 0.
 - cmd: lint propagate-feature -p frame --feature try-runtime --workspace
   stdout: |
-    crate "frame"
-      feature "try-runtime"
+    crate 'frame'
+      feature 'try-runtime'
         is required by 4 dependencies:
           frame-executive
           frame-support

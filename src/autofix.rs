@@ -178,7 +178,7 @@ std = [
 		let after = r#"[features]
 std = [
 	"AAA",
-	"BBB"
+	"BBB",
 ]
 "#;
 		let mut fixer = AutoFixer::from_raw(before).unwrap();

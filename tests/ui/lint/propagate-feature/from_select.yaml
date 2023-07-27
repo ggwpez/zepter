@@ -19,14 +19,16 @@ cases:
       feature 'F0'
         is required by 1 dependency:
           B
-    Found 2 issues and fixed 0.
+    Found 2 issues and fixed 0. Returning with exit code 1.
+  code: 1
 - cmd: lint propagate-feature -p a --feature F0
   stdout: |
     crate 'a'
       feature 'F0'
         is required by 1 dependency:
           B
-    Found 1 issue and fixed 0.
+    Found 1 issue and fixed 0. Returning with exit code 1.
+  code: 1
 - cmd: lint propagate-feature -p a A --feature F0
   stdout: |
     crate 'A'
@@ -37,4 +39,5 @@ cases:
       feature 'F0'
         is required by 1 dependency:
           B
-    Found 2 issues and fixed 0.
+    Found 2 issues and fixed 0. Returning with exit code 1.
+  code: 1

@@ -23,6 +23,20 @@ pub struct Dag<T> {
 	pub edges: BTreeMap<T, BTreeSet<T>>,
 }
 
+impl<T> Display for Dag<T>
+where
+	T: Display,
+{
+	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+		for (from, tos) in self.edges.iter() {
+			for to in tos {
+				write!(f, "{} -> {}\n", from, to)?;
+			}
+		}
+		Ok(())
+	}
+}
+
 impl<T> Default for Dag<T> {
 	fn default() -> Self {
 		Self { edges: BTreeMap::new() }

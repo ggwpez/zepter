@@ -82,6 +82,14 @@ It reports that `snow` is pulled in from libp2p - good to know. In this case, al
 node-cli -> try-runtime-cli -> substrate-rpc-client -> sc-rpc-api -> sc-chain-spec -> sc-telemetry -> libp2p -> libp2p-webrtc -> libp2p-noise -> snow
 ```
 
+## Testing
+
+UI and integration tests are run with the normal `cargo test`.  
+Environment overwrites exist for:
+- `OVERWRITE`: Update the `cout` and `diff` locks.
+- `UI_FILTER`: Regex to selectively run files.
+- `KEEP_GOING`: Print `FAILED` but don't abort. TODO: It's buggy
+
 ## Roadmap
 
 - [x] Add feature information to the enabled deps

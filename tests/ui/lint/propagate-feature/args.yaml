@@ -14,4 +14,5 @@ cases:
       feature 'F0'
         must propagate to:
           B
-    Found 1 issue and fixed 0.
+    Found 1 issue and fixed 0. Returning with exit code 1.
+  code: 1

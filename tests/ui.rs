@@ -95,6 +95,7 @@ fn ui() {
 	// Loop through all files in tests/ recursively
 	let files = glob::glob(&regex).unwrap();
 	let overwrite = std::env::var("OVERWRITE").is_ok();
+	let keep_going = std::env::var("KEEP_GOING").is_ok();
 	let (mut failed, mut good) = (0, 0);
 
 	// Update each time you add a test.
@@ -131,10 +132,12 @@ fn ui() {
 				},
 				false if !overwrite => {
 					colour::red!("cout:FAILED");
-					pretty_assertions::assert_eq!(
-						&String::from_utf8_lossy(&res.stdout),
-						&normalize(&case.stdout)
-					);
+					if !keep_going {
+						pretty_assertions::assert_eq!(
+							&String::from_utf8_lossy(&res.stdout),
+							&normalize(&case.stdout)
+						);
+					}
 				},
 				false => {
 					colour::yellow!("cout:OVERWRITE");
@@ -153,7 +156,9 @@ fn ui() {
 				} else {
 					colour::red_ln!("diff:FAILED");
 					colour::white!("");
-					pretty_assertions::assert_eq!(got, case.diff);
+					if !keep_going {
+						pretty_assertions::assert_eq!(got, case.diff);
+					}
 				}
 			} else {
 				colour::green_ln!("diff:OK");

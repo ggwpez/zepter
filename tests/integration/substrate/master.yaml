@@ -1080,7 +1080,8 @@ cases:
         is required by 2 dependencies:
           sc-service
           sp-runtime
-    Found 494 issues and fixed 0.
+    Found 494 issues and fixed 0. Returning with exit code 1.
+  code: 1
 - cmd: lint propagate-feature --feature runtime-benchmarks --workspace
   stdout: |
     crate 'binary-merkle-tree'
@@ -2159,7 +2160,8 @@ cases:
         is required by 2 dependencies:
           sc-service
           sp-runtime
-    Found 494 issues and fixed 0.
+    Found 494 issues and fixed 0. Returning with exit code 1.
+  code: 1
 - cmd: lint propagate-feature --feature std
   stdout: |
     crate 'Inflector'
@@ -6145,7 +6147,8 @@ cases:
       feature 'std'
         must propagate to:
           libc
-    Found 2150 issues and fixed 0.
+    Found 2150 issues and fixed 0. Returning with exit code 1.
+  code: 1
 - cmd: lint propagate-feature --feature std --workspace
   stdout: |
     crate 'binary-merkle-tree'
@@ -7427,7 +7430,8 @@ cases:
           sp-transaction-storage-proof
           sp-version
           sp-weights
-    Found 733 issues and fixed 0.
+    Found 733 issues and fixed 0. Returning with exit code 1.
+  code: 1
 - cmd: lint propagate-feature --feature try-runtime
   stdout: |
     crate 'binary-merkle-tree'
@@ -8531,7 +8535,8 @@ cases:
       feature 'try-runtime'
         must propagate to:
           sp-runtime
-    Found 504 issues and fixed 0.
+    Found 504 issues and fixed 0. Returning with exit code 1.
+  code: 1
 - cmd: lint propagate-feature --feature try-runtime --workspace
   stdout: |
     crate 'binary-merkle-tree'
@@ -9635,4 +9640,5 @@ cases:
       feature 'try-runtime'
         must propagate to:
           sp-runtime
-    Found 504 issues and fixed 0.
+    Found 504 issues and fixed 0. Returning with exit code 1.
+  code: 1

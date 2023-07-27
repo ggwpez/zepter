@@ -492,7 +492,13 @@ impl PropagateFeatureCmd {
 			//	}
 			//}
 		}
-		println!("{}.", error_stats(errors, warnings, fixes, self.fix));
+		print!("{}.", error_stats(errors, warnings, fixes, self.fix));
+		if errors > fixes {
+			println!(" Returning with exit code 1.");
+			std::process::exit(1);
+		} else {
+			println!();
+		}
 	}
 }
 

@@ -13,11 +13,13 @@ cases:
       feature 'F0'
         is required by 1 dependency:
           b (renamed from B)
-    Found 1 issue and fixed 0.
+    Found 1 issue and fixed 0. Returning with exit code 1.
+  code: 1
 - cmd: lint propagate-feature --feature F0 --workspace
   stdout: |
     crate 'A'
       feature 'F0'
         is required by 1 dependency:
           b (renamed from B)
-    Found 1 issue and fixed 0.
+    Found 1 issue and fixed 0. Returning with exit code 1.
+  code: 1

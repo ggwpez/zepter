@@ -1,10 +1,11 @@
-[![Rust](https://github.com/ggwpez/zepter/actions/workflows/rust.yml/badge.svg)](https://github.com/ggwpez/zepter/actions/workflows/rust.yml)
-[![crates.io](https://img.shields.io/crates/v/zepter.svg)](https://crates.io/crates/zepter)
-[![docs.rs](https://img.shields.io/docsrs/zepter)](https://docs.rs/zepter/latest/zepter)
-
 # Zepter
 
-Analyze and fix feature propagation in your Rust workspace. The goal for this tool is to automatically lint and fix feature propagation in CI runs.
+[![Rust](https://github.com/ggwpez/zepter/actions/workflows/rust.yml/badge.svg)](https://github.com/ggwpez/zepter/actions/workflows/rust.yml)
+[![crates.io](https://img.shields.io/crates/v/zepter.svg)](https://crates.io/crates/zepter)
+![MSRV](https://img.shields.io/badge/MSRV-1.65-informational)
+[![docs.rs](https://img.shields.io/docsrs/zepter)](https://docs.rs/zepter/latest/zepter)
+
+Analyze and fix feature propagation in your Rust workspace. The goal of this tool is to automatically lint and fix feature propagation in CI runs.
 
 ## Install
 
@@ -32,7 +33,7 @@ crate "frame-support"
 Found 3 issues and fixed 0 issues.
 ```
 
-Without the `-p` it will detect many more problems. You can verify this for the [frame-support](https://github.com/paritytech/substrate/blob/ce2cee35f8f0fc5968ea6ffaffa6660dcd008804/frame/support/Cargo.toml#L71) which is indeed missing the feature for `sp-runtime` while that is clearly [sp-runtime](https://github.com/paritytech/substrate/blob/0b6aec52a90870c999856cd37f7d04789cdd8dfc/primitives/runtime/Cargo.toml#L43) it 🤔.
+Without the `-p` it will detect many more problems. You can verify this for the [frame-support](https://github.com/paritytech/substrate/blob/ce2cee35f8f0fc5968ea6ffaffa6660dcd008804/frame/support/Cargo.toml#L71) which is indeed missing the feature for `sp-runtime` while [sp-runtime](https://github.com/paritytech/substrate/blob/0b6aec52a90870c999856cd37f7d04789cdd8dfc/primitives/runtime/Cargo.toml#L43) clearly supports it 🤔.
 
 This can be fixed by appending the `--fix` flag, which results in this diff:
 
@@ -45,17 +46,17 @@ This can be fixed by appending the `--fix` flag, which results in this diff:
 +]
 ```
 
-The auto-fix always enables the features of optional dependencies as optionally features. This is a noninvasive default, but may not correctly enable the dependency itself.
+The auto-fix always enables the features of optional dependencies as optional features. This is a noninvasive default, but may not correctly enable the dependency itself.
 
 ## Example - Feature tracing
 
-Let's say you want to ensure that specific features are never enabled by default. For this example we will use the `try-runtime` feature of [Substrate]. Check out branch `oty-faulty-feature-demo` and try:
+Let's say you want to ensure that specific features are never enabled by default. For this example, we will use the `try-runtime` feature of [Substrate]. Check out branch `oty-faulty-feature-demo` and try:
 
 ```bash
 zepter lint never-implies --precondition default --stays-disabled try-runtime --offline --workspace
 ```
 
-The `precondition` defines the feature on the left side of the implication and `stays-disabled` expresses that the precondition never enables the this.
+The `precondition` defines the feature on the left side of the implication and `stays-disabled` expressing that the precondition never enables this.
 
 Errors correctly with:
 ```pre
@@ -63,7 +64,7 @@ Feature 'default' implies 'try-runtime' via path:
   frame-benchmarking/default -> frame-benchmarking/std -> frame-system/std -> frame-support/wrong -> frame-support/wrong2 -> frame-support/try-runtime
 ```
 
-Only the first path is shown in case that there are multiple.
+Only the first path is shown in case there are multiple.
 
 ## Example - Dependency tracing
 
@@ -75,7 +76,7 @@ Let's find out how `node-cli` depends on `snow` (example on commit `dd6aedee3b8d
 zepter trace node-cli snow
 ```
 
-It reports that `snow` is pulled in from libp2p - good do know. In this case all paths are displayed.
+It reports that `snow` is pulled in from libp2p - good to know. In this case, all paths are displayed.
 
 ```pre
 node-cli -> try-runtime-cli -> substrate-rpc-client -> sc-rpc-api -> sc-chain-spec -> sc-telemetry -> libp2p -> libp2p-webrtc -> libp2p-noise -> snow
@@ -85,7 +86,7 @@ node-cli -> try-runtime-cli -> substrate-rpc-client -> sc-rpc-api -> sc-chain-sp
 
 - [x] Add feature information to the enabled deps
 - [ ] Allow manual skipping of dev dependencies (currently always skipped)
-- [ ] Introduce filters for versions and features for argument `to`
+- [ ] Introduce filters for versions and features for arguments `to``
 - [x] Optimize `shortest_path` function
 - [ ] Create lint rules which can be used to validate that certain constraints in the work-space hold
 

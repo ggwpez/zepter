@@ -46,7 +46,7 @@ impl AutoFixer {
 		let values = feature.iter().cloned().collect::<Vec<_>>();
 		feature.clear();
 		feature.set_trailing("");
-		feature.set_trailing_comma(false);	// We need to add this manually later on.
+		feature.set_trailing_comma(false); // We need to add this manually later on.
 
 		for value in values.into_iter() {
 			if value.as_str().map_or(false, |s| s.is_empty()) {
@@ -88,10 +88,12 @@ mod tests {
 	use rstest::*;
 
 	#[rstest]
-	#[case(r#"
+	#[case(
+		r#"
 [features]
 runtime-benchmarks = ["sp-runtime/runtime-benchmarks"]
-"#, r#"
+"#,
+		r#"
 [features]
 runtime-benchmarks = [
 	"sp-runtime/runtime-benchmarks",
@@ -100,13 +102,16 @@ runtime-benchmarks = [
 std = [
 	"frame-system/std"
 ]
-"#)]
-#[case(r#"
+"#
+	)]
+	#[case(
+		r#"
 [features]
 runtime-benchmarks = [
 	"sp-runtime/runtime-benchmarks"
 ]
-"#, r#"
+"#,
+		r#"
 [features]
 runtime-benchmarks = [
 	"sp-runtime/runtime-benchmarks",
@@ -115,13 +120,16 @@ runtime-benchmarks = [
 std = [
 	"frame-system/std"
 ]
-"#)]
-#[case(r#"
+"#
+	)]
+	#[case(
+		r#"
 [features]
 runtime-benchmarks = [
 	"sp-runtime/runtime-benchmarks",
 ]
-"#, r#"
+"#,
+		r#"
 [features]
 runtime-benchmarks = [
 	"sp-runtime/runtime-benchmarks",
@@ -130,11 +138,14 @@ runtime-benchmarks = [
 std = [
 	"frame-system/std"
 ]
-"#)]
-#[case(r#"
+"#
+	)]
+	#[case(
+		r#"
 [features]
 runtime-benchmarks = []
-"#, r#"
+"#,
+		r#"
 [features]
 runtime-benchmarks = [
 	"frame-support/runtime-benchmarks"
@@ -142,15 +153,18 @@ runtime-benchmarks = [
 std = [
 	"frame-system/std"
 ]
-"#)]
-	#[case(r#"
+"#
+	)]
+	#[case(
+		r#"
 [package]
 name = "something"
 
 [features]
 runtime-benchmarks = []
 std = ["frame-support/std"]
-"#, r#"
+"#,
+		r#"
 [package]
 name = "something"
 
@@ -162,7 +176,8 @@ std = [
 	"frame-support/std",
 	"frame-system/std",
 ]
-"#)]
+"#
+	)]
 	fn add_to_feature_works(#[case] before: &str, #[case] after: &str) {
 		let mut fixer = AutoFixer::from_raw(before).unwrap();
 		fixer

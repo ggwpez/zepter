@@ -109,6 +109,8 @@ impl TraceCmd {
 				if self.show_source {
 					if let Some(source) = krate.source.as_ref() {
 						out.push_str(&format!(" ({})", source.repr));
+					} else {
+						out.push_str(" (local)");
 					}
 				}
 			});

@@ -193,7 +193,7 @@ impl LintCmd {
 	}
 }
 
-#[derive(Clone, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Eq, Ord, PartialEq, PartialOrd, Debug)]
 struct CrateAndFeature(String, String);
 
 impl Display for CrateAndFeature {
@@ -227,8 +227,11 @@ impl NeverImpliesCmd {
 				// TODO cleanup this cluster fuck
 				let lookup = |id: &str| {
 					pkgs.iter()
-						.find(|pkg| pkg.id.to_string() == id)
-						.unwrap_or_else(|| panic!("Could not find crate '{id}' in the metadata"))
+						.find(|pkg| {
+							pkg.id.to_string().split(' ').next().unwrap() ==
+								id.split(' ').next().unwrap()
+						})
+						.unwrap_or_else(|| panic!("Could not find crate '{id}' in the metadata."))
 				};
 
 				let delimiter = self.path_delimiter.replace("\\n", "\n").replace("\\t", "\t");
@@ -248,6 +251,8 @@ impl NeverImpliesCmd {
 					if self.show_source {
 						if let Some(source) = krate.source.as_ref() {
 							out.push_str(&format!(" ({})", source.repr));
+						} else {
+							out.push_str(" (local)");
 						}
 					}
 				});
@@ -276,6 +281,7 @@ impl NeverEnablesCmd {
 
 		for lhs in pkgs.iter() {
 			let Some(enabled) = lhs.features.get(&self.precondition) else { continue };
+
 			// TODO do the same in other command.
 			if enabled.contains(&format!("{}", self.stays_disabled)) {
 				offenders.entry(lhs.id.to_string()).or_default().insert(RenamedPackage::new(
@@ -283,6 +289,12 @@ impl NeverEnablesCmd {
 					None,
 					false,
 				)); // TODO
+			} else {
+				log::info!(
+					"Feature {:?} not enabled on crate {:?}: {enabled:?}",
+					self.stays_disabled,
+					lhs.id
+				);
 			}
 
 			for rhs in lhs.dependencies.iter() {
@@ -548,6 +560,8 @@ impl OnlyEnablesCmd {
 				for (feat, imply) in pkg.features.iter() {
 					if feat == &self.precondition {
 						continue
+					} else {
+						log::info!("{}: {}", feat, imply.join(", "));
 					}
 
 					let opt = if dep.optional { "?" } else { "" };

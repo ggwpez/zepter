@@ -58,6 +58,12 @@ pub struct CargoArgs {
 	#[clap(long, global = true)]
 	pub offline: bool,
 
+	/// Whether to use all the locked dependencies from the `Cargo.lock`.
+	///
+	/// Otherwise it may update some dependencies. For CI usage its a good idea to use it.
+	#[clap(long, global = true)]
+	pub locked: bool,
+
 	#[clap(long, global = true)]
 	pub all_features: bool,
 }
@@ -80,6 +86,9 @@ impl CargoArgs {
 		}
 		if self.offline {
 			cmd.other_options(vec!["--offline".to_string()]);
+		}
+		if self.locked {
+			cmd.other_options(vec!["--locked".to_string()]);
 		}
 
 		cmd.exec().map_err(|e| format!("Failed to load metadata: {e}"))

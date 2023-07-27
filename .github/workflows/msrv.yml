@@ -1,0 +1,23 @@
+name: MSRV
+
+on:
+  push:
+    branches: [ "master", "dev" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 1
+    - name: Install MRRV
+      run: cargo install cargo-msrv --locked -q
+    - name: Verify MSRV
+      run: cargo msrv verify

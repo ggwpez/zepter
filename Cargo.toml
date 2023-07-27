@@ -6,6 +6,7 @@ authors = [ "Oliver Tale-Yazdi" ]
 description = "Check if features are correctly propagated in your workspace."
 license = "GPL-3.0-only"
 repository = "https://github.com/ggwpez/zepter"
+rust-version = "1.65"
 
 [[bin]]
 name = "zepter"

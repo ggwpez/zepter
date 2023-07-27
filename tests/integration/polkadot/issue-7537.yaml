@@ -1,0 +1,31 @@
+repo:
+  name: polkadot
+  ref: 30a0be939e09c3ad9c471960091b32a5b3f9c622
+cases:
+- cmd: lint propagate-feature -p xcm-executor --feature std --fix
+  stdout: |
+    crate 'xcm-executor'
+      feature 'std'
+        must propagate to:
+          environmental
+          frame-benchmarking
+    Found 2 issues and fixed 2.
+  diff: "diff --git xcm/xcm-executor/Cargo.toml xcm/xcm-executor/Cargo.toml\nindex 41463b..18962c 100644\n--- xcm/xcm-executor/Cargo.toml\n+++ xcm/xcm-executor/Cargo.toml\n@@ -36,4 +36,6 @@ std = [\n \t\"sp-weights/std\",\n \t\"frame-support/std\",\n \t\"log/std\",\n+\t\"environmental/std\",\n+\t\"frame-benchmarking?/std\",\n ]\n"
+- cmd: lint propagate-feature -p xcm-executor --feature runtime-benchmarks --fix
+  stdout: |
+    crate 'xcm-executor'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          sp-runtime
+    Found 2 issues and fixed 2.
+  diff: "diff --git xcm/xcm-executor/Cargo.toml xcm/xcm-executor/Cargo.toml\nindex 41463b..20526f 100644\n--- xcm/xcm-executor/Cargo.toml\n+++ xcm/xcm-executor/Cargo.toml\n@@ -24,6 +24,8 @@ frame-benchmarking = { git = \"https://github.com/paritytech/substrate\", branch =\n default = [\"std\"]\n runtime-benchmarks = [\n \t\"frame-benchmarking/runtime-benchmarks\",\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\",\n ]\n std = [\n \t\"parity-scale-codec/std\",\n"
+- cmd: lint propagate-feature -p xcm-executor --feature runtime-benchmarks --fix --feature-enables-dep "runtime-benchmarks:frame-benchmarking"
+  stdout: |
+    crate 'xcm-executor'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          sp-runtime
+    Found 2 issues and fixed 2.
+  diff: "diff --git xcm/xcm-executor/Cargo.toml xcm/xcm-executor/Cargo.toml\nindex 41463b..20526f 100644\n--- xcm/xcm-executor/Cargo.toml\n+++ xcm/xcm-executor/Cargo.toml\n@@ -24,6 +24,8 @@ frame-benchmarking = { git = \"https://github.com/paritytech/substrate\", branch =\n default = [\"std\"]\n runtime-benchmarks = [\n \t\"frame-benchmarking/runtime-benchmarks\",\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\",\n ]\n std = [\n \t\"parity-scale-codec/std\",\n"

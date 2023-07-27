@@ -130,14 +130,14 @@ fn ui() {
 					good += 1;
 				},
 				false if !overwrite => {
-					colour::red_ln!("FAILED");
+					colour::red!("cout:FAILED");
 					pretty_assertions::assert_eq!(
 						&String::from_utf8_lossy(&res.stdout),
 						&normalize(&case.stdout)
 					);
 				},
 				false => {
-					colour::yellow_ln!("cout:OVERWRITE");
+					colour::yellow!("cout:OVERWRITE");
 					colour::white!(" ");
 					overwrites.insert(i, String::from_utf8_lossy(&res.stdout).to_string());
 					failed += 1;
@@ -151,7 +151,7 @@ fn ui() {
 					colour::yellow_ln!("diff:OVERWRITE");
 					colour::white!("");
 				} else {
-					colour::red_ln!("FAILED");
+					colour::red_ln!("diff:FAILED");
 					colour::white!("");
 					pretty_assertions::assert_eq!(got, case.diff);
 				}

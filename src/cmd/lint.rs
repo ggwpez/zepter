@@ -132,6 +132,26 @@ pub struct PropagateFeatureCmd {
 	#[clap(long, short, num_args(0..))]
 	packages: Vec<String>,
 
+	/// The auto-fixer will enables the feature of the dependencies as non-optional.
+	///
+	/// This can be used in case that a dependency should not be enabled like `dep?/feature` but
+	/// like `dep/feature` instead. In this case you would pass `--feature-enables-dep
+	/// feature:dep`. The option can be passed multiple times, or multiple key-value pairs can be
+	/// passed at once by separating them with a comma like: `--feature-enables-dep
+	/// feature:dep,feature2:dep2`. (TODO: Duplicate entries are undefined).
+	#[clap(long, value_name = "FEATURE:CRATE", value_parser = parse_key_val::<String, String>, value_delimiter = ',', verbatim_doc_comment)]
+	feature_enables_dep: Option<Vec<(String, String)>>,
+
+	/// Overwrite the behaviour when the left side dependency is missing the feature.
+	///
+	/// This can be used to ignore missing features, treat them as warning or error. A "missing
+	/// feature" here means that if `A` has a dependency `B` which has a feature `F`, and the
+	/// propagation is checked then normally it would error if `A` is not forwarding `F` to `B`.
+	/// Now this option modifies the behaviour if `A` does not have the feature in the first place.
+	/// The default behaviour is to require `A` to also have `F`.
+	#[clap(long, value_enum, value_name = "MUTE_SETTING", default_value_t = MuteSetting::Error, verbatim_doc_comment)]
+	left_side_feature_missing: MuteSetting,
+
 	/// Show crate versions in the output.
 	#[clap(long)]
 	show_version: bool,
@@ -150,6 +170,15 @@ pub struct PropagateFeatureCmd {
 	/// Fix only issues with this package as feature source.
 	#[clap(long)]
 	fix_package: Option<String>,
+}
+
+/// Can be used to change the default error reporting behaviour of a lint.
+#[derive(Debug, Clone, PartialEq, clap::ValueEnum)]
+pub enum MuteSetting {
+	/// Ignore this behaviour.
+	Ignore,
+	/// Treat as error.
+	Error,
 }
 
 impl LintCmd {
@@ -177,7 +206,7 @@ impl NeverImpliesCmd {
 	pub fn run(&self) {
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
 		log::info!(
-			"Checking that feature {:?} never implies {:?}",
+			"Checking that feature '{}' never implies '{}'",
 			self.precondition,
 			self.stays_disabled
 		);
@@ -187,15 +216,19 @@ impl NeverImpliesCmd {
 		for CrateAndFeature(pkg, feature) in dag.lhs_nodes() {
 			let crate_and_feature = CrateAndFeature(pkg.clone(), feature.clone());
 			if feature == &self.precondition {
-				let Some(path) = dag.reachable_predicate(&crate_and_feature, |CrateAndFeature(_, enabled)| enabled == &self.stays_disabled) else {
-					continue;
+				let Some(path) = dag
+					.reachable_predicate(&crate_and_feature, |CrateAndFeature(_, enabled)| {
+						enabled == &self.stays_disabled
+					})
+				else {
+					continue
 				};
 
 				// TODO cleanup this cluster fuck
 				let lookup = |id: &str| {
 					pkgs.iter()
 						.find(|pkg| pkg.id.to_string() == id)
-						.unwrap_or_else(|| panic!("Could not find crate {id} in the metadata"))
+						.unwrap_or_else(|| panic!("Could not find crate '{id}' in the metadata"))
 				};
 
 				let delimiter = self.path_delimiter.replace("\\n", "\n").replace("\\t", "\t");
@@ -242,9 +275,7 @@ impl NeverEnablesCmd {
 		let mut offenders = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
 
 		for lhs in pkgs.iter() {
-			let Some(enabled) = lhs.features.get(&self.precondition) else {
-				continue;
-			};
+			let Some(enabled) = lhs.features.get(&self.precondition) else { continue };
 			// TODO do the same in other command.
 			if enabled.contains(&format!("{}", self.stays_disabled)) {
 				offenders.entry(lhs.id.to_string()).or_default().insert(RenamedPackage::new(
@@ -255,9 +286,7 @@ impl NeverEnablesCmd {
 			}
 
 			for rhs in lhs.dependencies.iter() {
-				let Some(rhs) = resolve_dep(lhs, rhs, &meta) else {
-					continue;
-				};
+				let Some(rhs) = resolve_dep(lhs, rhs, &meta) else { continue };
 
 				if enabled.contains(&format!("{}/{}", rhs.name(), self.stays_disabled)) {
 					offenders.entry(lhs.id.to_string()).or_default().insert(rhs);
@@ -327,26 +356,26 @@ impl PropagateFeatureCmd {
 			for dep in pkg.dependencies.iter() {
 				// TODO handle default features.
 				// Resolve the dep according to the metadata.
-				let optional = dep.optional;
 				let Some(dep) = resolve_dep(pkg, dep, &meta) else {
-					// Either outside workspace or not resolved, possibly due to not being used at all because of the target or whatever.
+					// Either outside workspace or not resolved, possibly due to not being used at
+					// all because of the target or whatever.
 					feature_used = true;
-					continue;
+					continue
 				};
 
 				if dep.pkg.features.contains_key(&feature) {
 					match pkg.features.get(&feature) {
-						None => {
-							feature_missing.entry(pkg.id.to_string()).or_default().insert(dep);
-						},
+						None =>
+							if self.left_side_feature_missing == MuteSetting::Error {
+								feature_missing.entry(pkg.id.to_string()).or_default().insert(dep);
+							},
 						Some(enabled) => {
-							let want = if optional {
-								format!("{}?/{}", dep.name(), feature)
-							} else {
-								format!("{}/{}", dep.name(), feature)
-							};
+							let want_opt = format!("{}?/{}", dep.name(), feature);
+							let want_req = format!("{}/{}", dep.name(), feature);
+							// TODO check that optional deps are only enabled as optional unless
+							// overwritten with `--feature-enables-dep`.
 
-							if !enabled.contains(&want) {
+							if !enabled.contains(&want_opt) && !enabled.contains(&want_req) {
 								propagate_missing
 									.entry(pkg.id.to_string())
 									.or_default()
@@ -394,7 +423,7 @@ impl PropagateFeatureCmd {
 			} else {
 				None
 			};
-			println!("crate {:?}\n  feature {:?}", krate.name, feature);
+			println!("crate '{}'\n  feature '{}'", krate.name, feature);
 
 			// join
 			if let Some(deps) = feature_missing.get(&krate.id.to_string()) {
@@ -419,10 +448,12 @@ impl PropagateFeatureCmd {
 						if !self.fix_dependency.as_ref().map_or(true, |d| d == &dep_name) {
 							continue
 						}
-						let Some(fixer) = fixer.as_mut() else {
-							continue;
-						};
-						let opt = if dep.optional { "?" } else { "" };
+						let Some(fixer) = fixer.as_mut() else { continue };
+						let non_optional = self
+							.feature_enables_dep
+							.as_ref()
+							.map_or(false, |v| v.contains(&(feature.clone(), dep_name.clone())));
+						let opt = if !non_optional && dep.optional { "?" } else { "" };
 
 						fixer
 							.add_to_feature(
@@ -430,7 +461,7 @@ impl PropagateFeatureCmd {
 								format!("{}{}/{}", dep_name, opt, feature).as_str(),
 							)
 							.unwrap();
-						log::info!("Added feature {feature} to {dep_name} in {}", krate.name);
+						log::info!("Added '{dep_name}/{feature}' to '{}'", krate.name);
 						fixes += 1;
 					}
 				}
@@ -453,6 +484,23 @@ impl PropagateFeatureCmd {
 	}
 }
 
+/// Parse a single key-value pair
+///
+/// Copy & paste from <https://github.com/clap-rs/clap/blob/master/examples/typed-derive.rs>
+fn parse_key_val<T, U>(
+	s: &str,
+) -> Result<(T, U), Box<dyn std::error::Error + Send + Sync + 'static>>
+where
+	T: std::str::FromStr,
+	T::Err: std::error::Error + Send + Sync + 'static,
+	U: std::str::FromStr,
+	U::Err: std::error::Error + Send + Sync + 'static,
+{
+	let s = s.trim_matches('"');
+	let pos = s.find(':').ok_or_else(|| format!("invalid KEY=value: no `:` found in `{s}`"))?;
+	Ok((s[..pos].parse()?, s[pos + 1..].parse()?))
+}
+
 fn error_stats(errors: usize, warnings: usize, fixes: usize, fix: bool) -> String {
 	let mut ret: String = "Found ".into();
 
@@ -469,13 +517,14 @@ fn error_stats(errors: usize, warnings: usize, fixes: usize, fix: bool) -> Strin
 	if warnings + errors > 0 {
 		ret.push_str(" and");
 	}
-	ret.push_str(&format!(" fixed {} issue{}", fixes, plural(fixes)));
+	ret.push_str(&format!(" fixed {}", fixes));
 	if fix && fixes < errors {
 		ret.push_str(&format!(" ({} could not be fixed)", errors - fixes));
 	}
 	ret
 }
 
+/// Add an plural `s` for English grammar iff `n != 1`.
 fn plural(n: usize) -> &'static str {
 	if n == 1 {
 		""
@@ -491,9 +540,7 @@ impl OnlyEnablesCmd {
 
 		for pkg in pkgs.iter() {
 			for dep in pkg.dependencies.iter() {
-				let Some(dep) = resolve_dep(pkg, dep, &meta) else {
-					continue;
-				};
+				let Some(dep) = resolve_dep(pkg, dep, &meta) else { continue };
 				if !dep.pkg.features.contains_key(&self.only_enables) {
 					continue
 				}

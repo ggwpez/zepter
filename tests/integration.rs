@@ -52,10 +52,12 @@ fn integration() {
 		let mut config = CaseFile::from_file(&file);
 		let workspace = config.init().unwrap();
 		let mut overwrites = HashMap::new();
+		let mut diff_overwrites = HashMap::new();
 		let m = config.cases.len();
 
 		for (i, case) in config.cases.iter().enumerate() {
 			colour::white!("Testing {} {}/{} .. ", file.display(), i + 1, m);
+			git_reset(workspace.as_path()).unwrap();
 			let mut cmd = Command::cargo_bin("zepter").unwrap();
 			for arg in case.cmd.split_whitespace() {
 				cmd.arg(arg);
@@ -75,33 +77,53 @@ fn integration() {
 
 			match res.stdout == case.stdout.as_bytes() {
 				true => {
-					colour::green_ln!("OK");
-					colour::white!("");
+					colour::green!("cout:OK");
+					colour::white!(" ");
 					good += 1;
 				},
 				false if !overwrite => {
-					colour::red_ln!("FAILED");
+					colour::red!("cout:FAILED");
 					pretty_assertions::assert_eq!(
 						&String::from_utf8_lossy(&res.stdout),
 						&normalize(&case.stdout)
 					);
 				},
 				false => {
-					colour::yellow_ln!("OVERWRITE");
-					colour::white!("");
+					colour::yellow!("cout:OVERWRITE");
+					colour::white!(" ");
 					overwrites.insert(i, String::from_utf8_lossy(&res.stdout).to_string());
 					failed += 1;
 				},
 			}
+
+			let got = git_diff(workspace.as_path()).unwrap();
+			if got != case.diff {
+				if std::env::var("OVERWRITE").is_ok() {
+					diff_overwrites.insert(i, got);
+					colour::yellow_ln!("diff:OVERWRITE");
+					colour::white!("");
+				} else {
+					colour::red_ln!("diff:FAILED");
+					colour::white!("");
+					pretty_assertions::assert_eq!(got, case.diff);
+				}
+			} else {
+				colour::green_ln!("diff:OK");
+				colour::white!("");
+			}
+			git_reset(workspace.as_path()).unwrap();
 		}
 
 		if std::env::var("OVERWRITE").is_ok() {
-			if overwrites.is_empty() {
+			if overwrites.is_empty() && diff_overwrites.is_empty() {
 				continue
 			}
 
 			for (i, stdout) in overwrites.into_iter() {
 				config.cases[i].stdout = stdout;
+			}
+			for (i, diff) in diff_overwrites.into_iter() {
+				config.cases[i].diff = diff;
 			}
 
 			let mut fd = fs::File::create(&file).unwrap();

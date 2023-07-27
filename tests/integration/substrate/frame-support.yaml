@@ -10,8 +10,8 @@ cases:
     Found no issues.
 - cmd: lint propagate-feature -p frame-support --feature std
   stdout: |
-    crate "frame-support"
-      feature "std"
+    crate 'frame-support'
+      feature 'std'
         must propagate to:
           frame-system
           once_cell
@@ -19,30 +19,28 @@ cases:
           serde
           serde_json
           sp-debug-derive
-          sp-state-machine
-    Found 7 issues and fixed 0 issues.
+    Found 6 issues and fixed 0.
 - cmd: lint propagate-feature -p frame-support --feature std --workspace
   stdout: |
-    crate "frame-support"
-      feature "std"
+    crate 'frame-support'
+      feature 'std'
         must propagate to:
           frame-system
           sp-debug-derive
-          sp-state-machine
-    Found 3 issues and fixed 0 issues.
+    Found 2 issues and fixed 0.
 - cmd: lint propagate-feature -p frame-support --feature try-runtime
   stdout: |
-    crate "frame-support"
-      feature "try-runtime"
+    crate 'frame-support'
+      feature 'try-runtime'
         must propagate to:
           frame-system
           sp-runtime
-    Found 2 issues and fixed 0 issues.
+    Found 2 issues and fixed 0.
 - cmd: lint propagate-feature -p frame-support --feature try-runtime --workspace
   stdout: |
-    crate "frame-support"
-      feature "try-runtime"
+    crate 'frame-support'
+      feature 'try-runtime'
         must propagate to:
           frame-system
           sp-runtime
-    Found 2 issues and fixed 0 issues.
+    Found 2 issues and fixed 0.

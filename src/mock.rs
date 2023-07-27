@@ -10,11 +10,14 @@ use std::{path::Path, process::Command};
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct Case {
 	pub cmd: String,
+
 	#[serde(skip_serializing_if = "String::is_empty")]
 	#[serde(default)]
 	pub stdout: String,
+
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub code: Option<i32>,
+
 	#[serde(skip_serializing_if = "String::is_empty")]
 	#[serde(default)]
 	pub diff: String,
@@ -81,6 +84,7 @@ pub fn git_diff(dir: &Path) -> Result<String, Box<dyn std::error::Error>> {
 	let mut cmd = Command::new("git");
 	cmd.current_dir(dir);
 	cmd.arg("diff");
+	cmd.arg("--abbrev=6"); // Pick a deterministic commit hash len.
 	cmd.arg("--patch");
 	cmd.arg("--no-color");
 	cmd.arg("--minimal");
@@ -90,6 +94,13 @@ pub fn git_diff(dir: &Path) -> Result<String, Box<dyn std::error::Error>> {
 }
 
 pub fn git_reset(dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
+	let mut cmd = Command::new("git");
+	cmd.current_dir(dir);
+	cmd.arg("checkout");
+	cmd.arg("--");
+	cmd.arg(".");
+	cmd.status()?;
+
 	let mut cmd = Command::new("git");
 	cmd.current_dir(dir);
 	cmd.arg("reset");

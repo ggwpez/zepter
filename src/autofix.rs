@@ -45,6 +45,8 @@ impl AutoFixer {
 		// line …]`.
 		let values = feature.iter().cloned().collect::<Vec<_>>();
 		feature.clear();
+		feature.set_trailing("");
+		feature.set_trailing_comma(false); // We need to add this manually later on.
 
 		for value in values.into_iter() {
 			if value.as_str().map_or(false, |s| s.is_empty()) {
@@ -57,8 +59,8 @@ impl AutoFixer {
 			panic!("Empty value in feature");
 		}
 		let mut value: Value = v.into();
-		// Working around `feature = []`.
-		value = value.decorated("\n\t", "\n");
+		let suffix = if feature.is_empty() { "\n" } else { ",\n" };
+		value = value.decorated("\n\t", suffix);
 		feature.push_formatted(value);
 
 		Ok(())
@@ -67,8 +69,8 @@ impl AutoFixer {
 	pub fn save(&mut self) -> Result<(), String> {
 		if let (Some(doc), Some(path)) = (self.doc.take(), &self.manifest) {
 			std::fs::write(path, doc.to_string())
-				.map_err(|e| format!("Failed to write manifest: {e}"))?;
-			log::info!("Wrote manifest to {}", path.display());
+				.map_err(|e| format!("Failed to write manifest: {:?}: {:?}", path.display(), e))?;
+			log::info!("Modified manifest {:?}", path.display());
 		}
 		Ok(())
 	}
@@ -83,19 +85,86 @@ impl ToString for AutoFixer {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use rstest::*;
 
-	#[test]
-	fn add_to_feature_works() {
-		let before = r#"
+	#[rstest]
+	#[case(
+		r#"
+[features]
+runtime-benchmarks = ["sp-runtime/runtime-benchmarks"]
+"#,
+		r#"
+[features]
+runtime-benchmarks = [
+	"sp-runtime/runtime-benchmarks",
+	"frame-support/runtime-benchmarks",
+]
+std = [
+	"frame-system/std"
+]
+"#
+	)]
+	#[case(
+		r#"
+[features]
+runtime-benchmarks = [
+	"sp-runtime/runtime-benchmarks"
+]
+"#,
+		r#"
+[features]
+runtime-benchmarks = [
+	"sp-runtime/runtime-benchmarks",
+	"frame-support/runtime-benchmarks",
+]
+std = [
+	"frame-system/std"
+]
+"#
+	)]
+	#[case(
+		r#"
+[features]
+runtime-benchmarks = [
+	"sp-runtime/runtime-benchmarks",
+]
+"#,
+		r#"
+[features]
+runtime-benchmarks = [
+	"sp-runtime/runtime-benchmarks",
+	"frame-support/runtime-benchmarks",
+]
+std = [
+	"frame-system/std"
+]
+"#
+	)]
+	#[case(
+		r#"
+[features]
+runtime-benchmarks = []
+"#,
+		r#"
+[features]
+runtime-benchmarks = [
+	"frame-support/runtime-benchmarks"
+]
+std = [
+	"frame-system/std"
+]
+"#
+	)]
+	#[case(
+		r#"
 [package]
 name = "something"
 
 [features]
 runtime-benchmarks = []
 std = ["frame-support/std"]
-    "#;
-
-		let after = r#"
+"#,
+		r#"
 [package]
 name = "something"
 
@@ -105,10 +174,11 @@ runtime-benchmarks = [
 ]
 std = [
 	"frame-support/std",
-	"frame-system/std"
+	"frame-system/std",
 ]
-    "#;
-
+"#
+	)]
+	fn add_to_feature_works(#[case] before: &str, #[case] after: &str) {
 		let mut fixer = AutoFixer::from_raw(before).unwrap();
 		fixer
 			.add_to_feature("runtime-benchmarks", "frame-support/runtime-benchmarks")
@@ -123,7 +193,7 @@ std = [
 		let after = r#"[features]
 std = [
 	"AAA",
-	"BBB"
+	"BBB",
 ]
 "#;
 		let mut fixer = AutoFixer::from_raw(before).unwrap();

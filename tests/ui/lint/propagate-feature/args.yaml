@@ -10,8 +10,8 @@ crates:
 cases:
 - cmd: lint propagate-feature --show-version --workspace --feature F0
   stdout: |
-    crate "A"
-      feature "F0"
+    crate 'A'
+      feature 'F0'
         must propagate to:
           B
-    Found 1 issue and fixed 0 issues.
+    Found 1 issue and fixed 0.

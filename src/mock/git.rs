@@ -62,6 +62,7 @@ pub fn git_diff(dir: &Path) -> Result<String, anyhow::Error> {
 	cmd.arg("--no-color");
 	cmd.arg("--minimal");
 	cmd.arg("--no-prefix");
+	cmd.arg("--unified=0");
 	let output = cmd.output()?;
 	Ok(String::from_utf8_lossy(&output.stdout).into())
 }

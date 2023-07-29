@@ -7,41 +7,13 @@ use std::{
 	fs,
 	path::{Path, PathBuf},
 };
+
 use zepter::mock::*;
-
-pub type ModuleName = String;
-pub type FeatureName = String;
-
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
-pub struct Repo {
-	pub name: String,
-	#[serde(rename = "ref")]
-	pub ref_spec: String,
-}
-
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
-pub struct CaseFile {
-	pub repo: Repo,
-	pub cases: Vec<Case>,
-}
-
-impl CaseFile {
-	pub fn from_file(path: &Path) -> Self {
-		let content = fs::read_to_string(path).unwrap();
-		let content = content.replace('\t', "  ");
-		serde_yaml::from_str(&content)
-			.unwrap_or_else(|_| panic!("Failed to parse: {}", &path.display()))
-	}
-
-	pub fn init(&self) -> Result<PathBuf, Box<dyn std::error::Error>> {
-		clone_repo(&self.repo.name, &self.repo.ref_spec)
-	}
-}
 
 #[test]
 fn integration() {
 	let filter = std::env::var("UI_FILTER").unwrap_or_else(|_| "**/*.yaml".into());
-	let regex = format!("tests/integration/{}", filter);
+	let regex = format!("tests/{}", filter);
 	// Loop through all files in tests/ recursively
 	let files = glob::glob(&regex).unwrap();
 	let overwrite = std::env::var("OVERWRITE").is_ok();
@@ -50,7 +22,7 @@ fn integration() {
 
 	// Update each time you add a test.
 	for file in files.filter_map(Result::ok) {
-		let mut config = CaseFile::from_file(&file);
+		let mut config = IntegrationCaseFile::from_file(&file);
 		let workspace = config.init().unwrap();
 		let mut overwrites = HashMap::new();
 		let mut diff_overwrites = HashMap::new();
@@ -119,6 +91,11 @@ fn integration() {
 			git_reset(workspace.as_path()).unwrap();
 		}
 
+		//if std::env::var("PERSIST").is_ok() {
+		//	let path = workspace.persist();
+		//	println!("Persisted to {:?}", path);
+		//}
+
 		if std::env::var("OVERWRITE").is_ok() {
 			if overwrites.is_empty() && diff_overwrites.is_empty() {
 				continue
@@ -148,60 +125,4 @@ fn integration() {
 		panic!("No tests found");
 	}
 	colour::white!("");
-}
-
-pub(crate) fn clone_repo(repo: &str, rev: &str) -> Result<PathBuf, Box<dyn std::error::Error>> {
-	let dir = std::env::var("CARGO_TARGET_DIR").unwrap_or_else(|_| "target".into());
-	let repos_dir = std::path::Path::new(&dir).join("test-repos");
-	let dir = repos_dir.join(repo);
-
-	// Check if the repo is already cloned
-	if std::path::Path::new(&dir).exists() {
-	} else {
-		std::fs::create_dir_all(&dir)?;
-
-		let mut cmd = std::process::Command::new("git");
-		cmd.current_dir(&dir);
-		cmd.arg("init");
-		cmd.arg("--quiet");
-		cmd.status()?;
-
-		// add remote
-		let mut cmd = std::process::Command::new("git");
-		cmd.current_dir(&dir);
-		cmd.arg("remote");
-		cmd.arg("add");
-		cmd.arg("origin");
-		cmd.arg(&format!("https://github.com/paritytech/{}", repo));
-		cmd.status()?;
-
-		fetch(&dir, rev)?;
-	}
-
-	if checkout(&dir, rev).is_err() {
-		fetch(&dir, rev)?;
-		checkout(&dir, rev)?;
-	}
-	Ok(dir)
-}
-
-fn fetch(dir: &PathBuf, rev: &str) -> Result<(), Box<dyn std::error::Error>> {
-	let mut cmd = std::process::Command::new("git");
-	cmd.current_dir(dir);
-	cmd.arg("fetch");
-	cmd.arg("--depth");
-	cmd.arg("1");
-	cmd.arg("origin");
-	cmd.arg(rev);
-	cmd.assert().try_code(0)?;
-	Ok(())
-}
-
-fn checkout(dir: &PathBuf, rev: &str) -> Result<(), Box<dyn std::error::Error>> {
-	let mut cmd = Command::new("git");
-	cmd.current_dir(dir);
-	cmd.arg("checkout");
-	cmd.arg(rev);
-	cmd.assert().try_code(0)?;
-	Ok(())
 }

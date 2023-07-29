@@ -1,39 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
-//! Helpers for writing tests.
+//! Helpers for cloning and checking out git repositories.
 
-#![cfg(feature = "testing")]
-
-use std::{path::Path, process::Command};
-
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
-pub struct Case {
-	pub cmd: String,
-
-	#[serde(skip_serializing_if = "String::is_empty")]
-	#[serde(default)]
-	pub stdout: String,
-
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub code: Option<i32>,
-
-	#[serde(skip_serializing_if = "String::is_empty")]
-	#[serde(default)]
-	pub diff: String,
-}
-
-/// Removes leading and trailing empty lines.
-pub fn normalize(s: &str) -> String {
-	let mut lines = s.lines().collect::<Vec<_>>();
-	while lines.first().map(|l| l.is_empty()).is_some() {
-		lines.remove(0);
-	}
-	while lines.last().map(|l| l.is_empty()).is_some() {
-		lines.pop();
-	}
-	format!("{}\n", lines.join("\n"))
-}
+use std::{path::Path, path::PathBuf, process::Command};
 
 /// Create a mocked git repository.
 pub fn git_init(dir: &Path) -> Result<(), anyhow::Error> {
@@ -106,6 +76,62 @@ pub fn git_reset(dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
 	cmd.arg("reset");
 	cmd.arg("--hard");
 	cmd.arg("--quiet");
+	cmd.status()?;
+	Ok(())
+}
+
+pub fn clone_repo(repo: &str, rev: &str) -> Result<PathBuf, Box<dyn std::error::Error>> {
+	let dir = std::env::var("CARGO_TARGET_DIR").unwrap_or_else(|_| "target".into());
+	let repos_dir = std::path::Path::new(&dir).join("test-repos");
+	let dir = repos_dir.join(repo);
+
+	// Check if the repo is already cloned
+	if Path::new(&dir).exists() {
+	} else {
+		std::fs::create_dir_all(&dir)?;
+
+		let mut cmd = Command::new("git");
+		cmd.current_dir(&dir);
+		cmd.arg("init");
+		cmd.arg("--quiet");
+		cmd.status()?;
+
+		// add remote
+		let mut cmd = Command::new("git");
+		cmd.current_dir(&dir);
+		cmd.arg("remote");
+		cmd.arg("add");
+		cmd.arg("origin");
+		cmd.arg(&format!("https://github.com/paritytech/{}", repo));
+		cmd.status()?;
+
+		fetch(&dir, rev)?;
+	}
+
+	if checkout(&dir, rev).is_err() {
+		fetch(&dir, rev)?;
+		checkout(&dir, rev)?;
+	}
+	Ok(dir)
+}
+
+pub fn fetch(dir: &PathBuf, rev: &str) -> Result<(), Box<dyn std::error::Error>> {
+	let mut cmd = Command::new("git");
+	cmd.current_dir(dir);
+	cmd.arg("fetch");
+	cmd.arg("--depth");
+	cmd.arg("1");
+	cmd.arg("origin");
+	cmd.arg(rev);
+	cmd.status()?;
+	Ok(())
+}
+
+pub fn checkout(dir: &PathBuf, rev: &str) -> Result<(), Box<dyn std::error::Error>> {
+	let mut cmd = Command::new("git");
+	cmd.current_dir(dir);
+	cmd.arg("checkout");
+	cmd.arg(rev);
 	cmd.status()?;
 	Ok(())
 }

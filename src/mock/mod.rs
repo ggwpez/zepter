@@ -8,19 +8,19 @@
 pub mod git;
 pub use git::*;
 
-use std::{path::Path, process::Command};
-use assert_cmd::{assert::OutputAssertExt};
 use std::{
+	any,
 	collections::HashMap,
 	fs,
-	path::{PathBuf},
+	io::Write,
+	path::{Path, PathBuf},
+	process::Command,
 };
-use std::io::Write;
 
 pub type ModuleName = String;
 
 /// A single test case.
-/// 
+///
 /// Holds the input arguments, the stdout, an optional git diff and the exit code of the binary.
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct Case {
@@ -46,6 +46,54 @@ pub struct Repo {
 	pub ref_spec: String,
 }
 
+pub enum CaseFile {
+	Ui(UiCaseFile),
+	Integration(IntegrationCaseFile),
+}
+
+impl CaseFile {
+	pub fn from_file(path: &Path) -> Self {
+		UiCaseFile::from_file(path)
+			.map(CaseFile::Ui)
+			.or_else(|_| IntegrationCaseFile::from_file(path).map(CaseFile::Integration))
+			.unwrap_or_else(|e| panic!("Failed to parse case file: {}", e))
+	}
+
+	pub fn to_file(&self, path: &Path) -> Result<(), anyhow::Error> {
+		let mut fd = fs::File::create(&path).unwrap();
+
+		match self {
+			CaseFile::Ui(ui) => serde_yaml::to_writer(&mut fd, &ui),
+			CaseFile::Integration(integration) => serde_yaml::to_writer(&mut fd, &integration),
+		}
+		.map_err(|e| anyhow::anyhow!("Failed to write case file: {}", e))
+	}
+
+	pub fn cases(&self) -> &[Case] {
+		match self {
+			CaseFile::Ui(ui) => &ui.cases,
+			CaseFile::Integration(integration) => &integration.cases,
+		}
+	}
+
+	pub fn case_mut(&mut self, i: usize) -> &mut Case {
+		match self {
+			CaseFile::Ui(ui) => &mut ui.cases[i],
+			CaseFile::Integration(integration) => &mut integration.cases[i],
+		}
+	}
+
+	pub fn init(&self) -> Result<(PathBuf, Option<Context>), anyhow::Error> {
+		match self {
+			CaseFile::Ui(ui) => {
+				let ctx = ui.init()?;
+				Ok((ctx.root.path().to_owned(), Some(ctx)))
+			},
+			CaseFile::Integration(integration) => Ok((integration.init()?, None)),
+		}
+	}
+}
+
 /// Describes the setup for a UI test.
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct UiCaseFile {
@@ -64,11 +112,10 @@ impl UiCaseFile {
 		Ok(ctx)
 	}
 
-	pub fn from_file(path: &Path) -> Self {
+	pub fn from_file(path: &Path) -> Result<Self, anyhow::Error> {
 		let content = fs::read_to_string(path).unwrap();
 		let content = content.replace('\t', "  ");
-		serde_yaml::from_str(&content)
-			.unwrap_or_else(|_| panic!("Failed to parse: {}", &path.display()))
+		serde_yaml::from_str(&content).map_err(|e| anyhow::anyhow!("Failed to parse: {}", e))
 	}
 }
 
@@ -80,14 +127,13 @@ pub struct IntegrationCaseFile {
 }
 
 impl IntegrationCaseFile {
-	pub fn from_file(path: &Path) -> Self {
+	pub fn from_file(path: &Path) -> Result<Self, anyhow::Error> {
 		let content = fs::read_to_string(path).unwrap();
 		let content = content.replace('\t', "  ");
-		serde_yaml::from_str(&content)
-			.unwrap_or_else(|_| panic!("Failed to parse: {}", &path.display()))
+		serde_yaml::from_str(&content).map_err(|e| anyhow::anyhow!("Failed to parse: {}", e))
 	}
 
-	pub fn init(&self) -> Result<PathBuf, Box<dyn std::error::Error>> {
+	pub fn init(&self) -> Result<PathBuf, anyhow::Error> {
 		clone_repo(&self.repo.name, &self.repo.ref_spec)
 	}
 }
@@ -244,7 +290,6 @@ impl CrateDependency {
 	}
 }
 
-
 /// Removes leading and trailing empty lines.
 pub fn normalize(s: &str) -> String {
 	let mut lines = s.lines().collect::<Vec<_>>();
@@ -256,7 +301,6 @@ pub fn normalize(s: &str) -> String {
 	}
 	format!("{}\n", lines.join("\n"))
 }
-
 
 /// Predicate for serde to skip serialization of default values.
 fn is_false(b: &Option<bool>) -> bool {

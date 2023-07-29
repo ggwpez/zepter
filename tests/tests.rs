@@ -2,16 +2,12 @@
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
 use assert_cmd::{assert::OutputAssertExt, Command};
-use std::{
-	collections::HashMap,
-	fs,
-	path::{Path, PathBuf},
-};
+use std::{collections::HashMap, fs};
 
 use zepter::mock::*;
 
 #[test]
-fn integration() {
+fn all() {
 	let filter = std::env::var("UI_FILTER").unwrap_or_else(|_| "**/*.yaml".into());
 	let regex = format!("tests/{}", filter);
 	// Loop through all files in tests/ recursively
@@ -22,13 +18,13 @@ fn integration() {
 
 	// Update each time you add a test.
 	for file in files.filter_map(Result::ok) {
-		let mut config = IntegrationCaseFile::from_file(&file);
-		let workspace = config.init().unwrap();
+		let mut config = CaseFile::from_file(&file);
+		let (workspace, _ctx) = config.init().unwrap();
 		let mut overwrites = HashMap::new();
 		let mut diff_overwrites = HashMap::new();
-		let m = config.cases.len();
+		let m = config.cases().len();
 
-		for (i, case) in config.cases.iter().enumerate() {
+		for (i, case) in config.cases().iter().enumerate() {
 			colour::white!("Testing {} {}/{} .. ", file.display(), i + 1, m);
 			git_reset(workspace.as_path()).unwrap();
 			let mut cmd = Command::cargo_bin("zepter").unwrap();
@@ -102,14 +98,13 @@ fn integration() {
 			}
 
 			for (i, stdout) in overwrites.into_iter() {
-				config.cases[i].stdout = stdout;
+				config.case_mut(i).stdout = stdout;
 			}
 			for (i, diff) in diff_overwrites.into_iter() {
-				config.cases[i].diff = diff;
+				config.case_mut(i).diff = diff;
 			}
 
-			let mut fd = fs::File::create(&file).unwrap();
-			serde_yaml::to_writer(&mut fd, &config).unwrap();
+			config.to_file(&file).unwrap();
 			println!("Updated {}", file.display());
 		}
 	}

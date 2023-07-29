@@ -283,7 +283,7 @@ impl NeverEnablesCmd {
 			let Some(enabled) = lhs.features.get(&self.precondition) else { continue };
 
 			// TODO do the same in other command.
-			if enabled.contains(&format!("{}", self.stays_disabled)) {
+			if enabled.contains(&self.stays_disabled.to_string()) {
 				offenders.entry(lhs.id.to_string()).or_default().insert(RenamedPackage::new(
 					(*lhs).clone(),
 					None,

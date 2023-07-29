@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
 use assert_cmd::{assert::OutputAssertExt, Command};
-use std::{collections::HashMap, fs};
+use std::{collections::HashMap};
 
 use zepter::mock::*;
 

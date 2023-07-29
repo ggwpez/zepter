@@ -9,7 +9,6 @@ pub mod git;
 pub use git::*;
 
 use std::{
-	any,
 	collections::HashMap,
 	fs,
 	io::Write,
@@ -60,7 +59,7 @@ impl CaseFile {
 	}
 
 	pub fn to_file(&self, path: &Path) -> Result<(), anyhow::Error> {
-		let mut fd = fs::File::create(&path).unwrap();
+		let mut fd = fs::File::create(path).unwrap();
 
 		match self {
 			CaseFile::Ui(ui) => serde_yaml::to_writer(&mut fd, &ui),
@@ -144,6 +143,7 @@ pub struct CrateConfig {
 	name: ModuleName,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	deps: Option<Vec<CrateDependency>>,
+	#[allow(clippy::type_complexity)]
 	#[serde(skip_serializing_if = "Option::is_none")]
 	features: Option<HashMap<String, Option<Vec<(String, String)>>>>,
 }
@@ -157,6 +157,12 @@ impl CrateConfig {
 
 pub struct Context {
 	pub root: tempfile::TempDir,
+}
+
+impl Default for Context {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Context {

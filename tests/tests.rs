@@ -26,6 +26,7 @@ fn all() {
 
 		for (i, case) in config.cases().iter().enumerate() {
 			colour::white!("Testing {} {}/{} .. ", file.display(), i + 1, m);
+			git_reset(workspace.as_path()).unwrap();
 			let mut cmd = Command::cargo_bin("zepter").unwrap();
 			for arg in case.cmd.split_whitespace() {
 				cmd.arg(arg);

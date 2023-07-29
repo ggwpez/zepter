@@ -91,7 +91,6 @@ pub fn clone_repo(repo: &str, rev: &str) -> Result<PathBuf, anyhow::Error> {
 
 	// Check if the repo is already cloned
 	if Path::new(&dir).exists() {
-		git_reset(&dir)?;
 	} else {
 		std::fs::create_dir_all(&dir)?;
 

@@ -26,7 +26,6 @@ fn all() {
 
 		for (i, case) in config.cases().iter().enumerate() {
 			colour::white!("Testing {} {}/{} .. ", file.display(), i + 1, m);
-			git_reset(workspace.as_path()).unwrap();
 			let mut cmd = Command::cargo_bin("zepter").unwrap();
 			for arg in case.cmd.split_whitespace() {
 				cmd.arg(arg);
@@ -84,6 +83,7 @@ fn all() {
 				colour::green_ln!("diff:OK");
 				colour::white!("");
 			}
+			git_reset(workspace.as_path()).unwrap();
 		}
 
 		//if std::env::var("PERSIST").is_ok() {

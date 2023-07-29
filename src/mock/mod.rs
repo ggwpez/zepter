@@ -160,9 +160,9 @@ pub struct Context {
 }
 
 impl Default for Context {
-    fn default() -> Self {
-        Self::new()
-    }
+	fn default() -> Self {
+		Self::new()
+	}
 }
 
 impl Context {

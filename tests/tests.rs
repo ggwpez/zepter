@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
 use assert_cmd::{assert::OutputAssertExt, Command};
-use std::{collections::HashMap};
+use std::collections::HashMap;
 
 use zepter::mock::*;
 
@@ -84,7 +84,6 @@ fn all() {
 				colour::green_ln!("diff:OK");
 				colour::white!("");
 			}
-			git_reset(workspace.as_path()).unwrap();
 		}
 
 		//if std::env::var("PERSIST").is_ok() {

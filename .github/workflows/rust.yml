@@ -22,6 +22,6 @@ jobs:
     - name: Run tests
       run: cargo test --locked -- --nocapture
     - name: Clippy
-      run: cargo clippy
+      run: cargo clippy --all-targets --all-features -q
     - name: Format
       run: cargo fmt --check

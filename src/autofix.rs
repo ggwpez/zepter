@@ -45,14 +45,24 @@ impl AutoFixer {
 		// line …]`.
 		let values = feature.iter().cloned().collect::<Vec<_>>();
 		feature.clear();
-		feature.set_trailing("");
+		feature.set_trailing(
+			feature.trailing().as_str().unwrap().to_string().trim_start_matches('\n'),
+		);
 		feature.set_trailing_comma(false); // We need to add this manually later on.
 
-		for value in values.into_iter() {
+		for mut value in values.into_iter() {
 			if value.as_str().map_or(false, |s| s.is_empty()) {
 				panic!("Empty value in feature");
 			}
-			let value = value.decorated("\n\t", "");
+			let mut prefix: String = match value.decor().prefix() {
+				None => "".into(),
+				Some(p) => p.as_str().unwrap().into(),
+			};
+			if !prefix.ends_with("\n\t") {
+				prefix = format!("{prefix}\n\t");
+			}
+			value.decor_mut().set_suffix("");
+			value.decor_mut().set_prefix(prefix);
 			feature.push_formatted(value);
 		}
 		if v.is_empty() {
@@ -88,6 +98,26 @@ mod tests {
 	use rstest::*;
 
 	#[rstest]
+	#[case(
+		r#"
+[features]
+runtime-benchmarks = [
+	# TOML comments are preserved
+	"sp-runtime/runtime-benchmarks"
+]
+"#,
+		r#"
+[features]
+runtime-benchmarks = [
+	# TOML comments are preserved
+	"sp-runtime/runtime-benchmarks",
+	"frame-support/runtime-benchmarks",
+]
+std = [
+	"frame-system/std"
+]
+"#
+	)]
 	#[case(
 		r#"
 [features]
@@ -178,12 +208,108 @@ std = [
 ]
 "#
 	)]
-	fn add_to_feature_works(#[case] before: &str, #[case] after: &str) {
+	fn add_to_features_works(#[case] before: &str, #[case] after: &str) {
 		let mut fixer = AutoFixer::from_raw(before).unwrap();
 		fixer
 			.add_to_feature("runtime-benchmarks", "frame-support/runtime-benchmarks")
 			.unwrap();
 		fixer.add_to_feature("std", "frame-system/std").unwrap();
+		assert_eq!(fixer.to_string(), after);
+	}
+
+	#[rstest]
+	#[case(
+		r#"
+[features]
+runtime-benchmarks = [
+	# Inside empty works
+]
+"#,
+		r#"
+[features]
+runtime-benchmarks = [
+	"frame-support/runtime-benchmarks"
+	# Inside empty works
+]
+"#
+	)]
+	#[case(
+		r#"
+[features]
+runtime-benchmarks = [
+	# TOML comments are preserved
+	"sp-runtime/runtime-benchmarks"
+]
+"#,
+		r#"
+[features]
+runtime-benchmarks = [
+	# TOML comments are preserved
+	"sp-runtime/runtime-benchmarks",
+	"frame-support/runtime-benchmarks",
+]
+"#
+	)]
+	#[case(
+		r#"
+[features]
+# TOML comments are preserved
+runtime-benchmarks = []
+"#,
+		r#"
+[features]
+# TOML comments are preserved
+runtime-benchmarks = [
+	"frame-support/runtime-benchmarks"
+]
+"#
+	)]
+	#[case(
+		r#"
+# First comment
+[features]
+# Second comment
+runtime-benchmarks = []
+"#,
+		r#"
+# First comment
+[features]
+# Second comment
+runtime-benchmarks = [
+	"frame-support/runtime-benchmarks"
+]
+"#
+	)]
+	#[case(
+		r#"
+# First comment
+[features]
+# Second comment
+runtime-benchmarks = [
+	# Third comment
+	"sp-runtime/runtime-benchmarks",
+	# Fourth comment
+]
+# Fifth comment
+"#,
+		r#"
+# First comment
+[features]
+# Second comment
+runtime-benchmarks = [
+	# Third comment
+	"sp-runtime/runtime-benchmarks",
+	"frame-support/runtime-benchmarks",
+	# Fourth comment
+]
+# Fifth comment
+"#
+	)]
+	fn add_feature_keeps_comments(#[case] before: &str, #[case] after: &str) {
+		let mut fixer = AutoFixer::from_raw(before).unwrap();
+		fixer
+			.add_to_feature("runtime-benchmarks", "frame-support/runtime-benchmarks")
+			.unwrap();
 		assert_eq!(fixer.to_string(), after);
 	}
 

@@ -3,10 +3,8 @@
 
 //! Helpers for cloning and checking out git repositories.
 
-use std::{
-	path::{Path, PathBuf},
-	process::Command,
-};
+use assert_cmd::Command;
+use std::path::{Path, PathBuf};
 
 /// Create a mocked git repository.
 pub fn git_init(dir: &Path) -> Result<(), anyhow::Error> {
@@ -14,14 +12,14 @@ pub fn git_init(dir: &Path) -> Result<(), anyhow::Error> {
 	cmd.current_dir(dir);
 	cmd.arg("init");
 	cmd.arg("--quiet");
-	cmd.output()?;
+	cmd.assert().try_success()?;
 
 	// Do an init commit
 	let mut cmd = Command::new("git");
 	cmd.current_dir(dir);
 	cmd.arg("add");
 	cmd.arg("--all");
-	cmd.output()?;
+	cmd.assert().try_success()?;
 
 	// git config user.email "you@example.com"
 	// git config user.name "Your Name"
@@ -30,14 +28,14 @@ pub fn git_init(dir: &Path) -> Result<(), anyhow::Error> {
 	cmd.arg("config");
 	cmd.arg("user.email");
 	cmd.arg("you@example.com");
-	cmd.output()?;
+	cmd.assert().try_success()?;
 
 	let mut cmd = Command::new("git");
 	cmd.current_dir(dir);
 	cmd.arg("config");
 	cmd.arg("user.name");
 	cmd.arg("Your Name");
-	cmd.output()?;
+	cmd.assert().try_success()?;
 
 	let mut cmd = Command::new("git");
 	cmd.current_dir(dir);
@@ -48,7 +46,7 @@ pub fn git_init(dir: &Path) -> Result<(), anyhow::Error> {
 	cmd.arg("test <t@t.com>");
 	cmd.arg("--no-gpg-sign");
 	cmd.arg("--quiet");
-	cmd.output()?;
+	cmd.assert().try_success()?;
 
 	Ok(())
 }
@@ -64,6 +62,7 @@ pub fn git_diff(dir: &Path) -> Result<String, anyhow::Error> {
 	cmd.arg("--no-prefix");
 	cmd.arg("--unified=0");
 	let output = cmd.output()?;
+
 	Ok(String::from_utf8_lossy(&output.stdout).into())
 }
 
@@ -73,14 +72,15 @@ pub fn git_reset(dir: &Path) -> Result<(), anyhow::Error> {
 	cmd.arg("checkout");
 	cmd.arg("--");
 	cmd.arg(".");
-	cmd.output()?;
+	cmd.assert().try_success()?;
 
 	let mut cmd = Command::new("git");
 	cmd.current_dir(dir);
 	cmd.arg("reset");
 	cmd.arg("--hard");
 	cmd.arg("--quiet");
-	cmd.output()?;
+	cmd.assert().try_success()?;
+
 	Ok(())
 }
 
@@ -91,6 +91,7 @@ pub fn clone_repo(repo: &str, rev: &str) -> Result<PathBuf, anyhow::Error> {
 
 	// Check if the repo is already cloned
 	if Path::new(&dir).exists() {
+		git_reset(&dir)?;
 	} else {
 		std::fs::create_dir_all(&dir)?;
 
@@ -98,7 +99,7 @@ pub fn clone_repo(repo: &str, rev: &str) -> Result<PathBuf, anyhow::Error> {
 		cmd.current_dir(&dir);
 		cmd.arg("init");
 		cmd.arg("--quiet");
-		cmd.output()?;
+		cmd.assert().try_success()?;
 
 		// add remote
 		let mut cmd = Command::new("git");
@@ -107,7 +108,7 @@ pub fn clone_repo(repo: &str, rev: &str) -> Result<PathBuf, anyhow::Error> {
 		cmd.arg("add");
 		cmd.arg("origin");
 		cmd.arg(&format!("https://github.com/paritytech/{}", repo));
-		cmd.output()?;
+		cmd.assert().try_success()?;
 
 		fetch(&dir, rev)?;
 	}
@@ -127,7 +128,7 @@ pub fn fetch(dir: &PathBuf, rev: &str) -> Result<(), anyhow::Error> {
 	cmd.arg("1");
 	cmd.arg("origin");
 	cmd.arg(rev);
-	cmd.output()?;
+	cmd.assert().try_success()?;
 	Ok(())
 }
 
@@ -136,6 +137,6 @@ pub fn checkout(dir: &PathBuf, rev: &str) -> Result<(), anyhow::Error> {
 	cmd.current_dir(dir);
 	cmd.arg("checkout");
 	cmd.arg(rev);
-	cmd.output()?;
+	cmd.assert().try_success()?;
 	Ok(())
 }

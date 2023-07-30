@@ -46,12 +46,15 @@ fn all() {
 
 			match res.stdout == case.stdout.as_bytes() {
 				true => {
-					colour::green!("cout:OK");
+					colour::white!("cout:");
+					colour::green!("OK");
 					colour::white!(" ");
 					good += 1;
 				},
 				false if !overwrite => {
-					colour::red!("cout:FAILED");
+					colour::white!("cout:");
+					colour::yellow!("FAIL");
+					colour::white!(" ");
 					if !keep_going {
 						pretty_assertions::assert_eq!(
 							&String::from_utf8_lossy(&res.stdout),
@@ -60,7 +63,8 @@ fn all() {
 					}
 				},
 				false => {
-					colour::yellow!("cout:OVERWRITE");
+					colour::white!("cout:");
+					colour::yellow!("OVERWRITE");
 					colour::white!(" ");
 					overwrites.insert(i, String::from_utf8_lossy(&res.stdout).to_string());
 					failed += 1;
@@ -71,17 +75,20 @@ fn all() {
 			if got != case.diff {
 				if std::env::var("OVERWRITE").is_ok() {
 					diff_overwrites.insert(i, got);
-					colour::yellow_ln!("diff:OVERWRITE");
+					colour::white!("diff:");
+					colour::yellow_ln!("OVERWRITE");
 					colour::white!("");
 				} else {
-					colour::red_ln!("diff:FAILED");
+					colour::white!("diff:");
+					colour::red_ln!("FAILED");
 					colour::white!("");
 					if !keep_going {
 						pretty_assertions::assert_eq!(got, case.diff);
 					}
 				}
 			} else {
-				colour::green_ln!("diff:OK");
+				colour::white!("diff:");
+				colour::green_ln!("OK");
 				colour::white!("");
 			}
 			git_reset(workspace.as_path()).unwrap();

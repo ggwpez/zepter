@@ -1,6 +1,6 @@
 [package]
 name = "zepter"
-version = "0.7.1"
+version = "0.7.2"
 edition = "2021"
 authors = [ "Oliver Tale-Yazdi" ]
 description = "Check if features are correctly propagated in your workspace."
@@ -26,10 +26,14 @@ serde = "1.0.171"
 toml_edit = "0.19.14"
 version = "3.0.0"
 
+# Testing deps
+tempfile = { version = "3.6.0", optional = true }
+serde_yaml = { version = "0.9.23", optional = true }
+assert_cmd = { version = "2.0.12", optional = true }
+
 [dev-dependencies]
 zepter = { path = ".", features = ["testing"] }
 
-assert_cmd = "2.0.12"
 criterion = "0.5"
 colour = "0.7.0"
 glob = "0.3.1"
@@ -38,12 +42,14 @@ pretty_assertions = "1.4.0"
 rand = "0.8.5"
 rstest = "0.18.1"
 serde = "1.0.171"
-serde_yaml = "0.9.23"
-tempfile = "3.6.0"
 void = "1.0.2"
 
 [features]
-testing = []
+testing = [
+	"dep:tempfile",
+	"dep:serde_yaml",
+	"dep:assert_cmd",
+]
 
 [profile.dev]
 opt-level = 3

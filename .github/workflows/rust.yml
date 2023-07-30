@@ -18,9 +18,10 @@ jobs:
       with:
         fetch-depth: 1
     - name: Build
-      run: cargo build --all-targets --all-features --locked
+      run: cargo build --all-targets --all-features --locked -q
     - name: Run tests
       run: cargo test --locked -- --nocapture
+    - name: Clippy
+      run: cargo clippy --all-targets --all-features -q
     - name: Format
-      run: |
-        cargo fmt --check
+      run: cargo fmt --check

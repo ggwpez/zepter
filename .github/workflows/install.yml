@@ -1,5 +1,4 @@
-# Smokescreen testing that it can be installed via cargo and runs.
-name: Cargo install
+name: Smokescreen
 
 on:
   push:
@@ -13,7 +12,7 @@ env:
 
 jobs:
   install:
-    name: "Smokescreen Install"
+    name: "Cargo install"
     runs-on: ubuntu-latest
 
     steps:

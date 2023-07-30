@@ -16,7 +16,7 @@ cases:
         must propagate to:
           B
     Found 1 issue and fixed 1.
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex b30994..a5c6b3 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,5 @@ B = { version = \"*\", path = \"../B\", optional = true}\n \n [features]\n F0 = [\n+\t\"B?/F0\"\n ]\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex b30994..a5c6b3 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"B?/F0\"\n"
 - cmd: lint propagate-feature -p A --feature F0 --fix
   stdout: |
     crate 'A'
@@ -24,7 +24,7 @@ cases:
         must propagate to:
           B
     Found 1 issue and fixed 1.
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex b30994..a5c6b3 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,5 @@ B = { version = \"*\", path = \"../B\", optional = true}\n \n [features]\n F0 = [\n+\t\"B?/F0\"\n ]\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex b30994..a5c6b3 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"B?/F0\"\n"
 - cmd: lint propagate-feature -p B --feature F0 --fix
   stdout: |
     Found no issues.
@@ -38,7 +38,7 @@ cases:
         must propagate to:
           B
     Found 1 issue and fixed 1.
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex b30994..a5c6b3 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,5 @@ B = { version = \"*\", path = \"../B\", optional = true}\n \n [features]\n F0 = [\n+\t\"B?/F0\"\n ]\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex b30994..a5c6b3 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"B?/F0\"\n"
 - cmd: lint propagate-feature -p A --feature F0 --workspace --fix
   stdout: |
     crate 'A'
@@ -46,7 +46,7 @@ cases:
         must propagate to:
           B
     Found 1 issue and fixed 1.
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex b30994..a5c6b3 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -10,4 +10,5 @@ B = { version = \"*\", path = \"../B\", optional = true}\n \n [features]\n F0 = [\n+\t\"B?/F0\"\n ]\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex b30994..a5c6b3 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"B?/F0\"\n"
 - cmd: lint propagate-feature -p B --feature F0 --workspace --fix
   stdout: |
     Found no issues.

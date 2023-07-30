@@ -46,7 +46,7 @@ This can be fixed by appending the `--fix` flag, which results in this diff:
 +]
 ```
 
-The auto-fix always enables the features of optional dependencies as optional features. This is a noninvasive default, but may not correctly enable the dependency itself.
+The auto-fix can be configured to enable specific optional dependencies as non-optional via `--feature-enables-dep="runtime-benchmarks:frame-benchmarking"` for example. In this case the `frame-benchmarking` dependency would enabled as non-optional if the `runtime-benchmarks` feature is enabled.
 
 ## Example - Feature tracing
 

@@ -76,7 +76,7 @@ impl AutoFixer {
 			unreachable!("Empty value in feature");
 		}
 		let mut value: Value = v.into();
-		let suffix = if feature.is_empty() { ",\n" } else { ",\n" };
+		let suffix = "\n";
 		value = value.decorated("\n\t", suffix);
 		new_vals.push(value);
 
@@ -86,6 +86,7 @@ impl AutoFixer {
 			new_vals[i].decor_mut().set_prefix(new_prefix);
 			new_vals[i - 1].decor_mut().set_suffix("");
 		}
+
 		for new_val in new_vals.into_iter() {
 			feature.push_formatted(new_val);
 		}
@@ -129,10 +130,10 @@ runtime-benchmarks = [
 runtime-benchmarks = [
 	# TOML comments are preserved
 	"sp-runtime/runtime-benchmarks",
-	"frame-support/runtime-benchmarks",
+	"frame-support/runtime-benchmarks"
 ]
 std = [
-	"frame-system/std",
+	"frame-system/std"
 ]
 "#
 	)]
@@ -150,10 +151,10 @@ runtime-benchmarks = [
 runtime-benchmarks = [
 	
 	"sp-runtime/runtime-benchmarks",
-	"frame-support/runtime-benchmarks",
+	"frame-support/runtime-benchmarks"
 ]
 std = [
-	"frame-system/std",
+	"frame-system/std"
 ]
 "#
 	)]
@@ -175,10 +176,10 @@ runtime-benchmarks = [
 	
 	
 	"sp-runtime/runtime-benchmarks",
-	"frame-support/runtime-benchmarks",
+	"frame-support/runtime-benchmarks"
 ]
 std = [
-	"frame-system/std",
+	"frame-system/std"
 ]
 "#
 	)]
@@ -211,10 +212,10 @@ runtime-benchmarks = [
 	# 5
 	"sp-runtime/runtime-benchmarks",
 	# 6
-	"frame-support/runtime-benchmarks",
+	"frame-support/runtime-benchmarks"
 ]
 std = [
-	"frame-system/std",
+	"frame-system/std"
 ]
 # 7
 "#
@@ -228,10 +229,10 @@ runtime-benchmarks = ["sp-runtime/runtime-benchmarks"]
 [features]
 runtime-benchmarks = [
 	"sp-runtime/runtime-benchmarks",
-	"frame-support/runtime-benchmarks",
+	"frame-support/runtime-benchmarks"
 ]
 std = [
-	"frame-system/std",
+	"frame-system/std"
 ]
 "#
 	)]
@@ -246,10 +247,10 @@ runtime-benchmarks = [
 [features]
 runtime-benchmarks = [
 	"sp-runtime/runtime-benchmarks",
-	"frame-support/runtime-benchmarks",
+	"frame-support/runtime-benchmarks"
 ]
 std = [
-	"frame-system/std",
+	"frame-system/std"
 ]
 "#
 	)]
@@ -264,10 +265,10 @@ runtime-benchmarks = [
 [features]
 runtime-benchmarks = [
 	"sp-runtime/runtime-benchmarks",
-	"frame-support/runtime-benchmarks",
+	"frame-support/runtime-benchmarks"
 ]
 std = [
-	"frame-system/std",
+	"frame-system/std"
 ]
 "#
 	)]
@@ -279,10 +280,10 @@ runtime-benchmarks = []
 		r#"
 [features]
 runtime-benchmarks = [
-	"frame-support/runtime-benchmarks",
+	"frame-support/runtime-benchmarks"
 ]
 std = [
-	"frame-system/std",
+	"frame-system/std"
 ]
 "#
 	)]
@@ -301,11 +302,11 @@ name = "something"
 
 [features]
 runtime-benchmarks = [
-	"frame-support/runtime-benchmarks",
+	"frame-support/runtime-benchmarks"
 ]
 std = [
 	"frame-support/std",
-	"frame-system/std",
+	"frame-system/std"
 ]
 "#
 	)]
@@ -329,7 +330,7 @@ runtime-benchmarks = [
 		r#"
 [features]
 runtime-benchmarks = [
-	"frame-support/runtime-benchmarks",
+	"frame-support/runtime-benchmarks"
 	# Inside empty works
 ]
 "#
@@ -347,7 +348,7 @@ runtime-benchmarks = [
 runtime-benchmarks = [
 	# TOML comments are preserved
 	"sp-runtime/runtime-benchmarks",
-	"frame-support/runtime-benchmarks",
+	"frame-support/runtime-benchmarks"
 ]
 "#
 	)]
@@ -361,7 +362,7 @@ runtime-benchmarks = []
 [features]
 # TOML comments are preserved
 runtime-benchmarks = [
-	"frame-support/runtime-benchmarks",
+	"frame-support/runtime-benchmarks"
 ]
 "#
 	)]
@@ -377,7 +378,7 @@ runtime-benchmarks = []
 [features]
 # Second comment
 runtime-benchmarks = [
-	"frame-support/runtime-benchmarks",
+	"frame-support/runtime-benchmarks"
 ]
 "#
 	)]
@@ -400,7 +401,7 @@ runtime-benchmarks = [
 runtime-benchmarks = [
 	# Third comment
 	"sp-runtime/runtime-benchmarks",
-	"frame-support/runtime-benchmarks",
+	"frame-support/runtime-benchmarks"
 	# Fourth comment
 ]
 # Fifth comment
@@ -421,11 +422,13 @@ runtime-benchmarks = [
 std = [
 	"AAA",
 	"BBB",
+	"CCC"
 ]
 "#;
 		let mut fixer = AutoFixer::from_raw(before).unwrap();
 		fixer.add_to_feature("std", "AAA").unwrap();
 		fixer.add_to_feature("std", "BBB").unwrap();
+		fixer.add_to_feature("std", "CCC").unwrap();
 		assert_eq!(fixer.to_string(), after);
 	}
 

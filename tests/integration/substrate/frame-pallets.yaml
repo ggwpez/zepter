@@ -12,7 +12,7 @@ cases:
           pallet-preimage
           pallet-scheduler
     Found 4 issues and fixed 4.
-  diff: "diff --git frame/referenda/Cargo.toml frame/referenda/Cargo.toml\nindex a89f64..2875a0 100644\n--- frame/referenda/Cargo.toml\n+++ frame/referenda/Cargo.toml\n@@ -58,0 +59,4 @@ runtime-benchmarks = [\n+\t\"frame-benchmarking/runtime-benchmarks\",\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"pallet-preimage/runtime-benchmarks\",\n+\t\"pallet-scheduler/runtime-benchmarks\",\n"
+  diff: "diff --git frame/referenda/Cargo.toml frame/referenda/Cargo.toml\nindex a89f64..7833ed 100644\n--- frame/referenda/Cargo.toml\n+++ frame/referenda/Cargo.toml\n@@ -58,0 +59,4 @@ runtime-benchmarks = [\n+\t\"frame-benchmarking/runtime-benchmarks\",\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"pallet-preimage/runtime-benchmarks\",\n+\t\"pallet-scheduler/runtime-benchmarks\"\n"
 - cmd: lint propagate-feature -p frame-support --feature runtime-benchmarks -p pallet-referenda --fix --feature-enables-dep "runtime-benchmarks:frame-benchmarking"
   stdout: |
     crate 'pallet-referenda'
@@ -23,7 +23,7 @@ cases:
           pallet-preimage
           pallet-scheduler
     Found 4 issues and fixed 4.
-  diff: "diff --git frame/referenda/Cargo.toml frame/referenda/Cargo.toml\nindex a89f64..2875a0 100644\n--- frame/referenda/Cargo.toml\n+++ frame/referenda/Cargo.toml\n@@ -58,0 +59,4 @@ runtime-benchmarks = [\n+\t\"frame-benchmarking/runtime-benchmarks\",\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"pallet-preimage/runtime-benchmarks\",\n+\t\"pallet-scheduler/runtime-benchmarks\",\n"
+  diff: "diff --git frame/referenda/Cargo.toml frame/referenda/Cargo.toml\nindex a89f64..7833ed 100644\n--- frame/referenda/Cargo.toml\n+++ frame/referenda/Cargo.toml\n@@ -58,0 +59,4 @@ runtime-benchmarks = [\n+\t\"frame-benchmarking/runtime-benchmarks\",\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"pallet-preimage/runtime-benchmarks\",\n+\t\"pallet-scheduler/runtime-benchmarks\"\n"
 - cmd: lint propagate-feature -p frame-support --feature runtime-benchmarks -p pallet-referenda --fix
   stdout: |
     crate 'pallet-referenda'
@@ -34,7 +34,7 @@ cases:
           pallet-preimage
           pallet-scheduler
     Found 4 issues and fixed 4.
-  diff: "diff --git frame/referenda/Cargo.toml frame/referenda/Cargo.toml\nindex a89f64..e89690 100644\n--- frame/referenda/Cargo.toml\n+++ frame/referenda/Cargo.toml\n@@ -58,0 +59,4 @@ runtime-benchmarks = [\n+\t\"frame-benchmarking?/runtime-benchmarks\",\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"pallet-preimage/runtime-benchmarks\",\n+\t\"pallet-scheduler/runtime-benchmarks\",\n"
+  diff: "diff --git frame/referenda/Cargo.toml frame/referenda/Cargo.toml\nindex a89f64..59f5e8 100644\n--- frame/referenda/Cargo.toml\n+++ frame/referenda/Cargo.toml\n@@ -58,0 +59,4 @@ runtime-benchmarks = [\n+\t\"frame-benchmarking?/runtime-benchmarks\",\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"pallet-preimage/runtime-benchmarks\",\n+\t\"pallet-scheduler/runtime-benchmarks\"\n"
 - cmd: lint propagate-feature --feature try-runtime -p pallet-referenda --fix
   stdout: |
     crate 'pallet-referenda'
@@ -46,4 +46,4 @@ cases:
           pallet-scheduler
           sp-runtime
     Found 5 issues and fixed 5.
-  diff: "diff --git frame/referenda/Cargo.toml frame/referenda/Cargo.toml\nindex a89f64..5e6e6f 100644\n--- frame/referenda/Cargo.toml\n+++ frame/referenda/Cargo.toml\n@@ -60 +60,8 @@ runtime-benchmarks = [\n-try-runtime = [\"frame-support/try-runtime\"]\n+try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"frame-system/try-runtime\",\n+\t\"pallet-balances/try-runtime\",\n+\t\"pallet-preimage/try-runtime\",\n+\t\"pallet-scheduler/try-runtime\",\n+\t\"sp-runtime/try-runtime\",\n+]\n"
+  diff: "diff --git frame/referenda/Cargo.toml frame/referenda/Cargo.toml\nindex a89f64..405bae 100644\n--- frame/referenda/Cargo.toml\n+++ frame/referenda/Cargo.toml\n@@ -60 +60,8 @@ runtime-benchmarks = [\n-try-runtime = [\"frame-support/try-runtime\"]\n+try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"frame-system/try-runtime\",\n+\t\"pallet-balances/try-runtime\",\n+\t\"pallet-preimage/try-runtime\",\n+\t\"pallet-scheduler/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\n+]\n"

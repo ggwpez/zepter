@@ -49,6 +49,7 @@ impl AutoFixer {
 			feature.trailing().as_str().unwrap().to_string().trim_start_matches('\n'),
 		);
 		feature.set_trailing_comma(false); // We need to add this manually later on.
+		let mut new_vals = Vec::new();
 
 		for mut value in values.into_iter() {
 			if value.as_str().map_or(false, |s| s.is_empty()) {
@@ -61,17 +62,33 @@ impl AutoFixer {
 			if !prefix.ends_with("\n\t") {
 				prefix = format!("{prefix}\n\t");
 			}
-			value.decor_mut().set_suffix("");
+			let mut suffix: String = match value.decor().suffix() {
+				None => "".into(),
+				Some(s) => s.as_str().unwrap().into(),
+			};
+			suffix = suffix.trim_end_matches('\n').into();
+			value.decor_mut().set_suffix(suffix);
 			value.decor_mut().set_prefix(prefix);
-			feature.push_formatted(value);
+			new_vals.push(value);
 		}
+
 		if v.is_empty() {
-			panic!("Empty value in feature");
+			unreachable!("Empty value in feature");
 		}
 		let mut value: Value = v.into();
-		let suffix = if feature.is_empty() { "\n" } else { ",\n" };
+		let suffix = if feature.is_empty() { ",\n" } else { ",\n" };
 		value = value.decorated("\n\t", suffix);
-		feature.push_formatted(value);
+		new_vals.push(value);
+
+		for i in 1..new_vals.len() {
+			let new_prefix = format!("{}{}", new_vals[i - 1].decor().suffix().unwrap().as_str().unwrap(), new_vals[i].decor().prefix().unwrap().as_str().unwrap());
+
+			new_vals[i].decor_mut().set_prefix(new_prefix);
+			new_vals[i - 1].decor_mut().set_suffix("");
+		}
+		for new_val in new_vals.into_iter() {
+			feature.push_formatted(new_val);
+		}
 
 		Ok(())
 	}
@@ -98,6 +115,7 @@ mod tests {
 	use rstest::*;
 
 	#[rstest]
+	// Keeps comments
 	#[case(
 		r#"
 [features]
@@ -114,8 +132,91 @@ runtime-benchmarks = [
 	"frame-support/runtime-benchmarks",
 ]
 std = [
-	"frame-system/std"
+	"frame-system/std",
 ]
+"#
+	)]
+	// Keeps newlines
+	#[case(
+		r#"
+[features]
+runtime-benchmarks = [
+	
+	"sp-runtime/runtime-benchmarks"
+]
+"#,
+		r#"
+[features]
+runtime-benchmarks = [
+	
+	"sp-runtime/runtime-benchmarks",
+	"frame-support/runtime-benchmarks",
+]
+std = [
+	"frame-system/std",
+]
+"#
+	)]
+	// Keeps newlines 2
+	#[case(
+		r#"
+[features]
+runtime-benchmarks = [
+	"pallet-balances/runtime-benchmarks",
+	
+	
+	"sp-runtime/runtime-benchmarks"
+]
+"#,
+		r#"
+[features]
+runtime-benchmarks = [
+	"pallet-balances/runtime-benchmarks",
+	
+	
+	"sp-runtime/runtime-benchmarks",
+	"frame-support/runtime-benchmarks",
+]
+std = [
+	"frame-system/std",
+]
+"#
+	)]
+	// Keeps newlines and comments
+	#[case(
+		r#"
+# 1
+[features]
+# 2
+runtime-benchmarks = [
+	# 3
+	"pallet-balances/runtime-benchmarks",
+	# 4
+	
+	# 5
+	"sp-runtime/runtime-benchmarks"
+	# 6
+]
+# 7
+"#,
+		r#"
+# 1
+[features]
+# 2
+runtime-benchmarks = [
+	# 3
+	"pallet-balances/runtime-benchmarks",
+	# 4
+	
+	# 5
+	"sp-runtime/runtime-benchmarks",
+	# 6
+	"frame-support/runtime-benchmarks",
+]
+std = [
+	"frame-system/std",
+]
+# 7
 "#
 	)]
 	#[case(
@@ -130,7 +231,7 @@ runtime-benchmarks = [
 	"frame-support/runtime-benchmarks",
 ]
 std = [
-	"frame-system/std"
+	"frame-system/std",
 ]
 "#
 	)]
@@ -148,7 +249,7 @@ runtime-benchmarks = [
 	"frame-support/runtime-benchmarks",
 ]
 std = [
-	"frame-system/std"
+	"frame-system/std",
 ]
 "#
 	)]
@@ -166,7 +267,7 @@ runtime-benchmarks = [
 	"frame-support/runtime-benchmarks",
 ]
 std = [
-	"frame-system/std"
+	"frame-system/std",
 ]
 "#
 	)]
@@ -178,10 +279,10 @@ runtime-benchmarks = []
 		r#"
 [features]
 runtime-benchmarks = [
-	"frame-support/runtime-benchmarks"
+	"frame-support/runtime-benchmarks",
 ]
 std = [
-	"frame-system/std"
+	"frame-system/std",
 ]
 "#
 	)]
@@ -200,7 +301,7 @@ name = "something"
 
 [features]
 runtime-benchmarks = [
-	"frame-support/runtime-benchmarks"
+	"frame-support/runtime-benchmarks",
 ]
 std = [
 	"frame-support/std",
@@ -228,7 +329,7 @@ runtime-benchmarks = [
 		r#"
 [features]
 runtime-benchmarks = [
-	"frame-support/runtime-benchmarks"
+	"frame-support/runtime-benchmarks",
 	# Inside empty works
 ]
 "#
@@ -260,7 +361,7 @@ runtime-benchmarks = []
 [features]
 # TOML comments are preserved
 runtime-benchmarks = [
-	"frame-support/runtime-benchmarks"
+	"frame-support/runtime-benchmarks",
 ]
 "#
 	)]
@@ -276,7 +377,7 @@ runtime-benchmarks = []
 [features]
 # Second comment
 runtime-benchmarks = [
-	"frame-support/runtime-benchmarks"
+	"frame-support/runtime-benchmarks",
 ]
 "#
 	)]

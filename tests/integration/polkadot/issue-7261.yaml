@@ -13,4 +13,4 @@ cases:
           sp-mmr-primitives
           sp-trie
     Found 5 issues and fixed 5.
-  diff: "diff --git runtime/test-runtime/Cargo.toml runtime/test-runtime/Cargo.toml\nindex 6d38a0..29b95c 100644\n--- runtime/test-runtime/Cargo.toml\n+++ runtime/test-runtime/Cargo.toml\n@@ -130,0 +131,5 @@ std = [\n+\t\"polkadot-runtime-parachains/std\",\n+\t\"serde_json/std\",\n+\t\"beefy-primitives/std\",\n+\t\"sp-mmr-primitives/std\",\n+\t\"sp-trie/std\",\n"
+  diff: "diff --git runtime/test-runtime/Cargo.toml runtime/test-runtime/Cargo.toml\nindex 6d38a0..8f3418 100644\n--- runtime/test-runtime/Cargo.toml\n+++ runtime/test-runtime/Cargo.toml\n@@ -130,0 +131,5 @@ std = [\n+\t\"polkadot-runtime-parachains/std\",\n+\t\"serde_json/std\",\n+\t\"beefy-primitives/std\",\n+\t\"sp-mmr-primitives/std\",\n+\t\"sp-trie/std\"\n"

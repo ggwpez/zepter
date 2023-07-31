@@ -81,7 +81,11 @@ impl AutoFixer {
 		new_vals.push(value);
 
 		for i in 1..new_vals.len() {
-			let new_prefix = format!("{}{}", new_vals[i - 1].decor().suffix().unwrap().as_str().unwrap(), new_vals[i].decor().prefix().unwrap().as_str().unwrap());
+			let new_prefix = format!(
+				"{}{}",
+				new_vals[i - 1].decor().suffix().unwrap().as_str().unwrap(),
+				new_vals[i].decor().prefix().unwrap().as_str().unwrap()
+			);
 
 			new_vals[i].decor_mut().set_prefix(new_prefix);
 			new_vals[i - 1].decor_mut().set_suffix("");

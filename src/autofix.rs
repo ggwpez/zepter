@@ -68,7 +68,7 @@ impl AutoFixer {
 			};
 			suffix = suffix.trim_end_matches('\n').into();
 			value.decor_mut().set_suffix(suffix);
-			value.decor_mut().set_prefix(prefix);
+			value.decor_mut().set_prefix(prefix.trim_start_matches(' '));
 			new_vals.push(value);
 		}
 
@@ -310,6 +310,23 @@ runtime-benchmarks = [
 ]
 std = [
 	"frame-support/std",
+	"frame-system/std"
+]
+"#
+	)]
+	#[case(
+		r#"
+[features]
+runtime-benchmarks = ["sp-runtime/runtime-benchmarks",   "pallet-balances/runtime-benchmarks"]
+"#,
+		r#"
+[features]
+runtime-benchmarks = [
+	"sp-runtime/runtime-benchmarks",
+	"pallet-balances/runtime-benchmarks",
+	"frame-support/runtime-benchmarks"
+]
+std = [
 	"frame-system/std"
 ]
 "#

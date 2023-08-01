@@ -30,7 +30,7 @@ jobs:
 
     - name: Zepter check ${{ matrix.repo }} master
       run: |
-        cd ${{ matrix.repo }}
+        ls
         cargo r -r -q --locked -- lint propagate-feature --feature try-runtime --left-side-feature-missing=ignore --workspace --fix --feature-enables-dep="try-runtime:frame-try-runtime" || true
         cargo r -r -q --locked -- lint propagate-feature --feature runtime-benchmarks --left-side-feature-missing=ignore --workspace --feature-enables-dep="runtime-benchmarks:frame-benchmarking" || true
         cargo r -r -q --locked -- lint propagate-feature --feature std --left-side-feature-missing=ignore --workspace || true

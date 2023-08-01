@@ -1,7 +1,7 @@
 name: Smokescreen
 
 concurrency:
-  group: ${{ github.ref }}
+  group: install-${{ github.ref }}
   cancel-in-progress: true
 
 on:

@@ -1,7 +1,7 @@
 name: License
 
 concurrency:
-  group: ${{ github.ref }}
+  group: license-${{ github.ref }}
   cancel-in-progress: true
 
 on:

@@ -1,7 +1,7 @@
 name: Rust MSRV
 
 concurrency:
-  group: ${{ github.ref }}
+  group: msrv-${{ github.ref }}
   cancel-in-progress: true
 
 on:

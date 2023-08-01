@@ -1,7 +1,7 @@
 name: Markdown
 
 concurrency:
-  group: ${{ github.ref }}
+  group: markdown-${{ github.ref }}
   cancel-in-progress: true
 
 on:

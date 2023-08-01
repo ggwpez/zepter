@@ -1,7 +1,7 @@
 name: Integration test master
 
 concurrency:
-  group: ${{ github.ref }}
+  group: downstream-${{ github.ref }}
   cancel-in-progress: true
 
 on:
@@ -26,10 +26,11 @@ jobs:
       name: Clone ${{ matrix.repo }}
       with:
         name: paritytech/${{ matrix.repo }}
-        ref: refs/heads/master
         depth: 1
+
     - name: Zepter check ${{ matrix.repo }} master
       run: |
+        cd ${{ matrix.repo }}
         cargo r -r -q --locked -- lint propagate-feature --feature try-runtime --left-side-feature-missing=ignore --workspace --fix --feature-enables-dep="try-runtime:frame-try-runtime" || true
         cargo r -r -q --locked -- lint propagate-feature --feature runtime-benchmarks --left-side-feature-missing=ignore --workspace --feature-enables-dep="runtime-benchmarks:frame-benchmarking" || true
         cargo r -r -q --locked -- lint propagate-feature --feature std --left-side-feature-missing=ignore --workspace || true

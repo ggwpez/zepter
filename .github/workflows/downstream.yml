@@ -27,10 +27,13 @@ jobs:
       with:
         repository: paritytech/${{ matrix.repo }}
         depth: 1
+    
+    - name: Cargo install
+      run: cargo install --git ${{ github.server_url }}/${{ github.repository }} zepter --rev $GITHUB_SHA --locked -q
 
     - name: Zepter check ${{ matrix.repo }} master
       run: |
         ls
-        cargo r -r -q --locked -- lint propagate-feature --feature try-runtime --left-side-feature-missing=ignore --workspace --fix --feature-enables-dep="try-runtime:frame-try-runtime" || true
-        cargo r -r -q --locked -- lint propagate-feature --feature runtime-benchmarks --left-side-feature-missing=ignore --workspace --feature-enables-dep="runtime-benchmarks:frame-benchmarking" || true
-        cargo r -r -q --locked -- lint propagate-feature --feature std --left-side-feature-missing=ignore --workspace || true
+        zepter lint propagate-feature --feature try-runtime --left-side-feature-missing=ignore --workspace --fix --feature-enables-dep="try-runtime:frame-try-runtime" || true
+        zepter lint propagate-feature --feature runtime-benchmarks --left-side-feature-missing=ignore --workspace --feature-enables-dep="runtime-benchmarks:frame-benchmarking" || true
+        zepter lint propagate-feature --feature std --left-side-feature-missing=ignore --workspace || true

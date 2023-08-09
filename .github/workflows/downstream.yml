@@ -1,0 +1,39 @@
+name: Integration test master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [ "master", "dev" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  dotsama:
+    runs-on: self-hosted
+    name: "Check"
+    strategy:
+      matrix:
+        repo: [substrate, polkadot, cumulus]
+
+    steps:
+    - uses: actions/checkout@master
+      name: Clone ${{ matrix.repo }}
+      with:
+        repository: paritytech/${{ matrix.repo }}
+        depth: 1
+    
+    - name: Cargo install
+      run: cargo install --git ${{ github.server_url }}/${{ github.repository }} zepter --rev $GITHUB_SHA --locked -q
+
+    - name: Zepter check ${{ matrix.repo }} master
+      run: |
+        ls
+        zepter lint propagate-feature --feature try-runtime --left-side-feature-missing=ignore --workspace --fix --feature-enables-dep="try-runtime:frame-try-runtime" || true
+        zepter lint propagate-feature --feature runtime-benchmarks --left-side-feature-missing=ignore --workspace --feature-enables-dep="runtime-benchmarks:frame-benchmarking" || true
+        zepter lint propagate-feature --feature std --left-side-feature-missing=ignore --workspace || true

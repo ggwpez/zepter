@@ -19,7 +19,7 @@ cases:
           serde
           serde_json
           sp-debug-derive
-    Found 6 issues and fixed 0. Returning with exit code 1.
+    Found 6 issues (run with --fix to fix). Exit code 1.
   code: 1
 - cmd: lint propagate-feature -p frame-support --feature std --workspace
   stdout: |
@@ -28,7 +28,7 @@ cases:
         must propagate to:
           frame-system
           sp-debug-derive
-    Found 2 issues and fixed 0. Returning with exit code 1.
+    Found 2 issues (run with --fix to fix). Exit code 1.
   code: 1
 - cmd: lint propagate-feature -p frame-support --feature try-runtime
   stdout: |
@@ -37,7 +37,7 @@ cases:
         must propagate to:
           frame-system
           sp-runtime
-    Found 2 issues and fixed 0. Returning with exit code 1.
+    Found 2 issues (run with --fix to fix). Exit code 1.
   code: 1
 - cmd: lint propagate-feature -p frame-support --feature try-runtime --workspace
   stdout: |
@@ -46,5 +46,5 @@ cases:
         must propagate to:
           frame-system
           sp-runtime
-    Found 2 issues and fixed 0. Returning with exit code 1.
+    Found 2 issues (run with --fix to fix). Exit code 1.
   code: 1

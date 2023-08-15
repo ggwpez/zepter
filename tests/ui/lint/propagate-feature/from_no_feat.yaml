@@ -12,7 +12,7 @@ cases:
       feature 'F0'
         is required by 1 dependency:
           B
-    Found 1 issue and fixed 0. Returning with exit code 1.
+    Found 1 issue (run with --fix to fix). Exit code 1.
   code: 1
 - cmd: lint propagate-feature --feature F0 --workspace
   stdout: |
@@ -20,5 +20,5 @@ cases:
       feature 'F0'
         is required by 1 dependency:
           B
-    Found 1 issue and fixed 0. Returning with exit code 1.
+    Found 1 issue (run with --fix to fix). Exit code 1.
   code: 1

@@ -16,7 +16,7 @@ cases:
           frame-support
           frame-system
           sp-runtime
-    Found 3 issues and fixed 0. Returning with exit code 1.
+    Found 3 issues (run with --fix to fix). Exit code 1.
   code: 1
 - cmd: lint propagate-feature -p frame --feature runtime-benchmarks --workspace
   stdout: |
@@ -26,7 +26,7 @@ cases:
           frame-support
           frame-system
           sp-runtime
-    Found 3 issues and fixed 0. Returning with exit code 1.
+    Found 3 issues (run with --fix to fix). Exit code 1.
   code: 1
 - cmd: lint propagate-feature -p frame --feature try-runtime
   stdout: |
@@ -37,7 +37,7 @@ cases:
           frame-support
           frame-system
           sp-runtime
-    Found 4 issues and fixed 0. Returning with exit code 1.
+    Found 4 issues (run with --fix to fix). Exit code 1.
   code: 1
 - cmd: lint propagate-feature -p frame --feature try-runtime --workspace
   stdout: |
@@ -48,7 +48,7 @@ cases:
           frame-support
           frame-system
           sp-runtime
-    Found 4 issues and fixed 0. Returning with exit code 1.
+    Found 4 issues (run with --fix to fix). Exit code 1.
   code: 1
 - cmd: lint never-enables --precondition default --stays-disabled runtime-benchmarks
 - cmd: lint never-enables --precondition default --stays-disabled try-runtime

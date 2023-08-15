@@ -6,6 +6,7 @@
 pub mod lint;
 pub mod trace;
 
+use crate::log;
 use cargo_metadata::{Dependency, Metadata, MetadataCommand, Package, Resolve};
 
 /// See out how Rust dependencies and features are enabled.
@@ -26,12 +27,18 @@ pub struct GlobalArgs {
 	quiet: bool,
 
 	/// Log level to use.
-	#[clap(long = "log", global = true, default_value = "info")]
-	level: log::Level,
+	#[cfg(feature = "logging")]
+	#[clap(long = "log", global = true, default_value = "info", ignore_case = true)]
+	level: ::log::Level,
 
-	/// Do not use ANSI terminal colors.
-	#[clap(long, global = true)]
-	no_color: bool,
+	/// Log level to use.
+	#[cfg(not(feature = "logging"))]
+	#[clap(long = "log", global = true, default_value = "info", ignore_case = true)]
+	level: String,
+
+	/// Use ANSI terminal colors.
+	#[clap(long, global = true, default_value_t = false)]
+	color: bool,
 }
 
 /// Sub-commands of the [Root](Command) command.
@@ -54,15 +61,16 @@ impl Command {
 
 impl GlobalArgs {
 	pub fn setup_logging(&self) {
+		#[cfg(feature = "logging")]
 		if self.quiet {
-			log::set_max_level(log::LevelFilter::Error);
+			::log::set_max_level(::log::LevelFilter::Error);
 		} else {
-			log::set_max_level(self.level.to_level_filter());
+			::log::set_max_level(self.level.to_level_filter());
 		}
 	}
 
 	pub fn red(&self, s: &str) -> String {
-		if self.no_color {
+		if !self.color {
 			s.to_string()
 		} else {
 			format!("\x1b[31m{}\x1b[0m", s)
@@ -70,7 +78,7 @@ impl GlobalArgs {
 	}
 
 	pub fn yellow(&self, s: &str) -> String {
-		if self.no_color {
+		if !self.color {
 			s.to_string()
 		} else {
 			format!("\x1b[33m{}\x1b[0m", s)
@@ -78,7 +86,7 @@ impl GlobalArgs {
 	}
 
 	pub fn green(&self, s: &str) -> String {
-		if self.no_color {
+		if !self.color {
 			s.to_string()
 		} else {
 			format!("\x1b[32m{}\x1b[0m", s)
@@ -187,7 +195,7 @@ pub(crate) fn resolve_dep_from_graph(
 	Some(RenamedPackage::new(resolve_dep.clone(), dep.rename.clone(), dep.optional))
 }
 
-#[derive(Clone, Debug, serde::Serialize, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct RenamedPackage {
 	pub pkg: Package,
 	pub rename: Option<String>,
@@ -213,7 +221,7 @@ impl RenamedPackage {
 
 impl Ord for RenamedPackage {
 	fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-		// Yikes...
+		// Yikes... dafuq is this?!
 		//bincode::serialize(self).unwrap().cmp(&bincode::serialize(other).unwrap())
 
 		self.pkg.id.cmp(&other.pkg.id)

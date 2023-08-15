@@ -10,5 +10,5 @@ cases:
           frame-system
           sp-runtime
           sp-staking
-    Found 3 issues and fixed 0. Returning with exit code 1.
+    Found 3 issues (run with --fix to fix). Exit code 1.
   code: 1

@@ -9,6 +9,7 @@ use crate::{
 	prelude::*,
 	CrateId,
 };
+use crate::log;
 use cargo_metadata::{Metadata, Package, PackageId};
 use core::{
 	fmt,

@@ -4,7 +4,7 @@
 //! Trace the dependency path from one crate to another.
 
 use super::*;
-use crate::{dag::Dag, CrateId};
+use crate::{log, dag::Dag, CrateId};
 use cargo_metadata::{Metadata, Package};
 use clap::Parser;
 use std::collections::{BTreeMap, BTreeSet};

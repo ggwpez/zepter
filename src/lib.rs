@@ -24,7 +24,7 @@ pub type CrateId = String;
 
 /// Internal use only.
 pub mod log {
-	pub use crate::{info, warn, error, debug, trace};
+	pub use crate::{debug, error, info, trace, warn};
 }
 
 #[macro_export]

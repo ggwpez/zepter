@@ -3,9 +3,9 @@
 
 //! Automatically fix problems by modifying `Cargo.toml` files.
 
+use crate::log;
 use std::path::{Path, PathBuf};
 use toml_edit::{table, value, Array, Document, Value};
-use crate::log;
 
 pub struct AutoFixer {
 	pub manifest: Option<PathBuf>,

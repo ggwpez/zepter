@@ -6,10 +6,10 @@
 use crate::{
 	autofix::AutoFixer,
 	cmd::{resolve_dep, RenamedPackage},
+	log,
 	prelude::*,
 	CrateId,
 };
-use crate::log;
 use cargo_metadata::{Metadata, Package, PackageId};
 use core::{
 	fmt,
@@ -522,7 +522,13 @@ where
 	Ok((s[..pos].parse()?, s[pos + 1..].parse()?))
 }
 
-fn error_stats(errors: usize, warnings: usize, fixes: usize, fix: bool, global: &GlobalArgs) -> String {
+fn error_stats(
+	errors: usize,
+	warnings: usize,
+	fixes: usize,
+	fix: bool,
+	global: &GlobalArgs,
+) -> String {
 	let mut ret: String = "Found ".into();
 
 	if errors + warnings + fixes == 0 {

@@ -3,7 +3,6 @@
 
 //! Entry point of the program.
 
-
 use clap::Parser;
 use zepter::cmd::Command;
 
@@ -14,13 +13,14 @@ fn main() {
 	cmd.run();
 }
 
-
 fn setup_logging() {
 	#[cfg(feature = "logging")]
 	{
 		use std::io::Write;
 		env_logger::builder()
-			.parse_env(env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "debug"),)
+			.parse_env(
+				env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "debug"),
+			)
 			.format_timestamp(None)
 			.format(|buf, record| {
 				let mut level_style = buf.style();

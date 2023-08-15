@@ -3,6 +3,7 @@
 
 //! Automatically fix problems by modifying `Cargo.toml` files.
 
+use crate::log;
 use std::path::{Path, PathBuf};
 use toml_edit::{table, value, Array, Document, Value};
 

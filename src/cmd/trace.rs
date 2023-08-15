@@ -4,7 +4,7 @@
 //! Trace the dependency path from one crate to another.
 
 use super::*;
-use crate::{dag::Dag, CrateId};
+use crate::{dag::Dag, log, CrateId};
 use cargo_metadata::{Metadata, Package};
 use clap::Parser;
 use std::collections::{BTreeMap, BTreeSet};
@@ -45,7 +45,7 @@ pub struct TraceCmd {
 }
 
 impl TraceCmd {
-	pub(crate) fn run(&self) {
+	pub fn run(&self, _global: &GlobalArgs) {
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
 		let (dag, index) = self.build_dag(meta).expect("Builds dependency graph");
 		let lookup = |id: &str| {

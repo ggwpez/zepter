@@ -6,6 +6,7 @@
 use crate::{
 	autofix::AutoFixer,
 	cmd::{resolve_dep, RenamedPackage},
+	log,
 	prelude::*,
 	CrateId,
 };
@@ -19,6 +20,8 @@ use std::{
 	fs::canonicalize,
 	path::PathBuf,
 };
+
+use super::GlobalArgs;
 
 /// Lint your feature usage by analyzing crate metadata.
 #[derive(Debug, clap::Parser)]
@@ -182,13 +185,13 @@ pub enum MuteSetting {
 }
 
 impl LintCmd {
-	pub(crate) fn run(&self) {
+	pub(crate) fn run(&self, global: &GlobalArgs) {
 		match &self.subcommand {
-			SubCommand::PropagateFeature(cmd) => cmd.run(),
-			SubCommand::NeverEnables(cmd) => cmd.run(),
-			SubCommand::NeverImplies(cmd) => cmd.run(),
-			SubCommand::WhyEnabled(cmd) => cmd.run(),
-			SubCommand::OnlyEnables(cmd) => cmd.run(),
+			SubCommand::PropagateFeature(cmd) => cmd.run(global),
+			SubCommand::NeverEnables(cmd) => cmd.run(global),
+			SubCommand::NeverImplies(cmd) => cmd.run(global),
+			SubCommand::WhyEnabled(cmd) => cmd.run(global),
+			SubCommand::OnlyEnables(cmd) => cmd.run(global),
 		}
 	}
 }
@@ -203,7 +206,7 @@ impl Display for CrateAndFeature {
 }
 
 impl NeverImpliesCmd {
-	pub fn run(&self) {
+	pub fn run(&self, _global: &GlobalArgs) {
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
 		log::info!(
 			"Checking that feature '{}' never implies '{}'",
@@ -268,7 +271,7 @@ impl NeverImpliesCmd {
 }
 
 impl NeverEnablesCmd {
-	pub fn run(&self) {
+	pub fn run(&self, _global: &GlobalArgs) {
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
 		log::info!(
 			"Checking that feature {:?} never enables {:?}",
@@ -331,7 +334,7 @@ impl NeverEnablesCmd {
 }
 
 impl PropagateFeatureCmd {
-	pub fn run(&self) {
+	pub fn run(&self, global: &GlobalArgs) {
 		// Allowed dir that we can write to.
 		let allowed_dir = canonicalize(&self.cargo_args.manifest_path).unwrap();
 		let allowed_dir = allowed_dir.parent().unwrap();
@@ -492,9 +495,9 @@ impl PropagateFeatureCmd {
 			//	}
 			//}
 		}
-		print!("{}.", error_stats(errors, warnings, fixes, self.fix));
+		print!("{}.", error_stats(errors, warnings, fixes, self.fix, global));
 		if errors > fixes {
-			println!(" Returning with exit code 1.");
+			println!(" Exit code 1.");
 			std::process::exit(1);
 		} else {
 			println!();
@@ -519,7 +522,13 @@ where
 	Ok((s[..pos].parse()?, s[pos + 1..].parse()?))
 }
 
-fn error_stats(errors: usize, warnings: usize, fixes: usize, fix: bool) -> String {
+fn error_stats(
+	errors: usize,
+	warnings: usize,
+	fixes: usize,
+	fix: bool,
+	global: &GlobalArgs,
+) -> String {
 	let mut ret: String = "Found ".into();
 
 	if errors + warnings + fixes == 0 {
@@ -527,17 +536,30 @@ fn error_stats(errors: usize, warnings: usize, fixes: usize, fix: bool) -> Strin
 		return ret
 	}
 	if errors > 0 {
-		ret.push_str(&format!("{} issue{}", errors, plural(errors)));
+		let issues = format!("{} issue{}", errors, plural(errors));
+		ret.push_str(&global.red(&issues));
 	}
 	if warnings > 0 {
-		ret.push_str(&format!(", {} warning{}", warnings, plural(warnings)));
+		let warn = format!(", {} warning{}", warnings, plural(warnings));
+		ret.push_str(&global.yellow(&warn));
 	}
-	if warnings + errors > 0 {
-		ret.push_str(" and");
-	}
-	ret.push_str(&format!(" fixed {}", fixes));
-	if fix && fixes < errors {
-		ret.push_str(&format!(" ({} could not be fixed)", errors - fixes));
+	if fix {
+		if warnings + errors > 0 {
+			ret.push_str(" and");
+		}
+		let fixed = format!(" fixed {}", fixes);
+		if fixes > 0 {
+			ret.push_str(&global.green(&fixed));
+		} else {
+			ret.push_str(&fixed);
+		}
+
+		if fixes < errors {
+			let could_not = format!(" ({} could not be fixed)", errors - fixes);
+			ret.push_str(&global.red(&could_not));
+		}
+	} else {
+		ret.push_str(" (run with --fix to fix)");
 	}
 	ret
 }
@@ -552,7 +574,7 @@ fn plural(n: usize) -> &'static str {
 }
 
 impl OnlyEnablesCmd {
-	pub fn run(&self) {
+	pub fn run(&self, _global: &GlobalArgs) {
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
 		let pkgs = &meta.packages;
 
@@ -589,7 +611,7 @@ impl OnlyEnablesCmd {
 }
 
 impl WhyEnabledCmd {
-	pub fn run(&self) {
+	pub fn run(&self, _global: &GlobalArgs) {
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
 		let dag = build_feature_dag(&meta, &meta.packages);
 		let pkgs = meta.packages;

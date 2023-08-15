@@ -20,8 +20,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
       - name: Cargo install
-        run: cargo install --git ${{ github.server_url }}/${{ github.repository }} zepter --rev $GITHUB_SHA --locked -q
+        run: cargo install --path . --locked -q
       
       - name: CLI works
+        run: zepter --version && zepter --help
+
+      - name: Cargo install (no-default-features)
+        run: cargo install --path . --locked -q --no-default-features
+
+      - name: CLI works (no-default-features)
         run: zepter --version && zepter --help

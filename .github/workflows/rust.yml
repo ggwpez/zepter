@@ -22,10 +22,14 @@ jobs:
       with:
         fetch-depth: 1
     - name: Build
-      run: cargo build --all-targets --all-features --locked -q
+      run: |
+        cargo build --all-targets --all-features --locked -q
+        cargo build --all-targets --no-default-features --locked -q
     - name: Run tests
       run: cargo test --locked -- --nocapture
     - name: Clippy
-      run: cargo clippy --all-targets --all-features -q
+      run: |
+        cargo clippy --all-targets --all-features -q
+        cargo clippy --all-targets --no-default-features -q
     - name: Format
       run: cargo fmt --check

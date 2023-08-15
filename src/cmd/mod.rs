@@ -6,6 +6,7 @@
 pub mod lint;
 pub mod trace;
 
+use crate::log;
 use cargo_metadata::{Dependency, Metadata, MetadataCommand, Package, Resolve};
 
 /// See out how Rust dependencies and features are enabled.
@@ -15,8 +16,29 @@ pub struct Command {
 	#[clap(subcommand)]
 	subcommand: SubCommand,
 
+	#[clap(flatten)]
+	global: GlobalArgs,
+}
+
+#[derive(Debug, clap::Parser)]
+pub struct GlobalArgs {
+	/// Only print errors. Supersedes `--log`.
 	#[clap(long, global = true)]
 	quiet: bool,
+
+	/// Log level to use.
+	#[cfg(feature = "logging")]
+	#[clap(long = "log", global = true, default_value = "info", ignore_case = true)]
+	level: ::log::Level,
+
+	/// Log level to use.
+	#[cfg(not(feature = "logging"))]
+	#[clap(long = "log", global = true, default_value = "info", ignore_case = true)]
+	level: String,
+
+	/// Use ANSI terminal colors.
+	#[clap(long, global = true, default_value_t = false)]
+	color: bool,
 }
 
 /// Sub-commands of the [Root](Command) command.
@@ -28,15 +50,46 @@ enum SubCommand {
 
 impl Command {
 	pub fn run(&self) {
-		if self.quiet {
-			log::set_max_level(log::LevelFilter::Error);
-		} else {
-			log::set_max_level(log::LevelFilter::Info);
-		}
+		self.global.setup_logging();
 
 		match &self.subcommand {
-			SubCommand::Trace(cmd) => cmd.run(),
-			SubCommand::Lint(cmd) => cmd.run(),
+			SubCommand::Trace(cmd) => cmd.run(&self.global),
+			SubCommand::Lint(cmd) => cmd.run(&self.global),
+		}
+	}
+}
+
+impl GlobalArgs {
+	pub fn setup_logging(&self) {
+		#[cfg(feature = "logging")]
+		if self.quiet {
+			::log::set_max_level(::log::LevelFilter::Error);
+		} else {
+			::log::set_max_level(self.level.to_level_filter());
+		}
+	}
+
+	pub fn red(&self, s: &str) -> String {
+		if !self.color {
+			s.to_string()
+		} else {
+			format!("\x1b[31m{}\x1b[0m", s)
+		}
+	}
+
+	pub fn yellow(&self, s: &str) -> String {
+		if !self.color {
+			s.to_string()
+		} else {
+			format!("\x1b[33m{}\x1b[0m", s)
+		}
+	}
+
+	pub fn green(&self, s: &str) -> String {
+		if !self.color {
+			s.to_string()
+		} else {
+			format!("\x1b[32m{}\x1b[0m", s)
 		}
 	}
 }
@@ -142,7 +195,7 @@ pub(crate) fn resolve_dep_from_graph(
 	Some(RenamedPackage::new(resolve_dep.clone(), dep.rename.clone(), dep.optional))
 }
 
-#[derive(Clone, Debug, serde::Serialize, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct RenamedPackage {
 	pub pkg: Package,
 	pub rename: Option<String>,
@@ -168,7 +221,7 @@ impl RenamedPackage {
 
 impl Ord for RenamedPackage {
 	fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-		// Yikes...
+		// Yikes... dafuq is this?!
 		//bincode::serialize(self).unwrap().cmp(&bincode::serialize(other).unwrap())
 
 		self.pkg.id.cmp(&other.pkg.id)

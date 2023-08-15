@@ -11,7 +11,7 @@ cases:
           frame-system
           pallet-balances
           sp-runtime
-    Found 4 issues and fixed 0. Returning with exit code 1.
+    Found 4 issues (run with --fix to fix). Exit code 1.
   code: 1
 - cmd: lint propagate-feature -p pallet-name-service --feature try-runtime --fix
   stdout: |
@@ -22,5 +22,5 @@ cases:
           frame-system
           pallet-balances
           sp-runtime
-    Found 4 issues and fixed 0 (4 could not be fixed). Returning with exit code 1.
+    Found 4 issues and fixed 0 (4 could not be fixed). Exit code 1.
   code: 1

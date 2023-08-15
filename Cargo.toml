@@ -16,33 +16,33 @@ name = "dag"
 harness = false
 
 [dependencies]
-cargo_metadata = "0.15.4"
-clap = { version = "4.3.14", features = ["derive"] }
+cargo_metadata = "0.17.0"
+clap = { version = "4.3.21", features = ["derive"] }
 toml_edit = "0.19.14"
 
 # Optional deps
 env_logger = { version = "0.10.0", features = [ "auto-color", "humantime" ], optional = true }
-log = { version = "0.4.19", optional = true }
+log = { version = "0.4.20", optional = true }
 
 # Testing deps
-anyhow = { version = "1.0.72", optional = true }
-assert_cmd = { version = "2.0.12", optional = true }
-serde = { version = "1.0.171", optional = true }
-serde_yaml = { version = "0.9.23", optional = true }
-tempfile = { version = "3.6.0", optional = true }
+anyhow = { version = "1.0.73", optional = true }
+assert_cmd = { version = "2.0.11", optional = true }
+serde = { version = "1.0.183", optional = true }
+serde_yaml = { version = "0.9.25", optional = true }
+tempfile = { version = "3.7.1", optional = true }
 
 [dev-dependencies]
 zepter = { path = ".", features = ["testing"] }
 
-anyhow = "1.0.72"
+anyhow = "1.0.73"
 colour = "0.7.0"
 criterion = "0.5"
 glob = "0.3.1"
 lazy_static = "1.4.0"
 pretty_assertions = "1.4.0"
 rand = "0.8.5"
-rstest = "0.18.1"
-serde = "1.0.171"
+rstest = "0.18.2"
+serde = "1.0.183"
 void = "1.0.2"
 
 [features]

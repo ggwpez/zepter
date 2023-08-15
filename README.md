@@ -82,6 +82,11 @@ It reports that `snow` is pulled in from libp2p - good to know. In this case, al
 node-cli -> try-runtime-cli -> substrate-rpc-client -> sc-rpc-api -> sc-chain-spec -> sc-telemetry -> libp2p -> libp2p-webrtc -> libp2p-noise -> snow
 ```
 
+## CI Usage
+
+Zepter is currently being used experimentially in the [Substrate](https://github.com/paritytech/substrate/blob/19971bd3eafa6394d918030f4142f85ea54404c0/scripts/ci/gitlab/pipeline/check.yml#L56-L60) CI to spot missing features. Usage in the Polkadot repository will be added soon as well.  
+When these two experiments proove the usefulness and reliability of Zepter for CI application, then a more streamlined process will be introduced (possibly in the form of CI actions).
+
 ## Testing
 
 UI and integration tests are run with the normal `cargo test`.  
@@ -90,13 +95,12 @@ Environment overwrites exist for:
 - `UI_FILTER`: Regex to selectively run files.
 - `KEEP_GOING`: Print `FAILED` but don't abort. TODO: It's buggy
 
-## Roadmap
+## Planned Features
 
 - [x] Add feature information to the enabled deps
-- [ ] Allow manual skipping of dev dependencies (currently always skipped)
-- [ ] Introduce filters for versions and features for arguments `to``
 - [x] Optimize `shortest_path` function
-- [ ] Create lint rules which can be used to validate that certain constraints in the work-space hold
+- [ ] Add support for config files
+- [ ] Feature sorting and deduplication
 
 <!-- LINKS -->
 [Cumulus]: https://github.com/paritytech/cumulus

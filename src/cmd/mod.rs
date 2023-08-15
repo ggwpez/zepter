@@ -15,8 +15,23 @@ pub struct Command {
 	#[clap(subcommand)]
 	subcommand: SubCommand,
 
+	#[clap(flatten)]
+	global: GlobalArgs,
+}
+
+#[derive(Debug, clap::Parser)]
+pub struct GlobalArgs {
+	/// Only print errors. Supersedes `--log`.
 	#[clap(long, global = true)]
 	quiet: bool,
+
+	/// Log level to use.
+	#[clap(long = "log", global = true, default_value = "info")]
+	level: log::Level,
+
+	/// Do not use ANSI terminal colors.
+	#[clap(long, global = true)]
+	no_color: bool,
 }
 
 /// Sub-commands of the [Root](Command) command.
@@ -28,15 +43,45 @@ enum SubCommand {
 
 impl Command {
 	pub fn run(&self) {
+		self.global.setup_logging();
+
+		match &self.subcommand {
+			SubCommand::Trace(cmd) => cmd.run(&self.global),
+			SubCommand::Lint(cmd) => cmd.run(&self.global),
+		}
+	}
+}
+
+impl GlobalArgs {
+	pub fn setup_logging(&self) {
 		if self.quiet {
 			log::set_max_level(log::LevelFilter::Error);
 		} else {
-			log::set_max_level(log::LevelFilter::Info);
+			log::set_max_level(self.level.to_level_filter());
 		}
+	}
 
-		match &self.subcommand {
-			SubCommand::Trace(cmd) => cmd.run(),
-			SubCommand::Lint(cmd) => cmd.run(),
+	pub fn red(&self, s: &str) -> String {
+		if self.no_color {
+			s.to_string()
+		} else {
+			format!("\x1b[31m{}\x1b[0m", s)
+		}
+	}
+
+	pub fn yellow(&self, s: &str) -> String {
+		if self.no_color {
+			s.to_string()
+		} else {
+			format!("\x1b[33m{}\x1b[0m", s)
+		}
+	}
+
+	pub fn green(&self, s: &str) -> String {
+		if self.no_color {
+			s.to_string()
+		} else {
+			format!("\x1b[32m{}\x1b[0m", s)
 		}
 	}
 }

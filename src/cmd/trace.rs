@@ -45,7 +45,7 @@ pub struct TraceCmd {
 }
 
 impl TraceCmd {
-	pub(crate) fn run(&self) {
+	pub fn run(&self, _global: &GlobalArgs) {
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
 		let (dag, index) = self.build_dag(meta).expect("Builds dependency graph");
 		let lookup = |id: &str| {

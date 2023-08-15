@@ -3,13 +3,21 @@
 
 //! Entry point of the program.
 
+use std::io::Write;
 use clap::Parser;
 use zepter::cmd::Command;
 
 fn main() {
+	env_logger::builder()
+		.parse_env(env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "debug"),)
+		.format_timestamp(None)
+		.format(|buf, record| {
+			let mut level_style = buf.style();
+			level_style.set_bold(true);
+			writeln!(buf, "[{}] {}", level_style.value(record.level()), record.args())
+		})
+		.init();
+	
 	let cmd = Command::parse();
-	env_logger::init_from_env(
-		env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "debug"),
-	);
 	cmd.run();
 }

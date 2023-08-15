@@ -1,6 +1,6 @@
 [package]
 name = "zepter"
-version = "0.7.4"
+version = "0.8.0"
 edition = "2021"
 authors = [ "Oliver Tale-Yazdi" ]
 description = "Check if features are correctly propagated in your workspace."
@@ -67,9 +67,8 @@ opt-level = 3
 [profile.release]
 opt-level = 3
 
-# Improves speed of the DAG logic by 4-20%, but since normally `cargo metadata`
-# takes magnitudes longer than that, there is no real reason to sacrifice human
-# time here when waiting on `cargo install`. So it is disabled by default.
+# Improves speed of the DAG logic by 4-20%. Normally `cargo metadata` magnitudes slower, so we dont
+# sacrifice (human) compile time for this negligible speedup.
 [profile.optimized]
 inherits = "release"
 lto = true

@@ -14,12 +14,12 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  lint:
+  linkCheck:
     name: "Lint"
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 2
 
@@ -31,9 +31,15 @@ jobs:
             *.md
             *.markdown
 
-      - name: Link Markdown
-        uses: gaurav-nelson/github-action-markdown-link-check@v1
-        if: steps.changed-files-specific.outputs.only_changed == 'true'
-              with:
-        config-file: '.github/mlc.json'
-        use-quiet-mode: "yes"
+      - name: Restore lychee cache
+        uses: actions/cache@v3
+        with:
+          path: .lycheecache
+          key: cache-lychee-${{ github.sha }}
+          restore-keys: cache-lychee-
+
+      - name: Link Checker
+        uses: lycheeverse/lychee-action@v1.8.0
+        with:
+          args: "--verbose --cache --max-cache-age 1d ."
+          fail: true

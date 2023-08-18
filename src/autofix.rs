@@ -7,6 +7,14 @@ use crate::log;
 use std::path::{Path, PathBuf};
 use toml_edit::{table, value, Array, Document, Value};
 
+#[derive(Debug, clap::Parser)]
+#[cfg_attr(feature = "testing", derive(Default))]
+pub struct AutoFixerArgs {
+	/// Try to automatically fix the problems.
+	#[clap(long = "fix")]
+	pub enable: bool,
+}
+
 pub struct AutoFixer {
 	pub manifest: Option<PathBuf>,
 	doc: Option<Document>,
@@ -23,6 +31,68 @@ impl AutoFixer {
 	pub fn from_raw(raw: &str) -> Result<Self, String> {
 		let doc = raw.parse::<Document>().map_err(|e| format!("Failed to parse manifest: {e}"))?;
 		Ok(Self { manifest: None, doc: Some(doc) })
+	}
+
+	/// Returns the unsorted features in alphabetical order.
+	pub fn check_sorted_all_features(&self) -> Vec<String> {
+		let doc: &Document = self.doc.as_ref().unwrap();
+		if !doc.contains_table("features") {
+			return Vec::new()
+		}
+		let features = doc["features"].as_table().unwrap();
+		let mut unsorted = Vec::new();
+
+		for (feature, _) in features.iter() {
+			if !self.check_sorted_feature(feature) {
+				unsorted.push(feature.to_string());
+			}
+		}
+
+		unsorted.sort();
+		unsorted
+	}
+
+	pub fn check_sorted_feature(&self, feature: &str) -> bool {
+		let doc: &Document = self.doc.as_ref().unwrap();
+		if !doc.contains_table("features") {
+			return true
+		}
+		let features = doc["features"].as_table().unwrap();
+		if !features.contains_key(feature) {
+			return true
+		}
+		let feature = features[feature].as_array().unwrap();
+
+		let mut last = "";
+		for value in feature.iter() {
+			let value = value.as_str().unwrap();
+			if value < last {
+				return false
+			}
+			last = value;
+		}
+		true
+	}
+
+	pub fn sort_all_features(&mut self) -> Result<(), String> {
+		let doc: &mut Document = self.doc.as_mut().unwrap();
+		if !doc.contains_table("features") {
+			return Ok(())
+		}
+		let features = doc["features"].as_table_mut().unwrap();
+
+		for (_, feature) in features.iter_mut() {
+			let feature = feature.as_array_mut().unwrap();
+			let mut values = feature.iter().cloned().collect::<Vec<_>>();
+			// DOGSHIT CODE
+			values.sort_by(|a, b| a.as_str().unwrap().cmp(b.as_str().unwrap()));
+			feature.clear();
+			for value in values.into_iter() {
+				feature.push_formatted(value.clone());
+			}
+		}
+
+		Ok(())
 	}
 
 	/// Add something to a feature. Creates that feature if it does not exist.
@@ -61,7 +131,7 @@ impl AutoFixer {
 				Some(p) => p.as_str().unwrap().into(),
 			};
 			if !prefix.ends_with("\n\t") {
-				prefix = format!("{prefix}\n\t");
+				prefix = format!("{}\n\t", prefix.trim_end());
 			}
 			let mut suffix: String = match value.decor().suffix() {
 				None => "".into(),
@@ -117,6 +187,8 @@ impl ToString for AutoFixer {
 
 #[cfg(test)]
 mod tests {
+	use std::vec;
+
 	use super::*;
 	use rstest::*;
 
@@ -429,6 +501,23 @@ runtime-benchmarks = [
 # Fifth comment
 "#
 	)]
+	#[case(
+		r#"
+[features]
+runtime-benchmarks = [
+"B/F0",
+"D/F0",
+]
+"#,
+		r#"
+[features]
+runtime-benchmarks = [
+	"B/F0",
+	"D/F0",
+	"frame-support/runtime-benchmarks"
+]
+"#
+	)]
 	fn add_feature_keeps_comments(#[case] before: &str, #[case] after: &str) {
 		let mut fixer = AutoFixer::from_raw(before).unwrap();
 		fixer
@@ -459,5 +548,187 @@ std = [
 		let raw = std::fs::read_to_string("Cargo.toml").unwrap();
 		let fixer = AutoFixer::from_raw(&raw).unwrap();
 		assert_eq!(fixer.to_string(), raw, "Formatting stays");
+	}
+
+	#[rstest]
+	#[case(r#""#, true)]
+	#[case(r#"[features]"#, true)]
+	#[case(
+		r#"
+[features]
+F0 = [
+	"A/F0",
+	"B/F0",
+	"C/F0",
+]"#,
+		true
+	)]
+	#[case(
+		r#"
+[features]
+F0 = [
+"B/F0",
+"A/F0",
+]"#,
+		false
+	)]
+	#[case(
+		r#"
+[features]
+G0 = [
+	"B/F0",
+	"A/F0",
+]"#,
+		true
+	)]
+	#[case(
+		r#"
+[features]
+G0 = [
+	"B/F0",
+	"A/F0",
+]
+F0 = [
+	"A/F0",
+	"B/F0",
+	"C/F0",
+]"#,
+		true
+	)]
+	#[case(
+		r#"
+[features]
+G0 = [
+	"B/F0",
+	"A/F0",
+]
+F0 = [
+"B/F0",
+"A/F0",
+]"#,
+		false
+	)]
+	fn check_sorted_feature_works(#[case] input: &str, #[case] good: bool) {
+		let fixer = AutoFixer::from_raw(input).unwrap();
+		assert_eq!(fixer.check_sorted_feature("F0"), good);
+	}
+
+	#[rstest]
+	#[case(r#""#, vec![])]
+	#[case(r#"[features]"#, vec![])]
+	#[case(r#"
+[features]
+F0 = [
+	"A/F0",
+	"B/F0",
+	"C/F0",
+]"#, vec![])]
+	#[case(r#"
+[features]
+F0 = [
+"B/F0",
+"A/F0",
+]"#, vec!["F0"])]
+	#[case(r#"
+[features]
+G0 = [
+	"B/F0",
+	"A/F0",
+]"#, vec!["G0"])]
+	#[case(r#"
+[features]
+G0 = [
+	"B/F0",
+	"A/F0",
+]
+F0 = [
+	"A/F0",
+	"B/F0",
+	"C/F0",
+]"#, vec!["G0"])]
+	#[case(r#"
+[features]
+G0 = [
+	"B/F0",
+	"A/F0",
+]
+F0 = [
+"B/F0",
+"A/F0",
+]"#, vec!["F0", "G0"])]
+	fn check_sorted_all_works(#[case] input: &str, #[case] expect: Vec<&str>) {
+		let fixer = AutoFixer::from_raw(input).unwrap();
+		assert_eq!(fixer.check_sorted_all_features(), expect);
+	}
+
+	#[rstest]
+	#[case(r#""#, None)]
+	// TODO think about trailing newlines
+	#[case(
+		r#"[features]"#,
+		Some(
+			r#"[features]
+"#
+		)
+	)]
+	#[case(
+		r#"
+[features]
+F0 = [
+	"A/F0",
+	"C/F0",
+	"B/F0",
+]
+"#,
+		Some(
+			r#"
+[features]
+F0 = [
+	"A/F0",
+	"B/F0",
+	"C/F0",
+]
+"#
+		)
+	)]
+	#[case(
+		r#"
+[features]
+F0 = [
+	"A/F0",
+
+	"C/F0",
+	"B/F0",
+]
+G0 = [
+	"A/G0",
+	"C/G0",
+	# hi
+	"B/G0",
+]
+"#,
+		Some(
+			r#"
+[features]
+F0 = [
+	"A/F0",
+	"B/F0",
+
+	"C/F0",
+]
+G0 = [
+	"A/G0",
+	# hi
+	"B/G0",
+	"C/G0",
+]
+"#
+		)
+	)]
+	fn sort_all_features_works(#[case] input: &str, #[case] modify: Option<&str>) {
+		let mut fixer = AutoFixer::from_raw(input).unwrap();
+		fixer.sort_all_features().unwrap();
+		assert_eq!(fixer.to_string(), modify.unwrap_or(input));
+		assert!(fixer.check_sorted_all_features().is_empty(), "Features should be sorted");
 	}
 }

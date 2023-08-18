@@ -55,7 +55,7 @@ impl CaseFile {
 		UiCaseFile::from_file(path)
 			.map(CaseFile::Ui)
 			.or_else(|_| IntegrationCaseFile::from_file(path).map(CaseFile::Integration))
-			.unwrap_or_else(|e| panic!("Failed to parse case file: {}", e))
+			.unwrap_or_else(|e| panic!("Failed to parse file {:?}: {}", path, e))
 	}
 
 	pub fn to_file(&self, path: &Path) -> Result<(), anyhow::Error> {

@@ -37,7 +37,7 @@ impl AutoFixer {
 	pub fn check_sorted_all_features(&self) -> Vec<String> {
 		let doc: &Document = self.doc.as_ref().unwrap();
 		if !doc.contains_table("features") {
-			return Vec::new();
+			return Vec::new()
 		}
 		let features = doc["features"].as_table().unwrap();
 		let mut unsorted = Vec::new();
@@ -47,19 +47,19 @@ impl AutoFixer {
 				unsorted.push(feature.to_string());
 			}
 		}
-		
+
 		unsorted.sort();
 		unsorted
 	}
-	
+
 	pub fn check_sorted_feature(&self, feature: &str) -> bool {
 		let doc: &Document = self.doc.as_ref().unwrap();
 		if !doc.contains_table("features") {
-			return true;
+			return true
 		}
 		let features = doc["features"].as_table().unwrap();
 		if !features.contains_key(feature) {
-			return true;
+			return true
 		}
 		let feature = features[feature].as_array().unwrap();
 
@@ -67,7 +67,7 @@ impl AutoFixer {
 		for value in feature.iter() {
 			let value = value.as_str().unwrap();
 			if value < last {
-				return false;
+				return false
 			}
 			last = value;
 		}
@@ -77,10 +77,10 @@ impl AutoFixer {
 	pub fn sort_all_features(&mut self) -> Result<(), String> {
 		let doc: &mut Document = self.doc.as_mut().unwrap();
 		if !doc.contains_table("features") {
-			return Ok(());
+			return Ok(())
 		}
 		let features = doc["features"].as_table_mut().unwrap();
-		
+
 		for (_, feature) in features.iter_mut() {
 			let feature = feature.as_array_mut().unwrap();
 			let mut values = feature.iter().cloned().collect::<Vec<_>>();
@@ -189,7 +189,7 @@ impl ToString for AutoFixer {
 mod tests {
 	use std::vec;
 
-use super::*;
+	use super::*;
 	use rstest::*;
 
 	#[rstest]
@@ -499,23 +499,25 @@ runtime-benchmarks = [
 	# Fourth comment
 ]
 # Fifth comment
-"#)]
+"#
+	)]
 	#[case(
-	r#"
+		r#"
 [features]
 runtime-benchmarks = [
 "B/F0",
 "D/F0",
 ]
 "#,
-	r#"
+		r#"
 [features]
 runtime-benchmarks = [
 	"B/F0",
 	"D/F0",
 	"frame-support/runtime-benchmarks"
 ]
-"#)]
+"#
+	)]
 	fn add_feature_keeps_comments(#[case] before: &str, #[case] after: &str) {
 		let mut fixer = AutoFixer::from_raw(before).unwrap();
 		fixer
@@ -551,26 +553,36 @@ std = [
 	#[rstest]
 	#[case(r#""#, true)]
 	#[case(r#"[features]"#, true)]
-	#[case(r#"
+	#[case(
+		r#"
 [features]
 F0 = [
 	"A/F0",
 	"B/F0",
 	"C/F0",
-]"#, true)]
-	#[case(r#"
+]"#,
+		true
+	)]
+	#[case(
+		r#"
 [features]
 F0 = [
 "B/F0",
 "A/F0",
-]"#, false)]
-	#[case(r#"
+]"#,
+		false
+	)]
+	#[case(
+		r#"
 [features]
 G0 = [
 	"B/F0",
 	"A/F0",
-]"#, true)]
-	#[case(r#"
+]"#,
+		true
+	)]
+	#[case(
+		r#"
 [features]
 G0 = [
 	"B/F0",
@@ -580,8 +592,11 @@ F0 = [
 	"A/F0",
 	"B/F0",
 	"C/F0",
-]"#, true)]
-	#[case(r#"
+]"#,
+		true
+	)]
+	#[case(
+		r#"
 [features]
 G0 = [
 	"B/F0",
@@ -590,7 +605,9 @@ G0 = [
 F0 = [
 "B/F0",
 "A/F0",
-]"#, false)]
+]"#,
+		false
+	)]
 	fn check_sorted_feature_works(#[case] input: &str, #[case] good: bool) {
 		let fixer = AutoFixer::from_raw(input).unwrap();
 		assert_eq!(fixer.check_sorted_feature("F0"), good);
@@ -647,24 +664,35 @@ F0 = [
 	#[rstest]
 	#[case(r#""#, None)]
 	// TODO think about trailing newlines
-	#[case(r#"[features]"#, Some(r#"[features]
-"#))]
-	#[case(r#"
+	#[case(
+		r#"[features]"#,
+		Some(
+			r#"[features]
+"#
+		)
+	)]
+	#[case(
+		r#"
 [features]
 F0 = [
 	"A/F0",
 	"C/F0",
 	"B/F0",
 ]
-"#, Some(r#"
+"#,
+		Some(
+			r#"
 [features]
 F0 = [
 	"A/F0",
 	"B/F0",
 	"C/F0",
 ]
-"#))]
-	#[case(r#"
+"#
+		)
+	)]
+	#[case(
+		r#"
 [features]
 F0 = [
 	"A/F0",
@@ -678,7 +706,9 @@ G0 = [
 	# hi
 	"B/G0",
 ]
-"#, Some(r#"
+"#,
+		Some(
+			r#"
 [features]
 F0 = [
 	"A/F0",
@@ -692,7 +722,9 @@ G0 = [
 	"B/G0",
 	"C/G0",
 ]
-"#))]
+"#
+		)
+	)]
 	fn sort_all_features_works(#[case] input: &str, #[case] modify: Option<&str>) {
 		let mut fixer = AutoFixer::from_raw(input).unwrap();
 		fixer.sort_all_features().unwrap();

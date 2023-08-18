@@ -6,8 +6,8 @@
 pub mod autofix;
 pub mod cmd;
 pub mod dag;
-pub mod mock;
 pub mod grammar;
+pub mod mock;
 
 pub mod prelude {
 	pub use super::{

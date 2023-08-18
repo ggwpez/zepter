@@ -3,9 +3,9 @@
 
 //! Sub-command definition and implementation.
 
+pub mod fmt;
 pub mod lint;
 pub mod trace;
-pub mod fmt;
 
 use crate::log;
 use cargo_metadata::{Dependency, Metadata, MetadataCommand, Package, Resolve};

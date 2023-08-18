@@ -6,10 +6,10 @@
 use crate::{
 	autofix::*,
 	cmd::{resolve_dep, RenamedPackage},
+	grammar::*,
 	log,
 	prelude::*,
 	CrateId,
-	grammar::*,
 };
 use cargo_metadata::{Metadata, Package, PackageId};
 use core::{
@@ -458,7 +458,9 @@ impl PropagateFeatureCmd {
 					deps.iter().map(|dep| dep.display_name()).collect::<Vec<_>>().join("\n      ");
 				println!("    must propagate to:\n      {joined}");
 
-				if self.fixer_args.enable && self.fix_package.as_ref().map_or(true, |p| p == &krate.name) {
+				if self.fixer_args.enable &&
+					self.fix_package.as_ref().map_or(true, |p| p == &krate.name)
+				{
 					for dep in deps {
 						let dep_name = dep.name();
 						if !self.fix_dependency.as_ref().map_or(true, |d| d == &dep_name) {

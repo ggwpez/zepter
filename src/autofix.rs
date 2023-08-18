@@ -534,7 +534,6 @@ std = [
 	"CCC"
 ]
 "#;
-	let opts = AutoFixerArgs::default();
 		let mut fixer = AutoFixer::from_raw(before).unwrap();
 		fixer.add_to_feature("std", "AAA").unwrap();
 		fixer.add_to_feature("std", "BBB").unwrap();

@@ -1,0 +1,42 @@
+crates:
+- name: A
+  deps:
+  - B
+  - C
+  features:
+    F0:
+    - - C
+      - F0
+    - - B
+      - F0
+- name: B
+  features:
+    F0: null
+- name: C
+  features:
+    F0: null
+cases:
+- cmd: format features
+  stdout: |
+    Found 1 crate with unsorted features:
+      A
+  code: 1
+- cmd: format features --print-features
+  stdout: |
+    Found 1 crate with unsorted features:
+      A (F0)
+  code: 1
+- cmd: format features --print-features --fix
+  stdout: |
+    Found 1 crate with unsorted features:
+      A (F0)
+    Fixed 1 crate with unsorted features
+  diff: |
+    diff --git A/Cargo.toml A/Cargo.toml
+    index 81b866..7cbdeb 100644
+    --- A/Cargo.toml
+    +++ A/Cargo.toml
+    @@ -14 +13,0 @@ F0 = [
+    -"C/F0",
+    @@ -15,0 +15 @@ F0 = [
+    +"C/F0",

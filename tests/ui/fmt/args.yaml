@@ -1,0 +1,7 @@
+crates:
+- name: A
+cases:
+- cmd: format features
+  stdout:
+- cmd: format features --color --fix --print-paths --print-features --quiet --log trace
+  stdout:

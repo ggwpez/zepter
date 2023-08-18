@@ -16,6 +16,10 @@ fn all() {
 	let keep_going = std::env::var("KEEP_GOING").is_ok();
 	let (mut failed, mut good) = (0, 0);
 
+	if overwrite {
+		colour::white_ln!("Running tests in OVERWRITE mode\n");
+	}
+
 	// Update each time you add a test.
 	for file in files.filter_map(Result::ok) {
 		let mut config = CaseFile::from_file(&file);
@@ -25,7 +29,7 @@ fn all() {
 		let m = config.cases().len();
 
 		for (i, case) in config.cases().iter().enumerate() {
-			colour::white!("Testing {} {}/{} .. ", file.display(), i + 1, m);
+			colour::white!("{} {}/{}  ", file.display(), i + 1, m);
 			git_reset(workspace.as_path()).unwrap();
 			let mut cmd = Command::cargo_bin("zepter").unwrap();
 			for arg in case.cmd.split_whitespace() {
@@ -130,5 +134,5 @@ fn all() {
 	if failed == 0 && good == 0 {
 		panic!("No tests found");
 	}
-	colour::white!("");
+	colour::prnt!("");
 }

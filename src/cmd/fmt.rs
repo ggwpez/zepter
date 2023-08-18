@@ -14,7 +14,7 @@ use std::{
 
 use super::GlobalArgs;
 
-/// Lint your feature usage by analyzing crate metadata.
+/// Format the features in your manifest files.
 #[derive(Debug, clap::Parser)]
 pub struct FormatCmd {
 	#[clap(subcommand)]
@@ -27,6 +27,7 @@ pub enum SubCommand {
 	Features(FormatFeaturesCmd),
 }
 
+/// Format the content of each feature in the crate manifest.
 #[derive(Debug, clap::Parser)]
 pub struct FormatFeaturesCmd {
 	#[allow(missing_docs)]
@@ -84,6 +85,7 @@ impl FormatFeaturesCmd {
 		let mut fixed = 0;
 		println!("Found {} crate{} with unsorted features:", global.red(&offenders.len().to_string()), plural(offenders.len()));
 		for (path, pkg, features) in offenders.iter() {
+			// trim of the allowed_dir, if possible:
 			let psuffix = self.print_paths.then(|| format!(" {}", path.display())).unwrap_or_default();
 			let feats = self.print_features.then(|| format!(" ({})", features.join(", "))).unwrap_or_default();
 			println!("  {}{}{}", global.bold(&pkg), psuffix, feats);

@@ -9,7 +9,7 @@ cases:
     Commands:
       trace   Trace the dependency path from one crate to another
       lint    Lint your feature usage by analyzing crate metadata
-      format  Format the features in your Cargo.toml files
+      format  Format the features in your manifest files
       help    Print this message or the help of the given subcommand(s)
 
     Options:

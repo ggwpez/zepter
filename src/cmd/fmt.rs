@@ -94,13 +94,13 @@ impl FormatFeaturesCmd {
 				.print_features
 				.then(|| format!(" ({})", features.join(", ")))
 				.unwrap_or_default();
-			println!("  {}{}{}", global.bold(&pkg), psuffix, feats);
+			println!("  {}{}{}", global.bold(pkg), psuffix, feats);
 
 			if !self.fix {
 				continue
 			}
 
-			let can_modify = path.starts_with(&allowed_dir) ||
+			let can_modify = path.starts_with(allowed_dir) ||
 				self.modify_paths.iter().any(|p| path.starts_with(p));
 			if !can_modify {
 				log::warn!(
@@ -111,7 +111,7 @@ impl FormatFeaturesCmd {
 				continue
 			}
 
-			let mut fixer = AutoFixer::from_manifest(&path).unwrap();
+			let mut fixer = AutoFixer::from_manifest(path).unwrap();
 			fixer.sort_all_features().unwrap();
 			fixer.save().unwrap();
 			fixed += 1;

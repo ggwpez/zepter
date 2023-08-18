@@ -3,7 +3,7 @@
 
 //! Format features in the crate manifest.
 
-use crate::{autofix::*, grammar::*};
+use crate::{autofix::*, grammar::*, log};
 use std::{fs::canonicalize, path::PathBuf};
 
 use super::GlobalArgs;

@@ -49,16 +49,17 @@ void = "1.0.2"
 default = [ "logging" ]
 
 logging = [ 
-	"dep:log",
 	"dep:env_logger",
+	"dep:log",
 ]
 
 testing = [
 	"dep:anyhow",
-	"dep:tempfile",
+	"dep:assert_cmd",
 	"dep:serde",
 	"dep:serde_yaml",
-	"dep:assert_cmd",
+	"dep:tempfile",
+
 ]
 
 [profile.dev]

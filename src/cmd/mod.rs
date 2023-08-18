@@ -5,6 +5,7 @@
 
 pub mod lint;
 pub mod trace;
+pub mod fmt;
 
 use crate::log;
 use cargo_metadata::{Dependency, Metadata, MetadataCommand, Package, Resolve};
@@ -46,6 +47,7 @@ pub struct GlobalArgs {
 enum SubCommand {
 	Trace(trace::TraceCmd),
 	Lint(lint::LintCmd),
+	Format(fmt::FormatCmd),
 }
 
 impl Command {
@@ -55,6 +57,7 @@ impl Command {
 		match &self.subcommand {
 			SubCommand::Trace(cmd) => cmd.run(&self.global),
 			SubCommand::Lint(cmd) => cmd.run(&self.global),
+			SubCommand::Format(cmd) => cmd.run(&self.global),
 		}
 	}
 }
@@ -90,6 +93,14 @@ impl GlobalArgs {
 			s.to_string()
 		} else {
 			format!("\x1b[32m{}\x1b[0m", s)
+		}
+	}
+
+	pub fn bold(&self, s: &str) -> String {
+		if !self.color {
+			s.to_string()
+		} else {
+			format!("\x1b[1m{}\x1b[0m", s)
 		}
 	}
 }

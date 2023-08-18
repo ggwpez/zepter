@@ -19,7 +19,7 @@ fn all() {
 	// Update each time you add a test.
 	for file in files.filter_map(Result::ok) {
 		let mut config = CaseFile::from_file(&file);
-		let (workspace, _ctx) = config.init().unwrap();
+		let (workspace, ctx) = config.init().unwrap();
 		let mut overwrites = HashMap::new();
 		let mut diff_overwrites = HashMap::new();
 		let m = config.cases().len();
@@ -94,10 +94,14 @@ fn all() {
 			git_reset(workspace.as_path()).unwrap();
 		}
 
-		//if std::env::var("PERSIST").is_ok() {
-		//	let path = workspace.persist();
-		//	println!("Persisted to {:?}", path);
-		//}
+		if std::env::var("PERSIST").is_ok() {
+			if let Some(ctx) = ctx {
+				let path = ctx.persist();
+				colour::white_ln!("Persisted to {:?}", path);
+			} else {
+				colour::red_ln!("Cannot persist test");
+			}
+		}
 
 		if std::env::var("OVERWRITE").is_ok() {
 			if overwrites.is_empty() && diff_overwrites.is_empty() {

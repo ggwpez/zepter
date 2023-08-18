@@ -4,11 +4,12 @@
 //! Lint your feature usage by analyzing crate metadata.
 
 use crate::{
-	autofix::AutoFixer,
+	autofix::*,
 	cmd::{resolve_dep, RenamedPackage},
 	log,
 	prelude::*,
 	CrateId,
+	grammar::*,
 };
 use cargo_metadata::{Metadata, Package, PackageId};
 use core::{
@@ -159,9 +160,9 @@ pub struct PropagateFeatureCmd {
 	#[clap(long)]
 	show_version: bool,
 
-	/// Try to automatically fix the problems.
-	#[clap(long)]
-	fix: bool,
+	#[allow(missing_docs)]
+	#[clap(flatten)]
+	fixer_args: AutoFixerArgs,
 
 	#[clap(long)]
 	modify_paths: Vec<PathBuf>,
@@ -422,7 +423,7 @@ impl PropagateFeatureCmd {
 			// check if we can modify in allowed_dir
 			let krate_path = canonicalize(krate.manifest_path.clone().into_std_path_buf()).unwrap();
 
-			let mut fixer = if self.fix {
+			let mut fixer = if self.fixer_args.enable {
 				if krate_path.starts_with(allowed_dir) ||
 					self.modify_paths.iter().any(|p| krate_path.starts_with(p))
 				{
@@ -457,7 +458,7 @@ impl PropagateFeatureCmd {
 					deps.iter().map(|dep| dep.display_name()).collect::<Vec<_>>().join("\n      ");
 				println!("    must propagate to:\n      {joined}");
 
-				if self.fix && self.fix_package.as_ref().map_or(true, |p| p == &krate.name) {
+				if self.fixer_args.enable && self.fix_package.as_ref().map_or(true, |p| p == &krate.name) {
 					for dep in deps {
 						let dep_name = dep.name();
 						if !self.fix_dependency.as_ref().map_or(true, |d| d == &dep_name) {
@@ -495,7 +496,7 @@ impl PropagateFeatureCmd {
 			//	}
 			//}
 		}
-		print!("{}.", error_stats(errors, warnings, fixes, self.fix, global));
+		print!("{}.", error_stats(errors, warnings, fixes, self.fixer_args.enable, global));
 		if errors > fixes {
 			println!(" Exit code 1.");
 			std::process::exit(1);
@@ -562,15 +563,6 @@ fn error_stats(
 		ret.push_str(" (run with --fix to fix)");
 	}
 	ret
-}
-
-/// Add an plural `s` for English grammar iff `n != 1`.
-fn plural(n: usize) -> &'static str {
-	if n == 1 {
-		""
-	} else {
-		"s"
-	}
 }
 
 impl OnlyEnablesCmd {

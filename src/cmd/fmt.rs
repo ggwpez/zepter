@@ -64,12 +64,11 @@ impl FormatFeaturesCmd {
 		for pkg in meta.packages.iter() {
 			let path = canonicalize(pkg.manifest_path.clone().into_std_path_buf()).unwrap();
 
-			let fixer = AutoFixer::from_manifest(&path).unwrap();
-			let unsorted = fixer.check_sorted_all_features();
-			if unsorted.is_empty() {
-				continue
+			let mut fixer = AutoFixer::from_manifest(&path).unwrap();
+			fixer.format_all_features().unwrap();
+			if fixer.modified() {
+				offenders.push((path, &pkg.name, fixer));
 			}
-			offenders.push((path, &pkg.name, unsorted));
 		}
 		if offenders.is_empty() {
 			log::info!(
@@ -86,15 +85,11 @@ impl FormatFeaturesCmd {
 			global.red(&offenders.len().to_string()),
 			plural(offenders.len())
 		);
-		for (path, pkg, features) in offenders.iter() {
+		for (path, pkg, fixer) in offenders.iter_mut() {
 			// trim of the allowed_dir, if possible:
 			let psuffix =
 				self.print_paths.then(|| format!(" {}", path.display())).unwrap_or_default();
-			let feats = self
-				.print_features
-				.then(|| format!(" ({})", features.join(", ")))
-				.unwrap_or_default();
-			println!("  {}{}{}", global.bold(pkg), psuffix, feats);
+			println!("  {}{}", global.bold(pkg), psuffix);
 
 			if !self.fix {
 				continue
@@ -111,8 +106,6 @@ impl FormatFeaturesCmd {
 				continue
 			}
 
-			let mut fixer = AutoFixer::from_manifest(path).unwrap();
-			fixer.sort_all_features().unwrap();
 			fixer.save().unwrap();
 			fixed += 1;
 		}

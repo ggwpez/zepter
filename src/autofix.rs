@@ -181,6 +181,68 @@ impl AutoFixer {
 		Ok(())
 	}
 
+	/// Returns the unsorted features in alphabetical order.
+	pub fn check_sorted_all_features(&self) -> Vec<String> {
+		let doc: &Document = self.doc.as_ref().unwrap();
+		if !doc.contains_table("features") {
+			return Vec::new()
+		}
+		let features = doc["features"].as_table().unwrap();
+		let mut unsorted = Vec::new();
+
+		for (feature, _) in features.iter() {
+			if !self.check_sorted_feature(feature) {
+				unsorted.push(feature.to_string());
+			}
+		}
+
+		unsorted.sort();
+		unsorted
+	}
+
+	pub fn check_sorted_feature(&self, feature: &str) -> bool {
+		let doc: &Document = self.doc.as_ref().unwrap();
+		if !doc.contains_table("features") {
+			return true
+		}
+		let features = doc["features"].as_table().unwrap();
+		if !features.contains_key(feature) {
+			return true
+		}
+		let feature = features[feature].as_array().unwrap();
+
+		let mut last = "";
+		for value in feature.iter() {
+			let value = value.as_str().unwrap();
+			if value < last {
+				return false
+			}
+			last = value;
+		}
+		true
+	}
+
+	pub fn sort_all_features(&mut self) -> Result<(), String> {
+		let doc: &mut Document = self.doc.as_mut().unwrap();
+		if !doc.contains_table("features") {
+			return Ok(())
+		}
+		let features = doc["features"].as_table_mut().unwrap();
+
+		for (_, feature) in features.iter_mut() {
+			let feature = feature.as_array_mut().unwrap();
+			let mut values = feature.iter().cloned().collect::<Vec<_>>();
+			// DOGSHIT CODE
+			values.sort_by(|a, b| a.as_str().unwrap().cmp(b.as_str().unwrap()));
+			feature.clear();
+			for value in values.into_iter() {
+				feature.push_formatted(value.clone());
+			}
+		}
+
+		Ok(())
+	}
+
 	/// Add something to a feature. Creates that feature if it does not exist.
 	pub fn add_to_feature(&mut self, feature: &str, v: &str) -> Result<(), String> {
 		let doc: &mut Document = self.doc.as_mut().unwrap();

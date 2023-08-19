@@ -18,25 +18,23 @@ crates:
 cases:
 - cmd: format features
   stdout: |
-    Found 1 crate with unsorted features:
+    Found 3 crates with unsorted features:
       A
+      B
+      C
   code: 1
 - cmd: format features --print-features
   stdout: |
-    Found 1 crate with unsorted features:
-      A (F0)
+    Found 3 crates with unsorted features:
+      A
+      B
+      C
   code: 1
 - cmd: format features --print-features --fix
   stdout: |
-    Found 1 crate with unsorted features:
-      A (F0)
-    Fixed 1 crate with unsorted features
-  diff: |
-    diff --git A/Cargo.toml A/Cargo.toml
-    index 81b866..7cbdeb 100644
-    --- A/Cargo.toml
-    +++ A/Cargo.toml
-    @@ -14 +13,0 @@ F0 = [
-    -"C/F0",
-    @@ -15,0 +15 @@ F0 = [
-    +"C/F0",
+    Found 3 crates with unsorted features:
+      A
+      B
+      C
+    Fixed 3 crates with unsorted features
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 81b866..f049a0 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -14,2 +14,2 @@ F0 = [\n-\"C/F0\",\n-\"B/F0\",\n+\t\"B/F0\",\n+\t\"C/F0\",\ndiff --git B/Cargo.toml B/Cargo.toml\nindex e35c7e..8bd6bd 100644\n--- B/Cargo.toml\n+++ B/Cargo.toml\n@@ -11,2 +11 @@ edition = \"2021\"\n-F0 = [\n-]\n+F0 = []\ndiff --git C/Cargo.toml C/Cargo.toml\nindex 57610a..b47e19 100644\n--- C/Cargo.toml\n+++ C/Cargo.toml\n@@ -11,2 +11 @@ edition = \"2021\"\n-F0 = [\n-]\n+F0 = []\n"

@@ -18,6 +18,7 @@ pub struct AutoFixerArgs {
 pub struct AutoFixer {
 	pub manifest: Option<PathBuf>,
 	doc: Option<Document>,
+	raw: String,
 }
 
 impl AutoFixer {
@@ -25,12 +26,12 @@ impl AutoFixer {
 		let raw = std::fs::read_to_string(manifest)
 			.map_err(|e| format!("Failed to read manifest: {e}"))?;
 		let doc = raw.parse::<Document>().map_err(|e| format!("Failed to parse manifest: {e}"))?;
-		Ok(Self { manifest: Some(manifest.to_path_buf()), doc: Some(doc) })
+		Ok(Self { raw, manifest: Some(manifest.to_path_buf()), doc: Some(doc) })
 	}
 
 	pub fn from_raw(raw: &str) -> Result<Self, String> {
 		let doc = raw.parse::<Document>().map_err(|e| format!("Failed to parse manifest: {e}"))?;
-		Ok(Self { manifest: None, doc: Some(doc) })
+		Ok(Self { raw: raw.into(), manifest: None, doc: Some(doc) })
 	}
 
 	/// Returns the unsorted features in alphabetical order.
@@ -91,6 +92,91 @@ impl AutoFixer {
 				feature.push_formatted(value.clone());
 			}
 		}
+
+		Ok(())
+	}
+
+	pub fn canonicalize_all_features(&mut self) -> Result<(), String> {
+		let doc: &mut Document = self.doc.as_mut().unwrap();
+		if !doc.contains_table("features") {
+			return Ok(())
+		}
+		let features = doc["features"].as_table_mut().unwrap();
+
+		for (_, feature) in features.iter_mut() {
+			let feature = feature.as_array_mut().unwrap();
+			let mut values = feature.iter().cloned().collect::<Vec<_>>();
+
+			for value in values.iter_mut() {
+				let mut prefix = value
+					.decor()
+					.prefix()
+					.map_or(String::new(), |p| p.as_str().unwrap().to_string());
+				let mut suffix = value
+					.decor()
+					.suffix()
+					.map_or(String::new(), |s| s.as_str().unwrap().to_string());
+				suffix = Self::canonicalize_pre_and_suffix(suffix);
+				suffix = if suffix.trim().is_empty() {
+					"".into()
+				} else {
+					format!("\n\t{}\n\t", suffix.trim())
+				};
+
+				prefix = Self::canonicalize_pre_and_suffix(prefix);
+				prefix = prefix.trim().into();
+				prefix =
+					if prefix.is_empty() { "\n\t".into() } else { format!("\n\t{}\n\t", prefix) };
+				value.decor_mut().set_suffix(suffix);
+				value.decor_mut().set_prefix(prefix);
+			}
+
+			// Last one gets a newline
+			if let Some(value) = values.last_mut() {
+				let mut suffix = value
+					.decor()
+					.suffix()
+					.map_or(String::new(), |s| s.as_str().unwrap().to_string());
+
+				suffix = Self::canonicalize_pre_and_suffix(suffix);
+				suffix = suffix.trim().into();
+				suffix =
+					if suffix.is_empty() { ",\n".into() } else { format!(",\n\t{}\n", suffix) };
+				value.decor_mut().set_suffix(suffix);
+			}
+
+			feature.clear();
+			for value in values.into_iter() {
+				feature.push_formatted(value.clone());
+			}
+			feature.set_trailing_comma(false);
+			feature.set_trailing(feature.trailing().as_str().unwrap().to_string().trim());
+			feature.decor_mut().clear();
+		}
+
+		Ok(())
+	}
+
+	fn canonicalize_pre_and_suffix(fix: String) -> String {
+		let lines = fix.lines().collect::<Vec<_>>();
+		let mut new_lines = Vec::new();
+
+		for i in 0..lines.len() {
+			if i == 0 {
+				new_lines.push(lines[i].trim_end().into());
+			} else if i == lines.len() - 1 {
+				new_lines.push(lines[i].trim_start().into());
+			} else {
+				new_lines.push(format!("\t{}", lines[i].trim()));
+			}
+		}
+
+		new_lines.join("\n")
+	}
+
+	pub fn format_all_features(&mut self) -> Result<(), String> {
+		self.sort_all_features()?;
+		self.canonicalize_all_features()?;
 
 		Ok(())
 	}
@@ -167,6 +253,10 @@ impl AutoFixer {
 		}
 
 		Ok(())
+	}
+
+	pub fn modified(&self) -> bool {
+		self.doc.as_ref().unwrap().to_string() != self.raw
 	}
 
 	pub fn save(&mut self) -> Result<(), String> {
@@ -730,5 +820,351 @@ G0 = [
 		fixer.sort_all_features().unwrap();
 		assert_eq!(fixer.to_string(), modify.unwrap_or(input));
 		assert!(fixer.check_sorted_all_features().is_empty(), "Features should be sorted");
+	}
+
+	#[rstest]
+	#[case(r#""#, None)]
+	#[case(
+		r#"[features]"#,
+		Some(
+			r#"[features]
+"#
+		)
+	)]
+	#[case(
+		r#"
+[features]
+F0 = ["A/F0"]
+"#,
+		Some(
+			r#"
+[features]
+F0 = [
+	"A/F0",
+]
+"#
+		)
+	)]
+	#[case(
+		r#"
+[features]
+F0 = [
+"A/F0"]
+"#,
+		Some(
+			r#"
+[features]
+F0 = [
+	"A/F0",
+]
+"#
+		)
+	)]
+	#[case(
+		r#"
+[features]
+F0 = [
+"A/F0"
+]
+"#,
+		Some(
+			r#"
+[features]
+F0 = [
+	"A/F0",
+]
+"#
+		)
+	)]
+	#[case(
+		r#"
+[features]
+F0 = [	"A/F0"	]
+"#,
+		Some(
+			r#"
+[features]
+F0 = [
+	"A/F0",
+]
+"#
+		)
+	)]
+	#[case(
+		r#"
+[features]
+F0 = [	"A/F0", "B/F0"	]
+"#,
+		Some(
+			r#"
+[features]
+F0 = [
+	"A/F0",
+	"B/F0",
+]
+"#
+		)
+	)]
+	#[case(
+		r#"
+[features]
+F0 = [
+		  
+  	
+	"A/F0",
+  
+ 
+	"B/F0"
+ 	 
+]
+"#,
+		Some(
+			r#"
+[features]
+F0 = [
+	"A/F0",
+	"B/F0",
+]
+"#
+		)
+	)]
+	#[case(
+		r#"
+[features]
+F0 = [	"A/F0",
+"B/F0"	]
+"#,
+		Some(
+			r#"
+[features]
+F0 = [
+	"A/F0",
+	"B/F0",
+]
+"#
+		)
+	)]
+	#[case(
+		r#"
+[features]
+F0 = [
+    "A/F0",
+	"B/F0"	]
+"#,
+		Some(
+			r#"
+[features]
+F0 = [
+	"A/F0",
+	"B/F0",
+]
+"#
+		)
+	)]
+	#[case(
+		r#"
+[features]
+F0 = ["A/F0"
+	,
+	"B/F0"
+,
+	"C/F0" 
+		, ]
+"#,
+		Some(
+			r#"
+[features]
+F0 = [
+	"A/F0",
+	"B/F0",
+	"C/F0",
+]
+"#
+		)
+	)]
+	#[case(
+		r#"
+[features]
+F0 = [
+    "A/F0"
+  # 1
+	,
+	"B/F0"
+,
+	"C/F0" 	,
+]
+"#,
+		Some(
+			r#"
+[features]
+F0 = [
+	"A/F0"
+	# 1
+	,
+	"B/F0",
+	"C/F0",
+]
+"#
+		)
+	)]
+	#[case(
+		r#"
+[features]
+F0 = [
+	
+	    # 1    
+
+    "A/F0",
+	"B/F0"	]
+"#,
+		Some(
+			r#"
+[features]
+F0 = [
+	# 1
+	"A/F0",
+	"B/F0",
+]
+"#
+		)
+	)]
+	#[case(
+		r#"
+[features]
+F0 = [
+	
+	    # 1   
+
+    "A/F0",
+	
+	 # 2 
+	
+	"B/F0"
+
+	# 3
+
+		]
+"#,
+		Some(
+			r#"
+[features]
+F0 = [
+	# 1
+	"A/F0",
+	# 2
+	"B/F0",
+	# 3
+]
+"#
+		)
+	)]
+	#[case(
+		r#"
+[features]
+F0 = [
+	
+	# 1
+		# 2  
+# 2  
+
+    "A/F0",
+	
+	 # 3 
+	
+	"B/F0"
+
+	# 4
+
+		]
+"#,
+		Some(
+			r#"
+[features]
+F0 = [
+	# 1
+	# 2
+	# 2
+	"A/F0",
+	# 3
+	"B/F0",
+	# 4
+]
+"#
+		)
+	)]
+	#[case(
+		r#"
+[features]
+std = [
+        "pallet-election-provider-support-benchmarking?/std",
+        "codec/std",
+        "scale-info/std",
+        "log/std",
+
+        "frame-support/std",
+        "frame-system/std",
+
+        "sp-io/std",
+        "sp-std/std",
+        "sp-core/std",
+        "sp-runtime/std",
+        "sp-npos-elections/std",
+        "sp-arithmetic/std",
+        "frame-election-provider-support/std",
+        "log/std",
+
+        "frame-benchmarking?/std",
+        "rand/std",
+        "strum/std",
+        "pallet-balances/std",
+        "sp-tracing/std"
+]"#,
+		Some(
+			r#"
+[features]
+std = [
+	"pallet-election-provider-support-benchmarking?/std",
+	"codec/std",
+	"scale-info/std",
+	"log/std",
+	"frame-support/std",
+	"frame-system/std",
+	"sp-io/std",
+	"sp-std/std",
+	"sp-core/std",
+	"sp-runtime/std",
+	"sp-npos-elections/std",
+	"sp-arithmetic/std",
+	"frame-election-provider-support/std",
+	"log/std",
+	"frame-benchmarking?/std",
+	"rand/std",
+	"strum/std",
+	"pallet-balances/std",
+	"sp-tracing/std",
+]
+"#
+		)
+	)]
+	// FIXME: Spaces before the = are not removed.
+	#[case(
+		r#"
+[features]
+F0 =  	[  "A/F0"	, 	"B/F0"	]
+"#,
+		Some(
+			r#"
+[features]
+F0 = [
+	"A/F0",
+	"B/F0",
+]
+"#
+		)
+	)]
+	fn canonicalize_all_features_works(#[case] input: &str, #[case] modify: Option<&str>) {
+		let mut fixer = AutoFixer::from_raw(input).unwrap();
+		fixer.canonicalize_all_features().unwrap();
+		pretty_assertions::assert_str_eq!(fixer.to_string(), modify.unwrap_or(input));
 	}
 }

@@ -244,3 +244,20 @@ impl PartialOrd for RenamedPackage {
 		Some(self.cmp(other))
 	}
 }
+
+/// Parse a single key-value pair
+///
+/// Copy & paste from <https://github.com/clap-rs/clap/blob/master/examples/typed-derive.rs>
+pub(crate) fn parse_key_val<T, U>(
+	s: &str,
+) -> Result<(T, U), Box<dyn std::error::Error + Send + Sync + 'static>>
+where
+	T: std::str::FromStr,
+	T::Err: std::error::Error + Send + Sync + 'static,
+	U: std::str::FromStr,
+	U::Err: std::error::Error + Send + Sync + 'static,
+{
+	let s = s.trim_matches('"');
+	let pos = s.find(':').ok_or_else(|| format!("invalid KEY=value: no `:` found in `{s}`"))?;
+	Ok((s[..pos].parse()?, s[pos + 1..].parse()?))
+}

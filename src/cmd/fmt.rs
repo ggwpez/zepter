@@ -3,8 +3,8 @@
 
 //! Format features in the crate manifest.
 
-use crate::{autofix::*, grammar::*, log};
-use std::{fs::canonicalize, path::PathBuf};
+use crate::{autofix::*, cmd::parse_key_val, grammar::*, log};
+use std::{fs::canonicalize, path::PathBuf, str::FromStr};
 
 use super::GlobalArgs;
 
@@ -36,6 +36,9 @@ pub struct FormatFeaturesCmd {
 	#[clap(long)]
 	fix: bool,
 
+	#[clap(long, value_name = "FEATURE:MODE", value_parser = parse_key_val::<String, Mode>, value_delimiter = ',', verbatim_doc_comment)]
+	modes_per_feature: Option<Vec<(String, Mode)>>,
+
 	/// Also print the offending features per crate.
 	#[clap(long)]
 	print_features: bool,
@@ -43,6 +46,24 @@ pub struct FormatFeaturesCmd {
 	/// Also print the paths of the offending Cargo.toml files.
 	#[clap(long)]
 	print_paths: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, clap::ValueEnum)]
+pub enum Mode {
+	Canonicalize,
+	Sort,
+}
+
+impl FromStr for Mode {
+	type Err = std::string::ParseError;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s.to_ascii_lowercase().as_str() {
+			"canonicalize" => Ok(Self::Canonicalize),
+			"sort" => Ok(Self::Sort),
+			_ => panic!("Invalid Mode: {s}. Expected 'canonicalize' or 'sort'"), // FIXME
+		}
+	}
 }
 
 impl FormatCmd {
@@ -60,6 +81,12 @@ impl FormatFeaturesCmd {
 		let allowed_dir = canonicalize(&self.cargo_args.manifest_path).unwrap();
 		let allowed_dir = allowed_dir.parent().unwrap();
 		let mut offenders = Vec::new();
+
+		log::info!(
+			"Checking {} crate{}",
+			meta.packages.len(),
+			plural(meta.packages.len()),
+		);
 
 		for pkg in meta.packages.iter() {
 			let path = canonicalize(pkg.manifest_path.clone().into_std_path_buf()).unwrap();
@@ -110,28 +137,23 @@ impl FormatFeaturesCmd {
 			fixed += 1;
 		}
 
-		log::info!(
-			"Checked {} crate{}: {} with unsorted features",
-			meta.packages.len(),
-			plural(meta.packages.len()),
-			offenders.len()
-		);
-
 		if self.fix {
 			println!(
-				"Fixed {} crate{} with unsorted features",
+				"Formatted {} crate{} unformatted",
 				global.green(&fixed.to_string()),
 				plural(fixed)
 			);
 
 			if fixed != offenders.len() {
 				log::error!(
-					"ASSERT FAILED THIS IS A BUG: {} crate{} could not be fixed",
+					"ASSERT FAILED THIS IS A BUG: {} crate{} could not be formatted",
 					offenders.len() - fixed,
 					plural(offenders.len() - fixed)
 				);
 			}
 			std::process::exit(0);
+		} else {
+			println!("Run again with --fix to format them.");
 		}
 
 		std::process::exit(1);

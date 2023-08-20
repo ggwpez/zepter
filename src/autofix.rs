@@ -174,9 +174,33 @@ impl AutoFixer {
 		new_lines.join("\n")
 	}
 
-	pub fn format_all_features(&mut self) -> Result<(), String> {
-		self.sort_all_features()?;
-		self.canonicalize_all_features()?;
+	fn get_all_features(&self) -> Vec<String> {
+		let mut found = Vec::new();
+
+		let doc: &mut Document = self.doc.as_mut().unwrap();
+		if !doc.contains_table("features") {
+			return found
+		}
+		let features = doc["features"].as_table_mut().unwrap();
+
+		for (feature, _) in features.iter() {
+			found.push(feature.into());
+		}
+
+		found
+	}
+
+	pub fn format_features(&mut self, modes_per_feature: Vec<(String, Mode)>) -> Result<(), String> {
+		if modes_per_feature.is_empty() {
+			self.sort_all_features()?;
+			self.canonicalize_all_features()?;
+		} else {
+			let features = self.get_all_features();
+
+			for feature in features.iter() {
+				if 
+			}
+		}
 
 		Ok(())
 	}

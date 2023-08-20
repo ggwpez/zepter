@@ -9,7 +9,7 @@ pub mod git;
 pub use git::*;
 
 use std::{
-	collections::HashMap,
+	collections::BTreeMap,
 	fs,
 	io::Write,
 	path::{Path, PathBuf},
@@ -145,7 +145,7 @@ pub struct CrateConfig {
 	deps: Option<Vec<CrateDependency>>,
 	#[allow(clippy::type_complexity)]
 	#[serde(skip_serializing_if = "Option::is_none")]
-	features: Option<HashMap<String, Option<Vec<(String, String)>>>>,
+	features: Option<BTreeMap<String, Option<Vec<(String, String)>>>>,
 }
 
 impl CrateConfig {

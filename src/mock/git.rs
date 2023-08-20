@@ -88,7 +88,7 @@ pub fn clone_repo(repo: &str, rev: &str) -> Result<PathBuf, anyhow::Error> {
 	let dir = std::env::var("CARGO_TARGET_DIR").unwrap_or_else(|_| "target".into());
 	let repos_dir = std::path::Path::new(&dir).join("test-repos");
 	let dir = repos_dir.join(repo);
-	colour::white_ln!("Pulling {} of repo {}", rev, repo);
+	colour::white_ln!("Checking out '{repo}' at '{}'", &rev[..10]);
 
 	// Check if the repo is already cloned
 	if Path::new(&dir).exists() {

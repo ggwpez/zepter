@@ -20,8 +20,8 @@ crates:
     F0: null
 - name: C
   features:
-    F0: null
     G0: null
+    F0: null
 cases:
 - cmd: format features
   stdout: |
@@ -46,7 +46,7 @@ cases:
       C
     Formatted 3 crates.
   code: 0
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 658365..dbba3e 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -14,2 +14,2 @@ G0 = [\n-\"C/G0\",\n-\"B/G0\",\n+\t\"B/G0\",\n+\t\"C/G0\",\n@@ -18,2 +18,2 @@ F0 = [\n-\"B/F0\",\n-\"C/F0\",\n+\t\"B/F0\",\n+\t\"C/F0\",\ndiff --git B/Cargo.toml B/Cargo.toml\nindex 321f5b..6ffa54 100644"#, r#"[features]--- B/Cargo.toml+++ B/Cargo.toml\n@@ -11,4 +11,2 @@ edition = \"2021\"\n-G0 = [\n-]\n-F0 = [\n-]\n+G0 = []\n+F0 = []\ndiff --git C/Cargo.toml C/Cargo.toml\nindex 8801ab..24f9b5 100644\n--- C/Cargo.toml\n+++ C/Cargo.toml\n@@ -11,4 +11,2 @@ edition = \"2021\"\n-F0 = [\n-]\n-G0 = [\n-]\n+F0 = []\n+G0 = []\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 3770f3..32d7a0 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -14,2 +14,2 @@ F0 = [\n-\"B/F0\",\n-\"C/F0\",\n+\t\"B/F0\",\n+\t\"C/F0\",\n@@ -18,2 +18,2 @@ G0 = [\n-\"C/G0\",\n-\"B/G0\",\n+\t\"B/G0\",\n+\t\"C/G0\",\ndiff --git B/Cargo.toml B/Cargo.toml\nindex 756a61..f08c09 100644\n--- B/Cargo.toml\n+++ B/Cargo.toml\n@@ -11,4 +11,2 @@ edition = \"2021\"\n-F0 = [\n-]\n-G0 = [\n-]\n+F0 = []\n+G0 = []\ndiff --git C/Cargo.toml C/Cargo.toml\nindex 8801ab..24f9b5 100644\n--- C/Cargo.toml\n+++ C/Cargo.toml\n@@ -11,4 +11,2 @@ edition = \"2021\"\n-F0 = [\n-]\n-G0 = [\n-]\n+F0 = []\n+G0 = []\n"
 - cmd: format features --mode-per-feature "F0:canonicalize"
   stdout: |
     Found 3 crates with unformatted features:

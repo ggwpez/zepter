@@ -235,6 +235,91 @@ impl AutoFixer {
 		Ok(())
 	}
 
+	pub fn canonicalize_all_features(&mut self) -> Result<(), String> {
+		let doc: &mut Document = self.doc.as_mut().unwrap();
+		if !doc.contains_table("features") {
+			return Ok(())
+		}
+		let features = doc["features"].as_table_mut().unwrap();
+
+		for (_, feature) in features.iter_mut() {
+			let feature = feature.as_array_mut().unwrap();
+			let mut values = feature.iter().cloned().collect::<Vec<_>>();
+
+			for value in values.iter_mut() {
+				let mut prefix = value
+					.decor()
+					.prefix()
+					.map_or(String::new(), |p| p.as_str().unwrap().to_string());
+				let mut suffix = value
+					.decor()
+					.suffix()
+					.map_or(String::new(), |s| s.as_str().unwrap().to_string());
+				suffix = Self::canonicalize_pre_and_suffix(suffix);
+				suffix = if suffix.trim().is_empty() {
+					"".into()
+				} else {
+					format!("\n\t{}\n\t", suffix.trim())
+				};
+
+				prefix = Self::canonicalize_pre_and_suffix(prefix);
+				prefix = prefix.trim().into();
+				prefix =
+					if prefix.is_empty() { "\n\t".into() } else { format!("\n\t{}\n\t", prefix) };
+				value.decor_mut().set_suffix(suffix);
+				value.decor_mut().set_prefix(prefix);
+			}
+
+			// Last one gets a newline
+			if let Some(value) = values.last_mut() {
+				let mut suffix = value
+					.decor()
+					.suffix()
+					.map_or(String::new(), |s| s.as_str().unwrap().to_string());
+
+				suffix = Self::canonicalize_pre_and_suffix(suffix);
+				suffix = suffix.trim().into();
+				suffix =
+					if suffix.is_empty() { ",\n".into() } else { format!(",\n\t{}\n", suffix) };
+				value.decor_mut().set_suffix(suffix);
+			}
+
+			feature.clear();
+			for value in values.into_iter() {
+				feature.push_formatted(value.clone());
+			}
+			feature.set_trailing_comma(false);
+			feature.set_trailing(feature.trailing().as_str().unwrap().to_string().trim());
+			feature.decor_mut().clear();
+		}
+
+		Ok(())
+	}
+
+	fn canonicalize_pre_and_suffix(fix: String) -> String {
+		let lines = fix.lines().collect::<Vec<_>>();
+		let mut new_lines = Vec::new();
+
+		for i in 0..lines.len() {
+			if i == 0 {
+				new_lines.push(lines[i].trim_end().into());
+			} else if i == lines.len() - 1 {
+				new_lines.push(lines[i].trim_start().into());
+			} else {
+				new_lines.push(format!("\t{}", lines[i].trim()));
+			}
+		}
+
+		new_lines.join("\n")
+	}
+
+	pub fn format_all_features(&mut self) -> Result<(), String> {
+		self.sort_all_features()?;
+		self.canonicalize_all_features()?;
+
+		Ok(())
+	}
+
 	/// Add something to a feature. Creates that feature if it does not exist.
 	pub fn add_to_feature(&mut self, feature: &str, v: &str) -> Result<(), String> {
 		let doc: &mut Document = self.doc.as_mut().unwrap();

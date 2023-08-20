@@ -5,10 +5,9 @@
 
 use crate::{
 	autofix::*,
-	cmd::{resolve_dep, RenamedPackage},
+	cmd::{parse_key_val, resolve_dep, RenamedPackage},
 	grammar::*,
 	log,
-	cmd::parse_key_val,
 	prelude::*,
 	CrateId,
 };

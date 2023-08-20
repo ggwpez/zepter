@@ -4,7 +4,7 @@
 //! Format features in the crate manifest.
 
 use crate::{autofix::*, cmd::parse_key_val, grammar::*, log};
-use std::{fs::canonicalize, path::PathBuf, str::FromStr};
+use std::{collections::BTreeMap as Map, fs::canonicalize, path::PathBuf, str::FromStr};
 
 use super::GlobalArgs;
 
@@ -36,22 +36,36 @@ pub struct FormatFeaturesCmd {
 	#[clap(long)]
 	fix: bool,
 
+	/// Set the formatting mode for a specific feature.
+	///
+	/// Can be specified multiple times. Example:
+	/// `--mode-per-feature default:sort,default:canonicalize`
 	#[clap(long, value_name = "FEATURE:MODE", value_parser = parse_key_val::<String, Mode>, value_delimiter = ',', verbatim_doc_comment)]
-	modes_per_feature: Option<Vec<(String, Mode)>>,
+	mode_per_feature: Option<Vec<(String, Mode)>>,
 
-	/// Also print the offending features per crate.
-	#[clap(long)]
-	print_features: bool,
+	/// Ignore a specific feature across all crates.
+	///
+	/// This is equivalent to `--mode-per-feature FEATURE:none`.
+	#[clap(long, value_name = "FEATURE", value_delimiter = ',', verbatim_doc_comment)]
+	ignore_feature: Vec<String>,
 
 	/// Also print the paths of the offending Cargo.toml files.
 	#[clap(long)]
 	print_paths: bool,
 }
 
+/// How to format the entries of a feature.
 #[derive(Debug, Clone, PartialEq, clap::ValueEnum)]
 pub enum Mode {
-	Canonicalize,
+	/// Do nothing. This supersedes all other modes.
+	None,
+	/// Alphabetically sort the feature entries.
 	Sort,
+	/// Canonicalize the formatting of the feature entries.
+	///
+	/// This means that the order is not changed but that white spaces and newlines are normalized.
+	/// Comments are kept but also normalized.
+	Canonicalize,
 }
 
 impl FromStr for Mode {
@@ -61,6 +75,7 @@ impl FromStr for Mode {
 		match s.to_ascii_lowercase().as_str() {
 			"canonicalize" => Ok(Self::Canonicalize),
 			"sort" => Ok(Self::Sort),
+			"none" => Ok(Self::None),
 			_ => panic!("Invalid Mode: {s}. Expected 'canonicalize' or 'sort'"), // FIXME
 		}
 	}
@@ -76,23 +91,20 @@ impl FormatCmd {
 
 impl FormatFeaturesCmd {
 	pub fn run(&self, global: &GlobalArgs) {
+		let modes = self.parse_mode_per_feature();
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
 		// modifications are only allowed in this dir:
 		let allowed_dir = canonicalize(&self.cargo_args.manifest_path).unwrap();
 		let allowed_dir = allowed_dir.parent().unwrap();
 		let mut offenders = Vec::new();
 
-		log::info!(
-			"Checking {} crate{}",
-			meta.packages.len(),
-			plural(meta.packages.len()),
-		);
+		log::info!("Checking {} crate{}", meta.packages.len(), plural(meta.packages.len()),);
 
 		for pkg in meta.packages.iter() {
 			let path = canonicalize(pkg.manifest_path.clone().into_std_path_buf()).unwrap();
 
 			let mut fixer = AutoFixer::from_manifest(&path).unwrap();
-			fixer.format_all_features().unwrap();
+			fixer.format_features(&modes).unwrap();
 			if fixer.modified() {
 				offenders.push((path, &pkg.name, fixer));
 			}
@@ -108,7 +120,7 @@ impl FormatFeaturesCmd {
 
 		let mut fixed = 0;
 		println!(
-			"Found {} crate{} with unsorted features:",
+			"Found {} crate{} with unformatted features:",
 			global.red(&offenders.len().to_string()),
 			plural(offenders.len())
 		);
@@ -138,11 +150,7 @@ impl FormatFeaturesCmd {
 		}
 
 		if self.fix {
-			println!(
-				"Formatted {} crate{} unformatted",
-				global.green(&fixed.to_string()),
-				plural(fixed)
-			);
+			println!("Formatted {} crate{}.", global.green(&fixed.to_string()), plural(fixed));
 
 			if fixed != offenders.len() {
 				log::error!(
@@ -157,5 +165,21 @@ impl FormatFeaturesCmd {
 		}
 
 		std::process::exit(1);
+	}
+
+	fn parse_mode_per_feature(&self) -> Map<String, Vec<Mode>> {
+		let mut map = Map::<String, Vec<Mode>>::new();
+		if let Some(modes) = &self.mode_per_feature {
+			for (feature, mode) in modes.iter() {
+				map.entry(feature.clone()).or_default().push(mode.clone());
+			}
+		}
+
+		// Respect the ignore_feature flag:
+		for feature in self.ignore_feature.iter() {
+			map.insert(feature.clone(), vec![Mode::None]);
+		}
+
+		map
 	}
 }

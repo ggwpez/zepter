@@ -3,8 +3,11 @@
 
 //! Automatically fix problems by modifying `Cargo.toml` files.
 
-use crate::log;
-use std::path::{Path, PathBuf};
+use crate::{cmd::fmt::Mode, log};
+use std::{
+	collections::BTreeMap as Map,
+	path::{Path, PathBuf},
+};
 use toml_edit::{table, value, Array, Document, Value};
 
 #[derive(Debug, clap::Parser)]
@@ -75,84 +78,97 @@ impl AutoFixer {
 		true
 	}
 
-	pub fn sort_all_features(&mut self) -> Result<(), String> {
+	pub fn sort_feature(&mut self, feature: &str) {
 		let doc: &mut Document = self.doc.as_mut().unwrap();
 		if !doc.contains_table("features") {
-			return Ok(())
+			return
 		}
 		let features = doc["features"].as_table_mut().unwrap();
+		if !features.contains_key(feature) {
+			return
+		}
+		let feature = features[feature].as_array_mut().unwrap();
 
-		for (_, feature) in features.iter_mut() {
-			let feature = feature.as_array_mut().unwrap();
-			let mut values = feature.iter().cloned().collect::<Vec<_>>();
-			// DOGSHIT CODE
-			values.sort_by(|a, b| a.as_str().unwrap().cmp(b.as_str().unwrap()));
-			feature.clear();
-			for value in values.into_iter() {
-				feature.push_formatted(value.clone());
-			}
+		let mut values = feature.iter().cloned().collect::<Vec<_>>();
+		// DOGSHIT CODE
+		values.sort_by(|a, b| a.as_str().unwrap().cmp(b.as_str().unwrap()));
+		feature.clear();
+		for value in values.into_iter() {
+			feature.push_formatted(value.clone());
+		}
+	}
+
+	pub fn sort_all_features(&mut self) -> Result<(), String> {
+		for feature in self.get_all_features() {
+			self.sort_feature(&feature);
 		}
 
 		Ok(())
 	}
 
 	pub fn canonicalize_all_features(&mut self) -> Result<(), String> {
+		for feature in self.get_all_features() {
+			self.canonicalize_feature(&feature)?;
+		}
+
+		Ok(())
+	}
+
+	pub fn canonicalize_feature(&mut self, feature: &str) -> Result<(), String> {
 		let doc: &mut Document = self.doc.as_mut().unwrap();
 		if !doc.contains_table("features") {
 			return Ok(())
 		}
 		let features = doc["features"].as_table_mut().unwrap();
-
-		for (_, feature) in features.iter_mut() {
-			let feature = feature.as_array_mut().unwrap();
-			let mut values = feature.iter().cloned().collect::<Vec<_>>();
-
-			for value in values.iter_mut() {
-				let mut prefix = value
-					.decor()
-					.prefix()
-					.map_or(String::new(), |p| p.as_str().unwrap().to_string());
-				let mut suffix = value
-					.decor()
-					.suffix()
-					.map_or(String::new(), |s| s.as_str().unwrap().to_string());
-				suffix = Self::canonicalize_pre_and_suffix(suffix);
-				suffix = if suffix.trim().is_empty() {
-					"".into()
-				} else {
-					format!("\n\t{}\n\t", suffix.trim())
-				};
-
-				prefix = Self::canonicalize_pre_and_suffix(prefix);
-				prefix = prefix.trim().into();
-				prefix =
-					if prefix.is_empty() { "\n\t".into() } else { format!("\n\t{}\n\t", prefix) };
-				value.decor_mut().set_suffix(suffix);
-				value.decor_mut().set_prefix(prefix);
-			}
-
-			// Last one gets a newline
-			if let Some(value) = values.last_mut() {
-				let mut suffix = value
-					.decor()
-					.suffix()
-					.map_or(String::new(), |s| s.as_str().unwrap().to_string());
-
-				suffix = Self::canonicalize_pre_and_suffix(suffix);
-				suffix = suffix.trim().into();
-				suffix =
-					if suffix.is_empty() { ",\n".into() } else { format!(",\n\t{}\n", suffix) };
-				value.decor_mut().set_suffix(suffix);
-			}
-
-			feature.clear();
-			for value in values.into_iter() {
-				feature.push_formatted(value.clone());
-			}
-			feature.set_trailing_comma(false);
-			feature.set_trailing(feature.trailing().as_str().unwrap().to_string().trim());
-			feature.decor_mut().clear();
+		if !features.contains_key(feature) {
+			return Ok(())
 		}
+		let feature = features[feature].as_array_mut().unwrap();
+		let mut values = feature.iter().cloned().collect::<Vec<_>>();
+
+		for value in values.iter_mut() {
+			let mut prefix = value
+				.decor()
+				.prefix()
+				.map_or(String::new(), |p| p.as_str().unwrap().to_string());
+			let mut suffix = value
+				.decor()
+				.suffix()
+				.map_or(String::new(), |s| s.as_str().unwrap().to_string());
+			suffix = Self::canonicalize_pre_and_suffix(suffix);
+			suffix = if suffix.trim().is_empty() {
+				"".into()
+			} else {
+				format!("\n\t{}\n\t", suffix.trim())
+			};
+
+			prefix = Self::canonicalize_pre_and_suffix(prefix);
+			prefix = prefix.trim().into();
+			prefix = if prefix.is_empty() { "\n\t".into() } else { format!("\n\t{}\n\t", prefix) };
+			value.decor_mut().set_suffix(suffix);
+			value.decor_mut().set_prefix(prefix);
+		}
+
+		// Last one gets a newline
+		if let Some(value) = values.last_mut() {
+			let mut suffix = value
+				.decor()
+				.suffix()
+				.map_or(String::new(), |s| s.as_str().unwrap().to_string());
+
+			suffix = Self::canonicalize_pre_and_suffix(suffix);
+			suffix = suffix.trim().into();
+			suffix = if suffix.is_empty() { ",\n".into() } else { format!(",\n\t{}\n", suffix) };
+			value.decor_mut().set_suffix(suffix);
+		}
+
+		feature.clear();
+		for value in values.into_iter() {
+			feature.push_formatted(value.clone());
+		}
+		feature.set_trailing_comma(false);
+		feature.set_trailing(feature.trailing().as_str().unwrap().to_string().trim());
+		feature.decor_mut().clear();
 
 		Ok(())
 	}
@@ -177,11 +193,11 @@ impl AutoFixer {
 	fn get_all_features(&self) -> Vec<String> {
 		let mut found = Vec::new();
 
-		let doc: &mut Document = self.doc.as_mut().unwrap();
+		let doc: &Document = self.doc.as_ref().unwrap();
 		if !doc.contains_table("features") {
 			return found
 		}
-		let features = doc["features"].as_table_mut().unwrap();
+		let features = doc["features"].as_table().unwrap();
 
 		for (feature, _) in features.iter() {
 			found.push(feature.into());
@@ -190,15 +206,29 @@ impl AutoFixer {
 		found
 	}
 
-	pub fn format_features(&mut self, modes_per_feature: Vec<(String, Mode)>) -> Result<(), String> {
-		if modes_per_feature.is_empty() {
-			self.sort_all_features()?;
-			self.canonicalize_all_features()?;
-		} else {
-			let features = self.get_all_features();
+	pub fn format_features(
+		&mut self,
+		mode_per_feature: &Map<String, Vec<Mode>>,
+	) -> Result<(), String> {
+		let features = self.get_all_features();
 
-			for feature in features.iter() {
-				if 
+		for feature in features.iter() {
+			match mode_per_feature.get(feature) {
+				Some(modes) => {
+					if modes.contains(&Mode::None) {
+						continue
+					}
+					if modes.contains(&Mode::Sort) {
+						self.sort_feature(feature);
+					}
+					if modes.contains(&Mode::Canonicalize) {
+						self.canonicalize_feature(feature)?;
+					}
+				},
+				None => {
+					self.sort_feature(feature);
+					self.canonicalize_feature(feature)?;
+				},
 			}
 		}
 
@@ -303,21 +333,22 @@ impl ToString for AutoFixer {
 mod tests {
 	use std::vec;
 
-	use super::*;
+	use super::{
+		Mode::{Canonicalize, Sort},
+		*,
+	};
 	use rstest::*;
 
 	#[rstest]
 	// Keeps comments
 	#[case(
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = [
 	# TOML comments are preserved
 	"sp-runtime/runtime-benchmarks"
 ]
 "#,
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = [
 	# TOML comments are preserved
 	"sp-runtime/runtime-benchmarks",
@@ -330,15 +361,13 @@ std = [
 	)]
 	// Keeps newlines
 	#[case(
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = [
 	
 	"sp-runtime/runtime-benchmarks"
 ]
 "#,
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = [
 	
 	"sp-runtime/runtime-benchmarks",
@@ -351,8 +380,7 @@ std = [
 	)]
 	// Keeps newlines 2
 	#[case(
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = [
 	"pallet-balances/runtime-benchmarks",
 	
@@ -360,8 +388,7 @@ runtime-benchmarks = [
 	"sp-runtime/runtime-benchmarks"
 ]
 "#,
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = [
 	"pallet-balances/runtime-benchmarks",
 	
@@ -412,12 +439,10 @@ std = [
 "#
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = ["sp-runtime/runtime-benchmarks"]
 "#,
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = [
 	"sp-runtime/runtime-benchmarks",
 	"frame-support/runtime-benchmarks"
@@ -428,14 +453,12 @@ std = [
 "#
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = [
 	"sp-runtime/runtime-benchmarks"
 ]
 "#,
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = [
 	"sp-runtime/runtime-benchmarks",
 	"frame-support/runtime-benchmarks"
@@ -446,14 +469,12 @@ std = [
 "#
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = [
 	"sp-runtime/runtime-benchmarks",
 ]
 "#,
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = [
 	"sp-runtime/runtime-benchmarks",
 	"frame-support/runtime-benchmarks"
@@ -464,12 +485,10 @@ std = [
 "#
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = []
 "#,
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = [
 	"frame-support/runtime-benchmarks"
 ]
@@ -502,12 +521,10 @@ std = [
 "#
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = ["sp-runtime/runtime-benchmarks",   "pallet-balances/runtime-benchmarks"]
 "#,
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = [
 	"sp-runtime/runtime-benchmarks",
 	"pallet-balances/runtime-benchmarks",
@@ -529,14 +546,12 @@ std = [
 
 	#[rstest]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = [
 	# Inside empty works
 ]
 "#,
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = [
 	"frame-support/runtime-benchmarks"
 	# Inside empty works
@@ -544,15 +559,13 @@ runtime-benchmarks = [
 "#
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = [
 	# TOML comments are preserved
 	"sp-runtime/runtime-benchmarks"
 ]
 "#,
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = [
 	# TOML comments are preserved
 	"sp-runtime/runtime-benchmarks",
@@ -561,13 +574,11 @@ runtime-benchmarks = [
 "#
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 # TOML comments are preserved
 runtime-benchmarks = []
 "#,
-		r#"
-[features]
+		r#"[features]
 # TOML comments are preserved
 runtime-benchmarks = [
 	"frame-support/runtime-benchmarks"
@@ -616,15 +627,13 @@ runtime-benchmarks = [
 "#
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = [
 "B/F0",
 "D/F0",
 ]
 "#,
-		r#"
-[features]
+		r#"[features]
 runtime-benchmarks = [
 	"B/F0",
 	"D/F0",
@@ -668,8 +677,7 @@ std = [
 	#[case(r#""#, true)]
 	#[case(r#"[features]"#, true)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 F0 = [
 	"A/F0",
 	"B/F0",
@@ -678,8 +686,7 @@ F0 = [
 		true
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 F0 = [
 "B/F0",
 "A/F0",
@@ -687,8 +694,7 @@ F0 = [
 		false
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 G0 = [
 	"B/F0",
 	"A/F0",
@@ -696,8 +702,7 @@ G0 = [
 		true
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 G0 = [
 	"B/F0",
 	"A/F0",
@@ -710,8 +715,7 @@ F0 = [
 		true
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 G0 = [
 	"B/F0",
 	"A/F0",
@@ -730,27 +734,23 @@ F0 = [
 	#[rstest]
 	#[case(r#""#, vec![])]
 	#[case(r#"[features]"#, vec![])]
-	#[case(r#"
-[features]
+	#[case(r#"[features]
 F0 = [
 	"A/F0",
 	"B/F0",
 	"C/F0",
 ]"#, vec![])]
-	#[case(r#"
-[features]
+	#[case(r#"[features]
 F0 = [
 "B/F0",
 "A/F0",
 ]"#, vec!["F0"])]
-	#[case(r#"
-[features]
+	#[case(r#"[features]
 G0 = [
 	"B/F0",
 	"A/F0",
 ]"#, vec!["G0"])]
-	#[case(r#"
-[features]
+	#[case(r#"[features]
 G0 = [
 	"B/F0",
 	"A/F0",
@@ -760,8 +760,7 @@ F0 = [
 	"B/F0",
 	"C/F0",
 ]"#, vec!["G0"])]
-	#[case(r#"
-[features]
+	#[case(r#"[features]
 G0 = [
 	"B/F0",
 	"A/F0",
@@ -786,8 +785,7 @@ F0 = [
 		)
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 F0 = [
 	"A/F0",
 	"C/F0",
@@ -795,8 +793,7 @@ F0 = [
 ]
 "#,
 		Some(
-			r#"
-[features]
+			r#"[features]
 F0 = [
 	"A/F0",
 	"B/F0",
@@ -806,8 +803,7 @@ F0 = [
 		)
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 F0 = [
 	"A/F0",
 
@@ -822,8 +818,7 @@ G0 = [
 ]
 "#,
 		Some(
-			r#"
-[features]
+			r#"[features]
 F0 = [
 	"A/F0",
 	"B/F0",
@@ -856,13 +851,11 @@ G0 = [
 		)
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 F0 = ["A/F0"]
 "#,
 		Some(
-			r#"
-[features]
+			r#"[features]
 F0 = [
 	"A/F0",
 ]
@@ -870,14 +863,12 @@ F0 = [
 		)
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 F0 = [
 "A/F0"]
 "#,
 		Some(
-			r#"
-[features]
+			r#"[features]
 F0 = [
 	"A/F0",
 ]
@@ -885,15 +876,13 @@ F0 = [
 		)
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 F0 = [
 "A/F0"
 ]
 "#,
 		Some(
-			r#"
-[features]
+			r#"[features]
 F0 = [
 	"A/F0",
 ]
@@ -901,13 +890,11 @@ F0 = [
 		)
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 F0 = [	"A/F0"	]
 "#,
 		Some(
-			r#"
-[features]
+			r#"[features]
 F0 = [
 	"A/F0",
 ]
@@ -915,13 +902,11 @@ F0 = [
 		)
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 F0 = [	"A/F0", "B/F0"	]
 "#,
 		Some(
-			r#"
-[features]
+			r#"[features]
 F0 = [
 	"A/F0",
 	"B/F0",
@@ -930,8 +915,7 @@ F0 = [
 		)
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 F0 = [
 		  
   	
@@ -943,8 +927,7 @@ F0 = [
 ]
 "#,
 		Some(
-			r#"
-[features]
+			r#"[features]
 F0 = [
 	"A/F0",
 	"B/F0",
@@ -953,14 +936,12 @@ F0 = [
 		)
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 F0 = [	"A/F0",
 "B/F0"	]
 "#,
 		Some(
-			r#"
-[features]
+			r#"[features]
 F0 = [
 	"A/F0",
 	"B/F0",
@@ -969,15 +950,13 @@ F0 = [
 		)
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 F0 = [
     "A/F0",
 	"B/F0"	]
 "#,
 		Some(
-			r#"
-[features]
+			r#"[features]
 F0 = [
 	"A/F0",
 	"B/F0",
@@ -986,8 +965,7 @@ F0 = [
 		)
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 F0 = ["A/F0"
 	,
 	"B/F0"
@@ -996,8 +974,7 @@ F0 = ["A/F0"
 		, ]
 "#,
 		Some(
-			r#"
-[features]
+			r#"[features]
 F0 = [
 	"A/F0",
 	"B/F0",
@@ -1007,8 +984,7 @@ F0 = [
 		)
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 F0 = [
     "A/F0"
   # 1
@@ -1019,8 +995,7 @@ F0 = [
 ]
 "#,
 		Some(
-			r#"
-[features]
+			r#"[features]
 F0 = [
 	"A/F0"
 	# 1
@@ -1032,8 +1007,7 @@ F0 = [
 		)
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 F0 = [
 	
 	    # 1    
@@ -1042,8 +1016,7 @@ F0 = [
 	"B/F0"	]
 "#,
 		Some(
-			r#"
-[features]
+			r#"[features]
 F0 = [
 	# 1
 	"A/F0",
@@ -1053,8 +1026,7 @@ F0 = [
 		)
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 F0 = [
 	
 	    # 1   
@@ -1070,8 +1042,7 @@ F0 = [
 		]
 "#,
 		Some(
-			r#"
-[features]
+			r#"[features]
 F0 = [
 	# 1
 	"A/F0",
@@ -1083,8 +1054,7 @@ F0 = [
 		)
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 F0 = [
 	
 	# 1
@@ -1102,8 +1072,7 @@ F0 = [
 		]
 "#,
 		Some(
-			r#"
-[features]
+			r#"[features]
 F0 = [
 	# 1
 	# 2
@@ -1117,8 +1086,7 @@ F0 = [
 		)
 	)]
 	#[case(
-		r#"
-[features]
+		r#"[features]
 std = [
         "pallet-election-provider-support-benchmarking?/std",
         "codec/std",
@@ -1144,8 +1112,7 @@ std = [
         "sp-tracing/std"
 ]"#,
 		Some(
-			r#"
-[features]
+			r#"[features]
 std = [
 	"pallet-election-provider-support-benchmarking?/std",
 	"codec/std",
@@ -1172,13 +1139,11 @@ std = [
 	)]
 	// FIXME: Spaces before the = are not removed.
 	#[case(
-		r#"
-[features]
+		r#"[features]
 F0 =  	[  "A/F0"	, 	"B/F0"	]
 "#,
 		Some(
-			r#"
-[features]
+			r#"[features]
 F0 = [
 	"A/F0",
 	"B/F0",
@@ -1189,6 +1154,87 @@ F0 = [
 	fn canonicalize_all_features_works(#[case] input: &str, #[case] modify: Option<&str>) {
 		let mut fixer = AutoFixer::from_raw(input).unwrap();
 		fixer.canonicalize_all_features().unwrap();
+		pretty_assertions::assert_str_eq!(fixer.to_string(), modify.unwrap_or(input));
+	}
+
+	#[rstest]
+	#[case(vec![], r#""#, None)]
+	#[case(vec![], r#"
+[features]
+default = ["std"]
+std = ["B", "A"]
+"#, Some(r#"
+[features]
+default = [
+	"std",
+]
+std = [
+	"A",
+	"B",
+]
+"#))]
+	#[case(vec![("default", vec![Sort, Canonicalize])], r#"
+[features]
+default = ["std"]
+std = ["B", "A"]
+"#, Some(r#"
+[features]
+default = [
+	"std",
+]
+std = [
+	"A",
+	"B",
+]
+"#))]
+	#[case(vec![("default", vec![Sort])], r#"
+[features]
+default = ["std"]
+std = ["B", "A"]
+"#, Some(r#"
+[features]
+default = ["std"]
+std = [
+	"A",
+	"B",
+]
+"#))]
+	#[case(vec![("default", vec![Canonicalize])], r#"
+[features]
+default = ["std"]
+std = ["B", "A"]
+"#, Some(r#"
+[features]
+default = [
+	"std",
+]
+std = [
+	"A",
+	"B",
+]
+"#))]
+	#[case(vec![("default", vec![Sort])], r#"
+[features]
+default = ["std", "A"]
+std = ["B", "A"]
+"#,
+// TODO: Now it looks stupid...
+Some(r#"
+[features]
+default = [ "A","std"]
+std = [
+	"A",
+	"B",
+]
+"#))]
+	fn format_some_features_with_modes_works(
+		#[case] modes: Vec<(&str, Vec<Mode>)>,
+		#[case] input: &str,
+		#[case] modify: Option<&str>,
+	) {
+		let mut fixer = AutoFixer::from_raw(input).unwrap();
+		let modes = modes.into_iter().map(|(f, m)| (f.into(), m)).collect::<Map<_, _>>();
+		fixer.format_features(&modes).unwrap();
 		pretty_assertions::assert_str_eq!(fixer.to_string(), modify.unwrap_or(input));
 	}
 }

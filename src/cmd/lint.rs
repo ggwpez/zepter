@@ -501,8 +501,7 @@ impl PropagateFeatureCmd {
 		}
 		print!("{}.", error_stats(errors, warnings, fixes, self.fixer_args.enable, global));
 		if errors > fixes {
-			println!(" Exit code 1.");
-			std::process::exit(1);
+			std::process::exit(global.error_code());
 		} else {
 			println!();
 		}

@@ -164,7 +164,7 @@ impl FormatFeaturesCmd {
 			println!("Run again with --fix to format them.");
 		}
 
-		std::process::exit(1);
+		std::process::exit(global.error_code())
 	}
 
 	fn parse_mode_per_feature(&self) -> Map<String, Vec<Mode>> {

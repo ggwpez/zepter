@@ -40,6 +40,13 @@ pub struct GlobalArgs {
 	/// Use ANSI terminal colors.
 	#[clap(long, global = true, default_value_t = false)]
 	color: bool,
+
+	/// Try to exit with code zero if the intended check failed.
+	///
+	/// Will still return 1 in case of an actual error (eg. failed to find some file) or a panic
+	/// (aka software bug).
+	#[clap(long, global = true, verbatim_doc_comment)]
+	exit_code_zero: bool,
 }
 
 /// Sub-commands of the [Root](Command) command.
@@ -69,6 +76,14 @@ impl GlobalArgs {
 			::log::set_max_level(::log::LevelFilter::Error);
 		} else {
 			::log::set_max_level(self.level.to_level_filter());
+		}
+	}
+
+	pub fn error_code(&self) -> i32 {
+		if self.exit_code_zero {
+			0
+		} else {
+			1
 		}
 	}
 

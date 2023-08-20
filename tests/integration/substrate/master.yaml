@@ -3,7 +3,7 @@ repo:
   ref: 2cc2e05e78b1e9109669dc959ac7656eb46b3492
 cases:
 - cmd: lint propagate-feature --feature runtime-benchmarks
-  stdout: |
+  stdout: |-
     crate 'binary-merkle-tree'
       feature 'runtime-benchmarks'
         is required by 1 dependency:
@@ -1080,10 +1080,10 @@ cases:
         is required by 2 dependencies:
           sc-service
           sp-runtime
-    Found 494 issues (run with --fix to fix). Exit code 1.
+    Found 494 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature --feature runtime-benchmarks --workspace
-  stdout: |
+  stdout: |-
     crate 'binary-merkle-tree'
       feature 'runtime-benchmarks'
         is required by 1 dependency:
@@ -2160,10 +2160,10 @@ cases:
         is required by 2 dependencies:
           sc-service
           sp-runtime
-    Found 494 issues (run with --fix to fix). Exit code 1.
+    Found 494 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature --feature std
-  stdout: |
+  stdout: |-
     crate 'Inflector'
       feature 'std'
         is required by 1 dependency:
@@ -6147,10 +6147,10 @@ cases:
       feature 'std'
         must propagate to:
           libc
-    Found 2150 issues (run with --fix to fix). Exit code 1.
+    Found 2150 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature --feature std --workspace
-  stdout: |
+  stdout: |-
     crate 'binary-merkle-tree'
       feature 'std'
         must propagate to:
@@ -7430,10 +7430,10 @@ cases:
           sp-transaction-storage-proof
           sp-version
           sp-weights
-    Found 733 issues (run with --fix to fix). Exit code 1.
+    Found 733 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature --feature try-runtime
-  stdout: |
+  stdout: |-
     crate 'binary-merkle-tree'
       feature 'try-runtime'
         is required by 1 dependency:
@@ -8535,10 +8535,10 @@ cases:
       feature 'try-runtime'
         must propagate to:
           sp-runtime
-    Found 504 issues (run with --fix to fix). Exit code 1.
+    Found 504 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature --feature try-runtime --workspace
-  stdout: |
+  stdout: |-
     crate 'binary-merkle-tree'
       feature 'try-runtime'
         is required by 1 dependency:
@@ -9640,5 +9640,5 @@ cases:
       feature 'try-runtime'
         must propagate to:
           sp-runtime
-    Found 504 issues (run with --fix to fix). Exit code 1.
+    Found 504 issues (run with --fix to fix).
   code: 1

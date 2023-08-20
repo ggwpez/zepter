@@ -1,5 +1,7 @@
 name: Integration test master
 
+# This tests that Zepter wont panic on Substrate, Polkadot or Cumulus.
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -34,6 +36,8 @@ jobs:
     - name: Zepter check ${{ matrix.repo }} master
       run: |
         ls
-        zepter lint propagate-feature --feature try-runtime --left-side-feature-missing=ignore --workspace --fix --feature-enables-dep="try-runtime:frame-try-runtime" || true
-        zepter lint propagate-feature --feature runtime-benchmarks --left-side-feature-missing=ignore --workspace --feature-enables-dep="runtime-benchmarks:frame-benchmarking" || true
-        zepter lint propagate-feature --feature std --left-side-feature-missing=ignore --workspace || true
+        zepter lint propagate-feature --feature try-runtime --left-side-feature-missing=ignore --workspace --fix --feature-enables-dep="try-runtime:frame-try-runtime" --exit-code-zero
+        zepter lint propagate-feature --feature runtime-benchmarks --left-side-feature-missing=ignore --workspace --feature-enables-dep="runtime-benchmarks:frame-benchmarking" --exit-code-zero
+        zepter lint propagate-feature --feature std --left-side-feature-missing=ignore --workspace --exit-code-zero
+
+        zepter format features --exit-code-zero

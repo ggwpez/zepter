@@ -3,5 +3,5 @@ crates:
 cases:
 - cmd: format features
   stdout:
-- cmd: format features --color --fix --print-paths --print-features --quiet --log trace
-  stdout:
+- cmd: format features --color --fix --print-paths --quiet --log trace
+- cmd: format features --color --fix --print-paths --quiet --log trace --mode-per-feature "F:sort" --mode-per-feature "G:none" --mode-per-feature "H:canonicalize" --ignore-feature G,H --ignore-feature Z

@@ -21,7 +21,7 @@ cases:
   stdout: |
     Found no issues.
 - cmd: lint propagate-feature --feature F0
-  stdout: |
+  stdout: |-
     crate 'A'
       feature 'F0'
         must propagate to:
@@ -34,31 +34,31 @@ cases:
       feature 'F0'
         must propagate to:
           D
-    Found 3 issues (run with --fix to fix). Exit code 1.
+    Found 3 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p A --feature F0
-  stdout: |
+  stdout: |-
     crate 'A'
       feature 'F0'
         must propagate to:
           C
-    Found 1 issue (run with --fix to fix). Exit code 1.
+    Found 1 issue (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p B --feature F0
-  stdout: |
+  stdout: |-
     crate 'B'
       feature 'F0'
         is required by 1 dependency:
           D
-    Found 1 issue (run with --fix to fix). Exit code 1.
+    Found 1 issue (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p C --feature F0
-  stdout: |
+  stdout: |-
     crate 'C'
       feature 'F0'
         must propagate to:
           D
-    Found 1 issue (run with --fix to fix). Exit code 1.
+    Found 1 issue (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p D --feature F0
   stdout: |
@@ -67,7 +67,7 @@ cases:
   stdout: |
     Found no issues.
 - cmd: lint propagate-feature --feature F0 --workspace
-  stdout: |
+  stdout: |-
     crate 'A'
       feature 'F0'
         must propagate to:
@@ -80,31 +80,31 @@ cases:
       feature 'F0'
         must propagate to:
           D
-    Found 3 issues (run with --fix to fix). Exit code 1.
+    Found 3 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p A --feature F0 --workspace
-  stdout: |
+  stdout: |-
     crate 'A'
       feature 'F0'
         must propagate to:
           C
-    Found 1 issue (run with --fix to fix). Exit code 1.
+    Found 1 issue (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p B --feature F0 --workspace
-  stdout: |
+  stdout: |-
     crate 'B'
       feature 'F0'
         is required by 1 dependency:
           D
-    Found 1 issue (run with --fix to fix). Exit code 1.
+    Found 1 issue (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p C --feature F0 --workspace
-  stdout: |
+  stdout: |-
     crate 'C'
       feature 'F0'
         must propagate to:
           D
-    Found 1 issue (run with --fix to fix). Exit code 1.
+    Found 1 issue (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p D --feature F0 --workspace
   stdout: |

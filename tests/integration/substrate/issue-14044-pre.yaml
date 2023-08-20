@@ -3,12 +3,12 @@ repo:
   ref: e94cb0dafd4f30ff29512c1c00ec513ada7d2b5d
 cases:
 - cmd: lint propagate-feature -p frame-support --feature runtime-benchmarks
-  stdout: |
+  stdout: |-
     crate 'frame-support'
       feature 'runtime-benchmarks'
         must propagate to:
           frame-system
           sp-runtime
           sp-staking
-    Found 3 issues (run with --fix to fix). Exit code 1.
+    Found 3 issues (run with --fix to fix).
   code: 1

@@ -9,27 +9,27 @@ cases:
   stdout: |
     Found no issues.
 - cmd: lint propagate-feature -p frame --feature runtime-benchmarks
-  stdout: |
+  stdout: |-
     crate 'frame'
       feature 'runtime-benchmarks'
         is required by 3 dependencies:
           frame-support
           frame-system
           sp-runtime
-    Found 3 issues (run with --fix to fix). Exit code 1.
+    Found 3 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p frame --feature runtime-benchmarks --workspace
-  stdout: |
+  stdout: |-
     crate 'frame'
       feature 'runtime-benchmarks'
         is required by 3 dependencies:
           frame-support
           frame-system
           sp-runtime
-    Found 3 issues (run with --fix to fix). Exit code 1.
+    Found 3 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p frame --feature try-runtime
-  stdout: |
+  stdout: |-
     crate 'frame'
       feature 'try-runtime'
         is required by 4 dependencies:
@@ -37,10 +37,10 @@ cases:
           frame-support
           frame-system
           sp-runtime
-    Found 4 issues (run with --fix to fix). Exit code 1.
+    Found 4 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p frame --feature try-runtime --workspace
-  stdout: |
+  stdout: |-
     crate 'frame'
       feature 'try-runtime'
         is required by 4 dependencies:
@@ -48,7 +48,7 @@ cases:
           frame-support
           frame-system
           sp-runtime
-    Found 4 issues (run with --fix to fix). Exit code 1.
+    Found 4 issues (run with --fix to fix).
   code: 1
 - cmd: lint never-enables --precondition default --stays-disabled runtime-benchmarks
 - cmd: lint never-enables --precondition default --stays-disabled try-runtime

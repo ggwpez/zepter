@@ -40,6 +40,13 @@ pub struct GlobalArgs {
 	/// Use ANSI terminal colors.
 	#[clap(long, global = true, default_value_t = false)]
 	color: bool,
+
+	/// Try to exit with code zero if the intended check failed.
+	///
+	/// Will still return 1 in case of an actual error (eg. failed to find some file) or a panic
+	/// (aka software bug).
+	#[clap(long, global = true, verbatim_doc_comment)]
+	exit_code_zero: bool,
 }
 
 /// Sub-commands of the [Root](Command) command.
@@ -69,6 +76,14 @@ impl GlobalArgs {
 			::log::set_max_level(::log::LevelFilter::Error);
 		} else {
 			::log::set_max_level(self.level.to_level_filter());
+		}
+	}
+
+	pub fn error_code(&self) -> i32 {
+		if self.exit_code_zero {
+			0
+		} else {
+			1
 		}
 	}
 
@@ -243,4 +258,21 @@ impl PartialOrd for RenamedPackage {
 	fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
 		Some(self.cmp(other))
 	}
+}
+
+/// Parse a single key-value pair
+///
+/// Copy & paste from <https://github.com/clap-rs/clap/blob/master/examples/typed-derive.rs>
+pub(crate) fn parse_key_val<T, U>(
+	s: &str,
+) -> Result<(T, U), Box<dyn std::error::Error + Send + Sync + 'static>>
+where
+	T: std::str::FromStr,
+	T::Err: std::error::Error + Send + Sync + 'static,
+	U: std::str::FromStr,
+	U::Err: std::error::Error + Send + Sync + 'static,
+{
+	let s = s.trim_matches('"');
+	let pos = s.find(':').ok_or_else(|| format!("invalid KEY=value: no `:` found in `{s}`"))?;
+	Ok((s[..pos].parse()?, s[pos + 1..].parse()?))
 }

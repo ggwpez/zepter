@@ -5,7 +5,7 @@
 
 use crate::{
 	autofix::*,
-	cmd::{resolve_dep, RenamedPackage},
+	cmd::{parse_key_val, resolve_dep, RenamedPackage},
 	grammar::*,
 	log,
 	prelude::*,
@@ -490,6 +490,7 @@ impl PropagateFeatureCmd {
 					fixer.save().unwrap();
 				}
 			}
+
 			//if let Some(_dep) = feature_maybe_unused.get(&krate.id.to_string()) {
 			//	if !feature_missing.contains_key(&krate.id.to_string()) &&
 			// !propagate_missing.contains_key(&krate.id.to_string()) 	{
@@ -500,29 +501,11 @@ impl PropagateFeatureCmd {
 		}
 		print!("{}.", error_stats(errors, warnings, fixes, self.fixer_args.enable, global));
 		if errors > fixes {
-			println!(" Exit code 1.");
-			std::process::exit(1);
+			std::process::exit(global.error_code());
 		} else {
 			println!();
 		}
 	}
-}
-
-/// Parse a single key-value pair
-///
-/// Copy & paste from <https://github.com/clap-rs/clap/blob/master/examples/typed-derive.rs>
-fn parse_key_val<T, U>(
-	s: &str,
-) -> Result<(T, U), Box<dyn std::error::Error + Send + Sync + 'static>>
-where
-	T: std::str::FromStr,
-	T::Err: std::error::Error + Send + Sync + 'static,
-	U: std::str::FromStr,
-	U::Err: std::error::Error + Send + Sync + 'static,
-{
-	let s = s.trim_matches('"');
-	let pos = s.find(':').ok_or_else(|| format!("invalid KEY=value: no `:` found in `{s}`"))?;
-	Ok((s[..pos].parse()?, s[pos + 1..].parse()?))
 }
 
 fn error_stats(

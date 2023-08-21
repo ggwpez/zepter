@@ -17,7 +17,7 @@ harness = false
 
 [dependencies]
 cargo_metadata = "0.17.0"
-clap = { version = "4.3.21", features = ["derive"] }
+clap = { version = "4.3.23", features = ["derive"] }
 toml_edit = "0.19.14"
 
 # Optional deps
@@ -25,24 +25,24 @@ env_logger = { version = "0.10.0", features = [ "auto-color", "humantime" ], opt
 log = { version = "0.4.20", optional = true }
 
 # Testing deps
-anyhow = { version = "1.0.73", optional = true }
+anyhow = { version = "1.0.75", optional = true }
 assert_cmd = { version = "2.0.11", optional = true }
 colour = { version = "0.7.0", optional = true }
-serde = { version = "1.0.183", optional = true }
+serde = { version = "1.0.185", optional = true }
 serde_yaml = { version = "0.9.25", optional = true }
-tempfile = { version = "3.7.1", optional = true }
+tempfile = { version = "3.8.0", optional = true }
 
 [dev-dependencies]
 zepter = { path = ".", features = ["testing"] }
 
-anyhow = "1.0.73"
+anyhow = "1.0.75"
 criterion = "0.5"
 glob = "0.3.1"
 lazy_static = "1.4.0"
 pretty_assertions = "1.4.0"
 rand = "0.8.5"
 rstest = "0.18.2"
-serde = "1.0.183"
+serde = "1.0.185"
 void = "1.0.2"
 
 [features]

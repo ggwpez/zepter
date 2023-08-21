@@ -515,12 +515,11 @@ fn error_stats(
 	fix: bool,
 	global: &GlobalArgs,
 ) -> String {
-	let mut ret: String = "Found ".into();
-
 	if errors + warnings + fixes == 0 {
-		ret.push_str("no issues");
-		return ret
+		return String::new()
 	}
+
+	let mut ret: String = "Found ".into();
 	if errors > 0 {
 		let issues = format!("{} issue{}", errors, plural(errors));
 		ret.push_str(&global.red(&issues));

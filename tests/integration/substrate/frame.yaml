@@ -4,10 +4,10 @@ repo:
 cases:
 - cmd: lint propagate-feature -p frame --feature std
   stdout: |
-    Found no issues.
+    .
 - cmd: lint propagate-feature -p frame --feature std --workspace
   stdout: |
-    Found no issues.
+    .
 - cmd: lint propagate-feature -p frame --feature runtime-benchmarks
   stdout: |-
     crate 'frame'

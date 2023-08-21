@@ -28,10 +28,10 @@ cases:
   diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex ada36d..504ca5 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"b?/F0\"\n"
 - cmd: lint propagate-feature -p B --feature F0 --fix
   stdout: |
-    Found no issues.
+    .
 - cmd: lint propagate-feature -p B --feature F1 --fix
   stdout: |
-    Found no issues.
+    .
 - cmd: lint propagate-feature --feature F0 --workspace --fix
   stdout: |
     crate 'A'
@@ -50,7 +50,7 @@ cases:
   diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex ada36d..504ca5 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"b?/F0\"\n"
 - cmd: lint propagate-feature -p B --feature F0 --workspace --fix
   stdout: |
-    Found no issues.
+    .
 - cmd: lint propagate-feature -p B --feature F1 --workspace --fix
   stdout: |
-    Found no issues.
+    .

@@ -27,10 +27,10 @@ cases:
   code: 1
 - cmd: lint propagate-feature -p B --feature F0
   stdout: |
-    Found no issues.
+    .
 - cmd: lint propagate-feature -p B --feature F1
   stdout: |
-    Found no issues.
+    .
 - cmd: lint propagate-feature --feature F0 --workspace
   stdout: |-
     crate 'A'
@@ -49,7 +49,7 @@ cases:
   code: 1
 - cmd: lint propagate-feature -p B --feature F0 --workspace
   stdout: |
-    Found no issues.
+    .
 - cmd: lint propagate-feature -p B --feature F1 --workspace
   stdout: |
-    Found no issues.
+    .

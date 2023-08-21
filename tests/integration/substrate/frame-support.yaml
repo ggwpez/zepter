@@ -4,10 +4,10 @@ repo:
 cases:
 - cmd: lint propagate-feature -p frame-support --feature runtime-benchmarks
   stdout: |
-    Found no issues.
+    .
 - cmd: lint propagate-feature -p frame-support --feature runtime-benchmarks --workspace
   stdout: |
-    Found no issues.
+    .
 - cmd: lint propagate-feature -p frame-support --feature std
   stdout: |-
     crate 'frame-support'

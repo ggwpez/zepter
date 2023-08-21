@@ -4,10 +4,10 @@ repo:
 cases:
 - cmd: lint propagate-feature --feature try-runtime --left-side-feature-missing=ignore --workspace --fix --feature-enables-dep="try-runtime:frame-try-runtime"
   stdout: |
-    Found no issues.
+    .
 - cmd: lint propagate-feature --feature runtime-benchmarks --left-side-feature-missing=ignore --workspace --fix --feature-enables-dep="runtime-benchmarks:frame-benchmarking"
   stdout: |
-    Found no issues.
+    .
 - cmd: lint propagate-feature --feature std --left-side-feature-missing=ignore --workspace --fix
   stdout: |
-    Found no issues.
+    .

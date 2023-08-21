@@ -3,13 +3,9 @@ repo:
   ref: da3c1d6477c0725b2cfd0b17c85763431b855e66
 cases:
 - cmd: lint propagate-feature -p frame --feature std
-  stdout: |
-    .
 - cmd: lint propagate-feature -p frame --feature std --workspace
-  stdout: |
-    .
 - cmd: lint propagate-feature -p frame --feature runtime-benchmarks
-  stdout: |-
+  stdout: |
     crate 'frame'
       feature 'runtime-benchmarks'
         is required by 3 dependencies:
@@ -19,7 +15,7 @@ cases:
     Found 3 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p frame --feature runtime-benchmarks --workspace
-  stdout: |-
+  stdout: |
     crate 'frame'
       feature 'runtime-benchmarks'
         is required by 3 dependencies:
@@ -29,7 +25,7 @@ cases:
     Found 3 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p frame --feature try-runtime
-  stdout: |-
+  stdout: |
     crate 'frame'
       feature 'try-runtime'
         is required by 4 dependencies:
@@ -40,7 +36,7 @@ cases:
     Found 4 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p frame --feature try-runtime --workspace
-  stdout: |-
+  stdout: |
     crate 'frame'
       feature 'try-runtime'
         is required by 4 dependencies:

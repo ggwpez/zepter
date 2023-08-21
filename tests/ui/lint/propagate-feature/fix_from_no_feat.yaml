@@ -7,7 +7,7 @@ crates:
     F0: null
 cases:
 - cmd: lint propagate-feature --feature F0 --fix
-  stdout: |-
+  stdout: |
     crate 'A'
       feature 'F0'
         is required by 1 dependency:
@@ -15,7 +15,7 @@ cases:
     Found 1 issue and fixed 0 (1 could not be fixed).
   code: 1
 - cmd: lint propagate-feature --feature F0 --workspace --fix
-  stdout: |-
+  stdout: |
     crate 'A'
       feature 'F0'
         is required by 1 dependency:

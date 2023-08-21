@@ -22,10 +22,8 @@ crates:
     F0: null
 cases:
 - cmd: lint propagate-feature --feature F1
-  stdout: |
-    .
 - cmd: lint propagate-feature --feature F0
-  stdout: |-
+  stdout: |
     crate 'A'
       feature 'F0'
         must propagate to:
@@ -41,7 +39,7 @@ cases:
     Found 3 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p A --feature F0
-  stdout: |-
+  stdout: |
     crate 'A'
       feature 'F0'
         must propagate to:
@@ -49,7 +47,7 @@ cases:
     Found 1 issue (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p B --feature F0
-  stdout: |-
+  stdout: |
     crate 'B'
       feature 'F0'
         is required by 1 dependency:
@@ -57,7 +55,7 @@ cases:
     Found 1 issue (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p C --feature F0
-  stdout: |-
+  stdout: |
     crate 'C'
       feature 'F0'
         must propagate to:
@@ -65,13 +63,9 @@ cases:
     Found 1 issue (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p D --feature F0
-  stdout: |
-    .
 - cmd: lint propagate-feature --feature F1 --workspace
-  stdout: |
-    .
 - cmd: lint propagate-feature --feature F0 --workspace
-  stdout: |-
+  stdout: |
     crate 'A'
       feature 'F0'
         must propagate to:
@@ -87,7 +81,7 @@ cases:
     Found 3 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p A --feature F0 --workspace
-  stdout: |-
+  stdout: |
     crate 'A'
       feature 'F0'
         must propagate to:
@@ -95,7 +89,7 @@ cases:
     Found 1 issue (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p B --feature F0 --workspace
-  stdout: |-
+  stdout: |
     crate 'B'
       feature 'F0'
         is required by 1 dependency:
@@ -103,7 +97,7 @@ cases:
     Found 1 issue (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p C --feature F0 --workspace
-  stdout: |-
+  stdout: |
     crate 'C'
       feature 'F0'
         must propagate to:
@@ -111,5 +105,3 @@ cases:
     Found 1 issue (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p D --feature F0 --workspace
-  stdout: |
-    .

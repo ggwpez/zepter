@@ -9,7 +9,7 @@ crates:
     F0: null
 cases:
 - cmd: lint propagate-feature --show-version --workspace --feature F0
-  stdout: |-
+  stdout: |
     crate 'A'
       feature 'F0'
         must propagate to:
@@ -17,14 +17,14 @@ cases:
     Found 1 issue (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature --show-version --workspace --feature F0 --color
-  stdout: "crate 'A'\n  feature 'F0'\n    must propagate to:\n      B\nFound \e[31m1 issue\e[0m (run with --fix to fix)."
+  stdout: "crate 'A'\n  feature 'F0'\n    must propagate to:\n      B\nFound \e[31m1 issue\e[0m (run with --fix to fix).\n"
   code: 1
 - cmd: lint propagate-feature --show-version --workspace --feature F0 --color --quiet
-  stdout: "crate 'A'\n  feature 'F0'\n    must propagate to:\n      B\nFound \e[31m1 issue\e[0m (run with --fix to fix)."
+  stdout: "crate 'A'\n  feature 'F0'\n    must propagate to:\n      B\nFound \e[31m1 issue\e[0m (run with --fix to fix).\n"
   code: 1
 - cmd: lint propagate-feature --show-version --workspace --feature F0 --color --quiet --log trace
-  stdout: "crate 'A'\n  feature 'F0'\n    must propagate to:\n      B\nFound \e[31m1 issue\e[0m (run with --fix to fix)."
+  stdout: "crate 'A'\n  feature 'F0'\n    must propagate to:\n      B\nFound \e[31m1 issue\e[0m (run with --fix to fix).\n"
   code: 1
 - cmd: lint propagate-feature --show-version --workspace --feature F0 --color --quiet --log InFo
-  stdout: "crate 'A'\n  feature 'F0'\n    must propagate to:\n      B\nFound \e[31m1 issue\e[0m (run with --fix to fix)."
+  stdout: "crate 'A'\n  feature 'F0'\n    must propagate to:\n      B\nFound \e[31m1 issue\e[0m (run with --fix to fix).\n"
   code: 1

@@ -499,11 +499,12 @@ impl PropagateFeatureCmd {
 			//	}
 			//}
 		}
-		print!("{}.", error_stats(errors, warnings, fixes, self.fixer_args.enable, global));
+		error_stats(errors, warnings, fixes, self.fixer_args.enable, global).map(|s| {
+			println!("{}", &s);
+		});
+
 		if errors > fixes {
 			std::process::exit(global.error_code());
-		} else {
-			println!();
 		}
 	}
 }
@@ -514,9 +515,9 @@ fn error_stats(
 	fixes: usize,
 	fix: bool,
 	global: &GlobalArgs,
-) -> String {
+) -> Option<String> {
 	if errors + warnings + fixes == 0 {
-		return String::new()
+		return None
 	}
 
 	let mut ret: String = "Found ".into();
@@ -546,7 +547,7 @@ fn error_stats(
 	} else {
 		ret.push_str(" (run with --fix to fix)");
 	}
-	ret
+	Some(format!("{}.", ret))
 }
 
 impl OnlyEnablesCmd {

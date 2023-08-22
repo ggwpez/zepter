@@ -121,7 +121,7 @@ impl GlobalArgs {
 }
 
 /// Arguments for how to load cargo metadata from a workspace.
-#[derive(Debug, clap::Parser)]
+#[derive(Debug, Clone, clap::Parser)]
 pub struct CargoArgs {
 	/// Cargo manifest path or directory.
 	///

@@ -811,7 +811,6 @@ std = [
 "#
 	)
 )]
-// FIXME: Spaces before the = are not removed.
 #[case(
 	r#"[features]
 F0 =  	[  "A/F0"	, 	"B/F0"	]
@@ -825,9 +824,97 @@ F0 = [
 "#
 	)
 )]
-fn canonicalize_all_features_works(#[case] input: &str, #[case] modify: Option<&str>) {
+fn format_all_features_works(#[case] input: &str, #[case] modify: Option<&str>) {
 	let mut fixer = AutoFixer::from_raw(input).unwrap();
-	fixer.canonicalize_all_features().unwrap();
+	fixer.format_all_feature(10).unwrap();
+	pretty_assertions::assert_str_eq!(fixer.to_string(), modify.unwrap_or(input));
+}
+
+#[rstest]
+#[case(
+	80,
+	r#"[features]
+F0 = [  "A/F0"	, 	"B/F0"	]
+"#,
+	Some(
+		r#"[features]
+F0 = [ "A/F0", "B/F0" ]
+"#
+	)
+)]
+#[case(
+	30,
+	r#"[features]
+F0 = [ "LONG/F0", "FEATU/F0" ]
+"#,
+	Some(
+		r#"[features]
+F0 = [ "LONG/F0", "FEATU/F0" ]
+"#
+	)
+)]
+#[case(
+	30,
+	r#"[features]
+F0 = [ "LONG/F0", "FEATUR/F0" ]
+"#,
+	Some(
+		r#"[features]
+F0 = [
+	"LONG/F0",
+	"FEATUR/F0",
+]
+"#
+	)
+)]
+#[case(
+	30,
+	r#"[features]
+F0 = [ "LONG/F0", "FEATU/F0" ]
+G0 = [ "LONG/F0", "FEATUR/F0" ]
+"#,
+	Some(
+		r#"[features]
+F0 = [ "LONG/F0", "FEATU/F0" ]
+G0 = [
+	"LONG/F0",
+	"FEATUR/F0",
+]
+"#
+	)
+)]
+#[case(
+	30,
+	r#"[features]
+default = [
+	"std",
+]
+"#,
+	Some(
+		r#"[features]
+default = [ "std" ]
+"#
+	)
+)]
+// FIXME: known bug
+#[case(
+	30,
+	r#"[features]
+default 	=					[ "std" ] # lel
+"#,
+	Some(
+		r#"[features]
+default 	=					[ "std" ] # lel
+"#
+	)
+)]
+fn format_all_features_line_width_works(
+	#[case] line_width: u32,
+	#[case] input: &str,
+	#[case] modify: Option<&str>,
+) {
+	let mut fixer = AutoFixer::from_raw(input).unwrap();
+	fixer.format_all_feature(line_width).unwrap();
 	pretty_assertions::assert_str_eq!(fixer.to_string(), modify.unwrap_or(input));
 }
 
@@ -892,7 +979,6 @@ std = [
 default = ["std", "A"]
 std = ["B", "A"]
 "#,
-// TODO: Now it looks stupid...
 Some(r#"
 [features]
 default = [ "A","std"]
@@ -901,13 +987,119 @@ std = [
 	"B",
 ]
 "#))]
-fn format_some_features_with_modes_works(
+fn canon_some_features_with_modes_works(
 	#[case] modes: Vec<(&str, Vec<Mode>)>,
 	#[case] input: &str,
 	#[case] modify: Option<&str>,
 ) {
 	let mut fixer = AutoFixer::from_raw(input).unwrap();
 	let modes = modes.into_iter().map(|(f, m)| (f.into(), m)).collect::<Map<_, _>>();
-	fixer.format_features(&modes).unwrap();
+	fixer.canonicalize_features(&modes, 0).unwrap();
 	pretty_assertions::assert_str_eq!(fixer.to_string(), modify.unwrap_or(input));
+}
+
+#[rstest]
+#[case(
+	r#"
+[features]
+default = [
+	"std",
+	"A"
+]
+"#,
+	Ok(
+		r#"
+[features]
+default = [ "std", "A" ]
+"#
+	)
+)]
+#[case(
+	r#"
+[features]
+default = [
+	"std",
+	"A",
+]
+"#,
+	Ok(
+		r#"
+[features]
+default = [ "std", "A" ]
+"#
+	)
+)]
+#[case(
+	r#"
+[features]
+default = [
+	"std",
+	"A", # 1
+]
+"#,
+	Err("has trailing")
+)]
+#[case(
+	r#"
+[features]
+default = [
+	"std",
+	"A"
+	# 1
+	,
+]
+"#,
+	Err("has comments")
+)]
+#[case(
+	r#"
+[features]
+default = [
+	# 1
+	"std",
+	"A",
+]
+"#,
+	Err("has comments")
+)]
+#[case(
+	r#"
+[features]
+default = [ #1
+	"std",
+	"A",
+]
+"#,
+	Err("has comments")
+)]
+#[case(
+	r#"
+[features]
+default = [
+	"std",
+	"A",
+] # 1
+"#,
+	Ok(
+		r#"
+[features]
+default = [ "std", "A" ] # 1
+"#
+	)
+)]
+fn format_feature_oneline_works(#[case] input: &str, #[case] modify: Result<&str, &str>) {
+	let mut fixer = AutoFixer::from_raw(input).unwrap();
+	let feature = fixer.get_feature_mut("default").unwrap();
+	let res = AutoFixer::format_feature_oneline(feature);
+
+	match modify {
+		Ok(modify) => {
+			pretty_assertions::assert_str_eq!(fixer.to_string(), modify);
+			assert!(fixer.modified());
+		},
+		Err(modify) => {
+			assert_eq!(res, Err(modify.into()));
+			assert!(!fixer.modified());
+		},
+	}
 }

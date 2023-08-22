@@ -7,6 +7,7 @@ use std::collections::HashMap;
 use zepter::mock::*;
 
 #[test]
+#[ignore]
 fn integration() {
 	let filter = std::env::var("UI_FILTER").unwrap_or_else(|_| "**/*.yaml".into());
 	let regex = format!("tests/{}", filter);

@@ -57,15 +57,7 @@ impl AutoFixer {
 	}
 
 	pub fn check_sorted_feature(&self, feature: &str) -> bool {
-		let doc: &Document = self.doc.as_ref().unwrap();
-		if !doc.contains_table("features") {
-			return true
-		}
-		let features = doc["features"].as_table().unwrap();
-		if !features.contains_key(feature) {
-			return true
-		}
-		let feature = features[feature].as_array().unwrap();
+		let Some(feature) = self.get_feature(feature) else { return true };
 
 		let mut last = "";
 		for value in feature.iter() {
@@ -78,17 +70,7 @@ impl AutoFixer {
 		true
 	}
 
-	pub fn sort_feature(&mut self, feature: &str) {
-		let doc: &mut Document = self.doc.as_mut().unwrap();
-		if !doc.contains_table("features") {
-			return
-		}
-		let features = doc["features"].as_table_mut().unwrap();
-		if !features.contains_key(feature) {
-			return
-		}
-		let feature = features[feature].as_array_mut().unwrap();
-
+	pub fn sort_feature(feature: &mut Array) {
 		let mut values = feature.iter().cloned().collect::<Vec<_>>();
 		// DOGSHIT CODE
 		values.sort_by(|a, b| a.as_str().unwrap().cmp(b.as_str().unwrap()));
@@ -100,30 +82,96 @@ impl AutoFixer {
 
 	pub fn sort_all_features(&mut self) -> Result<(), String> {
 		for feature in self.get_all_features() {
-			self.sort_feature(&feature);
+			let feature = self.get_feature_mut(&feature).unwrap();
+			Self::sort_feature(feature);
 		}
 
 		Ok(())
 	}
 
-	pub fn canonicalize_all_features(&mut self) -> Result<(), String> {
-		for feature in self.get_all_features() {
-			self.canonicalize_feature(&feature)?;
+	pub fn format_all_feature(&mut self, line_width: u32) -> Result<(), String> {
+		for fname in self.get_all_features() {
+			let feature = self.get_feature_mut(&fname).unwrap();
+			Self::format_feature(&fname, feature, line_width)?;
 		}
 
 		Ok(())
 	}
 
-	pub fn canonicalize_feature(&mut self, feature: &str) -> Result<(), String> {
-		let doc: &mut Document = self.doc.as_mut().unwrap();
-		if !doc.contains_table("features") {
-			return Ok(())
+	pub fn format_feature(
+		fname: &str,
+		feature: &mut Array,
+		mut line_width: u32,
+	) -> Result<(), String> {
+		// First we try to format it into one line.
+		let mut oneliner = feature.clone();
+		if Self::format_feature_oneline(&mut oneliner).is_ok() {
+			// Best effort: +1 for the space
+			line_width = line_width.saturating_sub(fname.len() as u32 + 1);
+
+			if oneliner.to_string().len() < line_width as usize {
+				*feature = oneliner;
+				return Ok(())
+			}
 		}
-		let features = doc["features"].as_table_mut().unwrap();
-		if !features.contains_key(feature) {
-			return Ok(())
+
+		// Then we try to format it into multiple lines.
+		Self::format_feature_multiline(feature)
+	}
+
+	/// Try to canonicalize into one line.
+	///
+	/// Can fail when there are comments in the way.
+	pub fn format_feature_oneline(feature: &mut Array) -> Result<(), String> {
+		let mut values = feature.iter().cloned().collect::<Vec<_>>();
+
+		// First we do the checking, then the modify.
+		if !feature.trailing().as_str().unwrap().trim().is_empty() {
+			return Err("has trailing".into())
 		}
-		let feature = features[feature].as_array_mut().unwrap();
+
+		for value in values.iter() {
+			let decor = value.decor();
+			// Spaghetti code
+			let prefix = decor
+				.prefix()
+				.map(|p| {
+					p.as_str().unwrap().chars().filter(|c| !c.is_whitespace()).collect::<String>()
+				})
+				.unwrap_or_default();
+			let suffix = decor
+				.suffix()
+				.map(|s| {
+					s.as_str().unwrap().chars().filter(|c| !c.is_whitespace()).collect::<String>()
+				})
+				.unwrap_or_default();
+
+			if !prefix.is_empty() || !suffix.is_empty() {
+				return Err("has comments".into())
+			}
+		}
+
+		// Now we modify
+		for value in values.iter_mut() {
+			value.decor_mut().clear();
+			value.decor_mut().set_prefix(" ");
+		}
+
+		if let Some(last) = values.last_mut() {
+			last.decor_mut().set_suffix(" ");
+		}
+
+		feature.set_trailing_comma(false);
+		feature.set_trailing("");
+		feature.clear();
+		for value in values.into_iter() {
+			feature.push_formatted(value.clone());
+		}
+
+		Ok(())
+	}
+
+	pub fn format_feature_multiline(feature: &mut Array) -> Result<(), String> {
 		let mut values = feature.iter().cloned().collect::<Vec<_>>();
 
 		for value in values.iter_mut() {
@@ -135,14 +183,14 @@ impl AutoFixer {
 				.decor()
 				.suffix()
 				.map_or(String::new(), |s| s.as_str().unwrap().to_string());
-			suffix = Self::canonicalize_pre_and_suffix(suffix);
+			suffix = Self::format_pre_and_suffix(suffix);
 			suffix = if suffix.trim().is_empty() {
 				"".into()
 			} else {
 				format!("\n\t{}\n\t", suffix.trim())
 			};
 
-			prefix = Self::canonicalize_pre_and_suffix(prefix);
+			prefix = Self::format_pre_and_suffix(prefix);
 			prefix = prefix.trim().into();
 			prefix = if prefix.is_empty() { "\n\t".into() } else { format!("\n\t{}\n\t", prefix) };
 			value.decor_mut().set_suffix(suffix);
@@ -156,7 +204,7 @@ impl AutoFixer {
 				.suffix()
 				.map_or(String::new(), |s| s.as_str().unwrap().to_string());
 
-			suffix = Self::canonicalize_pre_and_suffix(suffix);
+			suffix = Self::format_pre_and_suffix(suffix);
 			suffix = suffix.trim().into();
 			suffix = if suffix.is_empty() { ",\n".into() } else { format!(",\n\t{}\n", suffix) };
 			value.decor_mut().set_suffix(suffix);
@@ -189,28 +237,59 @@ impl AutoFixer {
 		found
 	}
 
-	pub fn format_features(
+	fn get_feature(&self, name: &str) -> Option<&Array> {
+		let doc: &Document = self.doc.as_ref().unwrap();
+		if !doc.contains_table("features") {
+			return None
+		}
+		let features = doc["features"].as_table().unwrap();
+
+		if !features.contains_key(name) {
+			return None
+		}
+
+		Some(features[name].as_array().unwrap())
+	}
+
+	pub(crate) fn get_feature_mut(&mut self, name: &str) -> Result<&mut Array, ()> {
+		let doc: &mut Document = self.doc.as_mut().unwrap();
+		if !doc.contains_table("features") {
+			return Err(())
+		}
+		let features = doc["features"].as_table_mut().unwrap();
+
+		if !features.contains_key(name) {
+			return Err(())
+		}
+
+		Ok(features[name].as_array_mut().unwrap())
+	}
+
+	pub fn canonicalize_features(
 		&mut self,
 		mode_per_feature: &Map<String, Vec<Mode>>,
+		line_width: u32,
 	) -> Result<(), String> {
 		let features = self.get_all_features();
 
-		for feature in features.iter() {
-			match mode_per_feature.get(feature) {
+		for feature_name in features.iter() {
+			let feature = self.get_feature_mut(feature_name).unwrap();
+
+			match mode_per_feature.get(feature_name) {
 				Some(modes) => {
 					if modes.contains(&Mode::None) {
 						continue
 					}
 					if modes.contains(&Mode::Sort) {
-						self.sort_feature(feature);
+						Self::sort_feature(feature);
 					}
 					if modes.contains(&Mode::Canonicalize) {
-						self.canonicalize_feature(feature)?;
+						Self::format_feature(feature_name, feature, line_width)?;
 					}
 				},
 				None => {
-					self.sort_feature(feature);
-					self.canonicalize_feature(feature)?;
+					Self::sort_feature(feature);
+					Self::format_feature(feature_name, feature, line_width)?;
 				},
 			}
 		}
@@ -218,7 +297,7 @@ impl AutoFixer {
 		Ok(())
 	}
 
-	fn canonicalize_pre_and_suffix(fix: String) -> String {
+	fn format_pre_and_suffix(fix: String) -> String {
 		let lines = fix.lines().collect::<Vec<_>>();
 		let mut new_lines = Vec::new();
 
@@ -235,9 +314,9 @@ impl AutoFixer {
 		new_lines.join("\n")
 	}
 
-	pub fn format_all_features(&mut self) -> Result<(), String> {
+	pub fn canonicalize_all_features(&mut self, line_width: u32) -> Result<(), String> {
 		self.sort_all_features()?;
-		self.canonicalize_all_features()?;
+		self.format_all_feature(line_width)?;
 
 		Ok(())
 	}

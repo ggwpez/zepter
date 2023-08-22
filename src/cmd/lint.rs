@@ -501,6 +501,8 @@ impl PropagateFeatureCmd {
 		}
 		if let Some(e) = error_stats(errors, warnings, fixes, self.fixer_args.enable, global) {
 			println!("{}", e);
+		} else {
+			println!("");
 		}
 
 		if errors > fixes {

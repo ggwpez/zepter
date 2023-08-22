@@ -4,6 +4,7 @@
 //! Format features in the crate manifest.
 
 use crate::{autofix::*, cmd::parse_key_val, grammar::*, log};
+use cargo_metadata::Metadata;
 use std::{collections::BTreeMap as Map, fs::canonicalize, path::PathBuf, str::FromStr};
 
 use super::GlobalArgs;
@@ -28,13 +29,23 @@ pub struct FormatFeaturesCmd {
 	#[clap(flatten)]
 	cargo_args: super::CargoArgs,
 
+	/// Include dependencies in the formatting check.
+	///
+	/// They will not be modified, unless their path is included in `--modify-paths`.
+	#[clap(long)]
+	no_workspace: bool,
+
 	/// Paths that are allowed to be modified by the formatter.
 	#[clap(long)]
 	modify_paths: Vec<PathBuf>,
 
-	/// Fix the offending features by sorting them.
+	/// Only check if the features are formatted but do not modify them.
 	#[clap(long)]
-	fix: bool,
+	check: bool,
+
+	/// The maximal length of a line for a feature.
+	#[clap(long, default_value_t = 80)]
+	line_width: u32,
 
 	/// Set the formatting mode for a specific feature.
 	///
@@ -92,7 +103,7 @@ impl FormatCmd {
 impl FormatFeaturesCmd {
 	pub fn run(&self, global: &GlobalArgs) {
 		let modes = self.parse_mode_per_feature();
-		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
+		let meta = self.load_metadata(global);
 		// modifications are only allowed in this dir:
 		let allowed_dir = canonicalize(&self.cargo_args.manifest_path).unwrap();
 		let allowed_dir = allowed_dir.parent().unwrap();
@@ -104,7 +115,7 @@ impl FormatFeaturesCmd {
 			let path = canonicalize(pkg.manifest_path.clone().into_std_path_buf()).unwrap();
 
 			let mut fixer = AutoFixer::from_manifest(&path).unwrap();
-			fixer.format_features(&modes).unwrap();
+			fixer.canonicalize_features(&modes, self.line_width).unwrap();
 			if fixer.modified() {
 				offenders.push((path, &pkg.name, fixer));
 			}
@@ -130,7 +141,7 @@ impl FormatFeaturesCmd {
 				self.print_paths.then(|| format!(" {}", path.display())).unwrap_or_default();
 			println!("  {}{}", global.bold(pkg), psuffix);
 
-			if !self.fix {
+			if self.check {
 				continue
 			}
 
@@ -149,19 +160,25 @@ impl FormatFeaturesCmd {
 			fixed += 1;
 		}
 
-		if self.fix {
-			println!("Formatted {} crate{}.", global.green(&fixed.to_string()), plural(fixed));
-
-			if fixed != offenders.len() {
-				log::error!(
-					"ASSERT FAILED THIS IS A BUG: {} crate{} could not be formatted",
-					offenders.len() - fixed,
-					plural(offenders.len() - fixed)
+		if !self.check {
+			if fixed == offenders.len() {
+				println!(
+					"Formatted {} crate{} (all fixed).",
+					global.green(&fixed.to_string()),
+					plural(fixed)
+				);
+			} else {
+				println!(
+					"Formatted {} crate{} ({} could not be fixed).",
+					global.green(&fixed.to_string()),
+					plural(fixed),
+					global.red(&(offenders.len() - fixed).to_string())
 				);
 			}
+
 			std::process::exit(0);
 		} else {
-			println!("Run again with --fix to format them.");
+			println!("Run again without --check to format them.");
 		}
 
 		std::process::exit(global.error_code())
@@ -181,5 +198,14 @@ impl FormatFeaturesCmd {
 		}
 
 		map
+	}
+
+	fn load_metadata(&self, global: &GlobalArgs) -> Metadata {
+		let mut args = self.cargo_args.clone();
+		if args.workspace {
+			println!("{}", global.yellow("WARNING: --workspace is the default now"));
+		}
+		args.workspace = !self.no_workspace;
+		args.load_metadata().expect("Loads metadata")
 	}
 }

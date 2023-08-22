@@ -298,14 +298,15 @@ impl CrateDependency {
 
 /// Removes leading and trailing empty lines.
 pub fn normalize(s: &str) -> String {
-	let mut lines = s.lines().collect::<Vec<_>>();
+	/*let mut lines = s.lines().collect::<Vec<_>>();
 	while lines.first().map(|l| l.is_empty()).is_some() {
 		lines.remove(0);
 	}
 	while lines.last().map(|l| l.is_empty()).is_some() {
 		lines.pop();
 	}
-	format!("{}\n", lines.join("\n"))
+	format!("{}\n", lines.join("\n"))*/
+	s.trim().to_string()
 }
 
 /// Predicate for serde to skip serialization of default values.

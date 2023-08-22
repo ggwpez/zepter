@@ -11,5 +11,3 @@ crates:
     F0: null
 cases:
 - cmd: lint propagate-feature --feature F0
-  stdout: |
-    Found no issues.

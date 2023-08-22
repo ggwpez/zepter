@@ -8,6 +8,7 @@ pub mod cmd;
 pub mod dag;
 pub mod grammar;
 pub mod mock;
+mod tests;
 
 pub mod prelude {
 	pub use super::{

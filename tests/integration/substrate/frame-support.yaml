@@ -3,13 +3,9 @@ repo:
   ref: 2cc2e05e78b1e9109669dc959ac7656eb46b3492
 cases:
 - cmd: lint propagate-feature -p frame-support --feature runtime-benchmarks
-  stdout: |
-    Found no issues.
 - cmd: lint propagate-feature -p frame-support --feature runtime-benchmarks --workspace
-  stdout: |
-    Found no issues.
 - cmd: lint propagate-feature -p frame-support --feature std
-  stdout: |-
+  stdout: |
     crate 'frame-support'
       feature 'std'
         must propagate to:
@@ -22,7 +18,7 @@ cases:
     Found 6 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p frame-support --feature std --workspace
-  stdout: |-
+  stdout: |
     crate 'frame-support'
       feature 'std'
         must propagate to:
@@ -31,7 +27,7 @@ cases:
     Found 2 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p frame-support --feature try-runtime
-  stdout: |-
+  stdout: |
     crate 'frame-support'
       feature 'try-runtime'
         must propagate to:
@@ -40,7 +36,7 @@ cases:
     Found 2 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p frame-support --feature try-runtime --workspace
-  stdout: |-
+  stdout: |
     crate 'frame-support'
       feature 'try-runtime'
         must propagate to:

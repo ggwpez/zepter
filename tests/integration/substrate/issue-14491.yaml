@@ -3,7 +3,7 @@ repo:
   ref: 9705afd8b17d3e0c8557fe220cfccffd8986bd6a
 cases:
 - cmd: lint propagate-feature -p pallet-name-service --feature try-runtime
-  stdout: |-
+  stdout: |
     crate 'pallet-name-service'
       feature 'try-runtime'
         is required by 4 dependencies:
@@ -14,7 +14,7 @@ cases:
     Found 4 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p pallet-name-service --feature try-runtime --fix
-  stdout: |-
+  stdout: |
     crate 'pallet-name-service'
       feature 'try-runtime'
         is required by 4 dependencies:

@@ -57,13 +57,14 @@ fn integration() {
 				},
 				false if !overwrite => {
 					colour::white!("cout:");
-					colour::yellow!("FAIL");
+					colour::red!("FAIL");
 					colour::white!(" ");
 					if !keep_going {
 						pretty_assertions::assert_eq!(
 							&String::from_utf8_lossy(&res.stdout),
 							&normalize(&case.stdout)
 						);
+						unreachable!()
 					}
 				},
 				false => {

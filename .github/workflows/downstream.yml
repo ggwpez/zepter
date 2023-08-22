@@ -32,12 +32,28 @@ jobs:
     
     - name: Cargo install
       run: cargo install --git ${{ github.server_url }}/${{ github.repository }} zepter --rev $GITHUB_SHA --locked -q
-
-    - name: Zepter check ${{ matrix.repo }} master
+    
+      # Substrate master should be green since its using Zepter in its CI.
+    - if: matrix.repo == 'substrate'
+      name: Zepter passes
       run: |
-        ls
+        echo "Checking features #1"
+        zepter lint propagate-feature --feature try-runtime --left-side-feature-missing=ignore --workspace --fix --feature-enables-dep="try-runtime:frame-try-runtime"
+        echo "Checking features #2"
+        zepter lint propagate-feature --feature runtime-benchmarks --left-side-feature-missing=ignore --workspace --feature-enables-dep="runtime-benchmarks:frame-benchmarking"
+        echo "Checking features #3"
+        zepter lint propagate-feature --feature std --left-side-feature-missing=ignore --workspace
+        echo "Checking formatting #1"
+        zepter format features --exit-code-zero
+    - if: matrix.repo != 'substrate'
+      name: Zepter doesnt panic
+      # Polkadot and Cumulus can be red, but should not panic. Hence the `--exit-code-zero`.
+      run: |
+        echo "Checking features #1"
         zepter lint propagate-feature --feature try-runtime --left-side-feature-missing=ignore --workspace --fix --feature-enables-dep="try-runtime:frame-try-runtime" --exit-code-zero
+        echo "Checking features #2"
         zepter lint propagate-feature --feature runtime-benchmarks --left-side-feature-missing=ignore --workspace --feature-enables-dep="runtime-benchmarks:frame-benchmarking" --exit-code-zero
+        echo "Checking features #3"
         zepter lint propagate-feature --feature std --left-side-feature-missing=ignore --workspace --exit-code-zero
-
+        echo "Checking formatting #1"
         zepter format features --exit-code-zero

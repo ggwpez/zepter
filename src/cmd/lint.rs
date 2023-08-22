@@ -499,9 +499,9 @@ impl PropagateFeatureCmd {
 			//	}
 			//}
 		}
-		error_stats(errors, warnings, fixes, self.fixer_args.enable, global).map(|s| {
-			println!("{}", &s);
-		});
+		if let Some(e) = error_stats(errors, warnings, fixes, self.fixer_args.enable, global) {
+			println!("{}", e);
+		}
 
 		if errors > fixes {
 			std::process::exit(global.error_code());

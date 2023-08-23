@@ -109,7 +109,7 @@ impl FormatFeaturesCmd {
 		let allowed_dir = allowed_dir.parent().unwrap();
 		let mut offenders = Vec::new();
 
-		log::info!("Checking {} crate{}", meta.packages.len(), plural(meta.packages.len()),);
+		log::debug!("Checking {} crate{}", meta.packages.len(), plural(meta.packages.len()),);
 
 		for pkg in meta.packages.iter() {
 			let path = canonicalize(pkg.manifest_path.clone().into_std_path_buf()).unwrap();
@@ -121,7 +121,7 @@ impl FormatFeaturesCmd {
 			}
 		}
 		if offenders.is_empty() {
-			log::info!(
+			log::debug!(
 				"Checked {} crate{}: all formatted",
 				meta.packages.len(),
 				plural(meta.packages.len())

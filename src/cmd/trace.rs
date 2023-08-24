@@ -120,9 +120,7 @@ impl TraceCmd {
 	}
 
 	/// Build a dependency graph over the crates ids and return an index of all crates.
-	fn build_dag(
-		meta: Metadata,
-	) -> Result<(Dag<CrateId>, BTreeMap<CrateId, Package>), String> {
+	fn build_dag(meta: Metadata) -> Result<(Dag<CrateId>, BTreeMap<CrateId, Package>), String> {
 		let mut dag = Dag::new();
 		let mut index = BTreeMap::new();
 

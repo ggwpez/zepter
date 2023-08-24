@@ -44,7 +44,7 @@ jobs:
         echo "Checking features #3"
         zepter lint propagate-feature --feature std --left-side-feature-missing=ignore --workspace
         echo "Checking formatting #1"
-        zepter format features --exit-code-zero
+        zepter format features --check
     - if: matrix.repo != 'substrate'
       name: Zepter doesnt panic
       # Polkadot and Cumulus can be red, but should not panic. Hence the `--exit-code-zero`.

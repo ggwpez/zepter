@@ -75,7 +75,7 @@ impl AutoFixer {
 		// DOGSHIT CODE
 		values.sort_by(|a, b| a.as_str().unwrap().cmp(b.as_str().unwrap()));
 		feature.clear();
-		for value in values.into_iter() {
+		for value in values {
 			feature.push_formatted(value.clone());
 		}
 	}
@@ -164,7 +164,7 @@ impl AutoFixer {
 		feature.set_trailing_comma(false);
 		feature.set_trailing("");
 		feature.clear();
-		for value in values.into_iter() {
+		for value in values {
 			feature.push_formatted(value.clone());
 		}
 
@@ -211,7 +211,7 @@ impl AutoFixer {
 		}
 
 		feature.clear();
-		for value in values.into_iter() {
+		for value in values {
 			feature.push_formatted(value.clone());
 		}
 		feature.set_trailing_comma(false);
@@ -275,22 +275,19 @@ impl AutoFixer {
 		for feature_name in features.iter() {
 			let feature = self.get_feature_mut(feature_name).unwrap();
 
-			match mode_per_feature.get(feature_name) {
-				Some(modes) => {
-					if modes.contains(&Mode::None) {
-						continue
-					}
-					if modes.contains(&Mode::Sort) {
-						Self::sort_feature(feature);
-					}
-					if modes.contains(&Mode::Canonicalize) {
-						Self::format_feature(feature_name, feature, line_width)?;
-					}
-				},
-				None => {
+			if let Some(modes) = mode_per_feature.get(feature_name) {
+				if modes.contains(&Mode::None) {
+					continue
+				}
+				if modes.contains(&Mode::Sort) {
 					Self::sort_feature(feature);
+				}
+				if modes.contains(&Mode::Canonicalize) {
 					Self::format_feature(feature_name, feature, line_width)?;
-				},
+				}
+			} else {
+				Self::sort_feature(feature);
+				Self::format_feature(feature_name, feature, line_width)?;
 			}
 		}
 
@@ -348,7 +345,7 @@ impl AutoFixer {
 		feature.set_trailing_comma(false); // We need to add this manually later on.
 		let mut new_vals = Vec::new();
 
-		for mut value in values.into_iter() {
+		for mut value in values {
 			if value.as_str().map_or(false, |s| s.is_empty()) {
 				panic!("Empty value in feature");
 			}
@@ -388,7 +385,7 @@ impl AutoFixer {
 			new_vals[i - 1].decor_mut().set_suffix("");
 		}
 
-		for new_val in new_vals.into_iter() {
+		for new_val in new_vals {
 			feature.push_formatted(new_val);
 		}
 

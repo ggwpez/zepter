@@ -91,7 +91,7 @@ where
 		F: FnMut(&T),
 	{
 		for e in self.0.iter() {
-			f(e.as_ref())
+			f(e.as_ref());
 		}
 	}
 }
@@ -143,7 +143,7 @@ where
 	///
 	/// *Directly* means with via an edge.
 	pub fn connected(&self, from: &T, to: &T) -> bool {
-		self.edges.get(from).map(|v| v.contains(to)).unwrap_or(false)
+		self.edges.get(from).map_or(false, |v| v.contains(to))
 	}
 
 	/// Whether `from` appears on the lhs of the edge relation.

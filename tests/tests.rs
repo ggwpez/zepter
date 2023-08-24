@@ -114,10 +114,10 @@ fn integration() {
 				continue
 			}
 
-			for (i, stdout) in overwrites.into_iter() {
+			for (i, stdout) in overwrites {
 				config.case_mut(i).stdout = stdout;
 			}
-			for (i, diff) in diff_overwrites.into_iter() {
+			for (i, diff) in diff_overwrites {
 				config.case_mut(i).diff = diff;
 			}
 

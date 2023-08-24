@@ -47,7 +47,7 @@ pub struct TraceCmd {
 impl TraceCmd {
 	pub fn run(&self, _global: &GlobalArgs) {
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
-		let (dag, index) = self.build_dag(meta).expect("Builds dependency graph");
+		let (dag, index) = Self::build_dag(meta).expect("Builds dependency graph");
 		let lookup = |id: &str| {
 			index
 				.get(id)
@@ -120,14 +120,11 @@ impl TraceCmd {
 	}
 
 	/// Build a dependency graph over the crates ids and return an index of all crates.
-	fn build_dag(
-		&self,
-		meta: Metadata,
-	) -> Result<(Dag<CrateId>, BTreeMap<CrateId, Package>), String> {
+	fn build_dag(meta: Metadata) -> Result<(Dag<CrateId>, BTreeMap<CrateId, Package>), String> {
 		let mut dag = Dag::new();
 		let mut index = BTreeMap::new();
 
-		for pkg in meta.packages.clone().into_iter() {
+		for pkg in meta.packages.clone() {
 			let id = pkg.id.to_string();
 			dag.add_node(id.clone());
 			index.insert(pkg.id.to_string(), pkg.clone());

@@ -238,7 +238,7 @@ impl Context {
 
 /// Convert a crate's name to a file path.
 ///
-/// This is needed for case-insensitive file systems like on MacOS. It prefixes all lower-case
+/// This is needed for case-insensitive file systems like on `MacOS`. It prefixes all lower-case
 /// letters with an `l` and turns the upper case.
 pub(crate) fn crate_name_to_path(n: &str) -> String {
 	n.chars()
@@ -263,9 +263,10 @@ pub enum CrateDependency {
 impl CrateDependency {
 	fn def(&self) -> String {
 		let option = if self.optional() { ", optional = true".to_string() } else { String::new() };
-		let mut ret = match self.rename() {
-			Some(rename) => format!("{} = {{ package = \"{}\", ", rename, self.name()),
-			None => format!("{} = {{ ", self.name()),
+		let mut ret = if let Some(rename) = self.rename() {
+			format!("{} = {{ package = \"{}\", ", rename, self.name())
+		} else {
+			format!("{} = {{ ", self.name())
 		};
 		ret.push_str(&format!("version = \"*\", path = \"../{}\"{}}}\n", self.path(), option));
 		ret
@@ -284,14 +285,14 @@ impl CrateDependency {
 	fn rename(&self) -> Option<String> {
 		match self {
 			Self::Explicit { rename, .. } => rename.clone(),
-			_ => None,
+			Self::Implicit(_) => None,
 		}
 	}
 
 	fn optional(&self) -> bool {
 		match self {
 			Self::Explicit { optional, .. } => optional.unwrap_or_default(),
-			_ => false,
+			Self::Implicit(_) => false,
 		}
 	}
 }

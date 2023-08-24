@@ -201,7 +201,7 @@ impl LintCmd {
 struct CrateAndFeature(String, String);
 
 impl Display for CrateAndFeature {
-	fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
 		write!(f, "{}/{}", self.0, self.1)
 	}
 }
@@ -287,7 +287,7 @@ impl NeverEnablesCmd {
 			let Some(enabled) = lhs.features.get(&self.precondition) else { continue };
 
 			// TODO do the same in other command.
-			if enabled.contains(&self.stays_disabled.to_string()) {
+			if enabled.contains(&self.stays_disabled) {
 				offenders.entry(lhs.id.to_string()).or_default().insert(RenamedPackage::new(
 					(*lhs).clone(),
 					None,
@@ -565,9 +565,8 @@ impl OnlyEnablesCmd {
 				for (feat, imply) in pkg.features.iter() {
 					if feat == &self.precondition {
 						continue
-					} else {
-						log::info!("{}: {}", feat, imply.join(", "));
 					}
+					log::info!("{}: {}", feat, imply.join(", "));
 
 					let opt = if dep.optional { "?" } else { "" };
 					let bad_opt = format!("{}{}/{}", dep.name(), opt, self.only_enables);
@@ -726,7 +725,7 @@ fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeature> 
 					dag.add_edge(
 						CrateAndFeature(pkg.id.to_string(), feature.clone()),
 						CrateAndFeature(pkg.id.to_string(), dep_feature.into()),
-					)
+					);
 				}
 			}
 		}

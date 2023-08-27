@@ -48,13 +48,6 @@ pub struct FormatFeaturesCmd {
 	#[clap(long, default_value_t = 80)]
 	line_width: u32,
 
-	/// How to handle overlapping and duplicate entires.
-	///
-	/// A duplicate in this sense is everything that touches the same dependency with the same
-	/// features.
-	#[clap(long, value_enum, value_name = "DUP_HANDLING", default_value_t = DuplicateHandling::Merge, verbatim_doc_comment)]
-	duplicates: DuplicateHandling,
-
 	/// Set the formatting mode for a specific feature.
 	///
 	/// Can be specified multiple times. Example:
@@ -96,18 +89,9 @@ impl FromStr for Mode {
 			"canonicalize" => Ok(Self::Canonicalize),
 			"sort" => Ok(Self::Sort),
 			"none" => Ok(Self::None),
-			_ => panic!("Invalid Mode: {s}. Expected 'canonicalize' or 'sort'"), // FIXME
+			_ => panic!("Invalid Mode: {s}. Expected 'canonicalize', 'sort' or 'none'"), // FIXME
 		}
 	}
-}
-
-/// How to handle duplicate entries in a feature.
-#[derive(Debug, Clone, PartialEq, clap::ValueEnum)]
-pub enum DuplicateHandling {
-	/// Merge duplicate entries.
-	Merge,
-	/// Keep duplicate entries.
-	Keep,
 }
 
 impl FormatCmd {

@@ -70,6 +70,50 @@ impl AutoFixer {
 		true
 	}
 
+	// Assumes sorting
+	pub fn dedub_feature(cname: &str, fname: &str, feature: &mut Array) -> Result<(), String> {
+		let mut values = feature.iter().cloned().collect::<Vec<_>>();
+
+		for i in (0..values.len()).rev() {
+			let last: Option<Value> = if i == 0 { None } else { Some(values[i - 1].clone()) };
+			let current = &values[i];
+			let cur_str = current.as_str().unwrap();
+
+			if let Some(ref last) = last {
+				let last_str = last.as_str().unwrap();
+				if cur_str < last_str {
+					return Err(format!(
+						"Cannot de-duplicate: feature is not sorted: {} < {}",
+						cur_str, last_str
+					))
+				}
+
+				if cur_str != last_str {
+					if cur_str.replace('?', "") == last_str.replace('?', "") {
+						return Err(format!("feature '{fname}': conflicting ? for '{cur_str}'"))
+					}
+					continue
+				}
+
+				// TODO merge the comments
+				let prefix = current.decor().prefix().unwrap().as_str().unwrap();
+				let suffix = current.decor().suffix().unwrap().as_str().unwrap();
+				if !prefix.trim().is_empty() || !suffix.trim().is_empty() {
+					return Err(format!("feature '{fname}': has a comment '{cur_str}'"))
+				}
+
+				values.remove(i);
+				log::debug!("Removed duplicate from '{cname}' / '{fname}'");
+			}
+		}
+
+		feature.clear();
+		for value in values {
+			feature.push_formatted(value.clone());
+		}
+		Ok(())
+	}
+
 	pub fn sort_feature(feature: &mut Array) {
 		let mut values = feature.iter().cloned().collect::<Vec<_>>();
 		// DOGSHIT CODE
@@ -267,31 +311,40 @@ impl AutoFixer {
 
 	pub fn canonicalize_features(
 		&mut self,
+		cname: &str,
 		mode_per_feature: &Map<String, Vec<Mode>>,
 		line_width: u32,
-	) -> Result<(), String> {
+	) -> Result<(), Vec<String>> {
 		let features = self.get_all_features();
+		let mut errors = Vec::new();
 
-		for feature_name in features.iter() {
-			let feature = self.get_feature_mut(feature_name).unwrap();
+		for fname in features.iter() {
+			let feature = self.get_feature_mut(fname).unwrap();
+			let modes = mode_per_feature.get(fname).cloned().unwrap_or_default();
 
-			if let Some(modes) = mode_per_feature.get(feature_name) {
-				if modes.contains(&Mode::None) {
-					continue
-				}
-				if modes.contains(&Mode::Sort) {
-					Self::sort_feature(feature);
-				}
-				if modes.contains(&Mode::Canonicalize) {
-					Self::format_feature(feature_name, feature, line_width)?;
-				}
-			} else {
+			if modes.contains(&Mode::None) {
+				continue
+			}
+			if modes.is_empty() || modes.contains(&Mode::Sort) {
 				Self::sort_feature(feature);
-				Self::format_feature(feature_name, feature, line_width)?;
+			}
+			if modes.is_empty() || modes.contains(&Mode::Dedub) {
+				let _ = Self::dedub_feature(cname, fname, feature).map_err(|e| {
+					errors.push(e);
+				});
+			}
+			if modes.is_empty() || modes.contains(&Mode::Canonicalize) {
+				let _ = Self::format_feature(fname, feature, line_width).map_err(|e| {
+					errors.push(e);
+				});
 			}
 		}
 
-		Ok(())
+		if errors.is_empty() {
+			Ok(())
+		} else {
+			Err(errors)
+		}
 	}
 
 	fn format_pre_and_suffix(fix: String) -> String {

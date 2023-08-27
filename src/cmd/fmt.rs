@@ -19,6 +19,7 @@ pub struct FormatCmd {
 /// Sub-commands of the [Format](FormatCmd) command.
 #[derive(Debug, clap::Subcommand)]
 pub enum SubCommand {
+	#[clap(alias = "f")]
 	Features(FormatFeaturesCmd),
 }
 
@@ -40,7 +41,7 @@ pub struct FormatFeaturesCmd {
 	modify_paths: Vec<PathBuf>,
 
 	/// Only check if the features are formatted but do not modify them.
-	#[clap(long)]
+	#[clap(long, short)]
 	check: bool,
 
 	/// The maximal length of a line for a feature.
@@ -72,6 +73,7 @@ pub enum Mode {
 	None,
 	/// Alphabetically sort the feature entries.
 	Sort,
+	Dedub,
 	/// Canonicalize the formatting of the feature entries.
 	///
 	/// This means that the order is not changed but that white spaces and newlines are normalized.
@@ -87,7 +89,7 @@ impl FromStr for Mode {
 			"canonicalize" => Ok(Self::Canonicalize),
 			"sort" => Ok(Self::Sort),
 			"none" => Ok(Self::None),
-			_ => panic!("Invalid Mode: {s}. Expected 'canonicalize' or 'sort'"), // FIXME
+			_ => panic!("Invalid Mode: {s}. Expected 'canonicalize', 'sort' or 'none'"), // FIXME
 		}
 	}
 }
@@ -108,18 +110,40 @@ impl FormatFeaturesCmd {
 		let allowed_dir = canonicalize(&self.cargo_args.manifest_path).unwrap();
 		let allowed_dir = allowed_dir.parent().unwrap();
 		let mut offenders = Vec::new();
+		// (path, crate) -> errors
+		let mut errors = Map::<(PathBuf, String), Vec<String>>::new();
 
-		log::debug!("Checking {} crate{}", meta.packages.len(), plural(meta.packages.len()),);
+		log::debug!("Checking {} crate{}", meta.packages.len(), plural(meta.packages.len()));
 
 		for pkg in meta.packages.iter() {
 			let path = canonicalize(pkg.manifest_path.clone().into_std_path_buf()).unwrap();
 
 			let mut fixer = AutoFixer::from_manifest(&path).unwrap();
-			fixer.canonicalize_features(&modes, self.line_width).unwrap();
-			if fixer.modified() {
+			if let Err(errs) = fixer.canonicalize_features(&pkg.name, &modes, self.line_width) {
+				let path = path.strip_prefix(allowed_dir).unwrap().to_path_buf();
+				errors.entry((path.clone(), pkg.name.clone())).or_default().extend(errs);
+			} else if fixer.modified() {
 				offenders.push((path, &pkg.name, fixer));
 			}
 		}
+		if !errors.is_empty() {
+			let num_errors = errors.values().map(|errs| errs.len()).sum::<usize>();
+			println!(
+				"Please fix {} error{} in {} crate{} manually:",
+				global.red(&num_errors.to_string()),
+				plural(num_errors),
+				global.red(&errors.len().to_string()),
+				plural(errors.len())
+			);
+			for ((path, pkg), errs) in errors.iter() {
+				println!("  {} ({})", global.bold(pkg), path.display());
+				for err in errs.iter() {
+					println!("    {err}");
+				}
+			}
+			std::process::exit(global.error_code())
+		}
+
 		if offenders.is_empty() {
 			log::debug!(
 				"Checked {} crate{}: all formatted",
@@ -206,6 +230,12 @@ impl FormatFeaturesCmd {
 			println!("{}", global.yellow("WARNING: --workspace is the default now"));
 		}
 		args.workspace = !self.no_workspace;
-		args.load_metadata().expect("Loads metadata")
+		match args.load_metadata() {
+			Ok(meta) => meta,
+			Err(err) => {
+				println!("{}", global.red(&err));
+				std::process::exit(1)
+			},
+		}
 	}
 }

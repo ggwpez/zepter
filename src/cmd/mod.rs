@@ -24,7 +24,7 @@ pub struct Command {
 #[derive(Debug, clap::Parser)]
 pub struct GlobalArgs {
 	/// Only print errors. Supersedes `--log`.
-	#[clap(long, global = true)]
+	#[clap(long, short, global = true)]
 	quiet: bool,
 
 	/// Log level to use.
@@ -54,6 +54,7 @@ pub struct GlobalArgs {
 enum SubCommand {
 	Trace(trace::TraceCmd),
 	Lint(lint::LintCmd),
+	#[clap(alias = "fmt", alias = "f")]
 	Format(fmt::FormatCmd),
 }
 

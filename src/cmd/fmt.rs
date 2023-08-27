@@ -48,8 +48,9 @@ pub struct FormatFeaturesCmd {
 	line_width: u32,
 
 	/// How to handle overlapping and duplicate entires.
-	/// 
-	/// A duplicate in this sense is everything that touches the same dependency with the same features. 
+	///
+	/// A duplicate in this sense is everything that touches the same dependency with the same
+	/// features.
 	#[clap(long, value_enum, value_name = "DUP_HANDLING", default_value_t = DuplicateHandling::Merge, verbatim_doc_comment)]
 	duplicates: DuplicateHandling,
 
@@ -78,6 +79,7 @@ pub enum Mode {
 	None,
 	/// Alphabetically sort the feature entries.
 	Sort,
+	Dedub,
 	/// Canonicalize the formatting of the feature entries.
 	///
 	/// This means that the order is not changed but that white spaces and newlines are normalized.
@@ -123,6 +125,7 @@ impl FormatFeaturesCmd {
 		let allowed_dir = canonicalize(&self.cargo_args.manifest_path).unwrap();
 		let allowed_dir = allowed_dir.parent().unwrap();
 		let mut offenders = Vec::new();
+		let mut unfixable = Vec::new();
 
 		log::debug!("Checking {} crate{}", meta.packages.len(), plural(meta.packages.len()),);
 
@@ -130,8 +133,9 @@ impl FormatFeaturesCmd {
 			let path = canonicalize(pkg.manifest_path.clone().into_std_path_buf()).unwrap();
 
 			let mut fixer = AutoFixer::from_manifest(&path).unwrap();
-			fixer.canonicalize_features(&modes, self.line_width).unwrap();
-			if fixer.modified() {
+			if let Err(err) = fixer.canonicalize_features(&modes, self.line_width) {
+				unfixable.push((path, &pkg.name, err));
+			} else if fixer.modified() {
 				offenders.push((path, &pkg.name, fixer));
 			}
 		}

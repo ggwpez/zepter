@@ -70,6 +70,44 @@ impl AutoFixer {
 		true
 	}
 
+	// Assumes sorting
+	pub fn dedub_feature(fname: &str, feature: &mut Array) -> Result<(), String> {
+		let mut values = feature.iter().cloned().collect::<Vec<_>>();
+
+		for i in (0..values.len()).rev() {
+			let last: Option<Value> = if i == 0 { None } else { Some(values[i - 1].clone()) };
+			let current = &values[i];
+			let cur_str = current.as_str().unwrap();
+
+			if let Some(ref last) = last {
+				let last_str = last.as_str().unwrap();
+				if cur_str < last_str {
+					return Err(format!(
+						"Cannot de-duplicate: feature is not sorted: {} < {}",
+						cur_str, last_str
+					))
+				}
+
+				if cur_str != last_str {
+					if cur_str.replace('?', "") == last_str.replace('?', "") {
+						return Err(format!("Feature '{fname}': ambiguous ? for '{cur_str}'"))
+					}
+					continue
+				}
+
+				// TODO merge the comments
+				log::info!("Removed duplicate feature '{}'", cur_str);
+				values.remove(i);
+			}
+		}
+
+		feature.clear();
+		for value in values {
+			feature.push_formatted(value.clone());
+		}
+		Ok(())
+	}
+
 	pub fn sort_feature(feature: &mut Array) {
 		let mut values = feature.iter().cloned().collect::<Vec<_>>();
 		// DOGSHIT CODE
@@ -272,22 +310,21 @@ impl AutoFixer {
 	) -> Result<(), String> {
 		let features = self.get_all_features();
 
-		for feature_name in features.iter() {
-			let feature = self.get_feature_mut(feature_name).unwrap();
+		for fname in features.iter() {
+			let feature = self.get_feature_mut(fname).unwrap();
+			let modes = mode_per_feature.get(fname).cloned().unwrap_or_default();
 
-			if let Some(modes) = mode_per_feature.get(feature_name) {
-				if modes.contains(&Mode::None) {
-					continue
-				}
-				if modes.contains(&Mode::Sort) {
-					Self::sort_feature(feature);
-				}
-				if modes.contains(&Mode::Canonicalize) {
-					Self::format_feature(feature_name, feature, line_width)?;
-				}
-			} else {
+			if modes.contains(&Mode::None) {
+				continue
+			}
+			if modes.is_empty() || modes.contains(&Mode::Sort) {
 				Self::sort_feature(feature);
-				Self::format_feature(feature_name, feature, line_width)?;
+			}
+			if modes.is_empty() || modes.contains(&Mode::Dedub) {
+				Self::dedub_feature(fname, feature)?;
+			}
+			if modes.is_empty() || modes.contains(&Mode::Canonicalize) {
+				Self::format_feature(fname, feature, line_width)?;
 			}
 		}
 

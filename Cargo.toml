@@ -48,10 +48,7 @@ void = "1.0.2"
 [features]
 default = [ "logging" ]
 
-logging = [ 
-	"dep:env_logger",
-	"dep:log",
-]
+logging = [ "dep:env_logger", "dep:log" ]
 
 testing = [
 	"dep:anyhow",
@@ -60,7 +57,6 @@ testing = [
 	"dep:serde",
 	"dep:serde_yaml",
 	"dep:tempfile",
-
 ]
 
 [profile.dev]

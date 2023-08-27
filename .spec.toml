@@ -1,3 +1,5 @@
+# UNUSED these are some ides on how to do config files.
+
 test: Check that the feature propagates.
 	given:
 		crates: [A, B]

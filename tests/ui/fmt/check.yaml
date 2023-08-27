@@ -31,6 +31,14 @@ cases:
       C
     Run again without --check to format them.
   code: 1
+- cmd: f f -c
+  stdout: |
+    Found 3 crates with unformatted features:
+      A
+      B
+      C
+    Run again without --check to format them.
+  code: 1
 - cmd: format features --exit-code-zero
   stdout: |
     Found 3 crates with unformatted features:

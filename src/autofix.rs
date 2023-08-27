@@ -103,7 +103,7 @@ impl AutoFixer {
 				}
 
 				values.remove(i);
-				log::info!("Removed duplicate from '{cname}' / '{fname}'");
+				log::debug!("Removed duplicate from '{cname}' / '{fname}'");
 			}
 		}
 

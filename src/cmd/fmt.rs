@@ -41,7 +41,7 @@ pub struct FormatFeaturesCmd {
 	modify_paths: Vec<PathBuf>,
 
 	/// Only check if the features are formatted but do not modify them.
-	#[clap(long)]
+	#[clap(long, short)]
 	check: bool,
 
 	/// The maximal length of a line for a feature.

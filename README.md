@@ -2,15 +2,80 @@
 
 [![Rust](https://github.com/ggwpez/zepter/actions/workflows/rust.yml/badge.svg)](https://github.com/ggwpez/zepter/actions/workflows/rust.yml)
 [![crates.io](https://img.shields.io/crates/v/zepter.svg)](https://crates.io/crates/zepter)
-![MSRV](https://img.shields.io/badge/MSRV-1.65-informational)
+![MSRV](https://img.shields.io/badge/MSRV-1.70-informational)
 [![docs.rs](https://img.shields.io/docsrs/zepter)](https://docs.rs/zepter/latest/zepter)
 
-Analyze and fix feature propagation in your Rust workspace. The goal of this tool is to automatically lint and fix feature propagation in CI runs.
+Analyze, Fix and Format features in your Rust workspace. The goal of this tool is to have this CI ready to prevent common errors with Rust features.
 
 ## Install
 
 ```bash
 cargo install -f zepter --locked
+```
+
+## Commands
+
+zepter
+- format
+  - features: Format features layout and remove duplicates.
+- trace: Trace dependencies paths.
+- lint
+  - propagate-features: Check that features are passed down.
+  - never-enables: A feature should never enable another other.
+  - never-implies *(⚠️ unstable)*: A feature should never transitively imply another one.
+  - only-enables *(⚠️ unstable)*: A features should exclusively enable another one.
+  - why-enables *(⚠️ unstable)*: Find out why a specific feature is enables.
+
+## Example - Feature Formatting
+
+To ensure that your features are in canonical formatting, just run:
+
+```bash
+zepter format features --check
+# Or shorter:
+zepter f f -c
+```
+
+The output will tell you which features are missing formatting:
+
+```pre
+Found 3 crates with unformatted features:
+  polkadot-cli
+  polkadot-runtime-common
+  polkadot-runtime-parachains
+  ...
+Run again without --check to format them.
+```
+
+You can then re-run without the `check`/`c` flag to get it fixed automatically:
+
+```pre
+Found 3 crates with unformatted features:
+  polkadot-cli
+  polkadot-parachain
+  polkadot-core-primitives
+  polkadot-primitives
+  ...
+Formatted 37 crates (all fixed).
+```
+
+Looking at the diff that this command produces; Zepter assumes a default line width of 80. For one-lined features they will just be padded with spaces:
+
+```patch
+-default = [
+-       "static_assertions",
+-]
++default = [ "static_assertions" ]
+```
+
+Entries are sorted, comments are kept and indentation is one tab for your convenience 😊
+
+```patch
+-       # Hi
+-       "xcm/std",
+        "xcm-builder/std",
++       # Hi
++       "xcm/std",
 ```
 
 ## Example - Fixing feature propagation

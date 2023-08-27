@@ -71,7 +71,7 @@ impl AutoFixer {
 	}
 
 	// Assumes sorting
-	pub fn dedub_feature(fname: &str, feature: &mut Array) -> Result<(), String> {
+	pub fn dedub_feature(cname: &str, fname: &str, feature: &mut Array) -> Result<(), String> {
 		let mut values = feature.iter().cloned().collect::<Vec<_>>();
 
 		for i in (0..values.len()).rev() {
@@ -90,14 +90,20 @@ impl AutoFixer {
 
 				if cur_str != last_str {
 					if cur_str.replace('?', "") == last_str.replace('?', "") {
-						return Err(format!("Feature '{fname}': ambiguous ? for '{cur_str}'"))
+						return Err(format!("feature '{fname}': conflicting ? for '{cur_str}'"))
 					}
 					continue
 				}
 
 				// TODO merge the comments
-				log::info!("Removed duplicate feature '{}'", cur_str);
+				let prefix = current.decor().prefix().unwrap().as_str().unwrap();
+				let suffix = current.decor().suffix().unwrap().as_str().unwrap();
+				if !prefix.trim().is_empty() || !suffix.trim().is_empty() {
+					return Err(format!("feature '{fname}': has a comment '{cur_str}'"))
+				}
+
 				values.remove(i);
+				log::info!("Removed duplicate from '{cname}' / '{fname}'");
 			}
 		}
 
@@ -305,10 +311,12 @@ impl AutoFixer {
 
 	pub fn canonicalize_features(
 		&mut self,
+		cname: &str,
 		mode_per_feature: &Map<String, Vec<Mode>>,
 		line_width: u32,
-	) -> Result<(), String> {
+	) -> Result<(), Vec<String>> {
 		let features = self.get_all_features();
+		let mut errors = Vec::new();
 
 		for fname in features.iter() {
 			let feature = self.get_feature_mut(fname).unwrap();
@@ -321,14 +329,22 @@ impl AutoFixer {
 				Self::sort_feature(feature);
 			}
 			if modes.is_empty() || modes.contains(&Mode::Dedub) {
-				Self::dedub_feature(fname, feature)?;
+				let _ = Self::dedub_feature(cname, fname, feature).map_err(|e| {
+					errors.push(e);
+				});
 			}
 			if modes.is_empty() || modes.contains(&Mode::Canonicalize) {
-				Self::format_feature(fname, feature, line_width)?;
+				let _ = Self::format_feature(fname, feature, line_width).map_err(|e| {
+					errors.push(e);
+				});
 			}
 		}
 
-		Ok(())
+		if errors.is_empty() {
+			Ok(())
+		} else {
+			Err(errors)
+		}
 	}
 
 	fn format_pre_and_suffix(fix: String) -> String {

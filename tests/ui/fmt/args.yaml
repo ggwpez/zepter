@@ -2,6 +2,10 @@ crates:
 - name: A
 cases:
 - cmd: format features
-  stdout:
+- cmd: fmt features
+- cmd: f features
+- cmd: format f
+- cmd: fmt f
+- cmd: f f
 - cmd: format features --color --check --print-paths --quiet --log trace
 - cmd: format features --color --print-paths --quiet --log trace --mode-per-feature "F:sort" --mode-per-feature "G:none" --mode-per-feature "H:canonicalize" --ignore-feature G,H --ignore-feature Z

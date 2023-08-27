@@ -54,6 +54,7 @@ pub struct GlobalArgs {
 enum SubCommand {
 	Trace(trace::TraceCmd),
 	Lint(lint::LintCmd),
+	#[clap(alias = "fmt", alias = "f")]
 	Format(fmt::FormatCmd),
 }
 

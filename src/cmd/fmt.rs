@@ -19,6 +19,7 @@ pub struct FormatCmd {
 /// Sub-commands of the [Format](FormatCmd) command.
 #[derive(Debug, clap::Subcommand)]
 pub enum SubCommand {
+	#[clap(alias = "f")]
 	Features(FormatFeaturesCmd),
 }
 
@@ -125,20 +126,40 @@ impl FormatFeaturesCmd {
 		let allowed_dir = canonicalize(&self.cargo_args.manifest_path).unwrap();
 		let allowed_dir = allowed_dir.parent().unwrap();
 		let mut offenders = Vec::new();
-		let mut unfixable = Vec::new();
+		// (path, crate) -> errors
+		let mut errors = Map::<(PathBuf, String), Vec<String>>::new();
 
-		log::debug!("Checking {} crate{}", meta.packages.len(), plural(meta.packages.len()),);
+		log::debug!("Checking {} crate{}", meta.packages.len(), plural(meta.packages.len()));
 
 		for pkg in meta.packages.iter() {
 			let path = canonicalize(pkg.manifest_path.clone().into_std_path_buf()).unwrap();
 
 			let mut fixer = AutoFixer::from_manifest(&path).unwrap();
-			if let Err(err) = fixer.canonicalize_features(&modes, self.line_width) {
-				unfixable.push((path, &pkg.name, err));
+			if let Err(errs) = fixer.canonicalize_features(&pkg.name, &modes, self.line_width) {
+				let path = path.strip_prefix(allowed_dir).unwrap().to_path_buf();
+				errors.entry((path.clone(), pkg.name.clone())).or_default().extend(errs);
 			} else if fixer.modified() {
 				offenders.push((path, &pkg.name, fixer));
 			}
 		}
+		if !errors.is_empty() {
+			let num_errors = errors.values().map(|errs| errs.len()).sum::<usize>();
+			println!(
+				"Please fix {} error{} in {} crate{} manually:",
+				global.red(&num_errors.to_string()),
+				plural(num_errors),
+				global.red(&errors.len().to_string()),
+				plural(errors.len())
+			);
+			for ((path, pkg), errs) in errors.iter() {
+				println!("  {} ({})", global.bold(pkg), path.display());
+				for err in errs.iter() {
+					println!("    {err}");
+				}
+			}
+			std::process::exit(global.error_code())
+		}
+
 		if offenders.is_empty() {
 			log::debug!(
 				"Checked {} crate{}: all formatted",
@@ -225,6 +246,12 @@ impl FormatFeaturesCmd {
 			println!("{}", global.yellow("WARNING: --workspace is the default now"));
 		}
 		args.workspace = !self.no_workspace;
-		args.load_metadata().expect("Loads metadata")
+		match args.load_metadata() {
+			Ok(meta) => meta,
+			Err(err) => {
+				println!("{}", global.red(&err));
+				std::process::exit(1)
+			},
+		}
 	}
 }

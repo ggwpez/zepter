@@ -1,0 +1,10 @@
+repo:
+  name: substrate
+  ref: 033d4e86cc7eff0066cd376b9375f815761d653c
+cases:
+- cmd: f f
+  stdout: |
+    Please fix 1 error in 1 crate manually:
+      node-template-runtime (substrate/bin/node-template/runtime/Cargo.toml)
+        feature 'std': conflicting ? for 'frame-try-runtime?/std'
+  code: 1

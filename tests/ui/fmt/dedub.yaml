@@ -1,0 +1,39 @@
+crates:
+- name: A
+  deps:
+  - B
+  features:
+    F0:
+    - - B
+      - F0
+    - - B
+      - F0
+- name: B
+  features:
+    F0: null
+cases:
+- cmd: format f
+  stdout: |
+    Found 2 crates with unformatted features:
+      A
+      B
+    Formatted 2 crates (all fixed).
+  diff: |
+    diff --git A/Cargo.toml A/Cargo.toml
+    index 45aeab..32d177 100644
+    --- A/Cargo.toml
+    +++ A/Cargo.toml
+    @@ -12,4 +12 @@ B = { version = "*", path = "../B"}
+    -F0 = [
+    -"B/F0",
+    -"B/F0",
+    -]
+    +F0 = [ "B/F0" ]
+    diff --git B/Cargo.toml B/Cargo.toml
+    index e35c7e..8bd6bd 100644
+    --- B/Cargo.toml
+    +++ B/Cargo.toml
+    @@ -11,2 +11 @@ edition = "2021"
+    -F0 = [
+    -]
+    +F0 = []

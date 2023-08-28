@@ -341,6 +341,7 @@ impl PropagateFeatureCmd {
 		let allowed_dir = allowed_dir.parent().unwrap();
 		let feature = self.feature.clone();
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
+		let dag = build_feature_dag(&meta, &meta.packages);
 		let pkgs = meta.packages.iter().collect::<Vec<_>>();
 		let mut to_check = pkgs.clone();
 		if !self.packages.is_empty() {
@@ -385,13 +386,27 @@ impl PropagateFeatureCmd {
 							if self.left_side_feature_missing == MuteSetting::Error {
 								feature_missing.entry(pkg.id.to_string()).or_default().insert(dep);
 							},
-						Some(enabled) => {
-							let want_opt = format!("{}?/{}", dep.name(), feature);
-							let want_req = format!("{}/{}", dep.name(), feature);
+						Some(_enabled) => {
 							// TODO check that optional deps are only enabled as optional unless
 							// overwritten with `--feature-enables-dep`.
+							let target = CrateAndFeature(dep.pkg.id.repr.clone(), feature.clone());
+							let want_opt = CrateAndFeature(format!("{}?", &pkg.id), feature.clone());
+							let want_req = CrateAndFeature(pkg.id.repr.clone(), feature.clone());
+							
+							if dag.adjacent(&want_opt, &target) {
+								log::info!("Opt reachable: {} -> {}", want_opt, target);
+						 	} else if dag.adjacent(&want_req, &target) {
+								log::info!("Req reachable: {} -> {}", want_opt, target);
+							} else {
+								//panic!("Not reachable: {} -> {}\n\n{:?}\n\n", want_opt, target, &dag.edges);
 
-							if !enabled.contains(&want_opt) && !enabled.contains(&want_req) {
+								propagate_missing
+									.entry(pkg.id.to_string())
+									.or_default()
+									.insert(dep);
+							}
+
+							/*if !enabled.contains(&want_opt) && !enabled.contains(&want_req) {
 								propagate_missing
 									.entry(pkg.id.to_string())
 									.or_default()
@@ -399,7 +414,7 @@ impl PropagateFeatureCmd {
 							} else {
 								// All ok
 								feature_used = true;
-							}
+							}*/
 						},
 					}
 				}

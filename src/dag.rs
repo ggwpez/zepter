@@ -139,11 +139,16 @@ where
 		self.edges.entry(node).or_default();
 	}
 
-	/// Whether `from` is directly connected to `to`.
+	/// Whether `from` is directly adjacent to `to`.
 	///
 	/// *Directly* means with via an edge.
-	pub fn connected(&self, from: &T, to: &T) -> bool {
+	pub fn adjacent(&self, from: &T, to: &T) -> bool {
 		self.edges.get(from).map_or(false, |v| v.contains(to))
+	}
+
+	/// Whether `from` is connected to `to` via.
+	pub fn connected(&self, from: &T, to: &T) -> bool {
+		self.any_path(from, to).is_some()
 	}
 
 	/// Whether `from` appears on the lhs of the edge relation.

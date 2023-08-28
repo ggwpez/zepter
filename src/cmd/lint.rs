@@ -341,6 +341,7 @@ impl PropagateFeatureCmd {
 		let allowed_dir = allowed_dir.parent().unwrap();
 		let feature = self.feature.clone();
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
+		let dag = build_feature_dag(&meta, &meta.packages);
 		let pkgs = meta.packages.iter().collect::<Vec<_>>();
 		let mut to_check = pkgs.clone();
 		if !self.packages.is_empty() {
@@ -362,11 +363,8 @@ impl PropagateFeatureCmd {
 		let mut propagate_missing = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
 		// (Crate that missing the feature) -> (Dependency that has it)
 		let mut feature_missing = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
-		// Crate that has the feature but does not need it.
-		let mut feature_maybe_unused = BTreeSet::<CrateId>::new();
 
 		for pkg in to_check.iter() {
-			let mut feature_used = false;
 			// TODO that it does not enable other features.
 
 			for dep in pkg.dependencies.iter() {
@@ -375,38 +373,50 @@ impl PropagateFeatureCmd {
 				let Some(dep) = resolve_dep(pkg, dep, &meta) else {
 					// Either outside workspace or not resolved, possibly due to not being used at
 					// all because of the target or whatever.
-					feature_used = true;
 					continue
 				};
 
-				if dep.pkg.features.contains_key(&feature) {
-					match pkg.features.get(&feature) {
-						None =>
-							if self.left_side_feature_missing == MuteSetting::Error {
-								feature_missing.entry(pkg.id.to_string()).or_default().insert(dep);
-							},
-						Some(enabled) => {
-							let want_opt = format!("{}?/{}", dep.name(), feature);
-							let want_req = format!("{}/{}", dep.name(), feature);
-							// TODO check that optional deps are only enabled as optional unless
-							// overwritten with `--feature-enables-dep`.
-
-							if !enabled.contains(&want_opt) && !enabled.contains(&want_req) {
-								propagate_missing
-									.entry(pkg.id.to_string())
-									.or_default()
-									.insert(dep);
-							} else {
-								// All ok
-								feature_used = true;
-							}
-						},
-					}
+				if !dep.pkg.features.contains_key(&feature) {
+					continue
 				}
-			}
+				if pkg.features.get(&feature).is_none() {
+					if self.left_side_feature_missing == MuteSetting::Error {
+						feature_missing.entry(pkg.id.to_string()).or_default().insert(dep);
+					}
+					continue
+				}
 
-			if !feature_used && pkg.features.contains_key(&feature) {
-				feature_maybe_unused.insert(pkg.id.to_string());
+				// TODO check that optional deps are only enabled as optional unless
+				// overwritten with `--feature-enables-dep`.
+				let target = CrateAndFeature(dep.pkg.id.repr.clone(), feature.clone());
+				let want_opt = CrateAndFeature(format!("{}?", &pkg.id), feature.clone());
+				let want_req = CrateAndFeature(pkg.id.repr.clone(), feature.clone());
+
+				if dag.adjacent(&want_opt, &target) || dag.adjacent(&want_req, &target) {
+					// Easy case, all good.
+					continue
+				}
+				let default_entrypoint = CrateAndFeature(pkg.id.repr.clone(), "#entrypoint".into());
+				let sub_dag = dag.sub(|CrateAndFeature(p, f)| {
+					(p == &pkg.id.repr && f == "#entrypoint") || (p == &dep.pkg.id.repr)
+				});
+				if let Some(p) = sub_dag.any_path(&default_entrypoint, &target) {
+					// Easy case, all good.
+					log::debug!(
+						"Reachable from the default entrypoint: {:?} vis {:?}",
+						target,
+						p.0
+					);
+					continue
+				}
+				// Now the more complicated case where `pkg/F -> dep/G .. -> dep/F`. So to say a
+				// multi-hop internal transitive propagation of the feature on the dependency side.
+				/*let sub_dag = dag.sub(|CrateAndFeature(p, f)| {
+					(p == &dep.pkg.id.repr)
+				});*/
+				//panic!("Not reachable: sub_dag:\n\n{:#?}\n\n", dag.edges);
+
+				propagate_missing.entry(pkg.id.to_string()).or_default().insert(dep);
 			}
 		}
 		let faulty_crates: BTreeSet<CrateId> = propagate_missing
@@ -640,6 +650,15 @@ fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeature> 
 					CrateAndFeature(pkg.id.to_string(), "default".into()),
 					CrateAndFeature(dep.name.clone(), "default".into()),
 				);
+
+				let Some(dep_id) = resolve_dep(pkg, dep, meta) else { continue };
+
+				// Hacky…
+				dag.add_edge(
+					CrateAndFeature(pkg.id.to_string(), "#entrypoint".into()),
+					CrateAndFeature(dep_id.pkg.id.repr.clone(), "default".into()),
+				);
+				log::debug!("Adding default entrypoint for {} on {}", dep.name, pkg.name);
 			}
 			for feature in &dep.features {
 				dag.add_edge(

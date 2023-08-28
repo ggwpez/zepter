@@ -139,11 +139,16 @@ where
 		self.edges.entry(node).or_default();
 	}
 
-	/// Whether `from` is directly connected to `to`.
+	/// Whether `from` is directly adjacent to `to`.
 	///
 	/// *Directly* means with via an edge.
-	pub fn connected(&self, from: &T, to: &T) -> bool {
+	pub fn adjacent(&self, from: &T, to: &T) -> bool {
 		self.edges.get(from).map_or(false, |v| v.contains(to))
+	}
+
+	/// Whether `from` is reachable to `to` via.
+	pub fn reachable(&self, from: &T, to: &T) -> bool {
+		self.any_path(from, to).is_some()
 	}
 
 	/// Whether `from` appears on the lhs of the edge relation.
@@ -168,6 +173,16 @@ where
 		let mut edges = BTreeMap::new();
 		let rhs = self.edges.get(&from).cloned().unwrap_or_default();
 		edges.insert(from, rhs);
+		Self { edges }
+	}
+
+	pub fn sub(&self, pred: impl Fn(&T) -> bool) -> Self {
+		let mut edges = BTreeMap::new();
+		for (k, v) in self.edges.iter() {
+			if pred(k) {
+				edges.insert(k.clone(), v.clone());
+			}
+		}
 		Self { edges }
 	}
 

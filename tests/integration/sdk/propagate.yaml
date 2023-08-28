@@ -1,0 +1,931 @@
+repo:
+  name: polkadot-sdk
+  ref: 70ab64bd1593dc15e6813de71f8ba280f2fb56f1
+cases:
+- cmd: lint propagate-feature --feature std --left-side-feature-missing=ignore --workspace --fix
+  stdout: |
+    crate 'asset-hub-kusama-runtime'
+      feature 'std'
+        must propagate to:
+          cumulus-pallet-session-benchmarking
+          frame-benchmarking
+          frame-system-benchmarking
+          frame-try-runtime
+          pallet-xcm-benchmarks
+          sp-storage
+          sp-weights
+    crate 'asset-hub-polkadot-runtime'
+      feature 'std'
+        must propagate to:
+          cumulus-pallet-session-benchmarking
+          frame-benchmarking
+          frame-system-benchmarking
+          frame-try-runtime
+          pallet-xcm-benchmarks
+          sp-storage
+          sp-weights
+    crate 'asset-hub-westend-runtime'
+      feature 'std'
+        must propagate to:
+          cumulus-pallet-session-benchmarking
+          frame-benchmarking
+          frame-system-benchmarking
+          frame-try-runtime
+          pallet-xcm-benchmarks
+          sp-storage
+    crate 'asset-test-utils'
+      feature 'std'
+        must propagate to:
+          sp-core
+    crate 'bp-test-utils'
+      feature 'std'
+        must propagate to:
+          bp-parachains
+          bp-runtime
+          sp-trie
+    crate 'bridge-hub-kusama-runtime'
+      feature 'std'
+        must propagate to:
+          cumulus-pallet-session-benchmarking
+          frame-benchmarking
+          frame-system-benchmarking
+          frame-try-runtime
+          pallet-xcm-benchmarks
+          sp-storage
+    crate 'bridge-hub-polkadot-runtime'
+      feature 'std'
+        must propagate to:
+          cumulus-pallet-session-benchmarking
+          frame-benchmarking
+          frame-system-benchmarking
+          frame-try-runtime
+          pallet-xcm-benchmarks
+          sp-storage
+    crate 'bridge-hub-rococo-runtime'
+      feature 'std'
+        must propagate to:
+          cumulus-pallet-session-benchmarking
+          frame-system-benchmarking
+          frame-try-runtime
+          pallet-xcm-benchmarks
+          sp-storage
+    crate 'bridge-hub-test-utils'
+      feature 'std'
+        must propagate to:
+          pallet-collator-selection
+          pallet-xcm-benchmarks
+    crate 'bridge-runtime-common'
+      feature 'std'
+        must propagate to:
+          bp-relayers
+    crate 'collectives-polkadot-runtime'
+      feature 'std'
+        must propagate to:
+          cumulus-pallet-session-benchmarking
+          frame-benchmarking
+          frame-system-benchmarking
+          frame-try-runtime
+          sp-arithmetic
+          sp-io
+          sp-storage
+    crate 'contracts-rococo-runtime'
+      feature 'std'
+        must propagate to:
+          cumulus-pallet-session-benchmarking
+          frame-benchmarking
+          frame-system-benchmarking
+          sp-storage
+    crate 'cumulus-pallet-aura-ext'
+      feature 'std'
+        must propagate to:
+          pallet-timestamp
+    crate 'cumulus-pallet-dmp-queue'
+      feature 'std'
+        must propagate to:
+          sp-core
+          sp-version
+    crate 'cumulus-pallet-parachain-system'
+      feature 'std'
+        must propagate to:
+          polkadot-parachain
+          sp-inherents
+    crate 'cumulus-pallet-xcm'
+      feature 'std'
+        must propagate to:
+          sp-io
+    crate 'cumulus-pallet-xcmp-queue'
+      feature 'std'
+        must propagate to:
+          frame-benchmarking
+    crate 'cumulus-ping'
+      feature 'std'
+        must propagate to:
+          cumulus-pallet-xcm
+    crate 'cumulus-primitives-core'
+      feature 'std'
+        must propagate to:
+          xcm
+    crate 'cumulus-test-relay-sproof-builder'
+      feature 'std'
+        must propagate to:
+          polkadot-primitives
+    crate 'glutton-runtime'
+      feature 'std'
+        must propagate to:
+          frame-benchmarking
+          frame-system-benchmarking
+          frame-try-runtime
+          sp-storage
+    crate 'kusama-runtime'
+      feature 'std'
+        must propagate to:
+          binary-merkle-tree
+          frame-benchmarking
+          frame-system-benchmarking
+          pallet-election-provider-support-benchmarking
+          pallet-nomination-pools-benchmarking
+          pallet-offences-benchmarking
+          pallet-session-benchmarking
+          pallet-xcm-benchmarks
+          sp-storage
+          sp-tracing
+    crate 'pallet-bridge-relayers'
+      feature 'std'
+        must propagate to:
+          pallet-bridge-messages
+    crate 'pallet-parachain-template'
+      feature 'std'
+        must propagate to:
+          sp-core
+          sp-io
+          sp-runtime
+    crate 'parachain-info'
+      feature 'std'
+        must propagate to:
+          sp-runtime
+          sp-std
+    crate 'parachain-template-runtime'
+      feature 'std'
+        must propagate to:
+          cumulus-pallet-session-benchmarking
+          frame-benchmarking
+          frame-system-benchmarking
+          frame-try-runtime
+    crate 'parachains-common'
+      feature 'std'
+        must propagate to:
+          pallet-asset-tx-payment
+          sp-core
+          sp-runtime
+          xcm-builder
+    crate 'parachains-runtimes-test-utils'
+      feature 'std'
+        must propagate to:
+          sp-core
+    crate 'penpal-runtime'
+      feature 'std'
+        must propagate to:
+          cumulus-pallet-session-benchmarking
+          frame-benchmarking
+          frame-system-benchmarking
+          frame-try-runtime
+          sp-storage
+    crate 'polkadot-runtime'
+      feature 'std'
+        must propagate to:
+          frame-benchmarking
+          frame-system-benchmarking
+          pallet-election-provider-support-benchmarking
+          pallet-nomination-pools-benchmarking
+          pallet-offences-benchmarking
+          pallet-session-benchmarking
+          pallet-xcm-benchmarks
+          runtime-parachains (renamed from polkadot-runtime-parachains)
+          sp-io
+          sp-storage
+          sp-tracing
+    crate 'polkadot-runtime-common'
+      feature 'std'
+        must propagate to:
+          frame-benchmarking
+          frame-election-provider-support
+    crate 'polkadot-runtime-metrics'
+      feature 'std'
+        must propagate to:
+          frame-benchmarking
+    crate 'polkadot-runtime-parachains'
+      feature 'std'
+        must propagate to:
+          frame-benchmarking
+          polkadot-parachain
+          sp-application-crypto
+    crate 'polkadot-test-runtime'
+      feature 'std'
+        must propagate to:
+          polkadot-runtime-parachains
+          sp-mmr-primitives
+    crate 'rococo-parachain-runtime'
+      feature 'std'
+        must propagate to:
+          frame-benchmarking
+          polkadot-parachain
+    crate 'rococo-runtime'
+      feature 'std'
+        must propagate to:
+          binary-merkle-tree
+          frame-benchmarking
+          frame-system-benchmarking
+          pallet-xcm-benchmarks
+          sp-storage
+          sp-tracing
+    crate 'shell-runtime'
+      feature 'std'
+        must propagate to:
+          frame-try-runtime
+    crate 'test-parachain-adder'
+      feature 'std'
+        must propagate to:
+          sp-io
+    crate 'test-parachain-undying'
+      feature 'std'
+        must propagate to:
+          sp-io
+    crate 'westend-runtime'
+      feature 'std'
+        must propagate to:
+          binary-merkle-tree
+          frame-benchmarking
+          frame-system-benchmarking
+          pallet-election-provider-support-benchmarking
+          pallet-nomination-pools-benchmarking
+          pallet-offences-benchmarking
+          pallet-session-benchmarking
+          pallet-xcm-benchmarks
+          sp-storage
+          sp-tracing
+    Found 139 issues and fixed 139.
+  code: 0
+  diff: "diff --git cumulus/bridges/bin/runtime-common/Cargo.toml cumulus/bridges/bin/runtime-common/Cargo.toml\nindex ee1334..cc552e 100644\n--- cumulus/bridges/bin/runtime-common/Cargo.toml\n+++ cumulus/bridges/bin/runtime-common/Cargo.toml\n@@ -79,0 +80 @@ std = [\n+\t\"bp-relayers/std\"\ndiff --git cumulus/bridges/modules/relayers/Cargo.toml cumulus/bridges/modules/relayers/Cargo.toml\nindex 8a5a4e..f7fd68 100644\n--- cumulus/bridges/modules/relayers/Cargo.toml\n+++ cumulus/bridges/modules/relayers/Cargo.toml\n@@ -51,0 +52 @@ std = [\n+\t\"pallet-bridge-messages/std\"\ndiff --git cumulus/bridges/primitives/test-utils/Cargo.toml cumulus/bridges/primitives/test-utils/Cargo.toml\nindex e841c8..8be857 100644\n--- cumulus/bridges/primitives/test-utils/Cargo.toml\n+++ cumulus/bridges/primitives/test-utils/Cargo.toml\n@@ -35,0 +36,3 @@ std = [\n+\t\"bp-parachains/std\",\n+\t\"bp-runtime/std\",\n+\t\"sp-trie/std\"\ndiff --git cumulus/pallets/aura-ext/Cargo.toml cumulus/pallets/aura-ext/Cargo.toml\nindex b29bbe..642766 100644\n--- cumulus/pallets/aura-ext/Cargo.toml\n+++ cumulus/pallets/aura-ext/Cargo.toml\n@@ -42,0 +43 @@ std = [\n+\t\"pallet-timestamp/std\"\ndiff --git cumulus/pallets/dmp-queue/Cargo.toml cumulus/pallets/dmp-queue/Cargo.toml\nindex 377738..4d3601 100644\n--- cumulus/pallets/dmp-queue/Cargo.toml\n+++ cumulus/pallets/dmp-queue/Cargo.toml\n@@ -41,0 +42,2 @@ std = [\n+\t\"sp-core/std\",\n+\t\"sp-version/std\"\ndiff --git cumulus/pallets/parachain-system/Cargo.toml cumulus/pallets/parachain-system/Cargo.toml\nindex cfc439..4aff6b 100644\n--- cumulus/pallets/parachain-system/Cargo.toml\n+++ cumulus/pallets/parachain-system/Cargo.toml\n@@ -74,0 +75,2 @@ std = [\n+\t\"polkadot-parachain/std\",\n+\t\"sp-inherents/std\"\ndiff --git cumulus/pallets/xcm/Cargo.toml cumulus/pallets/xcm/Cargo.toml\nindex d6b8c6..447a57 100644\n--- cumulus/pallets/xcm/Cargo.toml\n+++ cumulus/pallets/xcm/Cargo.toml\n@@ -31,0 +32 @@ std = [\n+\t\"sp-io/std\"\ndiff --git cumulus/pallets/xcmp-queue/Cargo.toml cumulus/pallets/xcmp-queue/Cargo.toml\nindex 2cd319..9316d4 100644\n--- cumulus/pallets/xcmp-queue/Cargo.toml\n+++ cumulus/pallets/xcmp-queue/Cargo.toml\n@@ -57,0 +58 @@ std = [\n+\t\"frame-benchmarking?/std\"\ndiff --git cumulus/parachain-template/pallets/template/Cargo.toml cumulus/parachain-template/pallets/template/Cargo.toml\nindex 9235cb..2cbfac 100644\n--- cumulus/parachain-template/pallets/template/Cargo.toml\n+++ cumulus/parachain-template/pallets/template/Cargo.toml\n@@ -39,0 +40,3 @@ std = [\n+\t\"sp-core/std\",\n+\t\"sp-io/std\",\n+\t\"sp-runtime/std\"\ndiff --git cumulus/parachain-template/runtime/Cargo.toml cumulus/parachain-template/runtime/Cargo.toml\nindex c61df9..c7b97b 100644\n--- cumulus/parachain-template/runtime/Cargo.toml\n+++ cumulus/parachain-template/runtime/Cargo.toml\n@@ -120,0 +121,4 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\"\ndiff --git cumulus/parachains/common/Cargo.toml cumulus/parachains/common/Cargo.toml\nindex 5900ec..3b1120 100644\n--- cumulus/parachains/common/Cargo.toml\n+++ cumulus/parachains/common/Cargo.toml\n@@ -65,0 +66,4 @@ std = [\n+\t\"pallet-asset-tx-payment/std\",\n+\t\"sp-core/std\",\n+\t\"sp-runtime/std\",\n+\t\"xcm-builder/std\"\ndiff --git cumulus/parachains/pallets/parachain-info/Cargo.toml cumulus/parachains/pallets/parachain-info/Cargo.toml\nindex 11876b..2be2f5 100644\n--- cumulus/parachains/pallets/parachain-info/Cargo.toml\n+++ cumulus/parachains/pallets/parachain-info/Cargo.toml\n@@ -27,0 +28,2 @@ std = [\n+\t\"sp-runtime/std\",\n+\t\"sp-std/std\"\ndiff --git cumulus/parachains/pallets/ping/Cargo.toml cumulus/parachains/pallets/ping/Cargo.toml\nindex d883be..4525c7 100644\n--- cumulus/parachains/pallets/ping/Cargo.toml\n+++ cumulus/parachains/pallets/ping/Cargo.toml\n@@ -31,0 +32 @@ std = [\n+\t\"cumulus-pallet-xcm/std\"\ndiff --git cumulus/parachains/runtimes/assets/asset-hub-kusama/Cargo.toml cumulus/parachains/runtimes/assets/asset-hub-kusama/Cargo.toml\nindex 682581..e03de7 100644\n--- cumulus/parachains/runtimes/assets/asset-hub-kusama/Cargo.toml\n+++ cumulus/parachains/runtimes/assets/asset-hub-kusama/Cargo.toml\n@@ -209,0 +210,7 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\",\n+\t\"sp-weights/std\"\ndiff --git cumulus/parachains/runtimes/assets/asset-hub-polkadot/Cargo.toml cumulus/parachains/runtimes/assets/asset-hub-polkadot/Cargo.toml\nindex dba374..f0b804 100644\n--- cumulus/parachains/runtimes/assets/asset-hub-polkadot/Cargo.toml\n+++ cumulus/parachains/runtimes/assets/asset-hub-polkadot/Cargo.toml\n@@ -189,0 +190,7 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\",\n+\t\"sp-weights/std\"\ndiff --git cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml\nindex 1e9c49..c964b3 100644\n--- cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml\n+++ cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml\n@@ -199,0 +200,6 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/assets/test-utils/Cargo.toml cumulus/parachains/runtimes/assets/test-utils/Cargo.toml\nindex 919f1b..1e8b04 100644\n--- cumulus/parachains/runtimes/assets/test-utils/Cargo.toml\n+++ cumulus/parachains/runtimes/assets/test-utils/Cargo.toml\n@@ -75,0 +76 @@ std = [\n+\t\"sp-core/std\"\ndiff --git cumulus/parachains/runtimes/bridge-hubs/bridge-hub-kusama/Cargo.toml cumulus/parachains/runtimes/bridge-hubs/bridge-hub-kusama/Cargo.toml\nindex 0dbe3e..d0749d 100644\n--- cumulus/parachains/runtimes/bridge-hubs/bridge-hub-kusama/Cargo.toml\n+++ cumulus/parachains/runtimes/bridge-hubs/bridge-hub-kusama/Cargo.toml\n@@ -127,0 +128,6 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/bridge-hubs/bridge-hub-polkadot/Cargo.toml cumulus/parachains/runtimes/bridge-hubs/bridge-hub-polkadot/Cargo.toml\nindex 9243f2..581298 100644\n--- cumulus/parachains/runtimes/bridge-hubs/bridge-hub-polkadot/Cargo.toml\n+++ cumulus/parachains/runtimes/bridge-hubs/bridge-hub-polkadot/Cargo.toml\n@@ -127,0 +128,6 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml\nindex 5e049d..8b7e37 100644\n--- cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml\n+++ cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml\n@@ -163,0 +164,5 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/bridge-hubs/test-utils/Cargo.toml cumulus/parachains/runtimes/bridge-hubs/test-utils/Cargo.toml\nindex 1efa80..4565b5 100644\n--- cumulus/parachains/runtimes/bridge-hubs/test-utils/Cargo.toml\n+++ cumulus/parachains/runtimes/bridge-hubs/test-utils/Cargo.toml\n@@ -98,0 +99,2 @@ std = [\n+\t\"pallet-collator-selection/std\",\n+\t\"pallet-xcm-benchmarks?/std\"\ndiff --git cumulus/parachains/runtimes/collectives/collectives-polkadot/Cargo.toml cumulus/parachains/runtimes/collectives/collectives-polkadot/Cargo.toml\nindex 3d2f6e..7bf470 100644\n--- cumulus/parachains/runtimes/collectives/collectives-polkadot/Cargo.toml\n+++ cumulus/parachains/runtimes/collectives/collectives-polkadot/Cargo.toml\n@@ -197,0 +198,7 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"sp-arithmetic/std\",\n+\t\"sp-io/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml\nindex 67885d..904e01 100644\n--- cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml\n+++ cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml\n@@ -130,0 +131,4 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/glutton/glutton-kusama/Cargo.toml cumulus/parachains/runtimes/glutton/glutton-kusama/Cargo.toml\nindex 43bf46..924b8a 100644\n--- cumulus/parachains/runtimes/glutton/glutton-kusama/Cargo.toml\n+++ cumulus/parachains/runtimes/glutton/glutton-kusama/Cargo.toml\n@@ -85,0 +86,4 @@ std = [\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/starters/shell/Cargo.toml cumulus/parachains/runtimes/starters/shell/Cargo.toml\nindex d15270..7a0ae5 100644\n--- cumulus/parachains/runtimes/starters/shell/Cargo.toml\n+++ cumulus/parachains/runtimes/starters/shell/Cargo.toml\n@@ -68,0 +69 @@ std = [\n+\t\"frame-try-runtime?/std\"\ndiff --git cumulus/parachains/runtimes/test-utils/Cargo.toml cumulus/parachains/runtimes/test-utils/Cargo.toml\nindex 6fbda8..8da190 100644\n--- cumulus/parachains/runtimes/test-utils/Cargo.toml\n+++ cumulus/parachains/runtimes/test-utils/Cargo.toml\n@@ -74,0 +75 @@ std = [\n+\t\"sp-core/std\"\ndiff --git cumulus/parachains/runtimes/testing/penpal/Cargo.toml cumulus/parachains/runtimes/testing/penpal/Cargo.toml\nindex dc945a..032592 100644\n--- cumulus/parachains/runtimes/testing/penpal/Cargo.toml\n+++ cumulus/parachains/runtimes/testing/penpal/Cargo.toml\n@@ -125,0 +126,5 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/testing/rococo-parachain/Cargo.toml cumulus/parachains/runtimes/testing/rococo-parachain/Cargo.toml\nindex 9a16d3..083621 100644\n--- cumulus/parachains/runtimes/testing/rococo-parachain/Cargo.toml\n+++ cumulus/parachains/runtimes/testing/rococo-parachain/Cargo.toml\n@@ -100,0 +101,2 @@ std = [\n+\t\"frame-benchmarking?/std\",\n+\t\"polkadot-parachain/std\"\ndiff --git cumulus/primitives/core/Cargo.toml cumulus/primitives/core/Cargo.toml\nindex 872278..6f306c 100644\n--- cumulus/primitives/core/Cargo.toml\n+++ cumulus/primitives/core/Cargo.toml\n@@ -34,0 +35 @@ std = [\n+\t\"xcm/std\"\ndiff --git cumulus/test/relay-sproof-builder/Cargo.toml cumulus/test/relay-sproof-builder/Cargo.toml\nindex 1f7aaf..fe7779 100644\n--- cumulus/test/relay-sproof-builder/Cargo.toml\n+++ cumulus/test/relay-sproof-builder/Cargo.toml\n@@ -30,0 +31 @@ std = [\n+\t\"polkadot-primitives/std\"\ndiff --git polkadot/parachain/test-parachains/adder/Cargo.toml polkadot/parachain/test-parachains/adder/Cargo.toml\nindex ca477e..3bda9f 100644\n--- polkadot/parachain/test-parachains/adder/Cargo.toml\n+++ polkadot/parachain/test-parachains/adder/Cargo.toml\n@@ -26 +26,5 @@ default = [ \"std\" ]\n-std = [ \"parachain/std\", \"sp-std/std\" ]\n+std = [\n+\t\"parachain/std\",\n+\t\"sp-std/std\", \n+\t\"sp-io/std\"\n+]\ndiff --git polkadot/parachain/test-parachains/undying/Cargo.toml polkadot/parachain/test-parachains/undying/Cargo.toml\nindex 192e89..2a0607 100644\n--- polkadot/parachain/test-parachains/undying/Cargo.toml\n+++ polkadot/parachain/test-parachains/undying/Cargo.toml\n@@ -27 +27,5 @@ default = [ \"std\" ]\n-std = [ \"parachain/std\", \"sp-std/std\" ]\n+std = [\n+\t\"parachain/std\",\n+\t\"sp-std/std\", \n+\t\"sp-io/std\"\n+]\ndiff --git polkadot/runtime/common/Cargo.toml polkadot/runtime/common/Cargo.toml\nindex 72b077..f397ff 100644\n--- polkadot/runtime/common/Cargo.toml\n+++ polkadot/runtime/common/Cargo.toml\n@@ -102,0 +103,2 @@ std = [\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-election-provider-support/std\"\ndiff --git polkadot/runtime/kusama/Cargo.toml polkadot/runtime/kusama/Cargo.toml\nindex d04f67..1f3645 100644\n--- polkadot/runtime/kusama/Cargo.toml\n+++ polkadot/runtime/kusama/Cargo.toml\n@@ -217,0 +218,10 @@ std = [\n+\t\"binary-merkle-tree/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"pallet-election-provider-support-benchmarking?/std\",\n+\t\"pallet-nomination-pools-benchmarking?/std\",\n+\t\"pallet-offences-benchmarking?/std\",\n+\t\"pallet-session-benchmarking?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\",\n+\t\"sp-tracing/std\"\ndiff --git polkadot/runtime/metrics/Cargo.toml polkadot/runtime/metrics/Cargo.toml\nindex de3114..9d88df 100644\n--- polkadot/runtime/metrics/Cargo.toml\n+++ polkadot/runtime/metrics/Cargo.toml\n@@ -24,0 +25 @@ std = [\n+\t\"frame-benchmarking?/std\"\ndiff --git polkadot/runtime/parachains/Cargo.toml polkadot/runtime/parachains/Cargo.toml\nindex f4f647..e1c9fc 100644\n--- polkadot/runtime/parachains/Cargo.toml\n+++ polkadot/runtime/parachains/Cargo.toml\n@@ -98,0 +99,3 @@ std = [\n+\t\"frame-benchmarking?/std\",\n+\t\"polkadot-parachain/std\",\n+\t\"sp-application-crypto?/std\"\ndiff --git polkadot/runtime/polkadot/Cargo.toml polkadot/runtime/polkadot/Cargo.toml\nindex 1d2ce8..c37294 100644\n--- polkadot/runtime/polkadot/Cargo.toml\n+++ polkadot/runtime/polkadot/Cargo.toml\n@@ -199,0 +200,11 @@ std = [\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"pallet-election-provider-support-benchmarking?/std\",\n+\t\"pallet-nomination-pools-benchmarking?/std\",\n+\t\"pallet-offences-benchmarking?/std\",\n+\t\"pallet-session-benchmarking?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"runtime-parachains/std\",\n+\t\"sp-io/std\",\n+\t\"sp-storage/std\",\n+\t\"sp-tracing/std\"\ndiff --git polkadot/runtime/rococo/Cargo.toml polkadot/runtime/rococo/Cargo.toml\nindex ebb7cd..925013 100644\n--- polkadot/runtime/rococo/Cargo.toml\n+++ polkadot/runtime/rococo/Cargo.toml\n@@ -184,0 +185,6 @@ std = [\n+\t\"binary-merkle-tree/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\",\n+\t\"sp-tracing/std\"\ndiff --git polkadot/runtime/test-runtime/Cargo.toml polkadot/runtime/test-runtime/Cargo.toml\nindex e5d04a..7aab01 100644\n--- polkadot/runtime/test-runtime/Cargo.toml\n+++ polkadot/runtime/test-runtime/Cargo.toml\n@@ -136,0 +137,2 @@ std = [\n+\t\"polkadot-runtime-parachains/std\",\n+\t\"sp-mmr-primitives/std\"\ndiff --git polkadot/runtime/westend/Cargo.toml polkadot/runtime/westend/Cargo.toml\nindex 40664e..f43a8b 100644\n--- polkadot/runtime/westend/Cargo.toml\n+++ polkadot/runtime/westend/Cargo.toml\n@@ -202,0 +203,10 @@ std = [\n+\t\"binary-merkle-tree/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"pallet-election-provider-support-benchmarking?/std\",\n+\t\"pallet-nomination-pools-benchmarking?/std\",\n+\t\"pallet-offences-benchmarking?/std\",\n+\t\"pallet-session-benchmarking?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\",\n+\t\"sp-tracing/std\"\n"
+- cmd: lint propagate-feature --feature try-runtime --left-side-feature-missing=ignore --workspace --fix
+  stdout: |
+    crate 'asset-hub-kusama-runtime'
+      feature 'try-runtime'
+        must propagate to:
+          frame-support
+          polkadot-runtime-common
+          sp-runtime
+    crate 'asset-hub-polkadot-runtime'
+      feature 'try-runtime'
+        must propagate to:
+          frame-support
+          polkadot-runtime-common
+          sp-runtime
+    crate 'asset-hub-westend-runtime'
+      feature 'try-runtime'
+        must propagate to:
+          frame-support
+          polkadot-runtime-common
+          sp-runtime
+    crate 'bridge-hub-kusama-runtime'
+      feature 'try-runtime'
+        must propagate to:
+          frame-support
+          polkadot-runtime-common
+          sp-runtime
+    crate 'bridge-hub-polkadot-runtime'
+      feature 'try-runtime'
+        must propagate to:
+          frame-support
+          polkadot-runtime-common
+          sp-runtime
+    crate 'bridge-hub-rococo-runtime'
+      feature 'try-runtime'
+        must propagate to:
+          frame-support
+          polkadot-runtime-common
+          sp-runtime
+    crate 'collectives-polkadot-runtime'
+      feature 'try-runtime'
+        must propagate to:
+          frame-support
+          polkadot-runtime-common
+          sp-runtime
+    crate 'contracts-rococo-runtime'
+      feature 'try-runtime'
+        must propagate to:
+          frame-support
+          polkadot-runtime-common
+          sp-runtime
+    crate 'cumulus-pallet-aura-ext'
+      feature 'try-runtime'
+        must propagate to:
+          cumulus-pallet-parachain-system
+          frame-system
+          pallet-aura
+          pallet-timestamp
+          sp-runtime
+    crate 'cumulus-pallet-dmp-queue'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'cumulus-pallet-parachain-system'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'cumulus-pallet-solo-to-para'
+      feature 'try-runtime'
+        must propagate to:
+          cumulus-pallet-parachain-system
+          frame-system
+          pallet-sudo
+          sp-runtime
+    crate 'cumulus-pallet-xcm'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'cumulus-pallet-xcmp-queue'
+      feature 'try-runtime'
+        must propagate to:
+          cumulus-pallet-parachain-system
+          frame-system
+          pallet-balances
+          polkadot-runtime-common
+          sp-runtime
+    crate 'glutton-runtime'
+      feature 'try-runtime'
+        must propagate to:
+          cumulus-pallet-parachain-system
+          cumulus-pallet-xcm
+          frame-support
+          frame-system
+          parachain-info
+          sp-runtime
+    crate 'kusama-runtime'
+      feature 'try-runtime'
+        must propagate to:
+          frame-election-provider-support
+          frame-support
+          frame-try-runtime
+          runtime-parachains (renamed from polkadot-runtime-parachains)
+          sp-runtime
+    crate 'pallet-bridge-grandpa'
+      feature 'try-runtime'
+        must propagate to:
+          sp-runtime
+    crate 'pallet-bridge-messages'
+      feature 'try-runtime'
+        must propagate to:
+          pallet-balances
+          sp-runtime
+    crate 'pallet-bridge-parachains'
+      feature 'try-runtime'
+        must propagate to:
+          pallet-bridge-grandpa
+          sp-runtime
+    crate 'pallet-bridge-relayers'
+      feature 'try-runtime'
+        must propagate to:
+          pallet-balances
+          pallet-bridge-messages
+          sp-runtime
+    crate 'pallet-collator-selection'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-aura
+          pallet-authorship
+          pallet-balances
+          pallet-session
+          pallet-timestamp
+          sp-runtime
+    crate 'pallet-parachain-template'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-xcm'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          polkadot-runtime-parachains
+          sp-runtime
+    crate 'pallet-xcm-bridge-hub-router'
+      feature 'try-runtime'
+        must propagate to:
+          sp-runtime
+    crate 'parachain-info'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'parachain-template-node'
+      feature 'try-runtime'
+        must propagate to:
+          polkadot-cli
+          sp-runtime
+    crate 'parachain-template-runtime'
+      feature 'try-runtime'
+        must propagate to:
+          frame-support
+          polkadot-runtime-common
+          sp-runtime
+    crate 'penpal-runtime'
+      feature 'try-runtime'
+        must propagate to:
+          frame-support
+          polkadot-runtime-common
+          sp-runtime
+    crate 'polkadot-parachain-bin'
+      feature 'try-runtime'
+        must propagate to:
+          bridge-hub-kusama-runtime
+          bridge-hub-polkadot-runtime
+          bridge-hub-rococo-runtime
+          collectives-polkadot-runtime
+          contracts-rococo-runtime
+          glutton-runtime
+          penpal-runtime
+          polkadot-cli
+          polkadot-service
+          sp-runtime
+    crate 'polkadot-runtime'
+      feature 'try-runtime'
+        must propagate to:
+          frame-election-provider-support
+          frame-support
+          frame-try-runtime
+          runtime-parachains (renamed from polkadot-runtime-parachains)
+          sp-runtime
+    crate 'polkadot-runtime-common'
+      feature 'try-runtime'
+        must propagate to:
+          frame-election-provider-support
+          frame-support
+          frame-support-test
+          frame-system
+          pallet-babe
+          pallet-election-provider-multi-phase
+          sp-runtime
+    crate 'polkadot-runtime-parachains'
+      feature 'try-runtime'
+        must propagate to:
+          frame-support-test
+          frame-system
+          sp-runtime
+    crate 'polkadot-service'
+      feature 'try-runtime'
+        must propagate to:
+          frame-support
+          frame-system
+          pallet-babe
+          pallet-im-online
+          pallet-staking
+          pallet-transaction-payment
+          polkadot-runtime-common
+          polkadot-runtime-parachains
+          sp-runtime
+    crate 'rococo-runtime'
+      feature 'try-runtime'
+        must propagate to:
+          frame-support
+          frame-try-runtime
+          sp-runtime
+    crate 'shell-runtime'
+      feature 'try-runtime'
+        must propagate to:
+          cumulus-pallet-parachain-system
+          cumulus-pallet-xcm
+          frame-support
+          frame-system
+          parachain-info
+          sp-runtime
+    crate 'westend-runtime'
+      feature 'try-runtime'
+        must propagate to:
+          frame-election-provider-support
+          frame-support
+          frame-try-runtime
+          runtime-parachains (renamed from polkadot-runtime-parachains)
+          sp-runtime
+    Found 135 issues and fixed 135.
+  diff: "diff --git cumulus/bridges/modules/grandpa/Cargo.toml cumulus/bridges/modules/grandpa/Cargo.toml\nindex 3e25b5..58823f 100644\n--- cumulus/bridges/modules/grandpa/Cargo.toml\n+++ cumulus/bridges/modules/grandpa/Cargo.toml\n@@ -60 +60,5 @@ runtime-benchmarks = [\n-try-runtime = [ \"frame-support/try-runtime\", \"frame-system/try-runtime\" ]\n+try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"frame-system/try-runtime\", \n+\t\"sp-runtime/try-runtime\"\n+]\ndiff --git cumulus/bridges/modules/messages/Cargo.toml cumulus/bridges/modules/messages/Cargo.toml\nindex 8108b5..2cc35d 100644\n--- cumulus/bridges/modules/messages/Cargo.toml\n+++ cumulus/bridges/modules/messages/Cargo.toml\n@@ -51 +51,6 @@ runtime-benchmarks = [ \"frame-benchmarking/runtime-benchmarks\" ]\n-try-runtime = [ \"frame-support/try-runtime\", \"frame-system/try-runtime\" ]\n+try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"frame-system/try-runtime\",\n+\t\"pallet-balances/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\n+]\ndiff --git cumulus/bridges/modules/parachains/Cargo.toml cumulus/bridges/modules/parachains/Cargo.toml\nindex d7384c..88eb9d 100644\n--- cumulus/bridges/modules/parachains/Cargo.toml\n+++ cumulus/bridges/modules/parachains/Cargo.toml\n@@ -55 +55,6 @@ runtime-benchmarks = [ \"frame-benchmarking/runtime-benchmarks\" ]\n-try-runtime = [ \"frame-support/try-runtime\", \"frame-system/try-runtime\" ]\n+try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"frame-system/try-runtime\",\n+\t\"pallet-bridge-grandpa/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\n+]\ndiff --git cumulus/bridges/modules/relayers/Cargo.toml cumulus/bridges/modules/relayers/Cargo.toml\nindex 8a5a4e..4ed273 100644\n--- cumulus/bridges/modules/relayers/Cargo.toml\n+++ cumulus/bridges/modules/relayers/Cargo.toml\n@@ -54 +54,7 @@ runtime-benchmarks = [ \"frame-benchmarking/runtime-benchmarks\" ]\n-try-runtime = [ \"frame-support/try-runtime\", \"frame-system/try-runtime\" ]\n+try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"frame-system/try-runtime\",\n+\t\"pallet-balances/try-runtime\",\n+\t\"pallet-bridge-messages/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\n+]\ndiff --git cumulus/bridges/modules/xcm-bridge-hub-router/Cargo.toml cumulus/bridges/modules/xcm-bridge-hub-router/Cargo.toml\nindex 7f57c5..316c3c 100644\n--- cumulus/bridges/modules/xcm-bridge-hub-router/Cargo.toml\n+++ cumulus/bridges/modules/xcm-bridge-hub-router/Cargo.toml\n@@ -56 +56,5 @@ runtime-benchmarks = [\n-try-runtime = [ \"frame-support/try-runtime\", \"frame-system/try-runtime\" ]\n+try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"frame-system/try-runtime\", \n+\t\"sp-runtime/try-runtime\"\n+]\ndiff --git cumulus/pallets/aura-ext/Cargo.toml cumulus/pallets/aura-ext/Cargo.toml\nindex b29bbe..175b5b 100644\n--- cumulus/pallets/aura-ext/Cargo.toml\n+++ cumulus/pallets/aura-ext/Cargo.toml\n@@ -44 +44,8 @@ std = [\n-try-runtime = [ \"frame-support/try-runtime\" ]\n+try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"cumulus-pallet-parachain-system/try-runtime\",\n+\t\"frame-system/try-runtime\",\n+\t\"pallet-aura/try-runtime\",\n+\t\"pallet-timestamp/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\n+]\ndiff --git cumulus/pallets/collator-selection/Cargo.toml cumulus/pallets/collator-selection/Cargo.toml\nindex cce7e3..a0d4be 100644\n--- cumulus/pallets/collator-selection/Cargo.toml\n+++ cumulus/pallets/collator-selection/Cargo.toml\n@@ -63 +63,10 @@ std = [\n-try-runtime = [ \"frame-support/try-runtime\" ]\n+try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"frame-system/try-runtime\",\n+\t\"pallet-aura/try-runtime\",\n+\t\"pallet-authorship/try-runtime\",\n+\t\"pallet-balances/try-runtime\",\n+\t\"pallet-session/try-runtime\",\n+\t\"pallet-timestamp/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\n+]\ndiff --git cumulus/pallets/dmp-queue/Cargo.toml cumulus/pallets/dmp-queue/Cargo.toml\nindex 377738..4110c9 100644\n--- cumulus/pallets/dmp-queue/Cargo.toml\n+++ cumulus/pallets/dmp-queue/Cargo.toml\n@@ -43 +43,5 @@ std = [\n-try-runtime = [ \"frame-support/try-runtime\" ]\n+try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"frame-system/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\n+]\ndiff --git cumulus/pallets/parachain-system/Cargo.toml cumulus/pallets/parachain-system/Cargo.toml\nindex cfc439..f6b3ae 100644\n--- cumulus/pallets/parachain-system/Cargo.toml\n+++ cumulus/pallets/parachain-system/Cargo.toml\n@@ -79 +79,5 @@ runtime-benchmarks = [ \"sp-runtime/runtime-benchmarks\" ]\n-try-runtime = [ \"frame-support/try-runtime\" ]\n+try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"frame-system/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\n+]\ndiff --git cumulus/pallets/solo-to-para/Cargo.toml cumulus/pallets/solo-to-para/Cargo.toml\nindex 94e0be..e94d9e 100644\n--- cumulus/pallets/solo-to-para/Cargo.toml\n+++ cumulus/pallets/solo-to-para/Cargo.toml\n@@ -38 +38,7 @@ std = [\n-try-runtime = [ \"frame-support/try-runtime\" ]\n+try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"cumulus-pallet-parachain-system/try-runtime\",\n+\t\"frame-system/try-runtime\",\n+\t\"pallet-sudo/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\n+]\ndiff --git cumulus/pallets/xcm/Cargo.toml cumulus/pallets/xcm/Cargo.toml\nindex d6b8c6..bddfdd 100644\n--- cumulus/pallets/xcm/Cargo.toml\n+++ cumulus/pallets/xcm/Cargo.toml\n@@ -33 +33,5 @@ std = [\n-try-runtime = [ \"frame-support/try-runtime\" ]\n+try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"frame-system/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\n+]\ndiff --git cumulus/pallets/xcmp-queue/Cargo.toml cumulus/pallets/xcmp-queue/Cargo.toml\nindex 2cd319..e4b9f8 100644\n--- cumulus/pallets/xcmp-queue/Cargo.toml\n+++ cumulus/pallets/xcmp-queue/Cargo.toml\n@@ -66 +66,8 @@ runtime-benchmarks = [\n-try-runtime = [ \"frame-support/try-runtime\" ]\n+try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"cumulus-pallet-parachain-system/try-runtime\",\n+\t\"frame-system/try-runtime\",\n+\t\"pallet-balances/try-runtime\",\n+\t\"polkadot-runtime-common/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\n+]\ndiff --git cumulus/parachain-template/node/Cargo.toml cumulus/parachain-template/node/Cargo.toml\nindex f110e9..d0cac2 100644\n--- cumulus/parachain-template/node/Cargo.toml\n+++ cumulus/parachain-template/node/Cargo.toml\n@@ -81 +81,5 @@ runtime-benchmarks = [\n-try-runtime = [ \"parachain-template-runtime/try-runtime\" ]\n+try-runtime = [\n+\t\"parachain-template-runtime/try-runtime\",\n+\t\"polkadot-cli/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\n+]\ndiff --git cumulus/parachain-template/pallets/template/Cargo.toml cumulus/parachain-template/pallets/template/Cargo.toml\nindex 9235cb..a89467 100644\n--- cumulus/parachain-template/pallets/template/Cargo.toml\n+++ cumulus/parachain-template/pallets/template/Cargo.toml\n@@ -41 +41,5 @@ std = [\n-try-runtime = [ \"frame-support/try-runtime\" ]\n+try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"frame-system/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\n+]\ndiff --git cumulus/parachain-template/runtime/Cargo.toml cumulus/parachain-template/runtime/Cargo.toml\nindex c61df9..96675a 100644\n--- cumulus/parachain-template/runtime/Cargo.toml\n+++ cumulus/parachain-template/runtime/Cargo.toml\n@@ -161,0 +162,3 @@ try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"polkadot-runtime-common/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\ndiff --git cumulus/parachains/pallets/parachain-info/Cargo.toml cumulus/parachains/pallets/parachain-info/Cargo.toml\nindex 11876b..7c45e3 100644\n--- cumulus/parachains/pallets/parachain-info/Cargo.toml\n+++ cumulus/parachains/pallets/parachain-info/Cargo.toml\n@@ -29 +29,5 @@ std = [\n-try-runtime = [ \"frame-support/try-runtime\" ]\n+try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"frame-system/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\n+]\ndiff --git cumulus/parachains/runtimes/assets/asset-hub-kusama/Cargo.toml cumulus/parachains/runtimes/assets/asset-hub-kusama/Cargo.toml\nindex 682581..67cbed 100644\n--- cumulus/parachains/runtimes/assets/asset-hub-kusama/Cargo.toml\n+++ cumulus/parachains/runtimes/assets/asset-hub-kusama/Cargo.toml\n@@ -151,0 +152,3 @@ try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"polkadot-runtime-common/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\ndiff --git cumulus/parachains/runtimes/assets/asset-hub-polkadot/Cargo.toml cumulus/parachains/runtimes/assets/asset-hub-polkadot/Cargo.toml\nindex dba374..5b77dd 100644\n--- cumulus/parachains/runtimes/assets/asset-hub-polkadot/Cargo.toml\n+++ cumulus/parachains/runtimes/assets/asset-hub-polkadot/Cargo.toml\n@@ -134,0 +135,3 @@ try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"polkadot-runtime-common/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\ndiff --git cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml\nindex 1e9c49..46fd24 100644\n--- cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml\n+++ cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml\n@@ -142,0 +143,3 @@ try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"polkadot-runtime-common/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\ndiff --git cumulus/parachains/runtimes/bridge-hubs/bridge-hub-kusama/Cargo.toml cumulus/parachains/runtimes/bridge-hubs/bridge-hub-kusama/Cargo.toml\nindex 0dbe3e..45b9e4 100644\n--- cumulus/parachains/runtimes/bridge-hubs/bridge-hub-kusama/Cargo.toml\n+++ cumulus/parachains/runtimes/bridge-hubs/bridge-hub-kusama/Cargo.toml\n@@ -168,0 +169,3 @@ try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"polkadot-runtime-common/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\ndiff --git cumulus/parachains/runtimes/bridge-hubs/bridge-hub-polkadot/Cargo.toml cumulus/parachains/runtimes/bridge-hubs/bridge-hub-polkadot/Cargo.toml\nindex 9243f2..93c13d 100644\n--- cumulus/parachains/runtimes/bridge-hubs/bridge-hub-polkadot/Cargo.toml\n+++ cumulus/parachains/runtimes/bridge-hubs/bridge-hub-polkadot/Cargo.toml\n@@ -168,0 +169,3 @@ try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"polkadot-runtime-common/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\ndiff --git cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml\nindex 5e049d..59370d 100644\n--- cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml\n+++ cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml\n@@ -213,0 +214,3 @@ try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"polkadot-runtime-common/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\ndiff --git cumulus/parachains/runtimes/collectives/collectives-polkadot/Cargo.toml cumulus/parachains/runtimes/collectives/collectives-polkadot/Cargo.toml\nindex 3d2f6e..1bd5df 100644\n--- cumulus/parachains/runtimes/collectives/collectives-polkadot/Cargo.toml\n+++ cumulus/parachains/runtimes/collectives/collectives-polkadot/Cargo.toml\n@@ -140,0 +141,3 @@ try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"polkadot-runtime-common/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\ndiff --git cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml\nindex 67885d..e5d1b1 100644\n--- cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml\n+++ cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml\n@@ -175,0 +176,3 @@ try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"polkadot-runtime-common/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\ndiff --git cumulus/parachains/runtimes/glutton/glutton-kusama/Cargo.toml cumulus/parachains/runtimes/glutton/glutton-kusama/Cargo.toml\nindex 43bf46..44124a 100644\n--- cumulus/parachains/runtimes/glutton/glutton-kusama/Cargo.toml\n+++ cumulus/parachains/runtimes/glutton/glutton-kusama/Cargo.toml\n@@ -91,0 +92,6 @@ try-runtime = [\n+\t\"cumulus-pallet-parachain-system/try-runtime\",\n+\t\"cumulus-pallet-xcm/try-runtime\",\n+\t\"frame-support/try-runtime\",\n+\t\"frame-system/try-runtime\",\n+\t\"parachain-info/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\ndiff --git cumulus/parachains/runtimes/starters/shell/Cargo.toml cumulus/parachains/runtimes/starters/shell/Cargo.toml\nindex d15270..31510c 100644\n--- cumulus/parachains/runtimes/starters/shell/Cargo.toml\n+++ cumulus/parachains/runtimes/starters/shell/Cargo.toml\n@@ -70 +70,10 @@ std = [\n-try-runtime = [ \"frame-executive/try-runtime\", \"frame-try-runtime/try-runtime\" ]\n+try-runtime = [\n+\t\"frame-executive/try-runtime\",\n+\t\"frame-try-runtime/try-runtime\",\n+\t\"cumulus-pallet-parachain-system/try-runtime\",\n+\t\"cumulus-pallet-xcm/try-runtime\",\n+\t\"frame-support/try-runtime\",\n+\t\"frame-system/try-runtime\",\n+\t\"parachain-info/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\n+]\ndiff --git cumulus/parachains/runtimes/testing/penpal/Cargo.toml cumulus/parachains/runtimes/testing/penpal/Cargo.toml\nindex dc945a..6120ec 100644\n--- cumulus/parachains/runtimes/testing/penpal/Cargo.toml\n+++ cumulus/parachains/runtimes/testing/penpal/Cargo.toml\n@@ -166,0 +167,3 @@ try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"polkadot-runtime-common/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\ndiff --git cumulus/polkadot-parachain/Cargo.toml cumulus/polkadot-parachain/Cargo.toml\nindex ad7c6e..cdc755 100644\n--- cumulus/polkadot-parachain/Cargo.toml\n+++ cumulus/polkadot-parachain/Cargo.toml\n@@ -125,0 +126,10 @@ try-runtime = [\n+\t\"bridge-hub-kusama-runtime/try-runtime\",\n+\t\"bridge-hub-polkadot-runtime/try-runtime\",\n+\t\"bridge-hub-rococo-runtime/try-runtime\",\n+\t\"collectives-polkadot-runtime/try-runtime\",\n+\t\"contracts-rococo-runtime/try-runtime\",\n+\t\"glutton-runtime/try-runtime\",\n+\t\"penpal-runtime/try-runtime\",\n+\t\"polkadot-cli/try-runtime\",\n+\t\"polkadot-service/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\ndiff --git polkadot/node/service/Cargo.toml polkadot/node/service/Cargo.toml\nindex f58f4a..c4fb36 100644\n--- polkadot/node/service/Cargo.toml\n+++ polkadot/node/service/Cargo.toml\n@@ -205,0 +206,9 @@ try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"frame-system/try-runtime\",\n+\t\"pallet-babe/try-runtime\",\n+\t\"pallet-im-online/try-runtime\",\n+\t\"pallet-staking/try-runtime\",\n+\t\"pallet-transaction-payment/try-runtime\",\n+\t\"polkadot-runtime-common/try-runtime\",\n+\t\"polkadot-runtime-parachains/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\ndiff --git polkadot/runtime/common/Cargo.toml polkadot/runtime/common/Cargo.toml\nindex 72b077..14db61 100644\n--- polkadot/runtime/common/Cargo.toml\n+++ polkadot/runtime/common/Cargo.toml\n@@ -124,0 +125,7 @@ try-runtime = [\n+\t\"frame-election-provider-support/try-runtime\",\n+\t\"frame-support/try-runtime\",\n+\t\"frame-support-test/try-runtime\",\n+\t\"frame-system/try-runtime\",\n+\t\"pallet-babe?/try-runtime\",\n+\t\"pallet-election-provider-multi-phase/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\ndiff --git polkadot/runtime/kusama/Cargo.toml polkadot/runtime/kusama/Cargo.toml\nindex d04f67..fb5f47 100644\n--- polkadot/runtime/kusama/Cargo.toml\n+++ polkadot/runtime/kusama/Cargo.toml\n@@ -318,0 +319,5 @@ try-runtime = [\n+\t\"frame-election-provider-support/try-runtime\",\n+\t\"frame-support/try-runtime\",\n+\t\"frame-try-runtime?/try-runtime\",\n+\t\"runtime-parachains/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\ndiff --git polkadot/runtime/parachains/Cargo.toml polkadot/runtime/parachains/Cargo.toml\nindex f4f647..eba236 100644\n--- polkadot/runtime/parachains/Cargo.toml\n+++ polkadot/runtime/parachains/Cargo.toml\n@@ -124,0 +125,3 @@ try-runtime = [\n+\t\"frame-support-test/try-runtime\",\n+\t\"frame-system/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\ndiff --git polkadot/runtime/polkadot/Cargo.toml polkadot/runtime/polkadot/Cargo.toml\nindex 1d2ce8..c591b6 100644\n--- polkadot/runtime/polkadot/Cargo.toml\n+++ polkadot/runtime/polkadot/Cargo.toml\n@@ -289,0 +290,5 @@ try-runtime = [\n+\t\"frame-election-provider-support/try-runtime\",\n+\t\"frame-support/try-runtime\",\n+\t\"frame-try-runtime?/try-runtime\",\n+\t\"runtime-parachains/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\ndiff --git polkadot/runtime/rococo/Cargo.toml polkadot/runtime/rococo/Cargo.toml\nindex ebb7cd..d9509a 100644\n--- polkadot/runtime/rococo/Cargo.toml\n+++ polkadot/runtime/rococo/Cargo.toml\n@@ -268,0 +269,3 @@ try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"frame-try-runtime?/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\ndiff --git polkadot/runtime/westend/Cargo.toml polkadot/runtime/westend/Cargo.toml\nindex 40664e..dfb369 100644\n--- polkadot/runtime/westend/Cargo.toml\n+++ polkadot/runtime/westend/Cargo.toml\n@@ -289,0 +290,5 @@ try-runtime = [\n+\t\"frame-election-provider-support/try-runtime\",\n+\t\"frame-support/try-runtime\",\n+\t\"frame-try-runtime?/try-runtime\",\n+\t\"runtime-parachains/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\ndiff --git polkadot/xcm/pallet-xcm/Cargo.toml polkadot/xcm/pallet-xcm/Cargo.toml\nindex eefc3c..de9bad 100644\n--- polkadot/xcm/pallet-xcm/Cargo.toml\n+++ polkadot/xcm/pallet-xcm/Cargo.toml\n@@ -58 +58,7 @@ runtime-benchmarks = [\n-try-runtime = [ \"frame-support/try-runtime\" ]\n+try-runtime = [\n+\t\"frame-support/try-runtime\",\n+\t\"frame-system/try-runtime\",\n+\t\"pallet-balances/try-runtime\",\n+\t\"polkadot-runtime-parachains/try-runtime\",\n+\t\"sp-runtime/try-runtime\"\n+]\n"
+- cmd: lint propagate-feature --feature runtime-benchmarks --left-side-feature-missing=ignore --workspace --fix
+  stdout: |
+    crate 'asset-hub-kusama-runtime'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          polkadot-parachain
+          polkadot-runtime-common
+          xcm-executor
+    crate 'asset-hub-polkadot-runtime'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-asset-tx-payment
+          polkadot-parachain
+          polkadot-runtime-common
+          xcm-executor
+    crate 'asset-hub-westend-runtime'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          polkadot-parachain
+          polkadot-runtime-common
+          xcm-executor
+    crate 'assets-common'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-asset-conversion
+          pallet-asset-tx-payment
+          sp-runtime
+          xcm-executor
+    crate 'bridge-hub-kusama-runtime'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          polkadot-parachain
+          polkadot-runtime-common
+          xcm-executor
+    crate 'bridge-hub-polkadot-runtime'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          polkadot-parachain
+          polkadot-runtime-common
+          xcm-executor
+    crate 'bridge-hub-rococo-runtime'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          polkadot-parachain
+          polkadot-runtime-common
+          xcm-executor
+    crate 'bridge-runtime-common'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          pallet-balances
+          pallet-utility
+          sp-runtime
+    crate 'collectives-polkadot-runtime'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          polkadot-parachain
+          polkadot-runtime-common
+          xcm-executor
+    crate 'contracts-rococo-runtime'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          cumulus-pallet-xcmp-queue
+          polkadot-parachain
+          polkadot-runtime-common
+          xcm-executor
+    crate 'cumulus-pallet-parachain-system'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          polkadot-parachain
+    crate 'cumulus-pallet-session-benchmarking'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          sp-runtime
+    crate 'cumulus-pallet-xcmp-queue'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          cumulus-pallet-parachain-system
+          pallet-balances
+          polkadot-runtime-common
+          sp-runtime
+          xcm-executor
+    crate 'cumulus-test-service'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          cumulus-pallet-parachain-system
+          frame-system
+          pallet-im-online
+          pallet-timestamp
+          polkadot-cli
+          polkadot-primitives
+          polkadot-service
+          rococo-parachain-runtime
+          sc-service
+          sp-runtime
+    crate 'glutton-runtime'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-sudo
+          sp-runtime
+          xcm-executor
+    crate 'integration-tests-common'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          asset-hub-kusama-runtime
+          asset-hub-polkadot-runtime
+          asset-hub-westend-runtime
+          bridge-hub-kusama-runtime
+          bridge-hub-polkadot-runtime
+          bridge-hub-rococo-runtime
+          bridge-runtime-common
+          collectives-polkadot-runtime
+          cumulus-pallet-parachain-system
+          cumulus-pallet-xcmp-queue
+          frame-support
+          frame-system
+          pallet-assets
+          pallet-balances
+          pallet-bridge-messages
+          pallet-im-online
+          pallet-message-queue
+          pallet-staking
+          pallet-xcm
+          penpal-runtime
+          polkadot-parachain
+          polkadot-primitives
+          polkadot-runtime-parachains
+          polkadot-service
+          rococo-runtime
+          sp-runtime
+          xcm-executor
+    crate 'kusama-runtime'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-mmr
+          pallet-offences
+          pallet-state-trie-migration
+          primitives (renamed from polkadot-primitives)
+          sp-staking
+          xcm-executor (renamed from xcm-executor)
+    crate 'pallet-bridge-grandpa'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          sp-runtime
+    crate 'pallet-bridge-messages'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-bridge-parachains'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          pallet-bridge-grandpa
+          sp-runtime
+    crate 'pallet-bridge-relayers'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          pallet-balances
+          pallet-bridge-messages
+          sp-runtime
+    crate 'pallet-collator-selection'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          pallet-timestamp
+          sp-runtime
+          sp-staking
+    crate 'pallet-parachain-template'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          sp-runtime
+    crate 'pallet-xcm'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          polkadot-parachain
+          polkadot-runtime-parachains
+          sp-runtime
+          xcm-executor
+    crate 'pallet-xcm-benchmarks'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-assets
+          pallet-balances
+          polkadot-primitives
+          polkadot-runtime-common
+          sp-runtime
+    crate 'pallet-xcm-bridge-hub-router'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          sp-runtime
+    crate 'parachain-template-node'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          frame-benchmarking-cli
+          polkadot-primitives
+          sc-service
+          sp-runtime
+    crate 'parachain-template-runtime'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          polkadot-parachain
+          polkadot-runtime-common
+          xcm-executor
+    crate 'penpal-runtime'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          cumulus-pallet-parachain-system
+          pallet-asset-tx-payment
+          polkadot-parachain
+          polkadot-primitives
+          polkadot-runtime-common
+          xcm-executor
+    crate 'polkadot-cli'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking-cli
+          sc-service
+    crate 'polkadot-node-metrics'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          primitives (renamed from polkadot-primitives)
+          polkadot-test-service
+          sc-service
+    crate 'polkadot-parachain'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          sp-runtime
+    crate 'polkadot-parachain-bin'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          frame-benchmarking-cli
+          glutton-runtime
+          polkadot-cli
+          polkadot-primitives
+          sc-service
+          sp-runtime
+    crate 'polkadot-performance-test'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          polkadot-primitives
+    crate 'polkadot-primitives'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          polkadot-parachain
+          runtime_primitives (renamed from sp-runtime)
+          sp-staking
+    crate 'polkadot-runtime'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-offences
+          primitives (renamed from polkadot-primitives)
+          sp-staking
+          xcm-executor (renamed from xcm-executor)
+    crate 'polkadot-runtime-common'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-election-provider-support
+          pallet-balances
+          pallet-election-provider-multi-phase
+          pallet-staking
+          pallet-timestamp
+          pallet-treasury
+          pallet-vesting
+          primitives (renamed from polkadot-primitives)
+          sp-runtime
+          sp-staking
+    crate 'polkadot-runtime-parachains'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          polkadot-parachain
+          sp-runtime
+          sp-staking
+          xcm-executor (renamed from xcm-executor)
+    crate 'polkadot-service'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          frame-benchmarking-cli
+          frame-support
+          frame-system
+          pallet-babe
+          pallet-im-online
+          pallet-staking
+          polkadot-parachain
+          polkadot-primitives
+          polkadot-runtime-common
+          polkadot-runtime-parachains
+          polkadot-test-client
+          sc-client-db
+          sp-runtime
+    crate 'polkadot-test-client'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          polkadot-primitives
+          polkadot-test-service
+          sc-service
+          sp-runtime
+    crate 'polkadot-test-runtime'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-election-provider-support
+          frame-support
+          frame-system
+          pallet-babe
+          pallet-balances
+          pallet-grandpa
+          pallet-indices
+          pallet-offences
+          pallet-staking
+          pallet-sudo
+          pallet-timestamp
+          pallet-vesting
+          polkadot-parachain
+          primitives (renamed from polkadot-primitives)
+          runtime-common (renamed from polkadot-runtime-common)
+          polkadot-runtime-parachains
+          sp-runtime
+          sp-staking
+          xcm-executor
+    crate 'polkadot-test-service'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-staking
+          polkadot-parachain
+          polkadot-primitives
+          polkadot-runtime-common
+          polkadot-runtime-parachains
+          sc-service
+          sp-runtime
+    crate 'rococo-parachain-runtime'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          cumulus-pallet-parachain-system
+          cumulus-pallet-xcmp-queue
+          frame-support
+          frame-system
+          pallet-balances
+          pallet-sudo
+          pallet-timestamp
+          polkadot-parachain
+          sp-runtime
+          xcm-executor
+    crate 'rococo-runtime'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-mmr
+          pallet-offences
+          pallet-state-trie-migration
+          polkadot-parachain
+          primitives (renamed from polkadot-primitives)
+          sp-staking
+          xcm-executor (renamed from xcm-executor)
+    crate 'westend-runtime'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-mmr
+          pallet-nomination-pools
+          pallet-offences
+          pallet-state-trie-migration
+          polkadot-parachain
+          primitives (renamed from polkadot-primitives)
+          sp-staking
+          xcm-executor (renamed from xcm-executor)
+    crate 'xcm-builder'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          pallet-salary
+          pallet-xcm
+          polkadot-parachain
+          primitives (renamed from polkadot-primitives)
+          polkadot-runtime-parachains
+          polkadot-test-runtime
+          sp-runtime
+    crate 'xcm-executor'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          sp-runtime
+    crate 'xcm-simulator-example'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          sp-runtime
+    crate 'xcm-simulator-fuzzer'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-system
+          pallet-balances
+          polkadot-parachain
+          polkadot-runtime-parachains
+          sp-runtime
+          xcm-executor
+    Found 265 issues and fixed 265.
+  diff: "diff --git cumulus/bridges/bin/runtime-common/Cargo.toml cumulus/bridges/bin/runtime-common/Cargo.toml\nindex ee1334..2d07fd 100644\n--- cumulus/bridges/bin/runtime-common/Cargo.toml\n+++ cumulus/bridges/bin/runtime-common/Cargo.toml\n@@ -86,0 +87,5 @@ runtime-benchmarks = [\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"frame-system/runtime-benchmarks\",\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"pallet-utility/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\ndiff --git cumulus/bridges/modules/grandpa/Cargo.toml cumulus/bridges/modules/grandpa/Cargo.toml\nindex 3e25b5..315db8 100644\n--- cumulus/bridges/modules/grandpa/Cargo.toml\n+++ cumulus/bridges/modules/grandpa/Cargo.toml\n@@ -58,0 +59,3 @@ runtime-benchmarks = [\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"frame-system/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\ndiff --git cumulus/bridges/modules/messages/Cargo.toml cumulus/bridges/modules/messages/Cargo.toml\nindex 8108b5..010e8b 100644\n--- cumulus/bridges/modules/messages/Cargo.toml\n+++ cumulus/bridges/modules/messages/Cargo.toml\n@@ -50 +50,7 @@ std = [\n-runtime-benchmarks = [ \"frame-benchmarking/runtime-benchmarks\" ]\n+runtime-benchmarks = [\n+\t\"frame-benchmarking/runtime-benchmarks\",\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"frame-system/runtime-benchmarks\",\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\n+]\ndiff --git cumulus/bridges/modules/parachains/Cargo.toml cumulus/bridges/modules/parachains/Cargo.toml\nindex d7384c..92ff6e 100644\n--- cumulus/bridges/modules/parachains/Cargo.toml\n+++ cumulus/bridges/modules/parachains/Cargo.toml\n@@ -54 +54,7 @@ std = [\n-runtime-benchmarks = [ \"frame-benchmarking/runtime-benchmarks\" ]\n+runtime-benchmarks = [\n+\t\"frame-benchmarking/runtime-benchmarks\",\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"frame-system/runtime-benchmarks\",\n+\t\"pallet-bridge-grandpa/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\n+]\ndiff --git cumulus/bridges/modules/relayers/Cargo.toml cumulus/bridges/modules/relayers/Cargo.toml\nindex 8a5a4e..ace4b1 100644\n--- cumulus/bridges/modules/relayers/Cargo.toml\n+++ cumulus/bridges/modules/relayers/Cargo.toml\n@@ -53 +53,8 @@ std = [\n-runtime-benchmarks = [ \"frame-benchmarking/runtime-benchmarks\" ]\n+runtime-benchmarks = [\n+\t\"frame-benchmarking/runtime-benchmarks\",\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"frame-system/runtime-benchmarks\",\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"pallet-bridge-messages/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\n+]\ndiff --git cumulus/bridges/modules/xcm-bridge-hub-router/Cargo.toml cumulus/bridges/modules/xcm-bridge-hub-router/Cargo.toml\nindex 7f57c5..c5f0bf 100644\n--- cumulus/bridges/modules/xcm-bridge-hub-router/Cargo.toml\n+++ cumulus/bridges/modules/xcm-bridge-hub-router/Cargo.toml\n@@ -54,0 +55,3 @@ runtime-benchmarks = [\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"frame-system/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\ndiff --git cumulus/pallets/collator-selection/Cargo.toml cumulus/pallets/collator-selection/Cargo.toml\nindex cce7e3..2ee055 100644\n--- cumulus/pallets/collator-selection/Cargo.toml\n+++ cumulus/pallets/collator-selection/Cargo.toml\n@@ -46,0 +47,4 @@ runtime-benchmarks = [\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"pallet-timestamp/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\",\n+\t\"sp-staking/runtime-benchmarks\"\ndiff --git cumulus/pallets/parachain-system/Cargo.toml cumulus/pallets/parachain-system/Cargo.toml\nindex cfc439..84b66b 100644\n--- cumulus/pallets/parachain-system/Cargo.toml\n+++ cumulus/pallets/parachain-system/Cargo.toml\n@@ -77 +77,6 @@ std = [\n-runtime-benchmarks = [ \"sp-runtime/runtime-benchmarks\" ]\n+runtime-benchmarks = [\n+\t\"sp-runtime/runtime-benchmarks\",\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"frame-system/runtime-benchmarks\",\n+\t\"polkadot-parachain/runtime-benchmarks\"\n+]\ndiff --git cumulus/pallets/session-benchmarking/Cargo.toml cumulus/pallets/session-benchmarking/Cargo.toml\nindex 901ddb..0b507e 100644\n--- cumulus/pallets/session-benchmarking/Cargo.toml\n+++ cumulus/pallets/session-benchmarking/Cargo.toml\n@@ -29,0 +30 @@ runtime-benchmarks = [\n+\t\"sp-runtime/runtime-benchmarks\"\ndiff --git cumulus/pallets/xcmp-queue/Cargo.toml cumulus/pallets/xcmp-queue/Cargo.toml\nindex 2cd319..b5be26 100644\n--- cumulus/pallets/xcmp-queue/Cargo.toml\n+++ cumulus/pallets/xcmp-queue/Cargo.toml\n@@ -64,0 +65,5 @@ runtime-benchmarks = [\n+\t\"cumulus-pallet-parachain-system/runtime-benchmarks\",\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"polkadot-runtime-common/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git cumulus/parachain-template/node/Cargo.toml cumulus/parachain-template/node/Cargo.toml\nindex f110e9..806125 100644\n--- cumulus/parachain-template/node/Cargo.toml\n+++ cumulus/parachain-template/node/Cargo.toml\n@@ -79,0 +80,5 @@ runtime-benchmarks = [\n+\t\"frame-benchmarking/runtime-benchmarks\",\n+\t\"frame-benchmarking-cli/runtime-benchmarks\",\n+\t\"polkadot-primitives/runtime-benchmarks\",\n+\t\"sc-service/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\ndiff --git cumulus/parachain-template/pallets/template/Cargo.toml cumulus/parachain-template/pallets/template/Cargo.toml\nindex 9235cb..f5802f 100644\n--- cumulus/parachain-template/pallets/template/Cargo.toml\n+++ cumulus/parachain-template/pallets/template/Cargo.toml\n@@ -33 +33,6 @@ default = [ \"std\" ]\n-runtime-benchmarks = [ \"frame-benchmarking/runtime-benchmarks\" ]\n+runtime-benchmarks = [\n+\t\"frame-benchmarking/runtime-benchmarks\",\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"frame-system/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\n+]\ndiff --git cumulus/parachain-template/runtime/Cargo.toml cumulus/parachain-template/runtime/Cargo.toml\nindex c61df9..2c835a 100644\n--- cumulus/parachain-template/runtime/Cargo.toml\n+++ cumulus/parachain-template/runtime/Cargo.toml\n@@ -139,0 +140,3 @@ runtime-benchmarks = [\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"polkadot-runtime-common/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git cumulus/parachains/integration-tests/emulated/common/Cargo.toml cumulus/parachains/integration-tests/emulated/common/Cargo.toml\nindex 012237..f71adb 100644\n--- cumulus/parachains/integration-tests/emulated/common/Cargo.toml\n+++ cumulus/parachains/integration-tests/emulated/common/Cargo.toml\n@@ -73,0 +74,27 @@ runtime-benchmarks = [\n+\t\"asset-hub-kusama-runtime/runtime-benchmarks\",\n+\t\"asset-hub-polkadot-runtime/runtime-benchmarks\",\n+\t\"asset-hub-westend-runtime/runtime-benchmarks\",\n+\t\"bridge-hub-kusama-runtime/runtime-benchmarks\",\n+\t\"bridge-hub-polkadot-runtime/runtime-benchmarks\",\n+\t\"bridge-hub-rococo-runtime/runtime-benchmarks\",\n+\t\"bridge-runtime-common/runtime-benchmarks\",\n+\t\"collectives-polkadot-runtime/runtime-benchmarks\",\n+\t\"cumulus-pallet-parachain-system/runtime-benchmarks\",\n+\t\"cumulus-pallet-xcmp-queue/runtime-benchmarks\",\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"frame-system/runtime-benchmarks\",\n+\t\"pallet-assets/runtime-benchmarks\",\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"pallet-bridge-messages/runtime-benchmarks\",\n+\t\"pallet-im-online/runtime-benchmarks\",\n+\t\"pallet-message-queue/runtime-benchmarks\",\n+\t\"pallet-staking/runtime-benchmarks\",\n+\t\"pallet-xcm/runtime-benchmarks\",\n+\t\"penpal-runtime/runtime-benchmarks\",\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"polkadot-primitives/runtime-benchmarks\",\n+\t\"polkadot-runtime-parachains/runtime-benchmarks\",\n+\t\"polkadot-service/runtime-benchmarks\",\n+\t\"rococo-runtime/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git cumulus/parachains/runtimes/assets/asset-hub-kusama/Cargo.toml cumulus/parachains/runtimes/assets/asset-hub-kusama/Cargo.toml\nindex 682581..fd8a1a 100644\n--- cumulus/parachains/runtimes/assets/asset-hub-kusama/Cargo.toml\n+++ cumulus/parachains/runtimes/assets/asset-hub-kusama/Cargo.toml\n@@ -122,0 +123,3 @@ runtime-benchmarks = [\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"polkadot-runtime-common/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git cumulus/parachains/runtimes/assets/asset-hub-polkadot/Cargo.toml cumulus/parachains/runtimes/assets/asset-hub-polkadot/Cargo.toml\nindex dba374..24c767 100644\n--- cumulus/parachains/runtimes/assets/asset-hub-polkadot/Cargo.toml\n+++ cumulus/parachains/runtimes/assets/asset-hub-polkadot/Cargo.toml\n@@ -108,0 +109,4 @@ runtime-benchmarks = [\n+\t\"pallet-asset-tx-payment/runtime-benchmarks\",\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"polkadot-runtime-common/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml\nindex 1e9c49..c1f042 100644\n--- cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml\n+++ cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml\n@@ -114,0 +115,3 @@ runtime-benchmarks = [\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"polkadot-runtime-common/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git cumulus/parachains/runtimes/assets/common/Cargo.toml cumulus/parachains/runtimes/assets/common/Cargo.toml\nindex dc4f62..c6be65 100644\n--- cumulus/parachains/runtimes/assets/common/Cargo.toml\n+++ cumulus/parachains/runtimes/assets/common/Cargo.toml\n@@ -57,0 +58,4 @@ runtime-benchmarks = [\n+\t\"pallet-asset-conversion/runtime-benchmarks\",\n+\t\"pallet-asset-tx-payment/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git cumulus/parachains/runtimes/bridge-hubs/bridge-hub-kusama/Cargo.toml cumulus/parachains/runtimes/bridge-hubs/bridge-hub-kusama/Cargo.toml\nindex 0dbe3e..2e5c49 100644\n--- cumulus/parachains/runtimes/bridge-hubs/bridge-hub-kusama/Cargo.toml\n+++ cumulus/parachains/runtimes/bridge-hubs/bridge-hub-kusama/Cargo.toml\n@@ -146,0 +147,3 @@ runtime-benchmarks = [\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"polkadot-runtime-common/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git cumulus/parachains/runtimes/bridge-hubs/bridge-hub-polkadot/Cargo.toml cumulus/parachains/runtimes/bridge-hubs/bridge-hub-polkadot/Cargo.toml\nindex 9243f2..a33c5f 100644\n--- cumulus/parachains/runtimes/bridge-hubs/bridge-hub-polkadot/Cargo.toml\n+++ cumulus/parachains/runtimes/bridge-hubs/bridge-hub-polkadot/Cargo.toml\n@@ -146,0 +147,3 @@ runtime-benchmarks = [\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"polkadot-runtime-common/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml\nindex 5e049d..b1da5f 100644\n--- cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml\n+++ cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml\n@@ -187,0 +188,3 @@ runtime-benchmarks = [\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"polkadot-runtime-common/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git cumulus/parachains/runtimes/collectives/collectives-polkadot/Cargo.toml cumulus/parachains/runtimes/collectives/collectives-polkadot/Cargo.toml\nindex 3d2f6e..908d22 100644\n--- cumulus/parachains/runtimes/collectives/collectives-polkadot/Cargo.toml\n+++ cumulus/parachains/runtimes/collectives/collectives-polkadot/Cargo.toml\n@@ -110,0 +111,3 @@ runtime-benchmarks = [\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"polkadot-runtime-common/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml\nindex 67885d..2caea3 100644\n--- cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml\n+++ cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml\n@@ -150,0 +151,4 @@ runtime-benchmarks = [\n+\t\"cumulus-pallet-xcmp-queue/runtime-benchmarks\",\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"polkadot-runtime-common/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git cumulus/parachains/runtimes/glutton/glutton-kusama/Cargo.toml cumulus/parachains/runtimes/glutton/glutton-kusama/Cargo.toml\nindex 43bf46..c86559 100644\n--- cumulus/parachains/runtimes/glutton/glutton-kusama/Cargo.toml\n+++ cumulus/parachains/runtimes/glutton/glutton-kusama/Cargo.toml\n@@ -57,0 +58,3 @@ runtime-benchmarks = [\n+\t\"pallet-sudo?/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git cumulus/parachains/runtimes/testing/penpal/Cargo.toml cumulus/parachains/runtimes/testing/penpal/Cargo.toml\nindex dc945a..77085b 100644\n--- cumulus/parachains/runtimes/testing/penpal/Cargo.toml\n+++ cumulus/parachains/runtimes/testing/penpal/Cargo.toml\n@@ -143,0 +144,6 @@ runtime-benchmarks = [\n+\t\"cumulus-pallet-parachain-system/runtime-benchmarks\",\n+\t\"pallet-asset-tx-payment/runtime-benchmarks\",\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"polkadot-primitives/runtime-benchmarks\",\n+\t\"polkadot-runtime-common/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git cumulus/parachains/runtimes/testing/rococo-parachain/Cargo.toml cumulus/parachains/runtimes/testing/rococo-parachain/Cargo.toml\nindex 9a16d3..1fd1d7 100644\n--- cumulus/parachains/runtimes/testing/rococo-parachain/Cargo.toml\n+++ cumulus/parachains/runtimes/testing/rococo-parachain/Cargo.toml\n@@ -106,0 +107,10 @@ runtime-benchmarks = [\n+\t\"cumulus-pallet-parachain-system/runtime-benchmarks\",\n+\t\"cumulus-pallet-xcmp-queue/runtime-benchmarks\",\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"frame-system/runtime-benchmarks\",\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"pallet-sudo/runtime-benchmarks\",\n+\t\"pallet-timestamp/runtime-benchmarks\",\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git cumulus/polkadot-parachain/Cargo.toml cumulus/polkadot-parachain/Cargo.toml\nindex ad7c6e..d9ba75 100644\n--- cumulus/polkadot-parachain/Cargo.toml\n+++ cumulus/polkadot-parachain/Cargo.toml\n@@ -119,0 +120,7 @@ runtime-benchmarks = [\n+\t\"frame-benchmarking/runtime-benchmarks\",\n+\t\"frame-benchmarking-cli/runtime-benchmarks\",\n+\t\"glutton-runtime/runtime-benchmarks\",\n+\t\"polkadot-cli/runtime-benchmarks\",\n+\t\"polkadot-primitives/runtime-benchmarks\",\n+\t\"sc-service/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\ndiff --git cumulus/test/service/Cargo.toml cumulus/test/service/Cargo.toml\nindex 70d6e9..f925ec 100644\n--- cumulus/test/service/Cargo.toml\n+++ cumulus/test/service/Cargo.toml\n@@ -99 +99,13 @@ substrate-test-utils = { path = \"../../../substrate/test-utils\" }\n-runtime-benchmarks = [ \"polkadot-test-service/runtime-benchmarks\" ]\n+runtime-benchmarks = [\n+\t\"polkadot-test-service/runtime-benchmarks\",\n+\t\"cumulus-pallet-parachain-system/runtime-benchmarks\",\n+\t\"frame-system/runtime-benchmarks\",\n+\t\"pallet-im-online/runtime-benchmarks\",\n+\t\"pallet-timestamp/runtime-benchmarks\",\n+\t\"polkadot-cli/runtime-benchmarks\",\n+\t\"polkadot-primitives/runtime-benchmarks\",\n+\t\"polkadot-service/runtime-benchmarks\",\n+\t\"rococo-parachain-runtime/runtime-benchmarks\",\n+\t\"sc-service/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\n+]\ndiff --git polkadot/cli/Cargo.toml polkadot/cli/Cargo.toml\nindex d6db97..63cbdb 100644\n--- polkadot/cli/Cargo.toml\n+++ polkadot/cli/Cargo.toml\n@@ -60,0 +61,2 @@ runtime-benchmarks = [\n+\t\"frame-benchmarking-cli?/runtime-benchmarks\",\n+\t\"sc-service?/runtime-benchmarks\"\ndiff --git polkadot/node/metrics/Cargo.toml polkadot/node/metrics/Cargo.toml\nindex c021f3..6b02d0 100644\n--- polkadot/node/metrics/Cargo.toml\n+++ polkadot/node/metrics/Cargo.toml\n@@ -41 +41,5 @@ runtime-metrics = []\n-runtime-benchmarks = []\n+runtime-benchmarks = [\n+\t\"primitives/runtime-benchmarks\",\n+\t\"polkadot-test-service/runtime-benchmarks\",\n+\t\"sc-service/runtime-benchmarks\"\n+]\ndiff --git polkadot/node/service/Cargo.toml polkadot/node/service/Cargo.toml\nindex f58f4a..8df0c3 100644\n--- polkadot/node/service/Cargo.toml\n+++ polkadot/node/service/Cargo.toml\n@@ -199,0 +200,14 @@ runtime-benchmarks = [\n+\t\"frame-benchmarking/runtime-benchmarks\",\n+\t\"frame-benchmarking-cli/runtime-benchmarks\",\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"frame-system/runtime-benchmarks\",\n+\t\"pallet-babe/runtime-benchmarks\",\n+\t\"pallet-im-online/runtime-benchmarks\",\n+\t\"pallet-staking/runtime-benchmarks\",\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"polkadot-primitives/runtime-benchmarks\",\n+\t\"polkadot-runtime-common/runtime-benchmarks\",\n+\t\"polkadot-runtime-parachains/runtime-benchmarks\",\n+\t\"polkadot-test-client/runtime-benchmarks\",\n+\t\"sc-client-db/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\ndiff --git polkadot/node/test/client/Cargo.toml polkadot/node/test/client/Cargo.toml\nindex f63dd1..a65828 100644\n--- polkadot/node/test/client/Cargo.toml\n+++ polkadot/node/test/client/Cargo.toml\n@@ -41 +41,8 @@ futures = \"0.3.21\"\n-runtime-benchmarks=[ \"polkadot-test-runtime/runtime-benchmarks\" ]\n+runtime-benchmarks=[\n+\t\"polkadot-test-runtime/runtime-benchmarks\",\n+\t\"frame-benchmarking/runtime-benchmarks\",\n+\t\"polkadot-primitives/runtime-benchmarks\",\n+\t\"polkadot-test-service/runtime-benchmarks\",\n+\t\"sc-service/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\n+]\ndiff --git polkadot/node/test/performance-test/Cargo.toml polkadot/node/test/performance-test/Cargo.toml\nindex 0e3236..569419 100644\n--- polkadot/node/test/performance-test/Cargo.toml\n+++ polkadot/node/test/performance-test/Cargo.toml\n@@ -30 +30,4 @@ path = \"src/gen_ref_constants.rs\"\n-runtime-benchmarks = [ \"kusama-runtime/runtime-benchmarks\" ]\n+runtime-benchmarks = [\n+\t\"kusama-runtime/runtime-benchmarks\", \n+\t\"polkadot-primitives/runtime-benchmarks\"\n+]\ndiff --git polkadot/node/test/service/Cargo.toml polkadot/node/test/service/Cargo.toml\nindex c9cb59..fdeea4 100644\n--- polkadot/node/test/service/Cargo.toml\n+++ polkadot/node/test/service/Cargo.toml\n@@ -69,0 +70,9 @@ runtime-benchmarks= [\n+\t\"frame-system/runtime-benchmarks\",\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"pallet-staking/runtime-benchmarks\",\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"polkadot-primitives/runtime-benchmarks\",\n+\t\"polkadot-runtime-common/runtime-benchmarks\",\n+\t\"polkadot-runtime-parachains/runtime-benchmarks\",\n+\t\"sc-service/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\ndiff --git polkadot/parachain/Cargo.toml polkadot/parachain/Cargo.toml\nindex 032004..a31e87 100644\n--- polkadot/parachain/Cargo.toml\n+++ polkadot/parachain/Cargo.toml\n@@ -40 +40,4 @@ std = [\n-runtime-benchmarks = []\n+runtime-benchmarks = [\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\n+]\ndiff --git polkadot/primitives/Cargo.toml polkadot/primitives/Cargo.toml\nindex be0531..cc9716 100644\n--- polkadot/primitives/Cargo.toml\n+++ polkadot/primitives/Cargo.toml\n@@ -53 +53,5 @@ std = [\n-runtime-benchmarks = []\n+runtime-benchmarks = [\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"runtime_primitives/runtime-benchmarks\",\n+\t\"sp-staking/runtime-benchmarks\"\n+]\ndiff --git polkadot/runtime/common/Cargo.toml polkadot/runtime/common/Cargo.toml\nindex 72b077..08e69b 100644\n--- polkadot/runtime/common/Cargo.toml\n+++ polkadot/runtime/common/Cargo.toml\n@@ -112,0 +113,10 @@ runtime-benchmarks = [\n+\t\"frame-election-provider-support/runtime-benchmarks\",\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"pallet-election-provider-multi-phase/runtime-benchmarks\",\n+\t\"pallet-staking/runtime-benchmarks\",\n+\t\"pallet-timestamp/runtime-benchmarks\",\n+\t\"pallet-treasury/runtime-benchmarks\",\n+\t\"pallet-vesting/runtime-benchmarks\",\n+\t\"primitives/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\",\n+\t\"sp-staking/runtime-benchmarks\"\ndiff --git polkadot/runtime/kusama/Cargo.toml polkadot/runtime/kusama/Cargo.toml\nindex d04f67..477798 100644\n--- polkadot/runtime/kusama/Cargo.toml\n+++ polkadot/runtime/kusama/Cargo.toml\n@@ -268,0 +269,6 @@ runtime-benchmarks = [\n+\t\"pallet-mmr/runtime-benchmarks\",\n+\t\"pallet-offences/runtime-benchmarks\",\n+\t\"pallet-state-trie-migration/runtime-benchmarks\",\n+\t\"primitives/runtime-benchmarks\",\n+\t\"sp-staking/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git polkadot/runtime/parachains/Cargo.toml polkadot/runtime/parachains/Cargo.toml\nindex f4f647..ff6dbf 100644\n--- polkadot/runtime/parachains/Cargo.toml\n+++ polkadot/runtime/parachains/Cargo.toml\n@@ -112,0 +113,4 @@ runtime-benchmarks = [\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\",\n+\t\"sp-staking/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git polkadot/runtime/polkadot/Cargo.toml polkadot/runtime/polkadot/Cargo.toml\nindex 1d2ce8..8b03f9 100644\n--- polkadot/runtime/polkadot/Cargo.toml\n+++ polkadot/runtime/polkadot/Cargo.toml\n@@ -247,0 +248,4 @@ runtime-benchmarks = [\n+\t\"pallet-offences/runtime-benchmarks\",\n+\t\"primitives/runtime-benchmarks\",\n+\t\"sp-staking/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git polkadot/runtime/rococo/Cargo.toml polkadot/runtime/rococo/Cargo.toml\nindex ebb7cd..c04a81 100644\n--- polkadot/runtime/rococo/Cargo.toml\n+++ polkadot/runtime/rococo/Cargo.toml\n@@ -224,0 +225,7 @@ runtime-benchmarks = [\n+\t\"pallet-mmr/runtime-benchmarks\",\n+\t\"pallet-offences/runtime-benchmarks\",\n+\t\"pallet-state-trie-migration/runtime-benchmarks\",\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"primitives/runtime-benchmarks\",\n+\t\"sp-staking/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git polkadot/runtime/test-runtime/Cargo.toml polkadot/runtime/test-runtime/Cargo.toml\nindex e5d04a..baf9dd 100644\n--- polkadot/runtime/test-runtime/Cargo.toml\n+++ polkadot/runtime/test-runtime/Cargo.toml\n@@ -141,0 +142,19 @@ runtime-benchmarks = [\n+\t\"frame-election-provider-support/runtime-benchmarks\",\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"frame-system/runtime-benchmarks\",\n+\t\"pallet-babe/runtime-benchmarks\",\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"pallet-grandpa/runtime-benchmarks\",\n+\t\"pallet-indices/runtime-benchmarks\",\n+\t\"pallet-offences/runtime-benchmarks\",\n+\t\"pallet-staking/runtime-benchmarks\",\n+\t\"pallet-sudo/runtime-benchmarks\",\n+\t\"pallet-timestamp/runtime-benchmarks\",\n+\t\"pallet-vesting/runtime-benchmarks\",\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"primitives/runtime-benchmarks\",\n+\t\"runtime-common/runtime-benchmarks\",\n+\t\"polkadot-runtime-parachains/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\",\n+\t\"sp-staking/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git polkadot/runtime/westend/Cargo.toml polkadot/runtime/westend/Cargo.toml\nindex 40664e..f69add 100644\n--- polkadot/runtime/westend/Cargo.toml\n+++ polkadot/runtime/westend/Cargo.toml\n@@ -246,0 +247,8 @@ runtime-benchmarks = [\n+\t\"pallet-mmr/runtime-benchmarks\",\n+\t\"pallet-nomination-pools/runtime-benchmarks\",\n+\t\"pallet-offences/runtime-benchmarks\",\n+\t\"pallet-state-trie-migration/runtime-benchmarks\",\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"primitives/runtime-benchmarks\",\n+\t\"sp-staking/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git polkadot/xcm/pallet-xcm-benchmarks/Cargo.toml polkadot/xcm/pallet-xcm-benchmarks/Cargo.toml\nindex f6f993..0de909 100644\n--- polkadot/xcm/pallet-xcm-benchmarks/Cargo.toml\n+++ polkadot/xcm/pallet-xcm-benchmarks/Cargo.toml\n@@ -56,0 +57,5 @@ runtime-benchmarks = [\n+\t\"pallet-assets/runtime-benchmarks\",\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"polkadot-primitives/runtime-benchmarks\",\n+\t\"polkadot-runtime-common/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\ndiff --git polkadot/xcm/pallet-xcm/Cargo.toml polkadot/xcm/pallet-xcm/Cargo.toml\nindex eefc3c..01a5b3 100644\n--- polkadot/xcm/pallet-xcm/Cargo.toml\n+++ polkadot/xcm/pallet-xcm/Cargo.toml\n@@ -56,0 +57,5 @@ runtime-benchmarks = [\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"polkadot-runtime-parachains/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\ndiff --git polkadot/xcm/xcm-builder/Cargo.toml polkadot/xcm/xcm-builder/Cargo.toml\nindex 336162..494a34 100644\n--- polkadot/xcm/xcm-builder/Cargo.toml\n+++ polkadot/xcm/xcm-builder/Cargo.toml\n@@ -45,0 +46,8 @@ runtime-benchmarks = [\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"pallet-salary/runtime-benchmarks\",\n+\t\"pallet-xcm/runtime-benchmarks\",\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"primitives/runtime-benchmarks\",\n+\t\"polkadot-runtime-parachains/runtime-benchmarks\",\n+\t\"polkadot-test-runtime/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\ndiff --git polkadot/xcm/xcm-executor/Cargo.toml polkadot/xcm/xcm-executor/Cargo.toml\nindex de0ca1..0d39ba 100644\n--- polkadot/xcm/xcm-executor/Cargo.toml\n+++ polkadot/xcm/xcm-executor/Cargo.toml\n@@ -26 +26,5 @@ default = [ \"std\" ]\n-runtime-benchmarks = [ \"frame-benchmarking/runtime-benchmarks\" ]\n+runtime-benchmarks = [\n+\t\"frame-benchmarking/runtime-benchmarks\",\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\n+]\ndiff --git polkadot/xcm/xcm-simulator/example/Cargo.toml polkadot/xcm/xcm-simulator/example/Cargo.toml\nindex 33a516..70545c 100644\n--- polkadot/xcm/xcm-simulator/example/Cargo.toml\n+++ polkadot/xcm/xcm-simulator/example/Cargo.toml\n@@ -46,0 +47 @@ runtime-benchmarks = [\n+\t\"sp-runtime/runtime-benchmarks\"\ndiff --git polkadot/xcm/xcm-simulator/fuzzer/Cargo.toml polkadot/xcm/xcm-simulator/fuzzer/Cargo.toml\nindex a8e43d..261276 100644\n--- polkadot/xcm/xcm-simulator/fuzzer/Cargo.toml\n+++ polkadot/xcm/xcm-simulator/fuzzer/Cargo.toml\n@@ -38,0 +39,6 @@ runtime-benchmarks = [\n+\t\"frame-system/runtime-benchmarks\",\n+\t\"pallet-balances/runtime-benchmarks\",\n+\t\"polkadot-parachain/runtime-benchmarks\",\n+\t\"polkadot-runtime-parachains/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\",\n+\t\"xcm-executor/runtime-benchmarks\"\n"

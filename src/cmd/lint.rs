@@ -402,7 +402,11 @@ impl PropagateFeatureCmd {
 				});
 				if let Some(p) = sub_dag.any_path(&default_entrypoint, &target) {
 					// Easy case, all good.
-					log::debug!("Reachable from the default entrypoint: {:?} vis {:?}", target, p.0);
+					log::debug!(
+						"Reachable from the default entrypoint: {:?} vis {:?}",
+						target,
+						p.0
+					);
 					continue
 				}
 				// Now the more complicated case where `pkg/F -> dep/G .. -> dep/F`. So to say a
@@ -646,11 +650,9 @@ fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeature> 
 					CrateAndFeature(pkg.id.to_string(), "default".into()),
 					CrateAndFeature(dep.name.clone(), "default".into()),
 				);
-				
-				let Some(dep_id) = resolve_dep(pkg, dep, meta) else {
-					continue;
-				};
-				
+
+				let Some(dep_id) = resolve_dep(pkg, dep, meta) else { continue };
+
 				// Hacky…
 				dag.add_edge(
 					CrateAndFeature(pkg.id.to_string(), "#entrypoint".into()),

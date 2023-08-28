@@ -1,6 +1,6 @@
 repo:
   name: substrate
-  ref: 033d4e86cc7eff0066cd376b9375f815761d653c
+  ref: 2cc2e05e78b1e9109669dc959ac7656eb46b3492
 cases:
 - cmd: lint propagate-feature --feature runtime-benchmarks
   stdout: |
@@ -12,11 +12,34 @@ cases:
       feature 'runtime-benchmarks'
         is required by 1 dependency:
           node-cli
+    crate 'frame-benchmarking'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          sp-runtime
+    crate 'frame-benchmarking-cli'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          frame-support
+          frame-system
+          sc-service
+          sp-runtime
+    crate 'frame-benchmarking-pallet-pov'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          sp-runtime
     crate 'frame-election-provider-solution-type'
       feature 'runtime-benchmarks'
         is required by 2 dependencies:
           frame-election-provider-support
           frame-support
+    crate 'frame-election-provider-support'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          sp-runtime
     crate 'frame-election-solution-type-fuzzer'
       feature 'runtime-benchmarks'
         is required by 3 dependencies:
@@ -32,7 +55,9 @@ cases:
           sp-runtime
     crate 'frame-remote-externalities'
       feature 'runtime-benchmarks'
-        is required by 1 dependency:
+        is required by 3 dependencies:
+          frame-support
+          pallet-elections-phragmen
           sp-runtime
     crate 'frame-support-test'
       feature 'runtime-benchmarks'
@@ -49,9 +74,12 @@ cases:
           sp-runtime
     crate 'frame-support-test-pallet'
       feature 'runtime-benchmarks'
-        is required by 3 dependencies:
+        is required by 2 dependencies:
           frame-support
           frame-system
+    crate 'frame-system-benchmarking'
+      feature 'runtime-benchmarks'
+        must propagate to:
           sp-runtime
     crate 'frame-try-runtime'
       feature 'runtime-benchmarks'
@@ -60,11 +88,18 @@ cases:
           sp-runtime
     crate 'generate-bags'
       feature 'runtime-benchmarks'
-        is required by 5 dependencies:
+        is required by 4 dependencies:
           frame-election-provider-support
           frame-support
           frame-system
           pallet-staking
+    crate 'kitchensink-runtime'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-election-provider-support
+          pallet-asset-tx-payment
+          pallet-nomination-pools
+          pallet-offences
           sp-staking
     crate 'mmr-gadget'
       feature 'runtime-benchmarks'
@@ -78,6 +113,18 @@ cases:
       feature 'runtime-benchmarks'
         is required by 2 dependencies:
           kitchensink-runtime
+          sp-runtime
+    crate 'node-cli'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-system
+          pallet-asset-tx-payment
+          pallet-assets
+          pallet-balances
+          pallet-im-online
+          pallet-timestamp
+          sc-client-db
+          sc-service
           sp-runtime
     crate 'node-executor'
       feature 'runtime-benchmarks'
@@ -101,7 +148,8 @@ cases:
           sp-runtime
     crate 'node-primitives'
       feature 'runtime-benchmarks'
-        is required by 1 dependency:
+        is required by 2 dependencies:
+          frame-system
           sp-runtime
     crate 'node-rpc'
       feature 'runtime-benchmarks'
@@ -111,26 +159,41 @@ cases:
       feature 'runtime-benchmarks'
         is required by 1 dependency:
           kitchensink-runtime
+    crate 'node-template'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-system
+          sc-service
+          sp-runtime
     crate 'node-testing'
       feature 'runtime-benchmarks'
-        is required by 8 dependencies:
+        is required by 7 dependencies:
           frame-system
           kitchensink-runtime
-          pallet-asset-conversion
           pallet-asset-tx-payment
           pallet-assets
           sc-client-db
           sc-service
           sp-runtime
-    crate 'pallet-asset-conversion-tx-payment'
+    crate 'pallet-alliance'
       feature 'runtime-benchmarks'
-        is required by 6 dependencies:
+        must propagate to:
+          pallet-balances
+    crate 'pallet-asset-rate'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+    crate 'pallet-asset-tx-payment'
+      feature 'runtime-benchmarks'
+        must propagate to:
           frame-support
-          frame-system
-          pallet-asset-conversion
           pallet-assets
           pallet-balances
-          sp-runtime
+    crate 'pallet-assets'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          pallet-balances
     crate 'pallet-atomic-swap'
       feature 'runtime-benchmarks'
         is required by 4 dependencies:
@@ -157,6 +220,24 @@ cases:
           frame-support
           frame-system
           sp-runtime
+    crate 'pallet-babe'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-election-provider-support
+          frame-support
+          frame-system
+          pallet-balances
+          pallet-offences
+          pallet-staking
+          pallet-timestamp
+          sp-runtime
+          sp-staking
+    crate 'pallet-bags-list'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          sp-runtime
     crate 'pallet-bags-list-fuzzer'
       feature 'runtime-benchmarks'
         is required by 2 dependencies:
@@ -170,6 +251,12 @@ cases:
           frame-system
           pallet-bags-list
           pallet-staking
+          sp-runtime
+    crate 'pallet-balances'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
           sp-runtime
     crate 'pallet-beefy'
       feature 'runtime-benchmarks'
@@ -191,16 +278,45 @@ cases:
           pallet-mmr
           sp-runtime
           sp-staking
+    crate 'pallet-bounties'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          pallet-treasury
+          sp-runtime
+    crate 'pallet-child-bounties'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          pallet-balances
+          pallet-bounties
+          pallet-treasury
+          sp-runtime
+    crate 'pallet-contracts'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          pallet-balances
+          pallet-proxy
+          pallet-timestamp
+          pallet-utility
+          sp-runtime
     crate 'pallet-contracts-primitives'
       feature 'runtime-benchmarks'
         is required by 1 dependency:
           sp-runtime
-    crate 'pallet-default-config-example'
+    crate 'pallet-conviction-voting'
       feature 'runtime-benchmarks'
-        is required by 3 dependencies:
-          frame-support
-          frame-system
-          sp-runtime
+        must propagate to:
+          pallet-balances
+          pallet-scheduler
+    crate 'pallet-democracy'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          pallet-preimage
+          pallet-scheduler
     crate 'pallet-dev-mode'
       feature 'runtime-benchmarks'
         is required by 4 dependencies:
@@ -221,24 +337,118 @@ cases:
           pallet-timestamp
           sp-runtime
           sp-staking
+    crate 'pallet-election-provider-multi-phase'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          pallet-balances
+          pallet-election-provider-support-benchmarking
+          sp-runtime
+    crate 'pallet-election-provider-support-benchmarking'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-elections-phragmen'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          sp-runtime
+    crate 'pallet-example-basic'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          pallet-balances
+          sp-runtime
     crate 'pallet-example-offchain-worker'
       feature 'runtime-benchmarks'
         is required by 3 dependencies:
           frame-support
           frame-system
           sp-runtime
-    crate 'pallet-examples'
+    crate 'pallet-fast-unstake'
       feature 'runtime-benchmarks'
-        is required by 3 dependencies:
-          pallet-example-basic
-          pallet-example-kitchensink
-          pallet-example-split
+        must propagate to:
+          frame-election-provider-support
+          frame-support
+          pallet-balances
+          pallet-staking
+          pallet-timestamp
+          sp-runtime
+    crate 'pallet-glutton'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          pallet-balances
+    crate 'pallet-grandpa'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-election-provider-support
+          frame-support
+          frame-system
+          pallet-balances
+          pallet-offences
+          pallet-staking
+          pallet-timestamp
+          sp-runtime
+          sp-staking
+    crate 'pallet-identity'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          sp-runtime
+    crate 'pallet-im-online'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          sp-runtime
+          sp-staking
+    crate 'pallet-indices'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          sp-runtime
     crate 'pallet-insecure-randomness-collective-flip'
       feature 'runtime-benchmarks'
         is required by 3 dependencies:
           frame-support
           frame-system
           sp-runtime
+    crate 'pallet-lottery'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          sp-runtime
+    crate 'pallet-message-queue'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          sp-runtime
+    crate 'pallet-mmr'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          sp-runtime
+    crate 'pallet-multisig'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          sp-runtime
+    crate 'pallet-nft-fractionalization'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          pallet-assets
+          pallet-balances
+          pallet-nfts
+    crate 'pallet-nfts'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          pallet-balances
     crate 'pallet-nfts-runtime-api'
       feature 'runtime-benchmarks'
         is required by 2 dependencies:
@@ -251,12 +461,29 @@ cases:
           frame-system
           pallet-balances
           sp-runtime
+    crate 'pallet-nis'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          sp-runtime
     crate 'pallet-node-authorization'
       feature 'runtime-benchmarks'
         is required by 3 dependencies:
           frame-support
           frame-system
           sp-runtime
+    crate 'pallet-nomination-pools'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-nomination-pools-benchmarking'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          pallet-timestamp
     crate 'pallet-nomination-pools-fuzzer'
       feature 'runtime-benchmarks'
         is required by 4 dependencies:
@@ -281,16 +508,81 @@ cases:
           pallet-timestamp
           sp-runtime
           sp-staking
-    crate 'pallet-paged-list-fuzzer'
+    crate 'pallet-offences'
       feature 'runtime-benchmarks'
-        is required by 2 dependencies:
+        must propagate to:
           frame-support
-          pallet-paged-list
+          frame-system
+          pallet-balances
+          sp-runtime
+          sp-staking
+    crate 'pallet-offences-benchmarking'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          frame-election-provider-support
+          frame-support
+          frame-system
+          pallet-babe
+          pallet-balances
+          pallet-grandpa
+          pallet-im-online
+          pallet-offences
+          pallet-timestamp
+          sp-runtime
+          sp-staking
+    crate 'pallet-preimage'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          pallet-balances
+          sp-runtime
+    crate 'pallet-proxy'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          pallet-utility
+          sp-runtime
+    crate 'pallet-recovery'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          pallet-balances
+    crate 'pallet-referenda'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          pallet-balances
+          pallet-preimage
+          pallet-scheduler
+    crate 'pallet-remark'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          sp-runtime
+    crate 'pallet-root-offences'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-election-provider-support
+          frame-support
+          frame-system
+          pallet-balances
+          pallet-staking
+          pallet-timestamp
+          sp-runtime
+          sp-staking
     crate 'pallet-root-testing'
       feature 'runtime-benchmarks'
         is required by 3 dependencies:
           frame-support
           frame-system
+          sp-runtime
+    crate 'pallet-scheduler'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          pallet-preimage
           sp-runtime
     crate 'pallet-scored-pool'
       feature 'runtime-benchmarks'
@@ -307,9 +599,41 @@ cases:
           pallet-timestamp
           sp-runtime
           sp-staking
+    crate 'pallet-session-benchmarking'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          frame-election-provider-support
+          frame-support
+          frame-system
+          pallet-balances
+          pallet-timestamp
+          sp-runtime
+    crate 'pallet-society'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          pallet-balances
+    crate 'pallet-staking'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          pallet-bags-list
+          pallet-balances
+          pallet-timestamp
+          sp-runtime
     crate 'pallet-staking-reward-curve'
       feature 'runtime-benchmarks'
         is required by 1 dependency:
+          sp-runtime
+    crate 'pallet-state-trie-migration'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          frame-support
+          frame-system
+          pallet-balances
           sp-runtime
     crate 'pallet-statement'
       feature 'runtime-benchmarks'
@@ -317,6 +641,28 @@ cases:
           frame-support
           frame-system
           pallet-balances
+          sp-runtime
+    crate 'pallet-sudo'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+    crate 'pallet-template'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          sp-runtime
+    crate 'pallet-timestamp'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          sp-runtime
+    crate 'pallet-tips'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          pallet-treasury
           sp-runtime
     crate 'pallet-transaction-payment'
       feature 'runtime-benchmarks'
@@ -332,6 +678,44 @@ cases:
     crate 'pallet-transaction-payment-rpc-runtime-api'
       feature 'runtime-benchmarks'
         is required by 1 dependency:
+          sp-runtime
+    crate 'pallet-transaction-storage'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-treasury'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          pallet-utility
+          sp-runtime
+    crate 'pallet-uniques'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          pallet-balances
+    crate 'pallet-utility'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          pallet-timestamp
+          sp-runtime
+    crate 'pallet-vesting'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-whitelist'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          pallet-balances
+          pallet-preimage
           sp-runtime
     crate 'sc-authority-discovery'
       feature 'runtime-benchmarks'
@@ -358,6 +742,11 @@ cases:
     crate 'sc-client-api'
       feature 'runtime-benchmarks'
         is required by 1 dependency:
+          sp-runtime
+    crate 'sc-client-db'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          kitchensink-runtime
           sp-runtime
     crate 'sc-consensus'
       feature 'runtime-benchmarks'
@@ -435,6 +824,10 @@ cases:
       feature 'runtime-benchmarks'
         is required by 1 dependency:
           sp-runtime
+    crate 'sc-network-statement'
+      feature 'runtime-benchmarks'
+        is required by 1 dependency:
+          sp-runtime
     crate 'sc-network-sync'
       feature 'runtime-benchmarks'
         is required by 1 dependency:
@@ -469,6 +862,10 @@ cases:
     crate 'sc-runtime-test'
       feature 'runtime-benchmarks'
         is required by 1 dependency:
+          sp-runtime
+    crate 'sc-service'
+      feature 'runtime-benchmarks'
+        must propagate to:
           sp-runtime
     crate 'sc-service-test'
       feature 'runtime-benchmarks'
@@ -512,6 +909,10 @@ cases:
       feature 'runtime-benchmarks'
         is required by 1 dependency:
           sp-runtime
+    crate 'sp-application-crypto-test'
+      feature 'runtime-benchmarks'
+        is required by 1 dependency:
+          sp-runtime
     crate 'sp-authority-discovery'
       feature 'runtime-benchmarks'
         is required by 1 dependency:
@@ -548,10 +949,6 @@ cases:
       feature 'runtime-benchmarks'
         is required by 1 dependency:
           sp-runtime
-    crate 'sp-genesis-builder'
-      feature 'runtime-benchmarks'
-        is required by 1 dependency:
-          sp-runtime
     crate 'sp-inherents'
       feature 'runtime-benchmarks'
         is required by 1 dependency:
@@ -585,6 +982,10 @@ cases:
         is required by 2 dependencies:
           sp-runtime
           sp-staking
+    crate 'sp-staking'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          sp-runtime
     crate 'sp-state-machine'
       feature 'runtime-benchmarks'
         is required by 1 dependency:
@@ -617,18 +1018,6 @@ cases:
       feature 'runtime-benchmarks'
         is required by 1 dependency:
           sp-runtime
-    crate 'substrate'
-      feature 'runtime-benchmarks'
-        is required by 4 dependencies:
-          frame-support
-          node-cli
-          sc-service
-          sp-runtime
-    crate 'substrate-cli-test-utils'
-      feature 'runtime-benchmarks'
-        is required by 2 dependencies:
-          node-cli
-          sc-service
     crate 'substrate-frame-cli'
       feature 'runtime-benchmarks'
         is required by 3 dependencies:
@@ -661,11 +1050,12 @@ cases:
           sp-runtime
     crate 'substrate-test-runtime'
       feature 'runtime-benchmarks'
-        is required by 7 dependencies:
+        is required by 8 dependencies:
           frame-support
           frame-system
           pallet-babe
           pallet-balances
+          pallet-sudo
           pallet-timestamp
           sc-service
           sp-runtime
@@ -687,9 +1077,10 @@ cases:
           sc-service
     crate 'try-runtime-cli'
       feature 'runtime-benchmarks'
-        is required by 1 dependency:
+        is required by 2 dependencies:
+          sc-service
           sp-runtime
-    Found 283 issues (run with --fix to fix).
+    Found 494 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature --feature runtime-benchmarks --workspace
   stdout: |
@@ -701,11 +1092,34 @@ cases:
       feature 'runtime-benchmarks'
         is required by 1 dependency:
           node-cli
+    crate 'frame-benchmarking'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          sp-runtime
+    crate 'frame-benchmarking-cli'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          frame-support
+          frame-system
+          sc-service
+          sp-runtime
+    crate 'frame-benchmarking-pallet-pov'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          sp-runtime
     crate 'frame-election-provider-solution-type'
       feature 'runtime-benchmarks'
         is required by 2 dependencies:
           frame-election-provider-support
           frame-support
+    crate 'frame-election-provider-support'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          sp-runtime
     crate 'frame-election-solution-type-fuzzer'
       feature 'runtime-benchmarks'
         is required by 3 dependencies:
@@ -721,7 +1135,9 @@ cases:
           sp-runtime
     crate 'frame-remote-externalities'
       feature 'runtime-benchmarks'
-        is required by 1 dependency:
+        is required by 3 dependencies:
+          frame-support
+          pallet-elections-phragmen
           sp-runtime
     crate 'frame-support-test'
       feature 'runtime-benchmarks'
@@ -738,9 +1154,12 @@ cases:
           sp-runtime
     crate 'frame-support-test-pallet'
       feature 'runtime-benchmarks'
-        is required by 3 dependencies:
+        is required by 2 dependencies:
           frame-support
           frame-system
+    crate 'frame-system-benchmarking'
+      feature 'runtime-benchmarks'
+        must propagate to:
           sp-runtime
     crate 'frame-try-runtime'
       feature 'runtime-benchmarks'
@@ -749,11 +1168,18 @@ cases:
           sp-runtime
     crate 'generate-bags'
       feature 'runtime-benchmarks'
-        is required by 5 dependencies:
+        is required by 4 dependencies:
           frame-election-provider-support
           frame-support
           frame-system
           pallet-staking
+    crate 'kitchensink-runtime'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-election-provider-support
+          pallet-asset-tx-payment
+          pallet-nomination-pools
+          pallet-offences
           sp-staking
     crate 'mmr-gadget'
       feature 'runtime-benchmarks'
@@ -767,6 +1193,18 @@ cases:
       feature 'runtime-benchmarks'
         is required by 2 dependencies:
           kitchensink-runtime
+          sp-runtime
+    crate 'node-cli'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-system
+          pallet-asset-tx-payment
+          pallet-assets
+          pallet-balances
+          pallet-im-online
+          pallet-timestamp
+          sc-client-db
+          sc-service
           sp-runtime
     crate 'node-executor'
       feature 'runtime-benchmarks'
@@ -790,7 +1228,8 @@ cases:
           sp-runtime
     crate 'node-primitives'
       feature 'runtime-benchmarks'
-        is required by 1 dependency:
+        is required by 2 dependencies:
+          frame-system
           sp-runtime
     crate 'node-rpc'
       feature 'runtime-benchmarks'
@@ -800,26 +1239,41 @@ cases:
       feature 'runtime-benchmarks'
         is required by 1 dependency:
           kitchensink-runtime
+    crate 'node-template'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-system
+          sc-service
+          sp-runtime
     crate 'node-testing'
       feature 'runtime-benchmarks'
-        is required by 8 dependencies:
+        is required by 7 dependencies:
           frame-system
           kitchensink-runtime
-          pallet-asset-conversion
           pallet-asset-tx-payment
           pallet-assets
           sc-client-db
           sc-service
           sp-runtime
-    crate 'pallet-asset-conversion-tx-payment'
+    crate 'pallet-alliance'
       feature 'runtime-benchmarks'
-        is required by 6 dependencies:
+        must propagate to:
+          pallet-balances
+    crate 'pallet-asset-rate'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+    crate 'pallet-asset-tx-payment'
+      feature 'runtime-benchmarks'
+        must propagate to:
           frame-support
-          frame-system
-          pallet-asset-conversion
           pallet-assets
           pallet-balances
-          sp-runtime
+    crate 'pallet-assets'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          pallet-balances
     crate 'pallet-atomic-swap'
       feature 'runtime-benchmarks'
         is required by 4 dependencies:
@@ -846,6 +1300,24 @@ cases:
           frame-support
           frame-system
           sp-runtime
+    crate 'pallet-babe'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-election-provider-support
+          frame-support
+          frame-system
+          pallet-balances
+          pallet-offences
+          pallet-staking
+          pallet-timestamp
+          sp-runtime
+          sp-staking
+    crate 'pallet-bags-list'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          sp-runtime
     crate 'pallet-bags-list-fuzzer'
       feature 'runtime-benchmarks'
         is required by 2 dependencies:
@@ -859,6 +1331,12 @@ cases:
           frame-system
           pallet-bags-list
           pallet-staking
+          sp-runtime
+    crate 'pallet-balances'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
           sp-runtime
     crate 'pallet-beefy'
       feature 'runtime-benchmarks'
@@ -880,16 +1358,45 @@ cases:
           pallet-mmr
           sp-runtime
           sp-staking
+    crate 'pallet-bounties'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          pallet-treasury
+          sp-runtime
+    crate 'pallet-child-bounties'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          pallet-balances
+          pallet-bounties
+          pallet-treasury
+          sp-runtime
+    crate 'pallet-contracts'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          pallet-balances
+          pallet-proxy
+          pallet-timestamp
+          pallet-utility
+          sp-runtime
     crate 'pallet-contracts-primitives'
       feature 'runtime-benchmarks'
         is required by 1 dependency:
           sp-runtime
-    crate 'pallet-default-config-example'
+    crate 'pallet-conviction-voting'
       feature 'runtime-benchmarks'
-        is required by 3 dependencies:
-          frame-support
-          frame-system
-          sp-runtime
+        must propagate to:
+          pallet-balances
+          pallet-scheduler
+    crate 'pallet-democracy'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          pallet-preimage
+          pallet-scheduler
     crate 'pallet-dev-mode'
       feature 'runtime-benchmarks'
         is required by 4 dependencies:
@@ -910,24 +1417,118 @@ cases:
           pallet-timestamp
           sp-runtime
           sp-staking
+    crate 'pallet-election-provider-multi-phase'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          pallet-balances
+          pallet-election-provider-support-benchmarking
+          sp-runtime
+    crate 'pallet-election-provider-support-benchmarking'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-elections-phragmen'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          sp-runtime
+    crate 'pallet-example-basic'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          pallet-balances
+          sp-runtime
     crate 'pallet-example-offchain-worker'
       feature 'runtime-benchmarks'
         is required by 3 dependencies:
           frame-support
           frame-system
           sp-runtime
-    crate 'pallet-examples'
+    crate 'pallet-fast-unstake'
       feature 'runtime-benchmarks'
-        is required by 3 dependencies:
-          pallet-example-basic
-          pallet-example-kitchensink
-          pallet-example-split
+        must propagate to:
+          frame-election-provider-support
+          frame-support
+          pallet-balances
+          pallet-staking
+          pallet-timestamp
+          sp-runtime
+    crate 'pallet-glutton'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          pallet-balances
+    crate 'pallet-grandpa'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-election-provider-support
+          frame-support
+          frame-system
+          pallet-balances
+          pallet-offences
+          pallet-staking
+          pallet-timestamp
+          sp-runtime
+          sp-staking
+    crate 'pallet-identity'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          sp-runtime
+    crate 'pallet-im-online'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          sp-runtime
+          sp-staking
+    crate 'pallet-indices'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          sp-runtime
     crate 'pallet-insecure-randomness-collective-flip'
       feature 'runtime-benchmarks'
         is required by 3 dependencies:
           frame-support
           frame-system
           sp-runtime
+    crate 'pallet-lottery'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          sp-runtime
+    crate 'pallet-message-queue'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          sp-runtime
+    crate 'pallet-mmr'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          sp-runtime
+    crate 'pallet-multisig'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          sp-runtime
+    crate 'pallet-nft-fractionalization'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          pallet-assets
+          pallet-balances
+          pallet-nfts
+    crate 'pallet-nfts'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          pallet-balances
     crate 'pallet-nfts-runtime-api'
       feature 'runtime-benchmarks'
         is required by 2 dependencies:
@@ -940,12 +1541,29 @@ cases:
           frame-system
           pallet-balances
           sp-runtime
+    crate 'pallet-nis'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          sp-runtime
     crate 'pallet-node-authorization'
       feature 'runtime-benchmarks'
         is required by 3 dependencies:
           frame-support
           frame-system
           sp-runtime
+    crate 'pallet-nomination-pools'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-nomination-pools-benchmarking'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          pallet-timestamp
     crate 'pallet-nomination-pools-fuzzer'
       feature 'runtime-benchmarks'
         is required by 4 dependencies:
@@ -970,16 +1588,81 @@ cases:
           pallet-timestamp
           sp-runtime
           sp-staking
-    crate 'pallet-paged-list-fuzzer'
+    crate 'pallet-offences'
       feature 'runtime-benchmarks'
-        is required by 2 dependencies:
+        must propagate to:
           frame-support
-          pallet-paged-list
+          frame-system
+          pallet-balances
+          sp-runtime
+          sp-staking
+    crate 'pallet-offences-benchmarking'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          frame-election-provider-support
+          frame-support
+          frame-system
+          pallet-babe
+          pallet-balances
+          pallet-grandpa
+          pallet-im-online
+          pallet-offences
+          pallet-timestamp
+          sp-runtime
+          sp-staking
+    crate 'pallet-preimage'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          pallet-balances
+          sp-runtime
+    crate 'pallet-proxy'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          pallet-utility
+          sp-runtime
+    crate 'pallet-recovery'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          pallet-balances
+    crate 'pallet-referenda'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          pallet-balances
+          pallet-preimage
+          pallet-scheduler
+    crate 'pallet-remark'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          sp-runtime
+    crate 'pallet-root-offences'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-election-provider-support
+          frame-support
+          frame-system
+          pallet-balances
+          pallet-staking
+          pallet-timestamp
+          sp-runtime
+          sp-staking
     crate 'pallet-root-testing'
       feature 'runtime-benchmarks'
         is required by 3 dependencies:
           frame-support
           frame-system
+          sp-runtime
+    crate 'pallet-scheduler'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          pallet-preimage
           sp-runtime
     crate 'pallet-scored-pool'
       feature 'runtime-benchmarks'
@@ -996,9 +1679,41 @@ cases:
           pallet-timestamp
           sp-runtime
           sp-staking
+    crate 'pallet-session-benchmarking'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          frame-election-provider-support
+          frame-support
+          frame-system
+          pallet-balances
+          pallet-timestamp
+          sp-runtime
+    crate 'pallet-society'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          pallet-balances
+    crate 'pallet-staking'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          pallet-bags-list
+          pallet-balances
+          pallet-timestamp
+          sp-runtime
     crate 'pallet-staking-reward-curve'
       feature 'runtime-benchmarks'
         is required by 1 dependency:
+          sp-runtime
+    crate 'pallet-state-trie-migration'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          frame-support
+          frame-system
+          pallet-balances
           sp-runtime
     crate 'pallet-statement'
       feature 'runtime-benchmarks'
@@ -1006,6 +1721,28 @@ cases:
           frame-support
           frame-system
           pallet-balances
+          sp-runtime
+    crate 'pallet-sudo'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+    crate 'pallet-template'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          sp-runtime
+    crate 'pallet-timestamp'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          sp-runtime
+    crate 'pallet-tips'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          pallet-treasury
           sp-runtime
     crate 'pallet-transaction-payment'
       feature 'runtime-benchmarks'
@@ -1021,6 +1758,44 @@ cases:
     crate 'pallet-transaction-payment-rpc-runtime-api'
       feature 'runtime-benchmarks'
         is required by 1 dependency:
+          sp-runtime
+    crate 'pallet-transaction-storage'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-treasury'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          pallet-utility
+          sp-runtime
+    crate 'pallet-uniques'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          pallet-balances
+    crate 'pallet-utility'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          pallet-balances
+          pallet-timestamp
+          sp-runtime
+    crate 'pallet-vesting'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-support
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-whitelist'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          frame-benchmarking
+          pallet-balances
+          pallet-preimage
           sp-runtime
     crate 'sc-authority-discovery'
       feature 'runtime-benchmarks'
@@ -1047,6 +1822,11 @@ cases:
     crate 'sc-client-api'
       feature 'runtime-benchmarks'
         is required by 1 dependency:
+          sp-runtime
+    crate 'sc-client-db'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          kitchensink-runtime
           sp-runtime
     crate 'sc-consensus'
       feature 'runtime-benchmarks'
@@ -1124,6 +1904,10 @@ cases:
       feature 'runtime-benchmarks'
         is required by 1 dependency:
           sp-runtime
+    crate 'sc-network-statement'
+      feature 'runtime-benchmarks'
+        is required by 1 dependency:
+          sp-runtime
     crate 'sc-network-sync'
       feature 'runtime-benchmarks'
         is required by 1 dependency:
@@ -1158,6 +1942,10 @@ cases:
     crate 'sc-runtime-test'
       feature 'runtime-benchmarks'
         is required by 1 dependency:
+          sp-runtime
+    crate 'sc-service'
+      feature 'runtime-benchmarks'
+        must propagate to:
           sp-runtime
     crate 'sc-service-test'
       feature 'runtime-benchmarks'
@@ -1201,6 +1989,10 @@ cases:
       feature 'runtime-benchmarks'
         is required by 1 dependency:
           sp-runtime
+    crate 'sp-application-crypto-test'
+      feature 'runtime-benchmarks'
+        is required by 1 dependency:
+          sp-runtime
     crate 'sp-authority-discovery'
       feature 'runtime-benchmarks'
         is required by 1 dependency:
@@ -1237,10 +2029,6 @@ cases:
       feature 'runtime-benchmarks'
         is required by 1 dependency:
           sp-runtime
-    crate 'sp-genesis-builder'
-      feature 'runtime-benchmarks'
-        is required by 1 dependency:
-          sp-runtime
     crate 'sp-inherents'
       feature 'runtime-benchmarks'
         is required by 1 dependency:
@@ -1274,6 +2062,10 @@ cases:
         is required by 2 dependencies:
           sp-runtime
           sp-staking
+    crate 'sp-staking'
+      feature 'runtime-benchmarks'
+        must propagate to:
+          sp-runtime
     crate 'sp-state-machine'
       feature 'runtime-benchmarks'
         is required by 1 dependency:
@@ -1306,18 +2098,6 @@ cases:
       feature 'runtime-benchmarks'
         is required by 1 dependency:
           sp-runtime
-    crate 'substrate'
-      feature 'runtime-benchmarks'
-        is required by 4 dependencies:
-          frame-support
-          node-cli
-          sc-service
-          sp-runtime
-    crate 'substrate-cli-test-utils'
-      feature 'runtime-benchmarks'
-        is required by 2 dependencies:
-          node-cli
-          sc-service
     crate 'substrate-frame-cli'
       feature 'runtime-benchmarks'
         is required by 3 dependencies:
@@ -1350,11 +2130,12 @@ cases:
           sp-runtime
     crate 'substrate-test-runtime'
       feature 'runtime-benchmarks'
-        is required by 7 dependencies:
+        is required by 8 dependencies:
           frame-support
           frame-system
           pallet-babe
           pallet-balances
+          pallet-sudo
           pallet-timestamp
           sc-service
           sp-runtime
@@ -1376,9 +2157,10 @@ cases:
           sc-service
     crate 'try-runtime-cli'
       feature 'runtime-benchmarks'
-        is required by 1 dependency:
+        is required by 2 dependencies:
+          sc-service
           sp-runtime
-    Found 283 issues (run with --fix to fix).
+    Found 494 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature --feature std
   stdout: |
@@ -1449,13 +2231,6 @@ cases:
       feature 'std'
         must propagate to:
           num-traits
-    crate 'ark-algebra-test-templates'
-      feature 'std'
-        must propagate to:
-          num-bigint
-          num-integer
-          num-traits
-          sha2
     crate 'ark-bls12-381'
       feature 'std'
         must propagate to:
@@ -1482,28 +2257,6 @@ cases:
       feature 'std'
         must propagate to:
           ark-serialize
-    crate 'ark-r1cs-std'
-      feature 'std'
-        must propagate to:
-          ark-ec
-          num-integer
-          num-traits
-          tracing
-    crate 'ark-scale'
-      feature 'std'
-        must propagate to:
-          ark-ec
-    crate 'ark-secret-scalar'
-      feature 'std'
-        is required by 8 dependencies:
-          ark-ec
-          ark-ff
-          ark-serialize
-          ark-std
-          ark-transcript
-          digest
-          rand_core
-          zeroize
     crate 'ark-serialize'
       feature 'std'
         must propagate to:
@@ -1513,15 +2266,6 @@ cases:
       feature 'std'
         must propagate to:
           num-traits
-    crate 'ark-transcript'
-      feature 'std'
-        must propagate to:
-          ark-ff
-          ark-serialize
-          ark-std
-          digest
-          rand_core
-          sha3
     crate 'asn1-rs'
       feature 'std'
         must propagate to:
@@ -1573,22 +2317,6 @@ cases:
           miniz_oxide
           object
           rustc-demangle
-    crate 'bandersnatch_vrfs'
-      feature 'std'
-        is required by 13 dependencies:
-          ark-bls12-381
-          ark-ec
-          ark-ed-on-bls12-381-bandersnatch
-          ark-ff
-          ark-serialize
-          ark-std
-          fflonk
-          merlin
-          rand_chacha
-          rand_core
-          ring
-          sha2
-          zeroize
     crate 'basic-toml'
       feature 'std'
         is required by 1 dependency:
@@ -1632,6 +2360,10 @@ cases:
       feature 'std'
         must propagate to:
           cipher
+    crate 'bounded-collections'
+      feature 'std'
+        must propagate to:
+          serde
     crate 'bstr'
       feature 'std'
         must propagate to:
@@ -1684,6 +2416,7 @@ cases:
     crate 'chrono'
       feature 'std'
         must propagate to:
+          num-integer
           num-traits
           winapi
     crate 'ciborium'
@@ -1727,11 +2460,6 @@ cases:
           encode_unicode
           libc
           unicode-width
-    crate 'const-random-macro'
-      feature 'std'
-        is required by 2 dependencies:
-          getrandom
-          once_cell
     crate 'core-foundation'
       feature 'std'
         is required by 1 dependency:
@@ -1824,8 +2552,7 @@ cases:
           zeroize
     crate 'curve25519-dalek'
       feature 'std'
-        is required by 5 dependencies:
-          digest
+        is required by 4 dependencies:
           fiat-crypto
           platforms
           subtle
@@ -1880,22 +2607,6 @@ cases:
         is required by 2 dependencies:
           libc
           winapi
-    crate 'dleq_vrf'
-      feature 'std'
-        is required by 8 dependencies:
-          ark-ec
-          ark-ff
-          ark-serialize
-          ark-std
-          ark-transcript
-          arrayvec
-          rand_core
-          zeroize
-    crate 'docify_macros'
-      feature 'std'
-        is required by 2 dependencies:
-          once_cell
-          regex
     crate 'ecdsa'
       feature 'std'
         must propagate to:
@@ -1905,15 +2616,6 @@ cases:
         must propagate to:
           der
           digest
-          spki
-    crate 'ed25519'
-      feature 'std'
-        must propagate to:
-          pkcs8
-    crate 'ed25519-dalek'
-      feature 'std'
-        must propagate to:
-          zeroize
     crate 'ed25519-dalek'
       feature 'std'
         must propagate to:
@@ -2013,9 +2715,13 @@ cases:
       feature 'std'
         is required by 1 dependency:
           num
+    crate 'frame-benchmarking'
+      feature 'std'
+        must propagate to:
+          frame-support-procedural
     crate 'frame-benchmarking-cli'
       feature 'std'
-        is required by 22 dependencies:
+        is required by 21 dependencies:
           chrono
           clap
           frame-benchmarking
@@ -2031,13 +2737,12 @@ cases:
           sp-core
           sp-externalities
           sp-inherents
-          sp-io
           sp-keystore
           sp-runtime
           sp-state-machine
+          sp-std
           sp-storage
           sp-trie
-          sp-wasm-interface
     crate 'frame-election-provider-solution-type'
       feature 'std'
         is required by 5 dependencies:
@@ -2058,22 +2763,32 @@ cases:
           sp-arithmetic
           sp-npos-elections
           sp-runtime
+    crate 'frame-executive'
+      feature 'std'
+        must propagate to:
+          frame-try-runtime
     crate 'frame-remote-externalities'
       feature 'std'
-        is required by 9 dependencies:
+        is required by 10 dependencies:
+          frame-support
           futures
           log
+          pallet-elections-phragmen
           codec (renamed from parity-scale-codec)
           serde
           sp-core
           sp-io
           sp-runtime
-          sp-state-machine
-          sp-tracing
+          tracing-subscriber
     crate 'frame-support'
       feature 'std'
         must propagate to:
-          serde_json
+          once_cell
+          sp-debug-derive
+    crate 'frame-support-test'
+      feature 'std'
+        must propagate to:
+          test-pallet (renamed from frame-support-test-pallet)
     crate 'fs2'
       feature 'std'
         is required by 2 dependencies:
@@ -2113,14 +2828,13 @@ cases:
           byteorder
     crate 'generate-bags'
       feature 'std'
-        is required by 7 dependencies:
+        is required by 6 dependencies:
           chrono
           frame-election-provider-support
           frame-support
           frame-system
           num-format
           pallet-staking
-          sp-staking
     crate 'generic-array'
       feature 'std'
         is required by 1 dependency:
@@ -2139,11 +2853,15 @@ cases:
         must propagate to:
           libc
           wasi
-          wasm-bindgen
     crate 'gimli'
       feature 'std'
         must propagate to:
           indexmap
+    crate 'git2'
+      feature 'std'
+        is required by 2 dependencies:
+          libc
+          log
     crate 'globset'
       feature 'std'
         is required by 5 dependencies:
@@ -2241,13 +2959,21 @@ cases:
           tracing
     crate 'hyper-rustls'
       feature 'std'
-        is required by 2 dependencies:
-          futures-util
+        is required by 1 dependency:
           log
     crate 'iana-time-zone'
       feature 'std'
         is required by 1 dependency:
           wasm-bindgen
+    crate 'iana-time-zone-haiku'
+      feature 'std'
+        is required by 1 dependency:
+          cxx
+    crate 'idna'
+      feature 'std'
+        is required by 2 dependencies:
+          unicode-bidi
+          unicode-normalization
     crate 'idna'
       feature 'std'
         is required by 2 dependencies:
@@ -2264,11 +2990,6 @@ cases:
           fnv
           futures
           log
-    crate 'impl-num-traits'
-      feature 'std'
-        is required by 2 dependencies:
-          num-traits
-          uint
     crate 'indexmap'
       feature 'std'
         must propagate to:
@@ -2310,11 +3031,6 @@ cases:
       feature 'std'
         is required by 1 dependency:
           wasm-bindgen
-    crate 'json-patch'
-      feature 'std'
-        is required by 2 dependencies:
-          serde
-          serde_json
     crate 'jsonrpsee'
       feature 'std'
         is required by 1 dependency:
@@ -2362,14 +3078,14 @@ cases:
       feature 'std'
         must propagate to:
           sha2
-    crate 'kitchensink-runtime'
-      feature 'std'
-        must propagate to:
-          primitive-types
     crate 'kvdb-rocksdb'
       feature 'std'
         is required by 1 dependency:
           regex
+    crate 'libgit2-sys'
+      feature 'std'
+        is required by 1 dependency:
+          libc
     crate 'libloading'
       feature 'std'
         is required by 1 dependency:
@@ -2545,6 +3261,14 @@ cases:
       feature 'std'
         is required by 1 dependency:
           libsecp256k1-core
+    crate 'libssh2-sys'
+      feature 'std'
+        is required by 1 dependency:
+          libc
+    crate 'libz-sys'
+      feature 'std'
+        is required by 1 dependency:
+          libc
     crate 'linregress'
       feature 'std'
         is required by 1 dependency:
@@ -2565,6 +3289,10 @@ cases:
       feature 'std'
         is required by 1 dependency:
           regex-automata
+    crate 'matchers'
+      feature 'std'
+        is required by 1 dependency:
+          regex-automata
     crate 'memfd'
       feature 'std'
         is required by 1 dependency:
@@ -2573,10 +3301,6 @@ cases:
       feature 'std'
         is required by 1 dependency:
           libc
-    crate 'merlin'
-      feature 'std'
-        must propagate to:
-          zeroize
     crate 'merlin'
       feature 'std'
         must propagate to:
@@ -2591,8 +3315,9 @@ cases:
           adler
     crate 'mio'
       feature 'std'
-        is required by 2 dependencies:
+        is required by 3 dependencies:
           libc
+          log
           wasi
     crate 'mmr-gadget'
       feature 'std'
@@ -2623,13 +3348,12 @@ cases:
           downcast
     crate 'multiaddr'
       feature 'std'
-        is required by 8 dependencies:
+        is required by 7 dependencies:
           byteorder
           data-encoding
           log
           multibase
           multihash
-          percent-encoding
           serde
           unsigned-varint
     crate 'multibase'
@@ -2646,6 +3370,12 @@ cases:
           digest
           sha-2 (renamed from sha2)
           sha-3 (renamed from sha3)
+    crate 'multihash'
+      feature 'std'
+        must propagate to:
+          core2
+          digest
+          sha-2 (renamed from sha2)
     crate 'multistream-select'
       feature 'std'
         is required by 4 dependencies:
@@ -2731,12 +3461,12 @@ cases:
           kitchensink-runtime
           log
           node-primitives
-          pallet-asset-conversion-tx-payment
           pallet-asset-tx-payment
           pallet-assets
           pallet-balances
           pallet-im-online
           pallet-timestamp
+          pallet-transaction-payment
           codec (renamed from parity-scale-codec)
           platforms
           rand
@@ -2753,9 +3483,9 @@ cases:
           sp-io
           sp-keystore
           sp-runtime
-          sp-statement-store
           sp-timestamp
           sp-tracing
+          sp-transaction-pool
           sp-transaction-storage-proof
     crate 'node-executor'
       feature 'std'
@@ -2790,9 +3520,10 @@ cases:
           sp-trie
     crate 'node-inspect'
       feature 'std'
-        is required by 4 dependencies:
+        is required by 5 dependencies:
           clap
           codec (renamed from parity-scale-codec)
+          sc-executor
           sp-core
           sp-runtime
     crate 'node-rpc'
@@ -2835,16 +3566,15 @@ cases:
           clap
     crate 'node-testing'
       feature 'std'
-        is required by 18 dependencies:
+        is required by 17 dependencies:
           frame-system
           futures
           kitchensink-runtime
           log
           node-primitives
-          pallet-asset-conversion
-          pallet-asset-conversion-tx-payment
           pallet-asset-tx-payment
           pallet-assets
+          pallet-transaction-payment
           codec (renamed from parity-scale-codec)
           sc-executor
           sp-api
@@ -2854,6 +3584,10 @@ cases:
           sp-io
           sp-runtime
           sp-timestamp
+    crate 'nu-ansi-term'
+      feature 'std'
+        is required by 1 dependency:
+          winapi
     crate 'num-format'
       feature 'std'
         must propagate to:
@@ -2879,6 +3613,10 @@ cases:
       feature 'std'
         is required by 1 dependency:
           asn1-rs
+    crate 'openssl-sys'
+      feature 'std'
+        is required by 1 dependency:
+          libc
     crate 'output_vt100'
       feature 'std'
         is required by 1 dependency:
@@ -2891,10 +3629,14 @@ cases:
       feature 'std'
         must propagate to:
           sha2
-    crate 'pallet-asset-conversion'
+    crate 'pallet-asset-tx-payment'
       feature 'std'
         must propagate to:
-          primitive-types
+          sp-storage
+    crate 'pallet-aura'
+      feature 'std'
+        must propagate to:
+          sp-core
     crate 'pallet-bags-list-fuzzer'
       feature 'std'
         is required by 3 dependencies:
@@ -2915,10 +3657,22 @@ cases:
           sp-std
           sp-storage
           sp-tracing
+    crate 'pallet-contracts'
+      feature 'std'
+        must propagate to:
+          sp-api
+    crate 'pallet-contracts-primitives'
+      feature 'std'
+        must propagate to:
+          sp-weights
     crate 'pallet-democracy'
       feature 'std'
         must propagate to:
           log
+    crate 'pallet-dev-mode'
+      feature 'std'
+        must propagate to:
+          sp-core
     crate 'pallet-election-provider-e2e-test'
       feature 'std'
         is required by 19 dependencies:
@@ -2941,6 +3695,14 @@ cases:
           sp-staking
           sp-std
           sp-tracing
+    crate 'pallet-example-basic'
+      feature 'std'
+        must propagate to:
+          sp-core
+    crate 'pallet-fast-unstake'
+      feature 'std'
+        must propagate to:
+          sp-core
     crate 'pallet-glutton'
       feature 'std'
         must propagate to:
@@ -2964,6 +3726,7 @@ cases:
     crate 'pallet-nomination-pools-benchmarking'
       feature 'std'
         must propagate to:
+          pallet-balances
           codec (renamed from parity-scale-codec)
           scale-info
     crate 'pallet-nomination-pools-fuzzer'
@@ -2997,20 +3760,26 @@ cases:
           sp-staking
           sp-std
           sp-tracing
-    crate 'pallet-paged-list-fuzzer'
-      feature 'std'
-        is required by 3 dependencies:
-          frame-support
-          pallet-paged-list
-          sp-io
     crate 'pallet-referenda'
       feature 'std'
         must propagate to:
           log
-    crate 'pallet-society'
+    crate 'pallet-root-offences'
       feature 'std'
         must propagate to:
-          log
+          sp-io
+          sp-staking
+          sp-std
+    crate 'pallet-root-testing'
+      feature 'std'
+        must propagate to:
+          sp-core
+          sp-io
+          sp-std
+    crate 'pallet-scheduler'
+      feature 'std'
+        must propagate to:
+          sp-core
     crate 'pallet-staking-reward-curve'
       feature 'std'
         is required by 1 dependency:
@@ -3028,6 +3797,14 @@ cases:
           sp-core
           sp-runtime
           sp-weights
+    crate 'pallet-transaction-storage'
+      feature 'std'
+        must propagate to:
+          sp-core
+    crate 'pallet-vesting'
+      feature 'std'
+        must propagate to:
+          sp-io
     crate 'parity-db'
       feature 'std'
         is required by 7 dependencies:
@@ -3281,24 +4058,10 @@ cases:
           log
           ring
           webpki
-    crate 'rustls'
-      feature 'std'
-        is required by 3 dependencies:
-          log
-          ring
-          webpki (renamed from rustls-webpki)
     crate 'rustls-pemfile'
       feature 'std'
         is required by 1 dependency:
           base64
-    crate 'rustls-webpki'
-      feature 'std'
-        must propagate to:
-          ring
-    crate 'rustls-webpki'
-      feature 'std'
-        must propagate to:
-          ring
     crate 'rusty-fork'
       feature 'std'
         is required by 1 dependency:
@@ -3376,7 +4139,7 @@ cases:
           sp-version
     crate 'sc-client-api'
       feature 'std'
-        is required by 14 dependencies:
+        is required by 15 dependencies:
           fnv
           futures
           log
@@ -3385,6 +4148,7 @@ cases:
           sp-api
           sp-core
           sp-externalities
+          sp-keystore
           sp-runtime
           sp-state-machine
           sp-statement-store
@@ -3578,10 +4342,11 @@ cases:
           wasm-instrument
     crate 'sc-executor-wasmtime'
       feature 'std'
-        is required by 9 dependencies:
+        is required by 10 dependencies:
           anyhow
           libc
           log
+          once_cell
           codec (renamed from parity-scale-codec)
           rustix
           sc-runtime-test
@@ -3633,11 +4398,14 @@ cases:
           unsigned-varint
     crate 'sc-network-common'
       feature 'std'
-        is required by 4 dependencies:
+        is required by 7 dependencies:
+          bytes
           futures
           codec (renamed from parity-scale-codec)
+          serde
           sp-consensus-grandpa
           sp-runtime
+          zeroize
     crate 'sc-network-gossip'
       feature 'std'
         is required by 5 dependencies:
@@ -3657,10 +4425,11 @@ cases:
           sp-runtime
     crate 'sc-network-statement'
       feature 'std'
-        is required by 4 dependencies:
+        is required by 5 dependencies:
           futures
           log
           codec (renamed from parity-scale-codec)
+          sp-runtime
           sp-statement-store
     crate 'sc-network-sync'
       feature 'std'
@@ -3677,10 +4446,11 @@ cases:
           sp-tracing
     crate 'sc-network-test'
       feature 'std'
-        is required by 7 dependencies:
+        is required by 8 dependencies:
           futures
           log
           rand
+          sp-consensus-babe
           sp-core
           sp-runtime
           sp-tracing
@@ -3694,33 +4464,38 @@ cases:
           sp-runtime
     crate 'sc-offchain'
       feature 'std'
-        is required by 15 dependencies:
+        is required by 12 dependencies:
           bytes
           fnv
           futures
-          log
           once_cell
           codec (renamed from parity-scale-codec)
           rand
           sp-api
           sp-core
-          sp-externalities
-          sp-keystore
           sp-offchain
           sp-runtime
           sp-tracing
           tracing
+    crate 'sc-peerset'
+      feature 'std'
+        is required by 6 dependencies:
+          futures
+          log
+          rand
+          serde_json
+          sp-arithmetic
+          sp-tracing
     crate 'sc-proposer-metrics'
       feature 'std'
         is required by 1 dependency:
           log
     crate 'sc-rpc'
       feature 'std'
-        is required by 14 dependencies:
+        is required by 13 dependencies:
           futures
           log
           codec (renamed from parity-scale-codec)
-          pretty_assertions
           serde_json
           sp-api
           sp-core
@@ -3748,13 +4523,12 @@ cases:
           serde_json
     crate 'sc-rpc-spec-v2'
       feature 'std'
-        is required by 13 dependencies:
+        is required by 12 dependencies:
           futures
           futures-util
           hex
           log
           codec (renamed from parity-scale-codec)
-          pretty_assertions
           serde
           serde_json
           sp-api
@@ -3762,6 +4536,10 @@ cases:
           sp-runtime
           sp-version
           substrate-test-runtime
+    crate 'sc-runtime-test'
+      feature 'std'
+        must propagate to:
+          sp-runtime-interface
     crate 'sc-service'
       feature 'std'
         is required by 22 dependencies:
@@ -3811,16 +4589,20 @@ cases:
           sp-core
     crate 'sc-statement-store'
       feature 'std'
-        is required by 5 dependencies:
+        is required by 8 dependencies:
+          futures
           log
+          codec (renamed from parity-scale-codec)
           sp-api
           sp-core
           sp-runtime
           sp-statement-store
+          sp-tracing
     crate 'sc-storage-monitor'
       feature 'std'
-        is required by 3 dependencies:
+        is required by 4 dependencies:
           clap
+          futures
           log
           sp-core
     crate 'sc-sync-state-rpc'
@@ -3855,10 +4637,11 @@ cases:
           serde_json
     crate 'sc-tracing'
       feature 'std'
-        is required by 12 dependencies:
+        is required by 13 dependencies:
           chrono
           libc
           log
+          once_cell
           regex
           rustc-hash
           serde
@@ -3870,9 +4653,10 @@ cases:
           tracing-log
     crate 'sc-transaction-pool'
       feature 'std'
-        is required by 10 dependencies:
+        is required by 11 dependencies:
           futures
           log
+          num-traits
           codec (renamed from parity-scale-codec)
           serde
           sp-api
@@ -3883,13 +4667,11 @@ cases:
           substrate-test-runtime
     crate 'sc-transaction-pool-api'
       feature 'std'
-        is required by 7 dependencies:
+        is required by 5 dependencies:
           futures
           log
-          codec (renamed from parity-scale-codec)
           serde
           serde_json
-          sp-core
           sp-runtime
     crate 'sc-utils'
       feature 'std'
@@ -4010,33 +4792,23 @@ cases:
           blake2
     crate 'sp-api-test'
       feature 'std'
-        is required by 10 dependencies:
-          futures
+        must propagate to:
           log
-          codec (renamed from parity-scale-codec)
-          scale-info
-          sp-api
-          sp-core
-          sp-runtime
-          sp-state-machine
-          sp-tracing
-          sp-version
     crate 'sp-application-crypto-test'
       feature 'std'
-        is required by 4 dependencies:
+        is required by 5 dependencies:
           sp-api
           sp-application-crypto
           sp-core
           sp-keystore
+          sp-runtime
     crate 'sp-arithmetic-fuzzer'
       feature 'std'
-        is required by 2 dependencies:
+        is required by 4 dependencies:
           num-bigint
+          num-traits
+          primitive-types
           sp-arithmetic
-    crate 'sp-ark-ed-on-bls12-381-bandersnatch'
-      feature 'std'
-        must propagate to:
-          ark-ec
     crate 'sp-blockchain'
       feature 'std'
         is required by 6 dependencies:
@@ -4056,10 +4828,18 @@ cases:
           sp-runtime
           sp-state-machine
           sp-test-primitives
+    crate 'sp-consensus-babe'
+      feature 'std'
+        must propagate to:
+          sp-keystore
     crate 'sp-consensus-beefy'
       feature 'std'
         must propagate to:
           strum
+    crate 'sp-consensus-grandpa'
+      feature 'std'
+        must propagate to:
+          sp-keystore
     crate 'sp-core'
       feature 'std'
         must propagate to:
@@ -4069,15 +4849,12 @@ cases:
       feature 'std'
         is required by 1 dependency:
           sp-core-hashing
-    crate 'sp-crypto-ec-utils'
-      feature 'std'
-        must propagate to:
-          sp-ark-models
     crate 'sp-io'
       feature 'std'
         must propagate to:
           ed25519-dalek
           log
+          sp-keystore
     crate 'sp-keyring'
       feature 'std'
         is required by 3 dependencies:
@@ -4090,9 +4867,11 @@ cases:
           scale-info
     crate 'sp-npos-elections-fuzzer'
       feature 'std'
-        is required by 4 dependencies:
+        is required by 6 dependencies:
           clap
+          codec (renamed from parity-scale-codec)
           rand
+          scale-info
           sp-npos-elections
           sp-runtime
     crate 'sp-panic-handler'
@@ -4126,8 +4905,16 @@ cases:
     crate 'sp-statement-store'
       feature 'std'
         must propagate to:
-          aes-gcm
-          hkdf
+          log
+          sp-externalities
+    crate 'sp-timestamp'
+      feature 'std'
+        must propagate to:
+          log
+    crate 'sp-transaction-storage-proof'
+      feature 'std'
+        must propagate to:
+          log
     crate 'sp-version-proc-macro'
       feature 'std'
         is required by 2 dependencies:
@@ -4174,11 +4961,6 @@ cases:
       feature 'std'
         is required by 1 dependency:
           clap
-    crate 'substrate'
-      feature 'std'
-        is required by 2 dependencies:
-          frame-support
-          sp-runtime
     crate 'substrate-bip39'
       feature 'std'
         is required by 5 dependencies:
@@ -4187,6 +4969,10 @@ cases:
           schnorrkel
           sha2
           zeroize
+    crate 'substrate-build-script-utils'
+      feature 'std'
+        is required by 1 dependency:
+          platforms
     crate 'substrate-cli-test-utils'
       feature 'std'
         is required by 3 dependencies:
@@ -4237,8 +5023,10 @@ cases:
           sp-runtime
     crate 'substrate-state-trie-migration-rpc'
       feature 'std'
-        is required by 8 dependencies:
+        is required by 10 dependencies:
+          log
           codec (renamed from parity-scale-codec)
+          scale-info
           serde
           serde_json
           sp-core
@@ -4261,12 +5049,12 @@ cases:
     crate 'substrate-test-runtime'
       feature 'std'
         must propagate to:
-          serde
-          serde_json
+          frame-executive
     crate 'substrate-test-runtime-client'
       feature 'std'
-        is required by 5 dependencies:
+        is required by 6 dependencies:
           futures
+          codec (renamed from parity-scale-codec)
           sp-api
           sp-core
           sp-runtime
@@ -4283,8 +5071,7 @@ cases:
           futures
     crate 'substrate-wasm-builder'
       feature 'std'
-        is required by 2 dependencies:
-          parity-wasm
+        is required by 1 dependency:
           strum
     crate 'system-configuration-sys'
       feature 'std'
@@ -4347,6 +5134,10 @@ cases:
       feature 'std'
         is required by 1 dependency:
           rand
+    crate 'tokio-rustls'
+      feature 'std'
+        is required by 1 dependency:
+          webpki
     crate 'tokio-stream'
       feature 'std'
         is required by 1 dependency:
@@ -4415,6 +5206,10 @@ cases:
           tracing
           tracing-core
           tracing-log
+    crate 'tracing-subscriber'
+      feature 'std'
+        must propagate to:
+          regex
     crate 'trie-bench'
       feature 'std'
         is required by 6 dependencies:
@@ -4451,12 +5246,11 @@ cases:
           tracing
     crate 'try-runtime-cli'
       feature 'std'
-        is required by 25 dependencies:
+        is required by 24 dependencies:
           clap
           frame-try-runtime
           hex
           log
-          node-primitives
           parity-scale-codec
           regex
           sc-executor
@@ -4507,12 +5301,6 @@ cases:
       feature 'std'
         must propagate to:
           subtle
-    crate 'url'
-      feature 'std'
-        is required by 3 dependencies:
-          form_urlencoded
-          idna
-          percent-encoding
     crate 'uuid'
       feature 'std'
         must propagate to:
@@ -4680,10 +5468,6 @@ cases:
       feature 'std'
         is required by 1 dependency:
           webpki
-    crate 'webpki-roots'
-      feature 'std'
-        is required by 1 dependency:
-          webpki (renamed from rustls-webpki)
     crate 'webrtc'
       feature 'std'
         is required by 10 dependencies:
@@ -4705,7 +5489,7 @@ cases:
           log
     crate 'webrtc-dtls'
       feature 'std'
-        is required by 22 dependencies:
+        is required by 23 dependencies:
           aes-gcm
           block-modes
           byteorder
@@ -4728,6 +5512,7 @@ cases:
           signature
           subtle
           webpki
+          x25519-dalek
     crate 'webrtc-ice'
       feature 'std'
         is required by 5 dependencies:
@@ -4790,9 +5575,8 @@ cases:
           zeroize
     crate 'x25519-dalek'
       feature 'std'
-        is required by 3 dependencies:
+        must propagate to:
           rand_core
-          serde
           zeroize
     crate 'x509-parser'
       feature 'std'
@@ -4836,7 +5620,7 @@ cases:
       feature 'std'
         is required by 1 dependency:
           zstd-safe
-    Found 1855 issues (run with --fix to fix).
+    Found 1830 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature --feature std --workspace
   stdout: |
@@ -4845,9 +5629,13 @@ cases:
         is required by 2 dependencies:
           sp-core
           sp-keystore
+    crate 'frame-benchmarking'
+      feature 'std'
+        must propagate to:
+          frame-support-procedural
     crate 'frame-benchmarking-cli'
       feature 'std'
-        is required by 15 dependencies:
+        is required by 14 dependencies:
           frame-benchmarking
           frame-support
           frame-system
@@ -4856,13 +5644,12 @@ cases:
           sp-core
           sp-externalities
           sp-inherents
-          sp-io
           sp-keystore
           sp-runtime
           sp-state-machine
+          sp-std
           sp-storage
           sp-trie
-          sp-wasm-interface
     crate 'frame-election-provider-solution-type'
       feature 'std'
         is required by 3 dependencies:
@@ -4877,22 +5664,33 @@ cases:
           sp-arithmetic
           sp-npos-elections
           sp-runtime
+    crate 'frame-executive'
+      feature 'std'
+        must propagate to:
+          frame-try-runtime
     crate 'frame-remote-externalities'
       feature 'std'
         is required by 5 dependencies:
+          frame-support
+          pallet-elections-phragmen
           sp-core
           sp-io
           sp-runtime
-          sp-state-machine
-          sp-tracing
+    crate 'frame-support'
+      feature 'std'
+        must propagate to:
+          sp-debug-derive
+    crate 'frame-support-test'
+      feature 'std'
+        must propagate to:
+          test-pallet (renamed from frame-support-test-pallet)
     crate 'generate-bags'
       feature 'std'
-        is required by 5 dependencies:
+        is required by 4 dependencies:
           frame-election-provider-support
           frame-support
           frame-system
           pallet-staking
-          sp-staking
     crate 'mmr-gadget'
       feature 'std'
         is required by 6 dependencies:
@@ -4928,12 +5726,12 @@ cases:
           frame-system-rpc-runtime-api
           kitchensink-runtime
           node-primitives
-          pallet-asset-conversion-tx-payment
           pallet-asset-tx-payment
           pallet-assets
           pallet-balances
           pallet-im-online
           pallet-timestamp
+          pallet-transaction-payment
           sc-executor
           sp-api
           sp-authority-discovery
@@ -4944,9 +5742,9 @@ cases:
           sp-io
           sp-keystore
           sp-runtime
-          sp-statement-store
           sp-timestamp
           sp-tracing
+          sp-transaction-pool
           sp-transaction-storage-proof
     crate 'node-executor'
       feature 'std'
@@ -4978,7 +5776,8 @@ cases:
           sp-trie
     crate 'node-inspect'
       feature 'std'
-        is required by 2 dependencies:
+        is required by 3 dependencies:
+          sc-executor
           sp-core
           sp-runtime
     crate 'node-rpc'
@@ -5014,14 +5813,13 @@ cases:
           sp-timestamp
     crate 'node-testing'
       feature 'std'
-        is required by 15 dependencies:
+        is required by 14 dependencies:
           frame-system
           kitchensink-runtime
           node-primitives
-          pallet-asset-conversion
-          pallet-asset-conversion-tx-payment
           pallet-asset-tx-payment
           pallet-assets
+          pallet-transaction-payment
           sc-executor
           sp-api
           sp-block-builder
@@ -5030,6 +5828,14 @@ cases:
           sp-io
           sp-runtime
           sp-timestamp
+    crate 'pallet-asset-tx-payment'
+      feature 'std'
+        must propagate to:
+          sp-storage
+    crate 'pallet-aura'
+      feature 'std'
+        must propagate to:
+          sp-core
     crate 'pallet-bags-list-fuzzer'
       feature 'std'
         is required by 2 dependencies:
@@ -5048,6 +5854,18 @@ cases:
           sp-std
           sp-storage
           sp-tracing
+    crate 'pallet-contracts'
+      feature 'std'
+        must propagate to:
+          sp-api
+    crate 'pallet-contracts-primitives'
+      feature 'std'
+        must propagate to:
+          sp-weights
+    crate 'pallet-dev-mode'
+      feature 'std'
+        must propagate to:
+          sp-core
     crate 'pallet-election-provider-e2e-test'
       feature 'std'
         is required by 16 dependencies:
@@ -5067,6 +5885,18 @@ cases:
           sp-staking
           sp-std
           sp-tracing
+    crate 'pallet-example-basic'
+      feature 'std'
+        must propagate to:
+          sp-core
+    crate 'pallet-fast-unstake'
+      feature 'std'
+        must propagate to:
+          sp-core
+    crate 'pallet-nomination-pools-benchmarking'
+      feature 'std'
+        must propagate to:
+          pallet-balances
     crate 'pallet-nomination-pools-fuzzer'
       feature 'std'
         is required by 6 dependencies:
@@ -5093,12 +5923,22 @@ cases:
           sp-staking
           sp-std
           sp-tracing
-    crate 'pallet-paged-list-fuzzer'
+    crate 'pallet-root-offences'
       feature 'std'
-        is required by 3 dependencies:
-          frame-support
-          pallet-paged-list
+        must propagate to:
           sp-io
+          sp-staking
+          sp-std
+    crate 'pallet-root-testing'
+      feature 'std'
+        must propagate to:
+          sp-core
+          sp-io
+          sp-std
+    crate 'pallet-scheduler'
+      feature 'std'
+        must propagate to:
+          sp-core
     crate 'pallet-staking-reward-curve'
       feature 'std'
         is required by 1 dependency:
@@ -5111,6 +5951,14 @@ cases:
           sp-core
           sp-runtime
           sp-weights
+    crate 'pallet-transaction-storage'
+      feature 'std'
+        must propagate to:
+          sp-core
+    crate 'pallet-vesting'
+      feature 'std'
+        must propagate to:
+          sp-io
     crate 'sc-allocator'
       feature 'std'
         is required by 2 dependencies:
@@ -5158,11 +6006,12 @@ cases:
           sp-version
     crate 'sc-client-api'
       feature 'std'
-        is required by 10 dependencies:
+        is required by 11 dependencies:
           sc-executor
           sp-api
           sp-core
           sp-externalities
+          sp-keystore
           sp-runtime
           sp-state-machine
           sp-statement-store
@@ -5346,7 +6195,8 @@ cases:
           sp-runtime
     crate 'sc-network-statement'
       feature 'std'
-        is required by 1 dependency:
+        is required by 2 dependencies:
+          sp-runtime
           sp-statement-store
     crate 'sc-network-sync'
       feature 'std'
@@ -5359,7 +6209,8 @@ cases:
           sp-tracing
     crate 'sc-network-test'
       feature 'std'
-        is required by 4 dependencies:
+        is required by 5 dependencies:
+          sp-consensus-babe
           sp-core
           sp-runtime
           sp-tracing
@@ -5370,13 +6221,16 @@ cases:
           sp-runtime
     crate 'sc-offchain'
       feature 'std'
-        is required by 7 dependencies:
+        is required by 5 dependencies:
           sp-api
           sp-core
-          sp-externalities
-          sp-keystore
           sp-offchain
           sp-runtime
+          sp-tracing
+    crate 'sc-peerset'
+      feature 'std'
+        is required by 2 dependencies:
+          sp-arithmetic
           sp-tracing
     crate 'sc-rpc'
       feature 'std'
@@ -5404,6 +6258,10 @@ cases:
           sp-runtime
           sp-version
           substrate-test-runtime
+    crate 'sc-runtime-test'
+      feature 'std'
+        must propagate to:
+          sp-runtime-interface
     crate 'sc-service'
       feature 'std'
         is required by 14 dependencies:
@@ -5440,11 +6298,12 @@ cases:
           sp-core
     crate 'sc-statement-store'
       feature 'std'
-        is required by 4 dependencies:
+        is required by 5 dependencies:
           sp-api
           sp-core
           sp-runtime
           sp-statement-store
+          sp-tracing
     crate 'sc-storage-monitor'
       feature 'std'
         is required by 1 dependency:
@@ -5478,29 +6337,20 @@ cases:
           substrate-test-runtime
     crate 'sc-transaction-pool-api'
       feature 'std'
-        is required by 2 dependencies:
-          sp-core
+        is required by 1 dependency:
           sp-runtime
     crate 'sc-utils'
       feature 'std'
         is required by 1 dependency:
           sp-arithmetic
-    crate 'sp-api-test'
-      feature 'std'
-        is required by 6 dependencies:
-          sp-api
-          sp-core
-          sp-runtime
-          sp-state-machine
-          sp-tracing
-          sp-version
     crate 'sp-application-crypto-test'
       feature 'std'
-        is required by 4 dependencies:
+        is required by 5 dependencies:
           sp-api
           sp-application-crypto
           sp-core
           sp-keystore
+          sp-runtime
     crate 'sp-arithmetic-fuzzer'
       feature 'std'
         is required by 1 dependency:
@@ -5519,10 +6369,22 @@ cases:
           sp-runtime
           sp-state-machine
           sp-test-primitives
+    crate 'sp-consensus-babe'
+      feature 'std'
+        must propagate to:
+          sp-keystore
+    crate 'sp-consensus-grandpa'
+      feature 'std'
+        must propagate to:
+          sp-keystore
     crate 'sp-core-hashing-proc-macro'
       feature 'std'
         is required by 1 dependency:
           sp-core-hashing
+    crate 'sp-io'
+      feature 'std'
+        must propagate to:
+          sp-keystore
     crate 'sp-keyring'
       feature 'std'
         is required by 2 dependencies:
@@ -5547,15 +6409,14 @@ cases:
           sp-runtime-interface-test-wasm
           sp-runtime-interface-test-wasm-deprecated
           sp-state-machine
+    crate 'sp-statement-store'
+      feature 'std'
+        must propagate to:
+          sp-externalities
     crate 'sp-version-proc-macro'
       feature 'std'
         is required by 1 dependency:
           sp-version
-    crate 'substrate'
-      feature 'std'
-        is required by 2 dependencies:
-          frame-support
-          sp-runtime
     crate 'substrate-cli-test-utils'
       feature 'std'
         is required by 1 dependency:
@@ -5604,6 +6465,10 @@ cases:
           sp-keystore
           sp-runtime
           sp-state-machine
+    crate 'substrate-test-runtime'
+      feature 'std'
+        must propagate to:
+          frame-executive
     crate 'substrate-test-runtime-client'
       feature 'std'
         is required by 4 dependencies:
@@ -5617,9 +6482,8 @@ cases:
           sp-runtime
     crate 'try-runtime-cli'
       feature 'std'
-        is required by 18 dependencies:
+        is required by 17 dependencies:
           frame-try-runtime
-          node-primitives
           sc-executor
           sp-api
           sp-consensus-aura
@@ -5636,7 +6500,7 @@ cases:
           sp-transaction-storage-proof
           sp-version
           sp-weights
-    Found 514 issues (run with --fix to fix).
+    Found 531 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature --feature try-runtime
   stdout: |
@@ -5660,20 +6524,47 @@ cases:
           frame-support
           frame-system
           sp-runtime
+    crate 'frame-benchmarking-pallet-pov'
+      feature 'try-runtime'
+        must propagate to:
+          sp-runtime
     crate 'frame-election-provider-solution-type'
       feature 'try-runtime'
         is required by 2 dependencies:
           frame-election-provider-support
           frame-support
+    crate 'frame-election-provider-support'
+      feature 'try-runtime'
+        must propagate to:
+          frame-support
+          frame-system
+          sp-runtime
     crate 'frame-election-solution-type-fuzzer'
       feature 'try-runtime'
         is required by 3 dependencies:
           frame-election-provider-support
           frame-support
           sp-runtime
+    crate 'frame-executive'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-transaction-payment
     crate 'frame-remote-externalities'
       feature 'try-runtime'
-        is required by 1 dependency:
+        is required by 3 dependencies:
+          frame-support
+          pallet-elections-phragmen
+          sp-runtime
+    crate 'frame-support'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'frame-support-test'
+      feature 'try-runtime'
+        must propagate to:
           sp-runtime
     crate 'frame-support-test-compile-pass'
       feature 'try-runtime'
@@ -5683,15 +6574,22 @@ cases:
           sp-runtime
     crate 'frame-support-test-pallet'
       feature 'try-runtime'
-        is required by 3 dependencies:
+        is required by 2 dependencies:
           frame-support
           frame-system
+    crate 'frame-system'
+      feature 'try-runtime'
+        must propagate to:
           sp-runtime
     crate 'frame-system-benchmarking'
       feature 'try-runtime'
         is required by 3 dependencies:
           frame-support
           frame-system
+          sp-runtime
+    crate 'frame-try-runtime'
+      feature 'try-runtime'
+        must propagate to:
           sp-runtime
     crate 'generate-bags'
       feature 'try-runtime'
@@ -5700,6 +6598,11 @@ cases:
           frame-support
           frame-system
           pallet-staking
+    crate 'kitchensink-runtime'
+      feature 'try-runtime'
+        must propagate to:
+          frame-election-provider-support
+          sp-runtime
     crate 'mmr-gadget'
       feature 'try-runtime'
         is required by 1 dependency:
@@ -5712,6 +6615,17 @@ cases:
       feature 'try-runtime'
         is required by 2 dependencies:
           kitchensink-runtime
+          sp-runtime
+    crate 'node-cli'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-asset-tx-payment
+          pallet-assets
+          pallet-balances
+          pallet-im-online
+          pallet-timestamp
+          pallet-transaction-payment
           sp-runtime
     crate 'node-executor'
       feature 'try-runtime'
@@ -5735,7 +6649,8 @@ cases:
           sp-runtime
     crate 'node-primitives'
       feature 'try-runtime'
-        is required by 1 dependency:
+        is required by 2 dependencies:
+          frame-system
           sp-runtime
     crate 'node-rpc'
       feature 'try-runtime'
@@ -5745,15 +6660,91 @@ cases:
       feature 'try-runtime'
         is required by 1 dependency:
           kitchensink-runtime
+    crate 'node-template'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-transaction-payment
+          sp-runtime
+    crate 'node-template-runtime'
+      feature 'try-runtime'
+        must propagate to:
+          sp-runtime
     crate 'node-testing'
       feature 'try-runtime'
-        is required by 7 dependencies:
+        is required by 6 dependencies:
           frame-system
           kitchensink-runtime
-          pallet-asset-conversion
-          pallet-asset-conversion-tx-payment
           pallet-asset-tx-payment
           pallet-assets
+          pallet-transaction-payment
+          sp-runtime
+    crate 'pallet-alliance'
+      feature 'try-runtime'
+        must propagate to:
+          pallet-balances
+          pallet-collective
+          pallet-identity
+          sp-runtime
+    crate 'pallet-asset-rate'
+      feature 'try-runtime'
+        must propagate to:
+          pallet-balances
+    crate 'pallet-asset-tx-payment'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-assets
+          pallet-authorship
+          pallet-balances
+          pallet-transaction-payment
+          sp-runtime
+    crate 'pallet-assets'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-atomic-swap'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-aura'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-timestamp
+          sp-runtime
+    crate 'pallet-authority-discovery'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-session
+          sp-runtime
+    crate 'pallet-authorship'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-babe'
+      feature 'try-runtime'
+        must propagate to:
+          frame-election-provider-support
+          frame-system
+          pallet-authorship
+          pallet-balances
+          pallet-offences
+          pallet-session
+          pallet-staking
+          pallet-timestamp
+          sp-runtime
+    crate 'pallet-bags-list'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
           sp-runtime
     crate 'pallet-bags-list-fuzzer'
       feature 'try-runtime'
@@ -5769,9 +6760,91 @@ cases:
           pallet-bags-list
           pallet-staking
           sp-runtime
+    crate 'pallet-balances'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-transaction-payment
+          sp-runtime
+    crate 'pallet-beefy'
+      feature 'try-runtime'
+        must propagate to:
+          frame-election-provider-support
+          frame-system
+          pallet-authorship
+          pallet-balances
+          pallet-offences
+          pallet-session
+          pallet-staking
+          pallet-timestamp
+          sp-runtime
+    crate 'pallet-beefy-mmr'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-beefy
+          pallet-mmr
+          pallet-session
+          sp-runtime
+    crate 'pallet-bounties'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-treasury
+          sp-runtime
+    crate 'pallet-child-bounties'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-bounties
+          pallet-treasury
+          sp-runtime
+    crate 'pallet-collective'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-contracts'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-insecure-randomness-collective-flip
+          pallet-proxy
+          pallet-timestamp
+          pallet-utility
+          sp-runtime
     crate 'pallet-contracts-primitives'
       feature 'try-runtime'
         is required by 1 dependency:
+          sp-runtime
+    crate 'pallet-conviction-voting'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-scheduler
+          sp-runtime
+    crate 'pallet-core-fellowship'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-democracy'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-preimage
+          pallet-scheduler
+          sp-runtime
+    crate 'pallet-dev-mode'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
           sp-runtime
     crate 'pallet-election-provider-e2e-test'
       feature 'try-runtime'
@@ -5786,17 +6859,157 @@ cases:
           pallet-staking
           pallet-timestamp
           sp-runtime
+    crate 'pallet-election-provider-multi-phase'
+      feature 'try-runtime'
+        must propagate to:
+          frame-election-provider-support
+          frame-system
+          pallet-balances
+          sp-runtime
     crate 'pallet-election-provider-support-benchmarking'
       feature 'try-runtime'
         is required by 3 dependencies:
           frame-election-provider-support
           frame-system
           sp-runtime
+    crate 'pallet-elections-phragmen'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-example-basic'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-example-offchain-worker'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-fast-unstake'
+      feature 'try-runtime'
+        must propagate to:
+          frame-election-provider-support
+          frame-system
+          pallet-balances
+          pallet-staking
+          pallet-timestamp
+          sp-runtime
+    crate 'pallet-glutton'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-grandpa'
+      feature 'try-runtime'
+        must propagate to:
+          frame-election-provider-support
+          frame-system
+          pallet-authorship
+          pallet-balances
+          pallet-offences
+          pallet-session
+          pallet-staking
+          pallet-timestamp
+          sp-runtime
+    crate 'pallet-identity'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-im-online'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-authorship
+          pallet-session
+          sp-runtime
+    crate 'pallet-indices'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-insecure-randomness-collective-flip'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-lottery'
+      feature 'try-runtime'
+        must propagate to:
+          frame-support-test
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-membership'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-message-queue'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-mmr'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-multisig'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-nft-fractionalization'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-assets
+          pallet-balances
+          pallet-nfts
+          sp-runtime
+    crate 'pallet-nfts'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
     crate 'pallet-nfts-runtime-api'
       feature 'try-runtime'
         is required by 2 dependencies:
           frame-support
           pallet-nfts
+    crate 'pallet-nicks'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-nis'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-node-authorization'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-nomination-pools'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
     crate 'pallet-nomination-pools-benchmarking'
       feature 'try-runtime'
         is required by 9 dependencies:
@@ -5832,6 +7045,12 @@ cases:
           pallet-staking
           pallet-timestamp
           sp-runtime
+    crate 'pallet-offences'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
     crate 'pallet-offences-benchmarking'
       feature 'try-runtime'
         is required by 12 dependencies:
@@ -5847,11 +7066,81 @@ cases:
           pallet-staking
           pallet-timestamp
           sp-runtime
-    crate 'pallet-paged-list-fuzzer'
+    crate 'pallet-preimage'
       feature 'try-runtime'
-        is required by 2 dependencies:
-          frame-support
-          pallet-paged-list
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-proxy'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-utility
+          sp-runtime
+    crate 'pallet-ranked-collective'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-recovery'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-referenda'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-preimage
+          pallet-scheduler
+          sp-runtime
+    crate 'pallet-remark'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-root-offences'
+      feature 'try-runtime'
+        must propagate to:
+          frame-election-provider-support
+          frame-system
+          pallet-balances
+          pallet-session
+          pallet-staking
+          pallet-timestamp
+          sp-runtime
+    crate 'pallet-root-testing'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-salary'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-scheduler'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-preimage
+          sp-runtime
+    crate 'pallet-scored-pool'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-session'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-timestamp
+          sp-runtime
     crate 'pallet-session-benchmarking'
       feature 'try-runtime'
         is required by 8 dependencies:
@@ -5863,9 +7152,66 @@ cases:
           pallet-staking
           pallet-timestamp
           sp-runtime
+    crate 'pallet-society'
+      feature 'try-runtime'
+        must propagate to:
+          frame-support-test
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-staking'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-authorship
+          pallet-bags-list
+          pallet-balances
+          pallet-session
+          pallet-timestamp
+          sp-runtime
     crate 'pallet-staking-reward-curve'
       feature 'try-runtime'
         is required by 1 dependency:
+          sp-runtime
+    crate 'pallet-state-trie-migration'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-statement'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-sudo'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-template'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-timestamp'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-tips'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-treasury
+          sp-runtime
+    crate 'pallet-transaction-payment'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
           sp-runtime
     crate 'pallet-transaction-payment-rpc'
       feature 'try-runtime'
@@ -5875,6 +7221,47 @@ cases:
       feature 'try-runtime'
         is required by 2 dependencies:
           pallet-transaction-payment
+          sp-runtime
+    crate 'pallet-transaction-storage'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-treasury'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-utility
+          sp-runtime
+    crate 'pallet-uniques'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-utility'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-collective
+          pallet-root-testing
+          pallet-timestamp
+          sp-runtime
+    crate 'pallet-vesting'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-whitelist'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-preimage
           sp-runtime
     crate 'sc-authority-discovery'
       feature 'try-runtime'
@@ -5981,6 +7368,10 @@ cases:
       feature 'try-runtime'
         is required by 1 dependency:
           sp-runtime
+    crate 'sc-network-statement'
+      feature 'try-runtime'
+        is required by 1 dependency:
+          sp-runtime
     crate 'sc-network-sync'
       feature 'try-runtime'
         is required by 1 dependency:
@@ -6053,6 +7444,10 @@ cases:
       feature 'try-runtime'
         is required by 1 dependency:
           sp-runtime
+    crate 'sp-application-crypto-test'
+      feature 'try-runtime'
+        is required by 1 dependency:
+          sp-runtime
     crate 'sp-authority-discovery'
       feature 'try-runtime'
         is required by 1 dependency:
@@ -6086,10 +7481,6 @@ cases:
         is required by 1 dependency:
           sp-runtime
     crate 'sp-consensus-pow'
-      feature 'try-runtime'
-        is required by 1 dependency:
-          sp-runtime
-    crate 'sp-genesis-builder'
       feature 'try-runtime'
         is required by 1 dependency:
           sp-runtime
@@ -6161,12 +7552,6 @@ cases:
       feature 'try-runtime'
         is required by 1 dependency:
           sp-runtime
-    crate 'substrate'
-      feature 'try-runtime'
-        is required by 3 dependencies:
-          frame-support
-          node-cli
-          sp-runtime
     crate 'substrate-frame-cli'
       feature 'try-runtime'
         is required by 3 dependencies:
@@ -6197,12 +7582,15 @@ cases:
           sp-runtime
     crate 'substrate-test-runtime'
       feature 'try-runtime'
-        is required by 7 dependencies:
+        is required by 10 dependencies:
           frame-executive
           frame-support
           frame-system
           pallet-babe
           pallet-balances
+          pallet-beefy-mmr
+          pallet-root-testing
+          pallet-sudo
           pallet-timestamp
           sp-runtime
     crate 'substrate-test-runtime-client'
@@ -6213,7 +7601,11 @@ cases:
       feature 'try-runtime'
         is required by 1 dependency:
           sp-runtime
-    Found 222 issues (run with --fix to fix).
+    crate 'try-runtime-cli'
+      feature 'try-runtime'
+        must propagate to:
+          sp-runtime
+    Found 504 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature --feature try-runtime --workspace
   stdout: |
@@ -6237,20 +7629,47 @@ cases:
           frame-support
           frame-system
           sp-runtime
+    crate 'frame-benchmarking-pallet-pov'
+      feature 'try-runtime'
+        must propagate to:
+          sp-runtime
     crate 'frame-election-provider-solution-type'
       feature 'try-runtime'
         is required by 2 dependencies:
           frame-election-provider-support
           frame-support
+    crate 'frame-election-provider-support'
+      feature 'try-runtime'
+        must propagate to:
+          frame-support
+          frame-system
+          sp-runtime
     crate 'frame-election-solution-type-fuzzer'
       feature 'try-runtime'
         is required by 3 dependencies:
           frame-election-provider-support
           frame-support
           sp-runtime
+    crate 'frame-executive'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-transaction-payment
     crate 'frame-remote-externalities'
       feature 'try-runtime'
-        is required by 1 dependency:
+        is required by 3 dependencies:
+          frame-support
+          pallet-elections-phragmen
+          sp-runtime
+    crate 'frame-support'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'frame-support-test'
+      feature 'try-runtime'
+        must propagate to:
           sp-runtime
     crate 'frame-support-test-compile-pass'
       feature 'try-runtime'
@@ -6260,15 +7679,22 @@ cases:
           sp-runtime
     crate 'frame-support-test-pallet'
       feature 'try-runtime'
-        is required by 3 dependencies:
+        is required by 2 dependencies:
           frame-support
           frame-system
+    crate 'frame-system'
+      feature 'try-runtime'
+        must propagate to:
           sp-runtime
     crate 'frame-system-benchmarking'
       feature 'try-runtime'
         is required by 3 dependencies:
           frame-support
           frame-system
+          sp-runtime
+    crate 'frame-try-runtime'
+      feature 'try-runtime'
+        must propagate to:
           sp-runtime
     crate 'generate-bags'
       feature 'try-runtime'
@@ -6277,6 +7703,11 @@ cases:
           frame-support
           frame-system
           pallet-staking
+    crate 'kitchensink-runtime'
+      feature 'try-runtime'
+        must propagate to:
+          frame-election-provider-support
+          sp-runtime
     crate 'mmr-gadget'
       feature 'try-runtime'
         is required by 1 dependency:
@@ -6289,6 +7720,17 @@ cases:
       feature 'try-runtime'
         is required by 2 dependencies:
           kitchensink-runtime
+          sp-runtime
+    crate 'node-cli'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-asset-tx-payment
+          pallet-assets
+          pallet-balances
+          pallet-im-online
+          pallet-timestamp
+          pallet-transaction-payment
           sp-runtime
     crate 'node-executor'
       feature 'try-runtime'
@@ -6312,7 +7754,8 @@ cases:
           sp-runtime
     crate 'node-primitives'
       feature 'try-runtime'
-        is required by 1 dependency:
+        is required by 2 dependencies:
+          frame-system
           sp-runtime
     crate 'node-rpc'
       feature 'try-runtime'
@@ -6322,15 +7765,91 @@ cases:
       feature 'try-runtime'
         is required by 1 dependency:
           kitchensink-runtime
+    crate 'node-template'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-transaction-payment
+          sp-runtime
+    crate 'node-template-runtime'
+      feature 'try-runtime'
+        must propagate to:
+          sp-runtime
     crate 'node-testing'
       feature 'try-runtime'
-        is required by 7 dependencies:
+        is required by 6 dependencies:
           frame-system
           kitchensink-runtime
-          pallet-asset-conversion
-          pallet-asset-conversion-tx-payment
           pallet-asset-tx-payment
           pallet-assets
+          pallet-transaction-payment
+          sp-runtime
+    crate 'pallet-alliance'
+      feature 'try-runtime'
+        must propagate to:
+          pallet-balances
+          pallet-collective
+          pallet-identity
+          sp-runtime
+    crate 'pallet-asset-rate'
+      feature 'try-runtime'
+        must propagate to:
+          pallet-balances
+    crate 'pallet-asset-tx-payment'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-assets
+          pallet-authorship
+          pallet-balances
+          pallet-transaction-payment
+          sp-runtime
+    crate 'pallet-assets'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-atomic-swap'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-aura'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-timestamp
+          sp-runtime
+    crate 'pallet-authority-discovery'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-session
+          sp-runtime
+    crate 'pallet-authorship'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-babe'
+      feature 'try-runtime'
+        must propagate to:
+          frame-election-provider-support
+          frame-system
+          pallet-authorship
+          pallet-balances
+          pallet-offences
+          pallet-session
+          pallet-staking
+          pallet-timestamp
+          sp-runtime
+    crate 'pallet-bags-list'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
           sp-runtime
     crate 'pallet-bags-list-fuzzer'
       feature 'try-runtime'
@@ -6346,9 +7865,91 @@ cases:
           pallet-bags-list
           pallet-staking
           sp-runtime
+    crate 'pallet-balances'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-transaction-payment
+          sp-runtime
+    crate 'pallet-beefy'
+      feature 'try-runtime'
+        must propagate to:
+          frame-election-provider-support
+          frame-system
+          pallet-authorship
+          pallet-balances
+          pallet-offences
+          pallet-session
+          pallet-staking
+          pallet-timestamp
+          sp-runtime
+    crate 'pallet-beefy-mmr'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-beefy
+          pallet-mmr
+          pallet-session
+          sp-runtime
+    crate 'pallet-bounties'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-treasury
+          sp-runtime
+    crate 'pallet-child-bounties'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-bounties
+          pallet-treasury
+          sp-runtime
+    crate 'pallet-collective'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-contracts'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-insecure-randomness-collective-flip
+          pallet-proxy
+          pallet-timestamp
+          pallet-utility
+          sp-runtime
     crate 'pallet-contracts-primitives'
       feature 'try-runtime'
         is required by 1 dependency:
+          sp-runtime
+    crate 'pallet-conviction-voting'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-scheduler
+          sp-runtime
+    crate 'pallet-core-fellowship'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-democracy'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-preimage
+          pallet-scheduler
+          sp-runtime
+    crate 'pallet-dev-mode'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
           sp-runtime
     crate 'pallet-election-provider-e2e-test'
       feature 'try-runtime'
@@ -6363,17 +7964,157 @@ cases:
           pallet-staking
           pallet-timestamp
           sp-runtime
+    crate 'pallet-election-provider-multi-phase'
+      feature 'try-runtime'
+        must propagate to:
+          frame-election-provider-support
+          frame-system
+          pallet-balances
+          sp-runtime
     crate 'pallet-election-provider-support-benchmarking'
       feature 'try-runtime'
         is required by 3 dependencies:
           frame-election-provider-support
           frame-system
           sp-runtime
+    crate 'pallet-elections-phragmen'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-example-basic'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-example-offchain-worker'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-fast-unstake'
+      feature 'try-runtime'
+        must propagate to:
+          frame-election-provider-support
+          frame-system
+          pallet-balances
+          pallet-staking
+          pallet-timestamp
+          sp-runtime
+    crate 'pallet-glutton'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-grandpa'
+      feature 'try-runtime'
+        must propagate to:
+          frame-election-provider-support
+          frame-system
+          pallet-authorship
+          pallet-balances
+          pallet-offences
+          pallet-session
+          pallet-staking
+          pallet-timestamp
+          sp-runtime
+    crate 'pallet-identity'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-im-online'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-authorship
+          pallet-session
+          sp-runtime
+    crate 'pallet-indices'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-insecure-randomness-collective-flip'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-lottery'
+      feature 'try-runtime'
+        must propagate to:
+          frame-support-test
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-membership'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-message-queue'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-mmr'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-multisig'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-nft-fractionalization'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-assets
+          pallet-balances
+          pallet-nfts
+          sp-runtime
+    crate 'pallet-nfts'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
     crate 'pallet-nfts-runtime-api'
       feature 'try-runtime'
         is required by 2 dependencies:
           frame-support
           pallet-nfts
+    crate 'pallet-nicks'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-nis'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-node-authorization'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-nomination-pools'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
     crate 'pallet-nomination-pools-benchmarking'
       feature 'try-runtime'
         is required by 9 dependencies:
@@ -6409,6 +8150,12 @@ cases:
           pallet-staking
           pallet-timestamp
           sp-runtime
+    crate 'pallet-offences'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
     crate 'pallet-offences-benchmarking'
       feature 'try-runtime'
         is required by 12 dependencies:
@@ -6424,11 +8171,81 @@ cases:
           pallet-staking
           pallet-timestamp
           sp-runtime
-    crate 'pallet-paged-list-fuzzer'
+    crate 'pallet-preimage'
       feature 'try-runtime'
-        is required by 2 dependencies:
-          frame-support
-          pallet-paged-list
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-proxy'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-utility
+          sp-runtime
+    crate 'pallet-ranked-collective'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-recovery'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-referenda'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-preimage
+          pallet-scheduler
+          sp-runtime
+    crate 'pallet-remark'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-root-offences'
+      feature 'try-runtime'
+        must propagate to:
+          frame-election-provider-support
+          frame-system
+          pallet-balances
+          pallet-session
+          pallet-staking
+          pallet-timestamp
+          sp-runtime
+    crate 'pallet-root-testing'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-salary'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-scheduler'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-preimage
+          sp-runtime
+    crate 'pallet-scored-pool'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-session'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-timestamp
+          sp-runtime
     crate 'pallet-session-benchmarking'
       feature 'try-runtime'
         is required by 8 dependencies:
@@ -6440,9 +8257,66 @@ cases:
           pallet-staking
           pallet-timestamp
           sp-runtime
+    crate 'pallet-society'
+      feature 'try-runtime'
+        must propagate to:
+          frame-support-test
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-staking'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-authorship
+          pallet-bags-list
+          pallet-balances
+          pallet-session
+          pallet-timestamp
+          sp-runtime
     crate 'pallet-staking-reward-curve'
       feature 'try-runtime'
         is required by 1 dependency:
+          sp-runtime
+    crate 'pallet-state-trie-migration'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-statement'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-sudo'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-template'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-timestamp'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          sp-runtime
+    crate 'pallet-tips'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-treasury
+          sp-runtime
+    crate 'pallet-transaction-payment'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
           sp-runtime
     crate 'pallet-transaction-payment-rpc'
       feature 'try-runtime'
@@ -6452,6 +8326,47 @@ cases:
       feature 'try-runtime'
         is required by 2 dependencies:
           pallet-transaction-payment
+          sp-runtime
+    crate 'pallet-transaction-storage'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-treasury'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-utility
+          sp-runtime
+    crate 'pallet-uniques'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-utility'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-collective
+          pallet-root-testing
+          pallet-timestamp
+          sp-runtime
+    crate 'pallet-vesting'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          sp-runtime
+    crate 'pallet-whitelist'
+      feature 'try-runtime'
+        must propagate to:
+          frame-system
+          pallet-balances
+          pallet-preimage
           sp-runtime
     crate 'sc-authority-discovery'
       feature 'try-runtime'
@@ -6558,6 +8473,10 @@ cases:
       feature 'try-runtime'
         is required by 1 dependency:
           sp-runtime
+    crate 'sc-network-statement'
+      feature 'try-runtime'
+        is required by 1 dependency:
+          sp-runtime
     crate 'sc-network-sync'
       feature 'try-runtime'
         is required by 1 dependency:
@@ -6630,6 +8549,10 @@ cases:
       feature 'try-runtime'
         is required by 1 dependency:
           sp-runtime
+    crate 'sp-application-crypto-test'
+      feature 'try-runtime'
+        is required by 1 dependency:
+          sp-runtime
     crate 'sp-authority-discovery'
       feature 'try-runtime'
         is required by 1 dependency:
@@ -6663,10 +8586,6 @@ cases:
         is required by 1 dependency:
           sp-runtime
     crate 'sp-consensus-pow'
-      feature 'try-runtime'
-        is required by 1 dependency:
-          sp-runtime
-    crate 'sp-genesis-builder'
       feature 'try-runtime'
         is required by 1 dependency:
           sp-runtime
@@ -6738,12 +8657,6 @@ cases:
       feature 'try-runtime'
         is required by 1 dependency:
           sp-runtime
-    crate 'substrate'
-      feature 'try-runtime'
-        is required by 3 dependencies:
-          frame-support
-          node-cli
-          sp-runtime
     crate 'substrate-frame-cli'
       feature 'try-runtime'
         is required by 3 dependencies:
@@ -6774,12 +8687,15 @@ cases:
           sp-runtime
     crate 'substrate-test-runtime'
       feature 'try-runtime'
-        is required by 7 dependencies:
+        is required by 10 dependencies:
           frame-executive
           frame-support
           frame-system
           pallet-babe
           pallet-balances
+          pallet-beefy-mmr
+          pallet-root-testing
+          pallet-sudo
           pallet-timestamp
           sp-runtime
     crate 'substrate-test-runtime-client'
@@ -6790,5 +8706,9 @@ cases:
       feature 'try-runtime'
         is required by 1 dependency:
           sp-runtime
-    Found 222 issues (run with --fix to fix).
+    crate 'try-runtime-cli'
+      feature 'try-runtime'
+        must propagate to:
+          sp-runtime
+    Found 504 issues (run with --fix to fix).
   code: 1

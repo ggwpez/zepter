@@ -7,7 +7,6 @@ cases:
     crate 'asset-hub-kusama-runtime'
       feature 'std'
         must propagate to:
-          asset-test-utils
           cumulus-pallet-session-benchmarking
           frame-benchmarking
           frame-system-benchmarking
@@ -18,7 +17,6 @@ cases:
     crate 'asset-hub-polkadot-runtime'
       feature 'std'
         must propagate to:
-          asset-test-utils
           cumulus-pallet-session-benchmarking
           frame-benchmarking
           frame-system-benchmarking
@@ -29,22 +27,16 @@ cases:
     crate 'asset-hub-westend-runtime'
       feature 'std'
         must propagate to:
-          asset-test-utils
           cumulus-pallet-session-benchmarking
           frame-benchmarking
           frame-system-benchmarking
           frame-try-runtime
           pallet-xcm-benchmarks
-          sp-io
           sp-storage
     crate 'asset-test-utils'
       feature 'std'
         must propagate to:
           sp-core
-    crate 'bp-header-chain'
-      feature 'std'
-        must propagate to:
-          bp-test-utils
     crate 'bp-test-utils'
       feature 'std'
         must propagate to:
@@ -54,7 +46,6 @@ cases:
     crate 'bridge-hub-kusama-runtime'
       feature 'std'
         must propagate to:
-          bridge-hub-test-utils
           cumulus-pallet-session-benchmarking
           frame-benchmarking
           frame-system-benchmarking
@@ -64,7 +55,6 @@ cases:
     crate 'bridge-hub-polkadot-runtime'
       feature 'std'
         must propagate to:
-          bridge-hub-test-utils
           cumulus-pallet-session-benchmarking
           frame-benchmarking
           frame-system-benchmarking
@@ -74,7 +64,6 @@ cases:
     crate 'bridge-hub-rococo-runtime'
       feature 'std'
         must propagate to:
-          bridge-hub-test-utils
           cumulus-pallet-session-benchmarking
           frame-system-benchmarking
           frame-try-runtime
@@ -89,8 +78,6 @@ cases:
       feature 'std'
         must propagate to:
           bp-relayers
-          bp-test-utils
-          pallet-balances
     crate 'collectives-polkadot-runtime'
       feature 'std'
         must propagate to:
@@ -120,11 +107,8 @@ cases:
     crate 'cumulus-pallet-parachain-system'
       feature 'std'
         must propagate to:
-          cumulus-test-relay-sproof-builder
           polkadot-parachain
           sp-inherents
-          sp-tracing
-          sp-version
     crate 'cumulus-pallet-xcm'
       feature 'std'
         must propagate to:
@@ -132,11 +116,7 @@ cases:
     crate 'cumulus-pallet-xcmp-queue'
       feature 'std'
         must propagate to:
-          cumulus-pallet-parachain-system
           frame-benchmarking
-          pallet-balances
-          sp-core
-          xcm-builder
     crate 'cumulus-ping'
       feature 'std'
         must propagate to:
@@ -145,14 +125,6 @@ cases:
       feature 'std'
         must propagate to:
           xcm
-    crate 'cumulus-primitives-parachain-inherent'
-      feature 'std'
-        must propagate to:
-          cumulus-test-relay-sproof-builder
-          sp-api
-          sp-runtime
-          sp-state-machine
-          sp-storage
     crate 'cumulus-test-relay-sproof-builder'
       feature 'std'
         must propagate to:
@@ -177,69 +149,16 @@ cases:
           pallet-xcm-benchmarks
           sp-storage
           sp-tracing
-          sp-trie
-    crate 'pallet-bridge-grandpa'
-      feature 'std'
-        must propagate to:
-          sp-core
-          sp-io
-    crate 'pallet-bridge-messages'
-      feature 'std'
-        must propagate to:
-          bp-test-utils
-          pallet-balances
-          sp-io
-    crate 'pallet-bridge-parachains'
-      feature 'std'
-        must propagate to:
-          bp-test-utils
-          sp-core
-          sp-io
     crate 'pallet-bridge-relayers'
       feature 'std'
         must propagate to:
-          pallet-balances
           pallet-bridge-messages
-          sp-core
-          sp-io
-    crate 'pallet-collator-selection'
-      feature 'std'
-        must propagate to:
-          pallet-aura
-          pallet-balances
-          pallet-timestamp
-          sp-consensus-aura
-          sp-core
-          sp-io
-          sp-tracing
     crate 'pallet-parachain-template'
       feature 'std'
         must propagate to:
           sp-core
           sp-io
           sp-runtime
-    crate 'pallet-xcm'
-      feature 'std'
-        must propagate to:
-          pallet-balances
-          polkadot-parachain
-          polkadot-runtime-parachains
-          xcm-builder
-    crate 'pallet-xcm-benchmarks'
-      feature 'std'
-        must propagate to:
-          pallet-assets
-          pallet-balances
-          pallet-xcm
-          polkadot-primitives
-          polkadot-runtime-common
-          sp-core
-          sp-tracing
-          xcm
-    crate 'pallet-xcm-bridge-hub-router'
-      feature 'std'
-        must propagate to:
-          sp-io
     crate 'parachain-info'
       feature 'std'
         must propagate to:
@@ -263,7 +182,6 @@ cases:
       feature 'std'
         must propagate to:
           sp-core
-          sp-tracing
     crate 'penpal-runtime'
       feature 'std'
         must propagate to:
@@ -272,10 +190,6 @@ cases:
           frame-system-benchmarking
           frame-try-runtime
           sp-storage
-    crate 'polkadot-primitives'
-      feature 'std'
-        must propagate to:
-          sp-keystore
     crate 'polkadot-runtime'
       feature 'std'
         must propagate to:
@@ -290,15 +204,11 @@ cases:
           sp-io
           sp-storage
           sp-tracing
-          sp-trie
     crate 'polkadot-runtime-common'
       feature 'std'
         must propagate to:
           frame-benchmarking
           frame-election-provider-support
-          frame-support-test
-          pallet-babe
-          sp-keystore
     crate 'polkadot-runtime-metrics'
       feature 'std'
         must propagate to:
@@ -307,17 +217,13 @@ cases:
       feature 'std'
         must propagate to:
           frame-benchmarking
-          frame-support-test
           polkadot-parachain
           sp-application-crypto
-          sp-keystore
-          sp-tracing
     crate 'polkadot-test-runtime'
       feature 'std'
         must propagate to:
           polkadot-runtime-parachains
           sp-mmr-primitives
-          sp-trie
     crate 'rococo-parachain-runtime'
       feature 'std'
         must propagate to:
@@ -332,7 +238,6 @@ cases:
           pallet-xcm-benchmarks
           sp-storage
           sp-tracing
-          sp-trie
     crate 'shell-runtime'
       feature 'std'
         must propagate to:
@@ -345,10 +250,6 @@ cases:
       feature 'std'
         must propagate to:
           sp-io
-    crate 'test-parachains'
-      feature 'std'
-        must propagate to:
-          sp-core
     crate 'westend-runtime'
       feature 'std'
         must propagate to:
@@ -362,32 +263,9 @@ cases:
           pallet-xcm-benchmarks
           sp-storage
           sp-tracing
-    crate 'xcm'
-      feature 'std'
-        must propagate to:
-          sp-io
-    crate 'xcm-builder'
-      feature 'std'
-        must propagate to:
-          pallet-assets
-          pallet-balances
-          pallet-salary
-          pallet-xcm
-          primitives (renamed from polkadot-primitives)
-          polkadot-runtime-parachains
-          polkadot-test-runtime
-    crate 'xcm-executor-integration-tests'
-      feature 'std'
-        must propagate to:
-          frame-system
-          pallet-xcm
-          polkadot-test-runtime
-          sp-state-machine
-          sp-tracing
-          xcm-executor
-    Found 219 issues and fixed 219.
+    Found 139 issues and fixed 139.
   code: 0
-  diff: "diff --git cumulus/bridges/bin/runtime-common/Cargo.toml cumulus/bridges/bin/runtime-common/Cargo.toml\nindex ee1334..bf2161 100644\n--- cumulus/bridges/bin/runtime-common/Cargo.toml\n+++ cumulus/bridges/bin/runtime-common/Cargo.toml\n@@ -79,0 +80,3 @@ std = [\n+\t\"bp-relayers/std\",\n+\t\"bp-test-utils/std\",\n+\t\"pallet-balances/std\"\ndiff --git cumulus/bridges/modules/grandpa/Cargo.toml cumulus/bridges/modules/grandpa/Cargo.toml\nindex 3e25b5..691fce 100644\n--- cumulus/bridges/modules/grandpa/Cargo.toml\n+++ cumulus/bridges/modules/grandpa/Cargo.toml\n@@ -54,0 +55,2 @@ std = [\n+\t\"sp-core/std\",\n+\t\"sp-io/std\"\ndiff --git cumulus/bridges/modules/messages/Cargo.toml cumulus/bridges/modules/messages/Cargo.toml\nindex 8108b5..5ddf98 100644\n--- cumulus/bridges/modules/messages/Cargo.toml\n+++ cumulus/bridges/modules/messages/Cargo.toml\n@@ -48,0 +49,3 @@ std = [\n+\t\"bp-test-utils/std\",\n+\t\"pallet-balances/std\",\n+\t\"sp-io/std\"\ndiff --git cumulus/bridges/modules/parachains/Cargo.toml cumulus/bridges/modules/parachains/Cargo.toml\nindex d7384c..4a399b 100644\n--- cumulus/bridges/modules/parachains/Cargo.toml\n+++ cumulus/bridges/modules/parachains/Cargo.toml\n@@ -52,0 +53,3 @@ std = [\n+\t\"bp-test-utils/std\",\n+\t\"sp-core/std\",\n+\t\"sp-io/std\"\ndiff --git cumulus/bridges/modules/relayers/Cargo.toml cumulus/bridges/modules/relayers/Cargo.toml\nindex 8a5a4e..328d5f 100644\n--- cumulus/bridges/modules/relayers/Cargo.toml\n+++ cumulus/bridges/modules/relayers/Cargo.toml\n@@ -51,0 +52,4 @@ std = [\n+\t\"pallet-balances/std\",\n+\t\"pallet-bridge-messages/std\",\n+\t\"sp-core/std\",\n+\t\"sp-io/std\"\ndiff --git cumulus/bridges/modules/xcm-bridge-hub-router/Cargo.toml cumulus/bridges/modules/xcm-bridge-hub-router/Cargo.toml\nindex 7f57c5..addb05 100644\n--- cumulus/bridges/modules/xcm-bridge-hub-router/Cargo.toml\n+++ cumulus/bridges/modules/xcm-bridge-hub-router/Cargo.toml\n@@ -50,0 +51 @@ std = [\n+\t\"sp-io/std\"\ndiff --git cumulus/bridges/primitives/header-chain/Cargo.toml cumulus/bridges/primitives/header-chain/Cargo.toml\nindex 8b59a2..e704f1 100644\n--- cumulus/bridges/primitives/header-chain/Cargo.toml\n+++ cumulus/bridges/primitives/header-chain/Cargo.toml\n@@ -44,0 +45 @@ std = [\n+\t\"bp-test-utils/std\"\ndiff --git cumulus/bridges/primitives/test-utils/Cargo.toml cumulus/bridges/primitives/test-utils/Cargo.toml\nindex e841c8..8be857 100644\n--- cumulus/bridges/primitives/test-utils/Cargo.toml\n+++ cumulus/bridges/primitives/test-utils/Cargo.toml\n@@ -35,0 +36,3 @@ std = [\n+\t\"bp-parachains/std\",\n+\t\"bp-runtime/std\",\n+\t\"sp-trie/std\"\ndiff --git cumulus/pallets/aura-ext/Cargo.toml cumulus/pallets/aura-ext/Cargo.toml\nindex b29bbe..642766 100644\n--- cumulus/pallets/aura-ext/Cargo.toml\n+++ cumulus/pallets/aura-ext/Cargo.toml\n@@ -42,0 +43 @@ std = [\n+\t\"pallet-timestamp/std\"\ndiff --git cumulus/pallets/collator-selection/Cargo.toml cumulus/pallets/collator-selection/Cargo.toml\nindex cce7e3..782aad 100644\n--- cumulus/pallets/collator-selection/Cargo.toml\n+++ cumulus/pallets/collator-selection/Cargo.toml\n@@ -60,0 +61,7 @@ std = [\n+\t\"pallet-aura/std\",\n+\t\"pallet-balances/std\",\n+\t\"pallet-timestamp/std\",\n+\t\"sp-consensus-aura/std\",\n+\t\"sp-core/std\",\n+\t\"sp-io/std\",\n+\t\"sp-tracing/std\"\ndiff --git cumulus/pallets/dmp-queue/Cargo.toml cumulus/pallets/dmp-queue/Cargo.toml\nindex 377738..4d3601 100644\n--- cumulus/pallets/dmp-queue/Cargo.toml\n+++ cumulus/pallets/dmp-queue/Cargo.toml\n@@ -41,0 +42,2 @@ std = [\n+\t\"sp-core/std\",\n+\t\"sp-version/std\"\ndiff --git cumulus/pallets/parachain-system/Cargo.toml cumulus/pallets/parachain-system/Cargo.toml\nindex cfc439..c5f4c6 100644\n--- cumulus/pallets/parachain-system/Cargo.toml\n+++ cumulus/pallets/parachain-system/Cargo.toml\n@@ -74,0 +75,5 @@ std = [\n+\t\"cumulus-test-relay-sproof-builder/std\",\n+\t\"polkadot-parachain/std\",\n+\t\"sp-inherents/std\",\n+\t\"sp-tracing/std\",\n+\t\"sp-version/std\"\ndiff --git cumulus/pallets/xcm/Cargo.toml cumulus/pallets/xcm/Cargo.toml\nindex d6b8c6..447a57 100644\n--- cumulus/pallets/xcm/Cargo.toml\n+++ cumulus/pallets/xcm/Cargo.toml\n@@ -31,0 +32 @@ std = [\n+\t\"sp-io/std\"\ndiff --git cumulus/pallets/xcmp-queue/Cargo.toml cumulus/pallets/xcmp-queue/Cargo.toml\nindex 2cd319..0b0cb0 100644\n--- cumulus/pallets/xcmp-queue/Cargo.toml\n+++ cumulus/pallets/xcmp-queue/Cargo.toml\n@@ -57,0 +58,5 @@ std = [\n+\t\"cumulus-pallet-parachain-system/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"pallet-balances/std\",\n+\t\"sp-core/std\",\n+\t\"xcm-builder/std\"\ndiff --git cumulus/parachain-template/pallets/template/Cargo.toml cumulus/parachain-template/pallets/template/Cargo.toml\nindex 9235cb..2cbfac 100644\n--- cumulus/parachain-template/pallets/template/Cargo.toml\n+++ cumulus/parachain-template/pallets/template/Cargo.toml\n@@ -39,0 +40,3 @@ std = [\n+\t\"sp-core/std\",\n+\t\"sp-io/std\",\n+\t\"sp-runtime/std\"\ndiff --git cumulus/parachain-template/runtime/Cargo.toml cumulus/parachain-template/runtime/Cargo.toml\nindex c61df9..c7b97b 100644\n--- cumulus/parachain-template/runtime/Cargo.toml\n+++ cumulus/parachain-template/runtime/Cargo.toml\n@@ -120,0 +121,4 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\"\ndiff --git cumulus/parachains/common/Cargo.toml cumulus/parachains/common/Cargo.toml\nindex 5900ec..3b1120 100644\n--- cumulus/parachains/common/Cargo.toml\n+++ cumulus/parachains/common/Cargo.toml\n@@ -65,0 +66,4 @@ std = [\n+\t\"pallet-asset-tx-payment/std\",\n+\t\"sp-core/std\",\n+\t\"sp-runtime/std\",\n+\t\"xcm-builder/std\"\ndiff --git cumulus/parachains/pallets/parachain-info/Cargo.toml cumulus/parachains/pallets/parachain-info/Cargo.toml\nindex 11876b..2be2f5 100644\n--- cumulus/parachains/pallets/parachain-info/Cargo.toml\n+++ cumulus/parachains/pallets/parachain-info/Cargo.toml\n@@ -27,0 +28,2 @@ std = [\n+\t\"sp-runtime/std\",\n+\t\"sp-std/std\"\ndiff --git cumulus/parachains/pallets/ping/Cargo.toml cumulus/parachains/pallets/ping/Cargo.toml\nindex d883be..4525c7 100644\n--- cumulus/parachains/pallets/ping/Cargo.toml\n+++ cumulus/parachains/pallets/ping/Cargo.toml\n@@ -31,0 +32 @@ std = [\n+\t\"cumulus-pallet-xcm/std\"\ndiff --git cumulus/parachains/runtimes/assets/asset-hub-kusama/Cargo.toml cumulus/parachains/runtimes/assets/asset-hub-kusama/Cargo.toml\nindex 682581..ca2ede 100644\n--- cumulus/parachains/runtimes/assets/asset-hub-kusama/Cargo.toml\n+++ cumulus/parachains/runtimes/assets/asset-hub-kusama/Cargo.toml\n@@ -209,0 +210,8 @@ std = [\n+\t\"asset-test-utils/std\",\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\",\n+\t\"sp-weights/std\"\ndiff --git cumulus/parachains/runtimes/assets/asset-hub-polkadot/Cargo.toml cumulus/parachains/runtimes/assets/asset-hub-polkadot/Cargo.toml\nindex dba374..70c5fa 100644\n--- cumulus/parachains/runtimes/assets/asset-hub-polkadot/Cargo.toml\n+++ cumulus/parachains/runtimes/assets/asset-hub-polkadot/Cargo.toml\n@@ -189,0 +190,8 @@ std = [\n+\t\"asset-test-utils/std\",\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\",\n+\t\"sp-weights/std\"\ndiff --git cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml\nindex 1e9c49..9950a4 100644\n--- cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml\n+++ cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml\n@@ -199,0 +200,8 @@ std = [\n+\t\"asset-test-utils/std\",\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-io/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/assets/test-utils/Cargo.toml cumulus/parachains/runtimes/assets/test-utils/Cargo.toml\nindex 919f1b..1e8b04 100644\n--- cumulus/parachains/runtimes/assets/test-utils/Cargo.toml\n+++ cumulus/parachains/runtimes/assets/test-utils/Cargo.toml\n@@ -75,0 +76 @@ std = [\n+\t\"sp-core/std\"\ndiff --git cumulus/parachains/runtimes/bridge-hubs/bridge-hub-kusama/Cargo.toml cumulus/parachains/runtimes/bridge-hubs/bridge-hub-kusama/Cargo.toml\nindex 0dbe3e..d5f170 100644\n--- cumulus/parachains/runtimes/bridge-hubs/bridge-hub-kusama/Cargo.toml\n+++ cumulus/parachains/runtimes/bridge-hubs/bridge-hub-kusama/Cargo.toml\n@@ -127,0 +128,7 @@ std = [\n+\t\"bridge-hub-test-utils/std\",\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/bridge-hubs/bridge-hub-polkadot/Cargo.toml cumulus/parachains/runtimes/bridge-hubs/bridge-hub-polkadot/Cargo.toml\nindex 9243f2..b8ff6c 100644\n--- cumulus/parachains/runtimes/bridge-hubs/bridge-hub-polkadot/Cargo.toml\n+++ cumulus/parachains/runtimes/bridge-hubs/bridge-hub-polkadot/Cargo.toml\n@@ -127,0 +128,7 @@ std = [\n+\t\"bridge-hub-test-utils/std\",\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml\nindex 5e049d..16adef 100644\n--- cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml\n+++ cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml\n@@ -163,0 +164,6 @@ std = [\n+\t\"bridge-hub-test-utils/std\",\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/bridge-hubs/test-utils/Cargo.toml cumulus/parachains/runtimes/bridge-hubs/test-utils/Cargo.toml\nindex 1efa80..4565b5 100644\n--- cumulus/parachains/runtimes/bridge-hubs/test-utils/Cargo.toml\n+++ cumulus/parachains/runtimes/bridge-hubs/test-utils/Cargo.toml\n@@ -98,0 +99,2 @@ std = [\n+\t\"pallet-collator-selection/std\",\n+\t\"pallet-xcm-benchmarks?/std\"\ndiff --git cumulus/parachains/runtimes/collectives/collectives-polkadot/Cargo.toml cumulus/parachains/runtimes/collectives/collectives-polkadot/Cargo.toml\nindex 3d2f6e..7bf470 100644\n--- cumulus/parachains/runtimes/collectives/collectives-polkadot/Cargo.toml\n+++ cumulus/parachains/runtimes/collectives/collectives-polkadot/Cargo.toml\n@@ -197,0 +198,7 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"sp-arithmetic/std\",\n+\t\"sp-io/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml\nindex 67885d..904e01 100644\n--- cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml\n+++ cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml\n@@ -130,0 +131,4 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/glutton/glutton-kusama/Cargo.toml cumulus/parachains/runtimes/glutton/glutton-kusama/Cargo.toml\nindex 43bf46..924b8a 100644\n--- cumulus/parachains/runtimes/glutton/glutton-kusama/Cargo.toml\n+++ cumulus/parachains/runtimes/glutton/glutton-kusama/Cargo.toml\n@@ -85,0 +86,4 @@ std = [\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/starters/shell/Cargo.toml cumulus/parachains/runtimes/starters/shell/Cargo.toml\nindex d15270..7a0ae5 100644\n--- cumulus/parachains/runtimes/starters/shell/Cargo.toml\n+++ cumulus/parachains/runtimes/starters/shell/Cargo.toml\n@@ -68,0 +69 @@ std = [\n+\t\"frame-try-runtime?/std\"\ndiff --git cumulus/parachains/runtimes/test-utils/Cargo.toml cumulus/parachains/runtimes/test-utils/Cargo.toml\nindex 6fbda8..3e0388 100644\n--- cumulus/parachains/runtimes/test-utils/Cargo.toml\n+++ cumulus/parachains/runtimes/test-utils/Cargo.toml\n@@ -74,0 +75,2 @@ std = [\n+\t\"sp-core/std\",\n+\t\"sp-tracing/std\"\ndiff --git cumulus/parachains/runtimes/testing/penpal/Cargo.toml cumulus/parachains/runtimes/testing/penpal/Cargo.toml\nindex dc945a..032592 100644\n--- cumulus/parachains/runtimes/testing/penpal/Cargo.toml\n+++ cumulus/parachains/runtimes/testing/penpal/Cargo.toml\n@@ -125,0 +126,5 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/testing/rococo-parachain/Cargo.toml cumulus/parachains/runtimes/testing/rococo-parachain/Cargo.toml\nindex 9a16d3..083621 100644\n--- cumulus/parachains/runtimes/testing/rococo-parachain/Cargo.toml\n+++ cumulus/parachains/runtimes/testing/rococo-parachain/Cargo.toml\n@@ -100,0 +101,2 @@ std = [\n+\t\"frame-benchmarking?/std\",\n+\t\"polkadot-parachain/std\"\ndiff --git cumulus/primitives/core/Cargo.toml cumulus/primitives/core/Cargo.toml\nindex 872278..6f306c 100644\n--- cumulus/primitives/core/Cargo.toml\n+++ cumulus/primitives/core/Cargo.toml\n@@ -34,0 +35 @@ std = [\n+\t\"xcm/std\"\ndiff --git cumulus/primitives/parachain-inherent/Cargo.toml cumulus/primitives/parachain-inherent/Cargo.toml\nindex ffcc0a..e3afb7 100644\n--- cumulus/primitives/parachain-inherent/Cargo.toml\n+++ cumulus/primitives/parachain-inherent/Cargo.toml\n@@ -47,0 +48,5 @@ std = [\n+\t\"cumulus-test-relay-sproof-builder?/std\",\n+\t\"sp-api?/std\",\n+\t\"sp-runtime?/std\",\n+\t\"sp-state-machine?/std\",\n+\t\"sp-storage?/std\"\ndiff --git cumulus/test/relay-sproof-builder/Cargo.toml cumulus/test/relay-sproof-builder/Cargo.toml\nindex 1f7aaf..fe7779 100644\n--- cumulus/test/relay-sproof-builder/Cargo.toml\n+++ cumulus/test/relay-sproof-builder/Cargo.toml\n@@ -30,0 +31 @@ std = [\n+\t\"polkadot-primitives/std\"\ndiff --git polkadot/parachain/test-parachains/Cargo.toml polkadot/parachain/test-parachains/Cargo.toml\nindex fdc3c7..503a14 100644\n--- polkadot/parachain/test-parachains/Cargo.toml\n+++ polkadot/parachain/test-parachains/Cargo.toml\n@@ -22 +22,5 @@ default = [ \"std\" ]\n-std = [ \"adder/std\", \"halt/std\" ]\n+std = [\n+\t\"adder/std\",\n+\t\"halt/std\", \n+\t\"sp-core/std\"\n+]\ndiff --git polkadot/parachain/test-parachains/adder/Cargo.toml polkadot/parachain/test-parachains/adder/Cargo.toml\nindex ca477e..3bda9f 100644\n--- polkadot/parachain/test-parachains/adder/Cargo.toml\n+++ polkadot/parachain/test-parachains/adder/Cargo.toml\n@@ -26 +26,5 @@ default = [ \"std\" ]\n-std = [ \"parachain/std\", \"sp-std/std\" ]\n+std = [\n+\t\"parachain/std\",\n+\t\"sp-std/std\", \n+\t\"sp-io/std\"\n+]\ndiff --git polkadot/parachain/test-parachains/undying/Cargo.toml polkadot/parachain/test-parachains/undying/Cargo.toml\nindex 192e89..2a0607 100644\n--- polkadot/parachain/test-parachains/undying/Cargo.toml\n+++ polkadot/parachain/test-parachains/undying/Cargo.toml\n@@ -27 +27,5 @@ default = [ \"std\" ]\n-std = [ \"parachain/std\", \"sp-std/std\" ]\n+std = [\n+\t\"parachain/std\",\n+\t\"sp-std/std\", \n+\t\"sp-io/std\"\n+]\ndiff --git polkadot/primitives/Cargo.toml polkadot/primitives/Cargo.toml\nindex be0531..fd55c6 100644\n--- polkadot/primitives/Cargo.toml\n+++ polkadot/primitives/Cargo.toml\n@@ -51,0 +52 @@ std = [\n+\t\"sp-keystore?/std\"\ndiff --git polkadot/runtime/common/Cargo.toml polkadot/runtime/common/Cargo.toml\nindex 72b077..0b9f01 100644\n--- polkadot/runtime/common/Cargo.toml\n+++ polkadot/runtime/common/Cargo.toml\n@@ -102,0 +103,5 @@ std = [\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-election-provider-support/std\",\n+\t\"frame-support-test/std\",\n+\t\"pallet-babe?/std\",\n+\t\"sp-keystore/std\"\ndiff --git polkadot/runtime/kusama/Cargo.toml polkadot/runtime/kusama/Cargo.toml\nindex d04f67..252830 100644\n--- polkadot/runtime/kusama/Cargo.toml\n+++ polkadot/runtime/kusama/Cargo.toml\n@@ -217,0 +218,11 @@ std = [\n+\t\"binary-merkle-tree/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"pallet-election-provider-support-benchmarking?/std\",\n+\t\"pallet-nomination-pools-benchmarking?/std\",\n+\t\"pallet-offences-benchmarking?/std\",\n+\t\"pallet-session-benchmarking?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\",\n+\t\"sp-tracing/std\",\n+\t\"sp-trie/std\"\ndiff --git polkadot/runtime/metrics/Cargo.toml polkadot/runtime/metrics/Cargo.toml\nindex de3114..9d88df 100644\n--- polkadot/runtime/metrics/Cargo.toml\n+++ polkadot/runtime/metrics/Cargo.toml\n@@ -24,0 +25 @@ std = [\n+\t\"frame-benchmarking?/std\"\ndiff --git polkadot/runtime/parachains/Cargo.toml polkadot/runtime/parachains/Cargo.toml\nindex f4f647..22f584 100644\n--- polkadot/runtime/parachains/Cargo.toml\n+++ polkadot/runtime/parachains/Cargo.toml\n@@ -98,0 +99,6 @@ std = [\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-support-test/std\",\n+\t\"polkadot-parachain/std\",\n+\t\"sp-application-crypto?/std\",\n+\t\"sp-keystore?/std\",\n+\t\"sp-tracing?/std\"\ndiff --git polkadot/runtime/polkadot/Cargo.toml polkadot/runtime/polkadot/Cargo.toml\nindex 1d2ce8..d3c0e9 100644\n--- polkadot/runtime/polkadot/Cargo.toml\n+++ polkadot/runtime/polkadot/Cargo.toml\n@@ -199,0 +200,12 @@ std = [\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"pallet-election-provider-support-benchmarking?/std\",\n+\t\"pallet-nomination-pools-benchmarking?/std\",\n+\t\"pallet-offences-benchmarking?/std\",\n+\t\"pallet-session-benchmarking?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"runtime-parachains/std\",\n+\t\"sp-io/std\",\n+\t\"sp-storage/std\",\n+\t\"sp-tracing/std\",\n+\t\"sp-trie/std\"\ndiff --git polkadot/runtime/rococo/Cargo.toml polkadot/runtime/rococo/Cargo.toml\nindex ebb7cd..2a54bf 100644\n--- polkadot/runtime/rococo/Cargo.toml\n+++ polkadot/runtime/rococo/Cargo.toml\n@@ -184,0 +185,7 @@ std = [\n+\t\"binary-merkle-tree/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\",\n+\t\"sp-tracing/std\",\n+\t\"sp-trie/std\"\ndiff --git polkadot/runtime/test-runtime/Cargo.toml polkadot/runtime/test-runtime/Cargo.toml\nindex e5d04a..258920 100644\n--- polkadot/runtime/test-runtime/Cargo.toml\n+++ polkadot/runtime/test-runtime/Cargo.toml\n@@ -136,0 +137,3 @@ std = [\n+\t\"polkadot-runtime-parachains/std\",\n+\t\"sp-mmr-primitives/std\",\n+\t\"sp-trie/std\"\ndiff --git polkadot/runtime/westend/Cargo.toml polkadot/runtime/westend/Cargo.toml\nindex 40664e..f43a8b 100644\n--- polkadot/runtime/westend/Cargo.toml\n+++ polkadot/runtime/westend/Cargo.toml\n@@ -202,0 +203,10 @@ std = [\n+\t\"binary-merkle-tree/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"pallet-election-provider-support-benchmarking?/std\",\n+\t\"pallet-nomination-pools-benchmarking?/std\",\n+\t\"pallet-offences-benchmarking?/std\",\n+\t\"pallet-session-benchmarking?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\",\n+\t\"sp-tracing/std\"\ndiff --git polkadot/xcm/Cargo.toml polkadot/xcm/Cargo.toml\nindex d33b1b..2f2388 100644\n--- polkadot/xcm/Cargo.toml\n+++ polkadot/xcm/Cargo.toml\n@@ -33,0 +34 @@ std = [\n+\t\"sp-io/std\"\ndiff --git polkadot/xcm/pallet-xcm-benchmarks/Cargo.toml polkadot/xcm/pallet-xcm-benchmarks/Cargo.toml\nindex f6f993..672bb4 100644\n--- polkadot/xcm/pallet-xcm-benchmarks/Cargo.toml\n+++ polkadot/xcm/pallet-xcm-benchmarks/Cargo.toml\n@@ -48,0 +49,8 @@ std = [\n+\t\"pallet-assets/std\",\n+\t\"pallet-balances/std\",\n+\t\"pallet-xcm/std\",\n+\t\"polkadot-primitives/std\",\n+\t\"polkadot-runtime-common/std\",\n+\t\"sp-core/std\",\n+\t\"sp-tracing/std\",\n+\t\"xcm/std\"\ndiff --git polkadot/xcm/pallet-xcm/Cargo.toml polkadot/xcm/pallet-xcm/Cargo.toml\nindex eefc3c..57e471 100644\n--- polkadot/xcm/pallet-xcm/Cargo.toml\n+++ polkadot/xcm/pallet-xcm/Cargo.toml\n@@ -50,0 +51,4 @@ std = [\n+\t\"pallet-balances/std\",\n+\t\"polkadot-parachain/std\",\n+\t\"polkadot-runtime-parachains/std\",\n+\t\"xcm-builder/std\"\ndiff --git polkadot/xcm/xcm-builder/Cargo.toml polkadot/xcm/xcm-builder/Cargo.toml\nindex 336162..2cd29a 100644\n--- polkadot/xcm/xcm-builder/Cargo.toml\n+++ polkadot/xcm/xcm-builder/Cargo.toml\n@@ -61,0 +62,7 @@ std = [\n+\t\"pallet-assets/std\",\n+\t\"pallet-balances/std\",\n+\t\"pallet-salary/std\",\n+\t\"pallet-xcm/std\",\n+\t\"primitives/std\",\n+\t\"polkadot-runtime-parachains/std\",\n+\t\"polkadot-test-runtime/std\"\ndiff --git polkadot/xcm/xcm-executor/integration-tests/Cargo.toml polkadot/xcm/xcm-executor/integration-tests/Cargo.toml\nindex ecd709..b05bfa 100644\n--- polkadot/xcm/xcm-executor/integration-tests/Cargo.toml\n+++ polkadot/xcm/xcm-executor/integration-tests/Cargo.toml\n@@ -29 +29,11 @@ default = [ \"std\" ]\n-std = [ \"frame-support/std\", \"sp-runtime/std\", \"xcm/std\" ]\n+std = [\n+\t\"frame-support/std\",\n+\t\"sp-runtime/std\",\n+\t\"xcm/std\",\n+\t\"frame-system/std\",\n+\t\"pallet-xcm/std\",\n+\t\"polkadot-test-runtime/std\",\n+\t\"sp-state-machine/std\",\n+\t\"sp-tracing/std\",\n+\t\"xcm-executor/std\"\n+]\n"
+  diff: "diff --git cumulus/bridges/bin/runtime-common/Cargo.toml cumulus/bridges/bin/runtime-common/Cargo.toml\nindex ee1334..cc552e 100644\n--- cumulus/bridges/bin/runtime-common/Cargo.toml\n+++ cumulus/bridges/bin/runtime-common/Cargo.toml\n@@ -79,0 +80 @@ std = [\n+\t\"bp-relayers/std\"\ndiff --git cumulus/bridges/modules/relayers/Cargo.toml cumulus/bridges/modules/relayers/Cargo.toml\nindex 8a5a4e..f7fd68 100644\n--- cumulus/bridges/modules/relayers/Cargo.toml\n+++ cumulus/bridges/modules/relayers/Cargo.toml\n@@ -51,0 +52 @@ std = [\n+\t\"pallet-bridge-messages/std\"\ndiff --git cumulus/bridges/primitives/test-utils/Cargo.toml cumulus/bridges/primitives/test-utils/Cargo.toml\nindex e841c8..8be857 100644\n--- cumulus/bridges/primitives/test-utils/Cargo.toml\n+++ cumulus/bridges/primitives/test-utils/Cargo.toml\n@@ -35,0 +36,3 @@ std = [\n+\t\"bp-parachains/std\",\n+\t\"bp-runtime/std\",\n+\t\"sp-trie/std\"\ndiff --git cumulus/pallets/aura-ext/Cargo.toml cumulus/pallets/aura-ext/Cargo.toml\nindex b29bbe..642766 100644\n--- cumulus/pallets/aura-ext/Cargo.toml\n+++ cumulus/pallets/aura-ext/Cargo.toml\n@@ -42,0 +43 @@ std = [\n+\t\"pallet-timestamp/std\"\ndiff --git cumulus/pallets/dmp-queue/Cargo.toml cumulus/pallets/dmp-queue/Cargo.toml\nindex 377738..4d3601 100644\n--- cumulus/pallets/dmp-queue/Cargo.toml\n+++ cumulus/pallets/dmp-queue/Cargo.toml\n@@ -41,0 +42,2 @@ std = [\n+\t\"sp-core/std\",\n+\t\"sp-version/std\"\ndiff --git cumulus/pallets/parachain-system/Cargo.toml cumulus/pallets/parachain-system/Cargo.toml\nindex cfc439..4aff6b 100644\n--- cumulus/pallets/parachain-system/Cargo.toml\n+++ cumulus/pallets/parachain-system/Cargo.toml\n@@ -74,0 +75,2 @@ std = [\n+\t\"polkadot-parachain/std\",\n+\t\"sp-inherents/std\"\ndiff --git cumulus/pallets/xcm/Cargo.toml cumulus/pallets/xcm/Cargo.toml\nindex d6b8c6..447a57 100644\n--- cumulus/pallets/xcm/Cargo.toml\n+++ cumulus/pallets/xcm/Cargo.toml\n@@ -31,0 +32 @@ std = [\n+\t\"sp-io/std\"\ndiff --git cumulus/pallets/xcmp-queue/Cargo.toml cumulus/pallets/xcmp-queue/Cargo.toml\nindex 2cd319..9316d4 100644\n--- cumulus/pallets/xcmp-queue/Cargo.toml\n+++ cumulus/pallets/xcmp-queue/Cargo.toml\n@@ -57,0 +58 @@ std = [\n+\t\"frame-benchmarking?/std\"\ndiff --git cumulus/parachain-template/pallets/template/Cargo.toml cumulus/parachain-template/pallets/template/Cargo.toml\nindex 9235cb..2cbfac 100644\n--- cumulus/parachain-template/pallets/template/Cargo.toml\n+++ cumulus/parachain-template/pallets/template/Cargo.toml\n@@ -39,0 +40,3 @@ std = [\n+\t\"sp-core/std\",\n+\t\"sp-io/std\",\n+\t\"sp-runtime/std\"\ndiff --git cumulus/parachain-template/runtime/Cargo.toml cumulus/parachain-template/runtime/Cargo.toml\nindex c61df9..c7b97b 100644\n--- cumulus/parachain-template/runtime/Cargo.toml\n+++ cumulus/parachain-template/runtime/Cargo.toml\n@@ -120,0 +121,4 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\"\ndiff --git cumulus/parachains/common/Cargo.toml cumulus/parachains/common/Cargo.toml\nindex 5900ec..3b1120 100644\n--- cumulus/parachains/common/Cargo.toml\n+++ cumulus/parachains/common/Cargo.toml\n@@ -65,0 +66,4 @@ std = [\n+\t\"pallet-asset-tx-payment/std\",\n+\t\"sp-core/std\",\n+\t\"sp-runtime/std\",\n+\t\"xcm-builder/std\"\ndiff --git cumulus/parachains/pallets/parachain-info/Cargo.toml cumulus/parachains/pallets/parachain-info/Cargo.toml\nindex 11876b..2be2f5 100644\n--- cumulus/parachains/pallets/parachain-info/Cargo.toml\n+++ cumulus/parachains/pallets/parachain-info/Cargo.toml\n@@ -27,0 +28,2 @@ std = [\n+\t\"sp-runtime/std\",\n+\t\"sp-std/std\"\ndiff --git cumulus/parachains/pallets/ping/Cargo.toml cumulus/parachains/pallets/ping/Cargo.toml\nindex d883be..4525c7 100644\n--- cumulus/parachains/pallets/ping/Cargo.toml\n+++ cumulus/parachains/pallets/ping/Cargo.toml\n@@ -31,0 +32 @@ std = [\n+\t\"cumulus-pallet-xcm/std\"\ndiff --git cumulus/parachains/runtimes/assets/asset-hub-kusama/Cargo.toml cumulus/parachains/runtimes/assets/asset-hub-kusama/Cargo.toml\nindex 682581..e03de7 100644\n--- cumulus/parachains/runtimes/assets/asset-hub-kusama/Cargo.toml\n+++ cumulus/parachains/runtimes/assets/asset-hub-kusama/Cargo.toml\n@@ -209,0 +210,7 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\",\n+\t\"sp-weights/std\"\ndiff --git cumulus/parachains/runtimes/assets/asset-hub-polkadot/Cargo.toml cumulus/parachains/runtimes/assets/asset-hub-polkadot/Cargo.toml\nindex dba374..f0b804 100644\n--- cumulus/parachains/runtimes/assets/asset-hub-polkadot/Cargo.toml\n+++ cumulus/parachains/runtimes/assets/asset-hub-polkadot/Cargo.toml\n@@ -189,0 +190,7 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\",\n+\t\"sp-weights/std\"\ndiff --git cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml\nindex 1e9c49..c964b3 100644\n--- cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml\n+++ cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml\n@@ -199,0 +200,6 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/assets/test-utils/Cargo.toml cumulus/parachains/runtimes/assets/test-utils/Cargo.toml\nindex 919f1b..1e8b04 100644\n--- cumulus/parachains/runtimes/assets/test-utils/Cargo.toml\n+++ cumulus/parachains/runtimes/assets/test-utils/Cargo.toml\n@@ -75,0 +76 @@ std = [\n+\t\"sp-core/std\"\ndiff --git cumulus/parachains/runtimes/bridge-hubs/bridge-hub-kusama/Cargo.toml cumulus/parachains/runtimes/bridge-hubs/bridge-hub-kusama/Cargo.toml\nindex 0dbe3e..d0749d 100644\n--- cumulus/parachains/runtimes/bridge-hubs/bridge-hub-kusama/Cargo.toml\n+++ cumulus/parachains/runtimes/bridge-hubs/bridge-hub-kusama/Cargo.toml\n@@ -127,0 +128,6 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/bridge-hubs/bridge-hub-polkadot/Cargo.toml cumulus/parachains/runtimes/bridge-hubs/bridge-hub-polkadot/Cargo.toml\nindex 9243f2..581298 100644\n--- cumulus/parachains/runtimes/bridge-hubs/bridge-hub-polkadot/Cargo.toml\n+++ cumulus/parachains/runtimes/bridge-hubs/bridge-hub-polkadot/Cargo.toml\n@@ -127,0 +128,6 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml\nindex 5e049d..8b7e37 100644\n--- cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml\n+++ cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml\n@@ -163,0 +164,5 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/bridge-hubs/test-utils/Cargo.toml cumulus/parachains/runtimes/bridge-hubs/test-utils/Cargo.toml\nindex 1efa80..4565b5 100644\n--- cumulus/parachains/runtimes/bridge-hubs/test-utils/Cargo.toml\n+++ cumulus/parachains/runtimes/bridge-hubs/test-utils/Cargo.toml\n@@ -98,0 +99,2 @@ std = [\n+\t\"pallet-collator-selection/std\",\n+\t\"pallet-xcm-benchmarks?/std\"\ndiff --git cumulus/parachains/runtimes/collectives/collectives-polkadot/Cargo.toml cumulus/parachains/runtimes/collectives/collectives-polkadot/Cargo.toml\nindex 3d2f6e..7bf470 100644\n--- cumulus/parachains/runtimes/collectives/collectives-polkadot/Cargo.toml\n+++ cumulus/parachains/runtimes/collectives/collectives-polkadot/Cargo.toml\n@@ -197,0 +198,7 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"sp-arithmetic/std\",\n+\t\"sp-io/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml\nindex 67885d..904e01 100644\n--- cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml\n+++ cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml\n@@ -130,0 +131,4 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/glutton/glutton-kusama/Cargo.toml cumulus/parachains/runtimes/glutton/glutton-kusama/Cargo.toml\nindex 43bf46..924b8a 100644\n--- cumulus/parachains/runtimes/glutton/glutton-kusama/Cargo.toml\n+++ cumulus/parachains/runtimes/glutton/glutton-kusama/Cargo.toml\n@@ -85,0 +86,4 @@ std = [\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/starters/shell/Cargo.toml cumulus/parachains/runtimes/starters/shell/Cargo.toml\nindex d15270..7a0ae5 100644\n--- cumulus/parachains/runtimes/starters/shell/Cargo.toml\n+++ cumulus/parachains/runtimes/starters/shell/Cargo.toml\n@@ -68,0 +69 @@ std = [\n+\t\"frame-try-runtime?/std\"\ndiff --git cumulus/parachains/runtimes/test-utils/Cargo.toml cumulus/parachains/runtimes/test-utils/Cargo.toml\nindex 6fbda8..8da190 100644\n--- cumulus/parachains/runtimes/test-utils/Cargo.toml\n+++ cumulus/parachains/runtimes/test-utils/Cargo.toml\n@@ -74,0 +75 @@ std = [\n+\t\"sp-core/std\"\ndiff --git cumulus/parachains/runtimes/testing/penpal/Cargo.toml cumulus/parachains/runtimes/testing/penpal/Cargo.toml\nindex dc945a..032592 100644\n--- cumulus/parachains/runtimes/testing/penpal/Cargo.toml\n+++ cumulus/parachains/runtimes/testing/penpal/Cargo.toml\n@@ -125,0 +126,5 @@ std = [\n+\t\"cumulus-pallet-session-benchmarking/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"frame-try-runtime?/std\",\n+\t\"sp-storage/std\"\ndiff --git cumulus/parachains/runtimes/testing/rococo-parachain/Cargo.toml cumulus/parachains/runtimes/testing/rococo-parachain/Cargo.toml\nindex 9a16d3..083621 100644\n--- cumulus/parachains/runtimes/testing/rococo-parachain/Cargo.toml\n+++ cumulus/parachains/runtimes/testing/rococo-parachain/Cargo.toml\n@@ -100,0 +101,2 @@ std = [\n+\t\"frame-benchmarking?/std\",\n+\t\"polkadot-parachain/std\"\ndiff --git cumulus/primitives/core/Cargo.toml cumulus/primitives/core/Cargo.toml\nindex 872278..6f306c 100644\n--- cumulus/primitives/core/Cargo.toml\n+++ cumulus/primitives/core/Cargo.toml\n@@ -34,0 +35 @@ std = [\n+\t\"xcm/std\"\ndiff --git cumulus/test/relay-sproof-builder/Cargo.toml cumulus/test/relay-sproof-builder/Cargo.toml\nindex 1f7aaf..fe7779 100644\n--- cumulus/test/relay-sproof-builder/Cargo.toml\n+++ cumulus/test/relay-sproof-builder/Cargo.toml\n@@ -30,0 +31 @@ std = [\n+\t\"polkadot-primitives/std\"\ndiff --git polkadot/parachain/test-parachains/adder/Cargo.toml polkadot/parachain/test-parachains/adder/Cargo.toml\nindex ca477e..3bda9f 100644\n--- polkadot/parachain/test-parachains/adder/Cargo.toml\n+++ polkadot/parachain/test-parachains/adder/Cargo.toml\n@@ -26 +26,5 @@ default = [ \"std\" ]\n-std = [ \"parachain/std\", \"sp-std/std\" ]\n+std = [\n+\t\"parachain/std\",\n+\t\"sp-std/std\", \n+\t\"sp-io/std\"\n+]\ndiff --git polkadot/parachain/test-parachains/undying/Cargo.toml polkadot/parachain/test-parachains/undying/Cargo.toml\nindex 192e89..2a0607 100644\n--- polkadot/parachain/test-parachains/undying/Cargo.toml\n+++ polkadot/parachain/test-parachains/undying/Cargo.toml\n@@ -27 +27,5 @@ default = [ \"std\" ]\n-std = [ \"parachain/std\", \"sp-std/std\" ]\n+std = [\n+\t\"parachain/std\",\n+\t\"sp-std/std\", \n+\t\"sp-io/std\"\n+]\ndiff --git polkadot/runtime/common/Cargo.toml polkadot/runtime/common/Cargo.toml\nindex 72b077..f397ff 100644\n--- polkadot/runtime/common/Cargo.toml\n+++ polkadot/runtime/common/Cargo.toml\n@@ -102,0 +103,2 @@ std = [\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-election-provider-support/std\"\ndiff --git polkadot/runtime/kusama/Cargo.toml polkadot/runtime/kusama/Cargo.toml\nindex d04f67..1f3645 100644\n--- polkadot/runtime/kusama/Cargo.toml\n+++ polkadot/runtime/kusama/Cargo.toml\n@@ -217,0 +218,10 @@ std = [\n+\t\"binary-merkle-tree/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"pallet-election-provider-support-benchmarking?/std\",\n+\t\"pallet-nomination-pools-benchmarking?/std\",\n+\t\"pallet-offences-benchmarking?/std\",\n+\t\"pallet-session-benchmarking?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\",\n+\t\"sp-tracing/std\"\ndiff --git polkadot/runtime/metrics/Cargo.toml polkadot/runtime/metrics/Cargo.toml\nindex de3114..9d88df 100644\n--- polkadot/runtime/metrics/Cargo.toml\n+++ polkadot/runtime/metrics/Cargo.toml\n@@ -24,0 +25 @@ std = [\n+\t\"frame-benchmarking?/std\"\ndiff --git polkadot/runtime/parachains/Cargo.toml polkadot/runtime/parachains/Cargo.toml\nindex f4f647..e1c9fc 100644\n--- polkadot/runtime/parachains/Cargo.toml\n+++ polkadot/runtime/parachains/Cargo.toml\n@@ -98,0 +99,3 @@ std = [\n+\t\"frame-benchmarking?/std\",\n+\t\"polkadot-parachain/std\",\n+\t\"sp-application-crypto?/std\"\ndiff --git polkadot/runtime/polkadot/Cargo.toml polkadot/runtime/polkadot/Cargo.toml\nindex 1d2ce8..c37294 100644\n--- polkadot/runtime/polkadot/Cargo.toml\n+++ polkadot/runtime/polkadot/Cargo.toml\n@@ -199,0 +200,11 @@ std = [\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"pallet-election-provider-support-benchmarking?/std\",\n+\t\"pallet-nomination-pools-benchmarking?/std\",\n+\t\"pallet-offences-benchmarking?/std\",\n+\t\"pallet-session-benchmarking?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"runtime-parachains/std\",\n+\t\"sp-io/std\",\n+\t\"sp-storage/std\",\n+\t\"sp-tracing/std\"\ndiff --git polkadot/runtime/rococo/Cargo.toml polkadot/runtime/rococo/Cargo.toml\nindex ebb7cd..925013 100644\n--- polkadot/runtime/rococo/Cargo.toml\n+++ polkadot/runtime/rococo/Cargo.toml\n@@ -184,0 +185,6 @@ std = [\n+\t\"binary-merkle-tree/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\",\n+\t\"sp-tracing/std\"\ndiff --git polkadot/runtime/test-runtime/Cargo.toml polkadot/runtime/test-runtime/Cargo.toml\nindex e5d04a..7aab01 100644\n--- polkadot/runtime/test-runtime/Cargo.toml\n+++ polkadot/runtime/test-runtime/Cargo.toml\n@@ -136,0 +137,2 @@ std = [\n+\t\"polkadot-runtime-parachains/std\",\n+\t\"sp-mmr-primitives/std\"\ndiff --git polkadot/runtime/westend/Cargo.toml polkadot/runtime/westend/Cargo.toml\nindex 40664e..f43a8b 100644\n--- polkadot/runtime/westend/Cargo.toml\n+++ polkadot/runtime/westend/Cargo.toml\n@@ -202,0 +203,10 @@ std = [\n+\t\"binary-merkle-tree/std\",\n+\t\"frame-benchmarking?/std\",\n+\t\"frame-system-benchmarking?/std\",\n+\t\"pallet-election-provider-support-benchmarking?/std\",\n+\t\"pallet-nomination-pools-benchmarking?/std\",\n+\t\"pallet-offences-benchmarking?/std\",\n+\t\"pallet-session-benchmarking?/std\",\n+\t\"pallet-xcm-benchmarks?/std\",\n+\t\"sp-storage/std\",\n+\t\"sp-tracing/std\"\n"
 - cmd: lint propagate-feature --feature try-runtime --left-side-feature-missing=ignore --workspace --fix
   stdout: |
     crate 'asset-hub-kusama-runtime'

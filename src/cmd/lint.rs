@@ -363,11 +363,8 @@ impl PropagateFeatureCmd {
 		let mut propagate_missing = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
 		// (Crate that missing the feature) -> (Dependency that has it)
 		let mut feature_missing = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
-		// Crate that has the feature but does not need it.
-		let mut feature_maybe_unused = BTreeSet::<CrateId>::new();
 
 		for pkg in to_check.iter() {
-			let mut feature_used = false;
 			// TODO that it does not enable other features.
 
 			for dep in pkg.dependencies.iter() {
@@ -376,7 +373,6 @@ impl PropagateFeatureCmd {
 				let Some(dep) = resolve_dep(pkg, dep, &meta) else {
 					// Either outside workspace or not resolved, possibly due to not being used at
 					// all because of the target or whatever.
-					feature_used = true;
 					continue
 				};
 
@@ -406,7 +402,7 @@ impl PropagateFeatureCmd {
 				});
 				if let Some(p) = sub_dag.any_path(&default_entrypoint, &target) {
 					// Easy case, all good.
-					log::info!("Reachable from the default entrypoint: {:?} vis {:?}", target, p.0);
+					log::debug!("Reachable from the default entrypoint: {:?} vis {:?}", target, p.0);
 					continue
 				}
 				// Now the more complicated case where `pkg/F -> dep/G .. -> dep/F`. So to say a
@@ -660,7 +656,7 @@ fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeature> 
 					CrateAndFeature(pkg.id.to_string(), "#entrypoint".into()),
 					CrateAndFeature(dep_id.pkg.id.repr.clone(), "default".into()),
 				);
-				log::info!("Adding default entrypoint for {} on {}", dep.name, pkg.name);
+				log::debug!("Adding default entrypoint for {} on {}", dep.name, pkg.name);
 			}
 			for feature in &dep.features {
 				dag.add_edge(

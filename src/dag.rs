@@ -146,8 +146,8 @@ where
 		self.edges.get(from).map_or(false, |v| v.contains(to))
 	}
 
-	/// Whether `from` is connected to `to` via.
-	pub fn connected(&self, from: &T, to: &T) -> bool {
+	/// Whether `from` is reachable to `to` via.
+	pub fn reachable(&self, from: &T, to: &T) -> bool {
 		self.any_path(from, to).is_some()
 	}
 
@@ -173,6 +173,16 @@ where
 		let mut edges = BTreeMap::new();
 		let rhs = self.edges.get(&from).cloned().unwrap_or_default();
 		edges.insert(from, rhs);
+		Self { edges }
+	}
+
+	pub fn sub(&self, pred: impl Fn(&T) -> bool) -> Self {
+		let mut edges = BTreeMap::new();
+		for (k, v) in self.edges.iter() {
+			if pred(k) {
+				edges.insert(k.clone(), v.clone());
+			}
+		}
 		Self { edges }
 	}
 

@@ -400,8 +400,21 @@ impl PropagateFeatureCmd {
 					// Easy case, all good.
 					continue
 				}
+				let default_entrypoint = CrateAndFeature(pkg.id.repr.clone(), "#entrypoint".into());
+				let sub_dag = dag.sub(|CrateAndFeature(p, f)| {
+					(p == &pkg.id.repr && f == "#entrypoint") || (p == &dep.pkg.id.repr)
+				});
+				if let Some(p) = sub_dag.any_path(&default_entrypoint, &target) {
+					// Easy case, all good.
+					log::info!("Reachable from the default entrypoint: {:?} vis {:?}", target, p.0);
+					continue
+				}
 				// Now the more complicated case where `pkg/F -> dep/G .. -> dep/F`. So to say a
 				// multi-hop internal transitive propagation of the feature on the dependency side.
+				/*let sub_dag = dag.sub(|CrateAndFeature(p, f)| {
+					(p == &dep.pkg.id.repr)
+				});*/
+				//panic!("Not reachable: sub_dag:\n\n{:#?}\n\n", dag.edges);
 
 				propagate_missing.entry(pkg.id.to_string()).or_default().insert(dep);
 			}
@@ -637,6 +650,17 @@ fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeature> 
 					CrateAndFeature(pkg.id.to_string(), "default".into()),
 					CrateAndFeature(dep.name.clone(), "default".into()),
 				);
+				
+				let Some(dep_id) = resolve_dep(pkg, dep, meta) else {
+					continue;
+				};
+				
+				// Hacky…
+				dag.add_edge(
+					CrateAndFeature(pkg.id.to_string(), "#entrypoint".into()),
+					CrateAndFeature(dep_id.pkg.id.repr.clone(), "default".into()),
+				);
+				log::info!("Adding default entrypoint for {} on {}", dep.name, pkg.name);
 			}
 			for feature in &dep.features {
 				dag.add_edge(

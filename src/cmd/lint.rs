@@ -380,48 +380,30 @@ impl PropagateFeatureCmd {
 					continue
 				};
 
-				if dep.pkg.features.contains_key(&feature) {
-					match pkg.features.get(&feature) {
-						None =>
-							if self.left_side_feature_missing == MuteSetting::Error {
-								feature_missing.entry(pkg.id.to_string()).or_default().insert(dep);
-							},
-						Some(_enabled) => {
-							// TODO check that optional deps are only enabled as optional unless
-							// overwritten with `--feature-enables-dep`.
-							let target = CrateAndFeature(dep.pkg.id.repr.clone(), feature.clone());
-							let want_opt = CrateAndFeature(format!("{}?", &pkg.id), feature.clone());
-							let want_req = CrateAndFeature(pkg.id.repr.clone(), feature.clone());
-							
-							if dag.adjacent(&want_opt, &target) {
-								log::info!("Opt reachable: {} -> {}", want_opt, target);
-						 	} else if dag.adjacent(&want_req, &target) {
-								log::info!("Req reachable: {} -> {}", want_opt, target);
-							} else {
-								//panic!("Not reachable: {} -> {}\n\n{:?}\n\n", want_opt, target, &dag.edges);
-
-								propagate_missing
-									.entry(pkg.id.to_string())
-									.or_default()
-									.insert(dep);
-							}
-
-							/*if !enabled.contains(&want_opt) && !enabled.contains(&want_req) {
-								propagate_missing
-									.entry(pkg.id.to_string())
-									.or_default()
-									.insert(dep);
-							} else {
-								// All ok
-								feature_used = true;
-							}*/
-						},
-					}
+				if !dep.pkg.features.contains_key(&feature) {
+					continue
 				}
-			}
+				if pkg.features.get(&feature).is_none() {
+					if self.left_side_feature_missing == MuteSetting::Error {
+						feature_missing.entry(pkg.id.to_string()).or_default().insert(dep);
+					}
+					continue
+				}
 
-			if !feature_used && pkg.features.contains_key(&feature) {
-				feature_maybe_unused.insert(pkg.id.to_string());
+				// TODO check that optional deps are only enabled as optional unless
+				// overwritten with `--feature-enables-dep`.
+				let target = CrateAndFeature(dep.pkg.id.repr.clone(), feature.clone());
+				let want_opt = CrateAndFeature(format!("{}?", &pkg.id), feature.clone());
+				let want_req = CrateAndFeature(pkg.id.repr.clone(), feature.clone());
+
+				if dag.adjacent(&want_opt, &target) || dag.adjacent(&want_req, &target) {
+					// Easy case, all good.
+					continue
+				}
+				// Now the more complicated case where `pkg/F -> dep/G .. -> dep/F`. So to say a
+				// multi-hop internal transitive propagation of the feature on the dependency side.
+
+				propagate_missing.entry(pkg.id.to_string()).or_default().insert(dep);
 			}
 		}
 		let faulty_crates: BTreeSet<CrateId> = propagate_missing

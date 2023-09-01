@@ -153,7 +153,7 @@ pub struct PropagateFeatureCmd {
 	/// propagation is checked then normally it would error if `A` is not forwarding `F` to `B`.
 	/// Now this option modifies the behaviour if `A` does not have the feature in the first place.
 	/// The default behaviour is to require `A` to also have `F`.
-	#[clap(long, value_enum, value_name = "MUTE_SETTING", default_value_t = MuteSetting::Error, verbatim_doc_comment)]
+	#[clap(long, value_enum, value_name = "MUTE_SETTING", default_value_t = MuteSetting::Fix, verbatim_doc_comment)]
 	left_side_feature_missing: MuteSetting,
 
 	/// Show crate versions in the output.
@@ -181,8 +181,10 @@ pub struct PropagateFeatureCmd {
 pub enum MuteSetting {
 	/// Ignore this behaviour.
 	Ignore,
-	/// Treat as error.
-	Error,
+	/// Only report but do not fix.
+	Report,
+	/// Fix if `--fix` is passed.
+	Fix,
 }
 
 impl LintCmd {
@@ -380,7 +382,7 @@ impl PropagateFeatureCmd {
 					continue
 				}
 				if pkg.features.get(&feature).is_none() {
-					if self.left_side_feature_missing == MuteSetting::Error {
+					if self.left_side_feature_missing != MuteSetting::Ignore {
 						feature_missing.entry(pkg.id.to_string()).or_default().insert(dep);
 					}
 					continue
@@ -462,7 +464,8 @@ impl PropagateFeatureCmd {
 				);
 
 				if self.fixer_args.enable &&
-					self.fix_package.as_ref().map_or(true, |p| p == &krate.name)
+					self.fix_package.as_ref().map_or(true, |p| p == &krate.name) &&
+					self.left_side_feature_missing == MuteSetting::Fix
 				{
 					let Some(fixer) = fixer.as_mut() else { continue };
 					fixer.add_feature(&feature).unwrap();

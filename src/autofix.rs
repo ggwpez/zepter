@@ -37,39 +37,6 @@ impl AutoFixer {
 		Ok(Self { raw: raw.into(), manifest: None, doc: Some(doc) })
 	}
 
-	/// Returns the unsorted features in alphabetical order.
-	pub fn check_sorted_all_features(&self) -> Vec<String> {
-		let doc: &Document = self.doc.as_ref().unwrap();
-		if !doc.contains_table("features") {
-			return Vec::new()
-		}
-		let features = doc["features"].as_table().unwrap();
-		let mut unsorted = Vec::new();
-
-		for (feature, _) in features.iter() {
-			if !self.check_sorted_feature(feature) {
-				unsorted.push(feature.to_string());
-			}
-		}
-
-		unsorted.sort();
-		unsorted
-	}
-
-	pub fn check_sorted_feature(&self, feature: &str) -> bool {
-		let Some(feature) = self.get_feature(feature) else { return true };
-
-		let mut last = "";
-		for value in feature.iter() {
-			let value = value.as_str().unwrap();
-			if value < last {
-				return false
-			}
-			last = value;
-		}
-		true
-	}
-
 	// Assumes sorting
 	pub fn dedub_feature(cname: &str, fname: &str, feature: &mut Array) -> Result<(), String> {
 		let mut values = feature.iter().cloned().collect::<Vec<_>>();
@@ -309,6 +276,28 @@ impl AutoFixer {
 		Ok(features[name].as_array_mut().unwrap())
 	}
 
+	pub fn canonicalize_feature(
+		cname: &str,
+		fname: &str,
+		modes: &[Mode],
+		line_width: u32,
+		feature: &mut Array,
+	) -> Result<(), String> {
+		if modes.contains(&Mode::None) {
+			return Ok(())
+		}
+		if modes.is_empty() || modes.contains(&Mode::Sort) {
+			Self::sort_feature(feature);
+		}
+		if modes.is_empty() || modes.contains(&Mode::Dedub) {
+			Self::dedub_feature(cname, fname, feature)?;
+		}
+		if modes.is_empty() || modes.contains(&Mode::Canonicalize) {
+			Self::format_feature(fname, feature, line_width)?;
+		}
+		Ok(())
+	}
+
 	pub fn canonicalize_features(
 		&mut self,
 		cname: &str,
@@ -322,22 +311,8 @@ impl AutoFixer {
 			let feature = self.get_feature_mut(fname).unwrap();
 			let modes = mode_per_feature.get(fname).cloned().unwrap_or_default();
 
-			if modes.contains(&Mode::None) {
-				continue
-			}
-			if modes.is_empty() || modes.contains(&Mode::Sort) {
-				Self::sort_feature(feature);
-			}
-			if modes.is_empty() || modes.contains(&Mode::Dedub) {
-				let _ = Self::dedub_feature(cname, fname, feature).map_err(|e| {
-					errors.push(e);
-				});
-			}
-			if modes.is_empty() || modes.contains(&Mode::Canonicalize) {
-				let _ = Self::format_feature(fname, feature, line_width).map_err(|e| {
-					errors.push(e);
-				});
-			}
+			let _ = Self::canonicalize_feature(cname, fname, &modes, line_width, feature)
+				.map_err(|e| errors.push(e));
 		}
 
 		if errors.is_empty() {
@@ -345,6 +320,22 @@ impl AutoFixer {
 		} else {
 			Err(errors)
 		}
+	}
+
+	pub fn is_feature_canonical(
+		&self,
+		cname: &str,
+		fname: &str,
+		mode_per_feature: &Map<String, Vec<Mode>>,
+		line_width: u32,
+	) -> Result<bool, String> {
+		let modes = mode_per_feature.get(fname).cloned().unwrap_or_default();
+
+		let orig = self.get_feature(fname).unwrap();
+		let mut modified = orig.clone();
+
+		Self::canonicalize_feature(cname, fname, &modes, line_width, &mut modified)?;
+		Ok(orig.to_string() == modified.to_string())
 	}
 
 	fn format_pre_and_suffix(fix: String) -> String {
@@ -364,10 +355,19 @@ impl AutoFixer {
 		new_lines.join("\n")
 	}
 
-	pub fn canonicalize_all_features(&mut self, line_width: u32) -> Result<(), String> {
-		self.sort_all_features()?;
-		self.format_all_feature(line_width)?;
+	pub fn add_feature(&mut self, feature: &str) -> Result<(), String> {
+		let doc: &mut Document = self.doc.as_mut().unwrap();
 
+		if !doc.contains_table("features") {
+			doc.as_table_mut().insert("features", table());
+		}
+		let features = doc["features"].as_table_mut().unwrap();
+
+		if features.contains_key(feature) {
+			return Ok(())
+		}
+
+		features.insert(feature, value(Array::new()));
 		Ok(())
 	}
 

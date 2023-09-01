@@ -1436,6 +1436,7 @@ dependencies = [
  "rand",
  "rstest",
  "serde",
+ "serde_json",
  "serde_yaml",
  "tempfile",
  "toml_edit",

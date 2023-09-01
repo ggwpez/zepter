@@ -451,7 +451,6 @@ impl PropagateFeatureCmd {
 			};
 			println!("crate '{}'\n  feature '{}'", krate.name, feature);
 
-			// join
 			if let Some(deps) = feature_missing.get(&krate.id.to_string()) {
 				let joined =
 					deps.iter().map(|dep| dep.display_name()).collect::<Vec<_>>().join("\n      ");
@@ -461,8 +460,20 @@ impl PropagateFeatureCmd {
 					if deps.len() == 1 { "y" } else { "ies" },
 					joined
 				);
-				errors += deps.len();
+
+				if self.fixer_args.enable &&
+					self.fix_package.as_ref().map_or(true, |p| p == &krate.name)
+				{
+					let Some(fixer) = fixer.as_mut() else { continue };
+					fixer.add_feature(&feature).unwrap();
+
+					log::info!("Creates feature '{}' on '{}'", &feature, &krate.name);
+					fixes += 1;
+				}
+
+				errors += 1;
 			}
+
 			if let Some(deps) = propagate_missing.get(&krate.id.to_string()) {
 				let joined =
 					deps.iter().map(|dep| dep.display_name()).collect::<Vec<_>>().join("\n      ");
@@ -500,14 +511,6 @@ impl PropagateFeatureCmd {
 					fixer.save().unwrap();
 				}
 			}
-
-			//if let Some(_dep) = feature_maybe_unused.get(&krate.id.to_string()) {
-			//	if !feature_missing.contains_key(&krate.id.to_string()) &&
-			// !propagate_missing.contains_key(&krate.id.to_string()) 	{
-			//		println!("    is not used by any dependencies");
-			//		warnings += 1;
-			//	}
-			//}
 		}
 		if let Some(e) = error_stats(errors, warnings, fixes, self.fixer_args.enable, global) {
 			println!("{}", e);

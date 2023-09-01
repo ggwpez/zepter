@@ -15,7 +15,7 @@ cases:
         must propagate to:
           B
     Found 1 issue and fixed 1.
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex cf8d3d..b4a43e 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"B/F0\"\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex cf8d3d50bd..b4a43ee9c4 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"B/F0\"\n"
 - cmd: lint propagate-feature -p A --feature F0 --fix
   stdout: |
     crate 'A'
@@ -23,7 +23,7 @@ cases:
         must propagate to:
           B
     Found 1 issue and fixed 1.
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex cf8d3d..b4a43e 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"B/F0\"\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex cf8d3d50bd..b4a43ee9c4 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"B/F0\"\n"
 - cmd: lint propagate-feature -p B --feature F0 --fix
 - cmd: lint propagate-feature -p B --feature F1 --fix
 - cmd: lint propagate-feature --feature F0 --workspace --fix
@@ -33,7 +33,7 @@ cases:
         must propagate to:
           B
     Found 1 issue and fixed 1.
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex cf8d3d..b4a43e 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"B/F0\"\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex cf8d3d50bd..b4a43ee9c4 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"B/F0\"\n"
 - cmd: lint propagate-feature -p A --feature F0 --workspace --fix
   stdout: |
     crate 'A'
@@ -41,6 +41,6 @@ cases:
         must propagate to:
           B
     Found 1 issue and fixed 1.
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex cf8d3d..b4a43e 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"B/F0\"\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex cf8d3d50bd..b4a43ee9c4 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"B/F0\"\n"
 - cmd: lint propagate-feature -p B --feature F0 --workspace --fix
 - cmd: lint propagate-feature -p B --feature F1 --workspace --fix

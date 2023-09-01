@@ -11,7 +11,7 @@ cases:
           frame-system
           pallet-balances
           sp-runtime
-    Found 4 issues (run with --fix to fix).
+    Found 1 issue (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature -p pallet-name-service --feature try-runtime --fix
   stdout: |
@@ -22,5 +22,15 @@ cases:
           frame-system
           pallet-balances
           sp-runtime
-    Found 4 issues and fixed 0 (4 could not be fixed).
-  code: 1
+    Found 1 issue and fixed 1.
+  code: 0
+  diff: |
+    diff --git frame/name-service/Cargo.toml frame/name-service/Cargo.toml
+    index be69eced78..b4bb16690e 100644
+    --- frame/name-service/Cargo.toml
+    +++ frame/name-service/Cargo.toml
+    @@ -45 +45,2 @@ runtime-benchmarks = [
+    -]
+    \ No newline at end of file
+    +]
+    +try-runtime = []

@@ -689,7 +689,7 @@ cases:
       feature 'runtime-benchmarks'
         is required by 1 dependency:
           sp-runtime
-    Found 283 issues (run with --fix to fix).
+    Found 134 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature --feature runtime-benchmarks --workspace
   stdout: |
@@ -1378,7 +1378,7 @@ cases:
       feature 'runtime-benchmarks'
         is required by 1 dependency:
           sp-runtime
-    Found 283 issues (run with --fix to fix).
+    Found 134 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature --feature std
   stdout: |
@@ -4836,7 +4836,7 @@ cases:
       feature 'std'
         is required by 1 dependency:
           zstd-safe
-    Found 1855 issues (run with --fix to fix).
+    Found 658 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature --feature std --workspace
   stdout: |
@@ -5636,7 +5636,7 @@ cases:
           sp-transaction-storage-proof
           sp-version
           sp-weights
-    Found 514 issues (run with --fix to fix).
+    Found 94 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature --feature try-runtime
   stdout: |
@@ -6213,7 +6213,7 @@ cases:
       feature 'try-runtime'
         is required by 1 dependency:
           sp-runtime
-    Found 222 issues (run with --fix to fix).
+    Found 117 issues (run with --fix to fix).
   code: 1
 - cmd: lint propagate-feature --feature try-runtime --workspace
   stdout: |
@@ -6790,5 +6790,5 @@ cases:
       feature 'try-runtime'
         is required by 1 dependency:
           sp-runtime
-    Found 222 issues (run with --fix to fix).
+    Found 117 issues (run with --fix to fix).
   code: 1

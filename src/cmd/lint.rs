@@ -399,6 +399,8 @@ impl PropagateFeatureCmd {
 					continue
 				}
 				let default_entrypoint = CrateAndFeature(pkg.id.repr.clone(), "#entrypoint".into());
+				// Now the more complicated case where `pkg/F -> dep/G .. -> dep/F`. So to say a
+				// multi-hop internal transitive propagation of the feature on the dependency side.
 				let sub_dag = dag.sub(|CrateAndFeature(p, f)| {
 					(p == &pkg.id.repr && f == "#entrypoint") || (p == &dep.pkg.id.repr)
 				});
@@ -411,13 +413,7 @@ impl PropagateFeatureCmd {
 					);
 					continue
 				}
-				// Now the more complicated case where `pkg/F -> dep/G .. -> dep/F`. So to say a
-				// multi-hop internal transitive propagation of the feature on the dependency side.
-				/*let sub_dag = dag.sub(|CrateAndFeature(p, f)| {
-					(p == &dep.pkg.id.repr)
-				});*/
-				//panic!("Not reachable: sub_dag:\n\n{:#?}\n\n", dag.edges);
-
+				
 				propagate_missing.entry(pkg.id.to_string()).or_default().insert(dep);
 			}
 		}
@@ -470,7 +466,7 @@ impl PropagateFeatureCmd {
 					let Some(fixer) = fixer.as_mut() else { continue };
 					fixer.add_feature(&feature).unwrap();
 
-					log::info!("Creates feature '{}' on '{}'", &feature, &krate.name);
+					log::info!("Inserted feature '{}' into '{}'", &feature, &krate.name);
 					fixes += 1;
 				}
 
@@ -503,7 +499,7 @@ impl PropagateFeatureCmd {
 								format!("{}{}/{}", dep_name, opt, feature).as_str(),
 							)
 							.unwrap();
-						log::info!("Added '{dep_name}/{feature}' to '{}'", krate.name);
+						log::info!("Inserted '{dep_name}/{feature}' into '{}'", krate.name);
 						fixes += 1;
 					}
 				}

@@ -12,13 +12,27 @@ cases:
       feature 'F0'
         is required by 1 dependency:
           B
-    Found 1 issue and fixed 0 (1 could not be fixed).
-  code: 1
+    Found 1 issue and fixed 1.
+  code: 0
+  diff: |
+    diff --git A/Cargo.toml A/Cargo.toml
+    index d5ba479999..af1fb01d77 100644
+    --- A/Cargo.toml
+    +++ A/Cargo.toml
+    @@ -11,0 +12 @@ B = { version = "*", path = "../B"}
+    +F0 = []
 - cmd: lint propagate-feature --feature F0 --workspace --fix
   stdout: |
     crate 'A'
       feature 'F0'
         is required by 1 dependency:
           B
-    Found 1 issue and fixed 0 (1 could not be fixed).
-  code: 1
+    Found 1 issue and fixed 1.
+  code: 0
+  diff: |
+    diff --git A/Cargo.toml A/Cargo.toml
+    index d5ba479999..af1fb01d77 100644
+    --- A/Cargo.toml
+    +++ A/Cargo.toml
+    @@ -11,0 +12 @@ B = { version = "*", path = "../B"}
+    +F0 = []

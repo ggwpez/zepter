@@ -8,7 +8,7 @@ use std::{
 	collections::BTreeMap as Map,
 	path::{Path, PathBuf},
 };
-use toml_edit::{table, value, Array, Document, Value};
+use toml_edit::{table, value, Array, Document, Formatted, Item, Table, Value};
 
 #[derive(Debug, clap::Parser)]
 #[cfg_attr(feature = "testing", derive(Default))]
@@ -442,6 +442,46 @@ impl AutoFixer {
 			feature.push_formatted(new_val);
 		}
 
+		Ok(())
+	}
+
+	pub fn lift_dependency(&mut self, dname: &str) -> Result<(), String> {
+		let doc: &mut Document = self.doc.as_mut().unwrap();
+
+		for kind in &["dependencies", "dev-dependencies", "build-dependencies"] {
+			if !doc.contains_table(kind) {
+				continue
+			}
+			let deps: &mut Table = doc[kind].as_table_mut().unwrap();
+
+			if !deps.contains_key(dname) {
+				continue
+			}
+
+			let dep = deps.get_mut(dname).unwrap();
+			Self::lift_some_dependency(dname, dep)?;
+			deps.key_decor_mut(dname).unwrap().set_suffix("");
+		}
+		Ok(())
+	}
+
+	pub fn lift_some_dependency(dname: &str, dep: &mut Item) -> Result<(), String> {
+		if let Some(as_str) = dep.as_str() {
+			cargo_metadata::semver::VersionReq::parse(as_str).expect("Is semver");
+			let mut table = Table::new();
+			table.insert("workspace", Item::Value(Value::Boolean(Formatted::new(true))));
+			table.set_implicit(true);
+			table.set_dotted(true);
+			*dep = Item::Table(table);
+		} else if let Some(as_table) = dep.as_inline_table_mut() {
+			if as_table.contains_key("git") || as_table.contains_key("path") {
+				return Err("'git' or 'path' dependency are currently not supported".into())
+			}
+			as_table.remove("version");
+			as_table.insert("workspace", Value::Boolean(Formatted::new(true)));
+		} else {
+			unreachable!("Unknown kind of dependency: {:?}", dep);
+		}
 		Ok(())
 	}
 

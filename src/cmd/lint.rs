@@ -413,7 +413,7 @@ impl PropagateFeatureCmd {
 					);
 					continue
 				}
-				
+
 				propagate_missing.entry(pkg.id.to_string()).or_default().insert(dep);
 			}
 		}

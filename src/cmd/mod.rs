@@ -6,6 +6,7 @@
 pub mod fmt;
 pub mod lint;
 pub mod trace;
+pub mod transpose;
 
 use crate::log;
 use cargo_metadata::{Dependency, Metadata, MetadataCommand, Package, Resolve};
@@ -56,6 +57,8 @@ enum SubCommand {
 	Lint(lint::LintCmd),
 	#[clap(alias = "fmt", alias = "f")]
 	Format(fmt::FormatCmd),
+	#[clap(alias = "t")]
+	Transpose(transpose::TransposeCmd),
 }
 
 impl Command {
@@ -66,6 +69,7 @@ impl Command {
 			SubCommand::Trace(cmd) => cmd.run(&self.global),
 			SubCommand::Lint(cmd) => cmd.run(&self.global),
 			SubCommand::Format(cmd) => cmd.run(&self.global),
+			SubCommand::Transpose(cmd) => cmd.run(&self.global),
 		}
 	}
 }

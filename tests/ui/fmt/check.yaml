@@ -48,7 +48,7 @@ cases:
     Formatted 3 crates (all fixed).
   diff: |
     diff --git A/Cargo.toml A/Cargo.toml
-    index 3770f3..8d03fc 100644
+    index 3770f3ed6e..8d03fc8409 100644
     --- A/Cargo.toml
     +++ A/Cargo.toml
     @@ -13,8 +13,2 @@ C = { version = "*", path = "../C"}
@@ -63,7 +63,7 @@ cases:
     +F0 = [ "B/F0", "C/F0" ]
     +G0 = [ "B/G0", "C/G0" ]
     diff --git B/Cargo.toml B/Cargo.toml
-    index 756a61..f08c09 100644
+    index 756a6136b7..f08c0994a7 100644
     --- B/Cargo.toml
     +++ B/Cargo.toml
     @@ -11,4 +11,2 @@ edition = "2021"
@@ -74,7 +74,7 @@ cases:
     +F0 = []
     +G0 = []
     diff --git C/Cargo.toml C/Cargo.toml
-    index 8801ab..24f9b5 100644
+    index 8801ab01e5..24f9b5ea09 100644
     --- C/Cargo.toml
     +++ C/Cargo.toml
     @@ -11,4 +11,2 @@ edition = "2021"
@@ -94,7 +94,7 @@ cases:
   code: 0
   diff: |
     diff --git A/Cargo.toml A/Cargo.toml
-    index 3770f3..8d03fc 100644
+    index 3770f3ed6e..8d03fc8409 100644
     --- A/Cargo.toml
     +++ A/Cargo.toml
     @@ -13,8 +13,2 @@ C = { version = "*", path = "../C"}
@@ -109,7 +109,7 @@ cases:
     +F0 = [ "B/F0", "C/F0" ]
     +G0 = [ "B/G0", "C/G0" ]
     diff --git B/Cargo.toml B/Cargo.toml
-    index 756a61..f08c09 100644
+    index 756a6136b7..f08c0994a7 100644
     --- B/Cargo.toml
     +++ B/Cargo.toml
     @@ -11,4 +11,2 @@ edition = "2021"
@@ -120,7 +120,7 @@ cases:
     +F0 = []
     +G0 = []
     diff --git C/Cargo.toml C/Cargo.toml
-    index 8801ab..24f9b5 100644
+    index 8801ab01e5..24f9b5ea09 100644
     --- C/Cargo.toml
     +++ C/Cargo.toml
     @@ -11,4 +11,2 @@ edition = "2021"

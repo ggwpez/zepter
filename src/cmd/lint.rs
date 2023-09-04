@@ -336,11 +336,11 @@ impl NeverEnablesCmd {
 
 impl PropagateFeatureCmd {
 	pub fn run(&self, global: &GlobalArgs) {
-		// Allowed dir that we can write to.
-		let allowed_dir = canonicalize(&self.cargo_args.manifest_path).unwrap();
-		let allowed_dir = allowed_dir.parent().unwrap();
 		let feature = self.feature.clone();
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
+		// Allowed dir that we can write to.
+		let allowed_dir = canonicalize(meta.workspace_root.as_std_path()).unwrap();
+
 		let dag = build_feature_dag(&meta, &meta.packages);
 		let pkgs = meta.packages.iter().collect::<Vec<_>>();
 		let mut to_check = pkgs.clone();
@@ -434,7 +434,7 @@ impl PropagateFeatureCmd {
 			let krate_path = canonicalize(krate.manifest_path.clone().into_std_path_buf()).unwrap();
 
 			let mut fixer = if self.fixer_args.enable {
-				if krate_path.starts_with(allowed_dir) ||
+				if krate_path.starts_with(&allowed_dir) ||
 					self.modify_paths.iter().any(|p| krate_path.starts_with(p))
 				{
 					Some(AutoFixer::from_manifest(&krate_path).unwrap())

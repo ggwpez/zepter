@@ -1,0 +1,53 @@
+
+
+all-features = false
+feature-depth = 1
+no-default-features = false
+targets = []
+
+[advisories]
+unsound = "deny"
+
+db-path = "~/.cargo/advisory-db"
+db-urls = ["https://github.com/rustsec/advisory-db"]
+ignore = []
+notice = "warn"
+unmaintained = "warn"
+vulnerability = "deny"
+yanked = "warn"
+
+[licenses]
+allow = [
+  "Apache-2.0",
+  "MIT",
+  "Unicode-DFS-2016",
+]
+allow-osi-fsf-free = "neither"
+confidence-threshold = 0.8
+copyleft = "allow"
+default = "deny"
+deny = []
+exceptions = []
+unlicensed = "deny"
+
+[licenses.private]
+ignore = false
+registries = []
+
+[bans]
+allow = []
+deny = []
+external-default-features = "allow"
+highlight = "all"
+multiple-versions = "warn"
+wildcards = "allow"
+workspace-default-features = "allow"
+
+skip = []
+skip-tree = []
+
+[sources]
+allow-git = []
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+unknown-git = "warn"
+unknown-registry = "warn"

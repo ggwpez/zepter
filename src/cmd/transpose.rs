@@ -85,7 +85,7 @@ impl LiftToWorkspaceCmd {
 		for pkg in meta.packages.iter() {
 			for dep in pkg.dependencies.iter() {
 				if dep.name != self.dependency {
-					continue;
+					continue
 				}
 
 				found.push((pkg.clone(), dep.clone()));
@@ -122,13 +122,13 @@ impl LiftToWorkspaceCmd {
 		);
 
 		let mut fixers = Map::new();
-		for (pkg, dep) in found.into_iter() {
+		for (pkg, dep) in found {
 			let krate_path = canonicalize(pkg.manifest_path.clone().into_std_path_buf()).unwrap();
 			fixers
 				.entry(pkg.name.clone())
 				.or_insert_with(|| AutoFixer::from_manifest(&krate_path).unwrap());
 			let fixer = fixers.get_mut(&pkg.name).unwrap();
-			
+
 			fixer.lift_dependency(&dep.name, dep.uses_default_features).unwrap(); // TODO
 		}
 
@@ -137,8 +137,9 @@ impl LiftToWorkspaceCmd {
 		}
 
 		// Now create fixer for the root package
-		//let mut fixer = AutoFixer::from_manifest(&meta.workspace_root.into_std_path_buf()).unwrap();
-		//fixer.add_workspace_dep(&found_dep.unwrap(), false);
+		//let mut fixer =
+		// AutoFixer::from_manifest(&meta.workspace_root.into_std_path_buf()).unwrap();
+		// fixer.add_workspace_dep(&found_dep.unwrap(), false);
 		//fixer.save().unwrap();
 	}
 }

@@ -4,12 +4,12 @@
 //! Automatically fix problems by modifying `Cargo.toml` files.
 
 use crate::{cmd::fmt::Mode, log};
+use cargo_metadata::Dependency;
 use std::{
 	collections::BTreeMap as Map,
 	path::{Path, PathBuf},
 };
-use cargo_metadata::Dependency;
-use toml_edit::{table, value, Array, Document, Formatted, Item, Table, Value, InlineTable};
+use toml_edit::{table, value, Array, Document, Formatted, InlineTable, Item, Table, Value};
 
 #[derive(Debug, clap::Parser)]
 #[cfg_attr(feature = "testing", derive(Default))]
@@ -493,8 +493,12 @@ impl AutoFixer {
 		Ok(())
 	}
 
-	pub fn add_workspace_dep(&mut self, _dep: &Dependency, _default_feats: bool) -> Result<(), String> {
-		todo!();
+	pub fn add_workspace_dep(
+		&mut self,
+		_dep: &Dependency,
+		_default_feats: bool,
+	) -> Result<(), String> {
+		panic!("todo");
 	}
 
 	pub fn modified(&self) -> bool {

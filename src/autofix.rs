@@ -4,11 +4,12 @@
 //! Automatically fix problems by modifying `Cargo.toml` files.
 
 use crate::{cmd::fmt::Mode, log};
+use cargo_metadata::Dependency;
 use std::{
 	collections::BTreeMap as Map,
 	path::{Path, PathBuf},
 };
-use toml_edit::{table, value, Array, Document, Value};
+use toml_edit::{table, value, Array, Document, Formatted, InlineTable, Item, Table, Value};
 
 #[derive(Debug, clap::Parser)]
 #[cfg_attr(feature = "testing", derive(Default))]
@@ -35,39 +36,6 @@ impl AutoFixer {
 	pub fn from_raw(raw: &str) -> Result<Self, String> {
 		let doc = raw.parse::<Document>().map_err(|e| format!("Failed to parse manifest: {e}"))?;
 		Ok(Self { raw: raw.into(), manifest: None, doc: Some(doc) })
-	}
-
-	/// Returns the unsorted features in alphabetical order.
-	pub fn check_sorted_all_features(&self) -> Vec<String> {
-		let doc: &Document = self.doc.as_ref().unwrap();
-		if !doc.contains_table("features") {
-			return Vec::new()
-		}
-		let features = doc["features"].as_table().unwrap();
-		let mut unsorted = Vec::new();
-
-		for (feature, _) in features.iter() {
-			if !self.check_sorted_feature(feature) {
-				unsorted.push(feature.to_string());
-			}
-		}
-
-		unsorted.sort();
-		unsorted
-	}
-
-	pub fn check_sorted_feature(&self, feature: &str) -> bool {
-		let Some(feature) = self.get_feature(feature) else { return true };
-
-		let mut last = "";
-		for value in feature.iter() {
-			let value = value.as_str().unwrap();
-			if value < last {
-				return false
-			}
-			last = value;
-		}
-		true
 	}
 
 	// Assumes sorting
@@ -309,6 +277,28 @@ impl AutoFixer {
 		Ok(features[name].as_array_mut().unwrap())
 	}
 
+	pub fn canonicalize_feature(
+		cname: &str,
+		fname: &str,
+		modes: &[Mode],
+		line_width: u32,
+		feature: &mut Array,
+	) -> Result<(), String> {
+		if modes.contains(&Mode::None) {
+			return Ok(())
+		}
+		if modes.is_empty() || modes.contains(&Mode::Sort) {
+			Self::sort_feature(feature);
+		}
+		if modes.is_empty() || modes.contains(&Mode::Dedub) {
+			Self::dedub_feature(cname, fname, feature)?;
+		}
+		if modes.is_empty() || modes.contains(&Mode::Canonicalize) {
+			Self::format_feature(fname, feature, line_width)?;
+		}
+		Ok(())
+	}
+
 	pub fn canonicalize_features(
 		&mut self,
 		cname: &str,
@@ -322,22 +312,8 @@ impl AutoFixer {
 			let feature = self.get_feature_mut(fname).unwrap();
 			let modes = mode_per_feature.get(fname).cloned().unwrap_or_default();
 
-			if modes.contains(&Mode::None) {
-				continue
-			}
-			if modes.is_empty() || modes.contains(&Mode::Sort) {
-				Self::sort_feature(feature);
-			}
-			if modes.is_empty() || modes.contains(&Mode::Dedub) {
-				let _ = Self::dedub_feature(cname, fname, feature).map_err(|e| {
-					errors.push(e);
-				});
-			}
-			if modes.is_empty() || modes.contains(&Mode::Canonicalize) {
-				let _ = Self::format_feature(fname, feature, line_width).map_err(|e| {
-					errors.push(e);
-				});
-			}
+			let _ = Self::canonicalize_feature(cname, fname, &modes, line_width, feature)
+				.map_err(|e| errors.push(e));
 		}
 
 		if errors.is_empty() {
@@ -345,6 +321,22 @@ impl AutoFixer {
 		} else {
 			Err(errors)
 		}
+	}
+
+	pub fn is_feature_canonical(
+		&self,
+		cname: &str,
+		fname: &str,
+		mode_per_feature: &Map<String, Vec<Mode>>,
+		line_width: u32,
+	) -> Result<bool, String> {
+		let modes = mode_per_feature.get(fname).cloned().unwrap_or_default();
+
+		let orig = self.get_feature(fname).unwrap();
+		let mut modified = orig.clone();
+
+		Self::canonicalize_feature(cname, fname, &modes, line_width, &mut modified)?;
+		Ok(orig.to_string() == modified.to_string())
 	}
 
 	fn format_pre_and_suffix(fix: String) -> String {
@@ -364,10 +356,19 @@ impl AutoFixer {
 		new_lines.join("\n")
 	}
 
-	pub fn canonicalize_all_features(&mut self, line_width: u32) -> Result<(), String> {
-		self.sort_all_features()?;
-		self.format_all_feature(line_width)?;
+	pub fn add_feature(&mut self, feature: &str) -> Result<(), String> {
+		let doc: &mut Document = self.doc.as_mut().unwrap();
 
+		if !doc.contains_table("features") {
+			doc.as_table_mut().insert("features", table());
+		}
+		let features = doc["features"].as_table_mut().unwrap();
+
+		if features.contains_key(feature) {
+			return Ok(())
+		}
+
+		features.insert(feature, value(Array::new()));
 		Ok(())
 	}
 
@@ -443,6 +444,61 @@ impl AutoFixer {
 		}
 
 		Ok(())
+	}
+
+	pub fn lift_dependency(&mut self, dname: &str, default_feats: bool) -> Result<(), String> {
+		let doc: &mut Document = self.doc.as_mut().unwrap();
+
+		for kind in &["dependencies", "dev-dependencies", "build-dependencies"] {
+			if !doc.contains_table(kind) {
+				continue
+			}
+			let deps: &mut Table = doc[kind].as_table_mut().unwrap();
+
+			if !deps.contains_key(dname) {
+				continue
+			}
+
+			let dep = deps.get_mut(dname).unwrap();
+			Self::lift_some_dependency(dep, default_feats)?;
+			//deps.key_decor_mut(dname).unwrap().set_suffix("");
+		}
+		Ok(())
+	}
+
+	pub fn lift_some_dependency(dep: &mut Item, default_feats: bool) -> Result<(), String> {
+		if let Some(as_str) = dep.as_str() {
+			cargo_metadata::semver::VersionReq::parse(as_str).expect("Is semver");
+			let mut table = InlineTable::new();
+			table.insert("workspace", Value::Boolean(Formatted::new(true)));
+
+			if default_feats {
+				table.insert("default-features", Value::Boolean(Formatted::new(true)));
+			}
+			table.set_dotted(false);
+
+			*dep = Item::Value(Value::InlineTable(table));
+		} else if let Some(as_table) = dep.as_inline_table_mut() {
+			if as_table.contains_key("git") || as_table.contains_key("path") {
+				return Err("'git' or 'path' dependency are currently not supported".into())
+			}
+			as_table.remove("version");
+			as_table.insert("workspace", Value::Boolean(Formatted::new(true)));
+			if default_feats {
+				as_table.insert("default-features", Value::Boolean(Formatted::new(true)));
+			}
+		} else {
+			unreachable!("Unknown kind of dependency: {:?}", dep);
+		}
+		Ok(())
+	}
+
+	pub fn add_workspace_dep(
+		&mut self,
+		_dep: &Dependency,
+		_default_feats: bool,
+	) -> Result<(), String> {
+		panic!("todo");
 	}
 
 	pub fn modified(&self) -> bool {

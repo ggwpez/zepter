@@ -348,107 +348,6 @@ fn add_to_feature_keeps_format() {
 }
 
 #[rstest]
-#[case(r#""#, true)]
-#[case(r#"[features]"#, true)]
-#[case(
-	r#"[features]
-F0 = [
-	"A/F0",
-	"B/F0",
-	"C/F0",
-]"#,
-	true
-)]
-#[case(
-	r#"[features]
-F0 = [
-"B/F0",
-"A/F0",
-]"#,
-	false
-)]
-#[case(
-	r#"[features]
-G0 = [
-	"B/F0",
-	"A/F0",
-]"#,
-	true
-)]
-#[case(
-	r#"[features]
-G0 = [
-	"B/F0",
-	"A/F0",
-]
-F0 = [
-	"A/F0",
-	"B/F0",
-	"C/F0",
-]"#,
-	true
-)]
-#[case(
-	r#"[features]
-G0 = [
-	"B/F0",
-	"A/F0",
-]
-F0 = [
-"B/F0",
-"A/F0",
-]"#,
-	false
-)]
-fn check_sorted_feature_works(#[case] input: &str, #[case] good: bool) {
-	let fixer = AutoFixer::from_raw(input).unwrap();
-	assert_eq!(fixer.check_sorted_feature("F0"), good);
-}
-
-#[rstest]
-#[case(r#""#, vec![])]
-#[case(r#"[features]"#, vec![])]
-#[case(r#"[features]
-F0 = [
-	"A/F0",
-	"B/F0",
-	"C/F0",
-]"#, vec![])]
-#[case(r#"[features]
-F0 = [
-"B/F0",
-"A/F0",
-]"#, vec!["F0"])]
-#[case(r#"[features]
-G0 = [
-	"B/F0",
-	"A/F0",
-]"#, vec!["G0"])]
-#[case(r#"[features]
-G0 = [
-	"B/F0",
-	"A/F0",
-]
-F0 = [
-	"A/F0",
-	"B/F0",
-	"C/F0",
-]"#, vec!["G0"])]
-#[case(r#"[features]
-G0 = [
-	"B/F0",
-	"A/F0",
-]
-F0 = [
-"B/F0",
-"A/F0",
-]"#, vec!["F0", "G0"])]
-fn check_sorted_all_works(#[case] input: &str, #[case] expect: Vec<&str>) {
-	let fixer = AutoFixer::from_raw(input).unwrap();
-	assert_eq!(fixer.check_sorted_all_features(), expect);
-}
-
-#[rstest]
 #[case(r#""#, None)]
 // TODO think about trailing newlines
 #[case(
@@ -512,7 +411,6 @@ fn sort_all_features_works(#[case] input: &str, #[case] modify: Option<&str>) {
 	let mut fixer = AutoFixer::from_raw(input).unwrap();
 	fixer.sort_all_features().unwrap();
 	assert_eq!(fixer.to_string(), modify.unwrap_or(input));
-	assert!(fixer.check_sorted_all_features().is_empty(), "Features should be sorted");
 }
 
 #[rstest]

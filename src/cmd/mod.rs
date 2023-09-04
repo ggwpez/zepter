@@ -7,7 +7,6 @@ pub mod fmt;
 pub mod lint;
 pub mod trace;
 
-use crate::log;
 use cargo_metadata::{Dependency, Metadata, MetadataCommand, Package, Resolve};
 
 /// See out how Rust dependencies and features are enabled.
@@ -127,8 +126,8 @@ pub struct CargoArgs {
 	/// Cargo manifest path or directory.
 	///
 	/// For directories it appends a `Cargo.toml`.
-	#[arg(long, global = true, default_value = "Cargo.toml")]
-	pub manifest_path: std::path::PathBuf,
+	#[arg(long, global = true)]
+	pub manifest_path: Option<std::path::PathBuf>,
 
 	/// Whether to only consider workspace crates.
 	#[clap(long, global = true)]
@@ -152,13 +151,16 @@ impl CargoArgs {
 	/// Load the metadata of the rust project.
 	pub fn load_metadata(&self) -> Result<Metadata, String> {
 		let mut cmd = MetadataCommand::new();
-		let manifest_path = if self.manifest_path.is_dir() {
-			self.manifest_path.join("Cargo.toml")
-		} else {
-			self.manifest_path.clone()
-		};
-		log::debug!("Manifest at: {:?}", manifest_path);
-		cmd.manifest_path(&manifest_path);
+
+		if let Some(ref manifest_path) = self.manifest_path {
+			let manifest_path = if manifest_path.is_dir() {
+				manifest_path.join("Cargo.toml")
+			} else {
+				manifest_path.clone()
+			};
+			cmd.manifest_path(&manifest_path);
+		}
+		
 		cmd.features(cargo_metadata::CargoOpt::AllFeatures);
 
 		if self.workspace {

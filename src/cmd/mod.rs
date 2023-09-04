@@ -160,7 +160,7 @@ impl CargoArgs {
 			};
 			cmd.manifest_path(&manifest_path);
 		}
-		
+
 		cmd.features(cargo_metadata::CargoOpt::AllFeatures);
 
 		if self.workspace {

@@ -5,6 +5,6 @@ cases:
 - cmd: f f
   stdout: |
     Please fix 1 error in 1 crate manually:
-      node-template-runtime (substrate/bin/node-template/runtime/Cargo.toml)
+      node-template-runtime (bin/node-template/runtime/Cargo.toml)
         feature 'std': conflicting ? for 'frame-try-runtime?/std'
   code: 1

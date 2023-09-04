@@ -11,4 +11,4 @@ cases:
           beefy-primitives (renamed from sp-consensus-beefy)
           sp-mmr-primitives
     Found 3 issues and fixed 3.
-  diff: "diff --git runtime/test-runtime/Cargo.toml runtime/test-runtime/Cargo.toml\nindex 6d38a0..972533 100644\n--- runtime/test-runtime/Cargo.toml\n+++ runtime/test-runtime/Cargo.toml\n@@ -130,0 +131,3 @@ std = [\n+\t\"polkadot-runtime-parachains/std\",\n+\t\"beefy-primitives/std\",\n+\t\"sp-mmr-primitives/std\"\n"
+  diff: "diff --git runtime/test-runtime/Cargo.toml runtime/test-runtime/Cargo.toml\nindex 6d38a0283d..97253325c5 100644\n--- runtime/test-runtime/Cargo.toml\n+++ runtime/test-runtime/Cargo.toml\n@@ -130,0 +131,3 @@ std = [\n+\t\"polkadot-runtime-parachains/std\",\n+\t\"beefy-primitives/std\",\n+\t\"sp-mmr-primitives/std\"\n"

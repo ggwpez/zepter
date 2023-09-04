@@ -106,9 +106,9 @@ impl FormatFeaturesCmd {
 	pub fn run(&self, global: &GlobalArgs) {
 		let modes = self.parse_mode_per_feature();
 		let meta = self.load_metadata(global);
-		// modifications are only allowed in this dir:
-		let allowed_dir = canonicalize(&self.cargo_args.manifest_path).unwrap();
-		let allowed_dir = allowed_dir.parent().unwrap();
+		// Allowed dir that we can write to.
+		let allowed_dir = canonicalize(meta.workspace_root.as_std_path()).unwrap();
+		log::debug!("Allowed dir: {}", allowed_dir.display());
 		let mut offenders = Vec::new();
 		// (path, crate) -> errors
 		let mut errors = Map::<(PathBuf, String), Vec<String>>::new();
@@ -120,7 +120,7 @@ impl FormatFeaturesCmd {
 
 			let mut fixer = AutoFixer::from_manifest(&path).unwrap();
 			if let Err(errs) = fixer.canonicalize_features(&pkg.name, &modes, self.line_width) {
-				let path = path.strip_prefix(allowed_dir).unwrap().to_path_buf();
+				let path = path.strip_prefix(&allowed_dir).unwrap().to_path_buf();
 				errors.entry((path.clone(), pkg.name.clone())).or_default().extend(errs);
 			} else if fixer.modified() {
 				offenders.push((path, &pkg.name, fixer));
@@ -169,7 +169,7 @@ impl FormatFeaturesCmd {
 				continue
 			}
 
-			let can_modify = path.starts_with(allowed_dir) ||
+			let can_modify = path.starts_with(&allowed_dir) ||
 				self.modify_paths.iter().any(|p| path.starts_with(p));
 			if !can_modify {
 				log::warn!(

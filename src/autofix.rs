@@ -8,7 +8,8 @@ use std::{
 	collections::BTreeMap as Map,
 	path::{Path, PathBuf},
 };
-use toml_edit::{table, value, Array, Document, Formatted, Item, Table, Value};
+use cargo_metadata::Dependency;
+use toml_edit::{table, value, Array, Document, Formatted, Item, Table, Value, InlineTable};
 
 #[derive(Debug, clap::Parser)]
 #[cfg_attr(feature = "testing", derive(Default))]
@@ -445,7 +446,7 @@ impl AutoFixer {
 		Ok(())
 	}
 
-	pub fn lift_dependency(&mut self, dname: &str) -> Result<(), String> {
+	pub fn lift_dependency(&mut self, dname: &str, default_feats: bool) -> Result<(), String> {
 		let doc: &mut Document = self.doc.as_mut().unwrap();
 
 		for kind in &["dependencies", "dev-dependencies", "build-dependencies"] {
@@ -459,30 +460,41 @@ impl AutoFixer {
 			}
 
 			let dep = deps.get_mut(dname).unwrap();
-			Self::lift_some_dependency(dname, dep)?;
-			deps.key_decor_mut(dname).unwrap().set_suffix("");
+			Self::lift_some_dependency(dep, default_feats)?;
+			//deps.key_decor_mut(dname).unwrap().set_suffix("");
 		}
 		Ok(())
 	}
 
-	pub fn lift_some_dependency(dname: &str, dep: &mut Item) -> Result<(), String> {
+	pub fn lift_some_dependency(dep: &mut Item, default_feats: bool) -> Result<(), String> {
 		if let Some(as_str) = dep.as_str() {
 			cargo_metadata::semver::VersionReq::parse(as_str).expect("Is semver");
-			let mut table = Table::new();
-			table.insert("workspace", Item::Value(Value::Boolean(Formatted::new(true))));
-			table.set_implicit(true);
-			table.set_dotted(true);
-			*dep = Item::Table(table);
+			let mut table = InlineTable::new();
+			table.insert("workspace", Value::Boolean(Formatted::new(true)));
+
+			if default_feats {
+				table.insert("default-features", Value::Boolean(Formatted::new(true)));
+			}
+			table.set_dotted(false);
+
+			*dep = Item::Value(Value::InlineTable(table));
 		} else if let Some(as_table) = dep.as_inline_table_mut() {
 			if as_table.contains_key("git") || as_table.contains_key("path") {
 				return Err("'git' or 'path' dependency are currently not supported".into())
 			}
 			as_table.remove("version");
 			as_table.insert("workspace", Value::Boolean(Formatted::new(true)));
+			if default_feats {
+				as_table.insert("default-features", Value::Boolean(Formatted::new(true)));
+			}
 		} else {
 			unreachable!("Unknown kind of dependency: {:?}", dep);
 		}
 		Ok(())
+	}
+
+	pub fn add_workspace_dep(&mut self, _dep: &Dependency, _default_feats: bool) -> Result<(), String> {
+		todo!();
 	}
 
 	pub fn modified(&self) -> bool {

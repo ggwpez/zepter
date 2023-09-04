@@ -57,8 +57,8 @@ enum SubCommand {
 	Lint(lint::LintCmd),
 	#[clap(alias = "fmt", alias = "f")]
 	Format(fmt::FormatCmd),
-	#[clap(alias = "t")]
-	Transpose(transpose::TransposeCmd),
+	//#[clap(alias = "t")]
+	//Transpose(transpose::TransposeCmd),
 }
 
 impl Command {
@@ -69,7 +69,7 @@ impl Command {
 			SubCommand::Trace(cmd) => cmd.run(&self.global),
 			SubCommand::Lint(cmd) => cmd.run(&self.global),
 			SubCommand::Format(cmd) => cmd.run(&self.global),
-			SubCommand::Transpose(cmd) => cmd.run(&self.global),
+			//SubCommand::Transpose(cmd) => cmd.run(&self.global),
 		}
 	}
 }

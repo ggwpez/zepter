@@ -61,6 +61,14 @@ pub struct LiftToWorkspaceCmd {
 
 	#[clap(index(1))]
 	dependency: String,
+
+	#[clap(long, value_enum, default_value_t = DefaultFeatureMode::False)]
+	default_feature: DefaultFeatureMode,
+}
+
+#[derive(Debug, Clone, PartialEq, clap::ValueEnum)]
+pub enum DefaultFeatureMode {
+	False,
 }
 
 impl LiftToWorkspaceCmd {
@@ -76,24 +84,26 @@ impl LiftToWorkspaceCmd {
 
 		for pkg in meta.packages.iter() {
 			for dep in pkg.dependencies.iter() {
-				if dep.name == self.dependency {
-					found.push((pkg.clone(), dep.clone()));
-
-					if found_version.as_ref().map_or(false, |f| f.ne(&dep.req)) {
-						panic!(
-							"Found different versions of '{}' in the workspace: {} vs {}. Please use 'cargo upgrade -p {}' first.",
-							global.bold(&self.dependency), global.red(&format!("{}", found_version.unwrap())), global.red(&format!("{}", dep.req)), &self.dependency
-						);
-					}
-					found_version = Some(dep.req.clone());
-					log::debug!(
-						"Found '{}' in package '{}' with version '{}'",
-						self.dependency,
-						pkg.name,
-						dep.req
-					);
-					*by_kind.entry(dep.kind).or_default() += 1;
+				if dep.name != self.dependency {
+					continue;
 				}
+
+				found.push((pkg.clone(), dep.clone()));
+
+				if found_version.as_ref().map_or(false, |f| f.ne(&dep.req)) {
+					panic!(
+						"Found different versions of '{}' in the workspace: {} vs {}. Please use 'cargo upgrade -p {}' first.",
+						global.bold(&self.dependency), global.red(&format!("{}", found_version.unwrap())), global.red(&format!("{}", dep.req)), &self.dependency
+					);
+				}
+				found_version = Some(dep.req.clone());
+				log::debug!(
+					"Found '{}' in package '{}' with version '{}'",
+					self.dependency,
+					pkg.name,
+					dep.req
+				);
+				*by_kind.entry(dep.kind).or_default() += 1;
 			}
 		}
 		let Some(version) = found_version else {
@@ -118,11 +128,17 @@ impl LiftToWorkspaceCmd {
 				.entry(pkg.name.clone())
 				.or_insert_with(|| AutoFixer::from_manifest(&krate_path).unwrap());
 			let fixer = fixers.get_mut(&pkg.name).unwrap();
-			fixer.lift_dependency(&dep.name);
+			
+			fixer.lift_dependency(&dep.name, dep.uses_default_features).unwrap(); // TODO
 		}
 
 		for fixer in fixers.values_mut() {
 			fixer.save().unwrap();
 		}
+
+		// Now create fixer for the root package
+		//let mut fixer = AutoFixer::from_manifest(&meta.workspace_root.into_std_path_buf()).unwrap();
+		//fixer.add_workspace_dep(&found_dep.unwrap(), false);
+		//fixer.save().unwrap();
 	}
 }

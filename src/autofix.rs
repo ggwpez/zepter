@@ -40,6 +40,7 @@ impl AutoFixer {
 
 	// Assumes sorting
 	pub fn dedub_feature(cname: &str, fname: &str, feature: &mut Array) -> Result<(), String> {
+		let _ = cname;
 		let mut values = feature.iter().cloned().collect::<Vec<_>>();
 
 		for i in (0..values.len()).rev() {

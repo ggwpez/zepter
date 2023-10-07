@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
 use super::{lint::CrateAndFeature, GlobalArgs};
-use crate::{cmd::lint::build_feature_dag, prelude::Dag};
+use crate::{cmd::lint::build_feature_dag, log, prelude::Dag};
 
 use cargo_metadata::Metadata;
 use histo::Histogram;

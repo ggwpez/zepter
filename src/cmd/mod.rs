@@ -10,6 +10,8 @@ pub mod run;
 pub mod trace;
 pub mod transpose;
 
+use crate::log;
+
 use cargo_metadata::{Dependency, Metadata, MetadataCommand, Package, Resolve};
 
 /// See out how Rust dependencies and features are enabled.

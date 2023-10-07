@@ -2,7 +2,10 @@
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
 use super::GlobalArgs;
-use crate::config::{workflow::WORKFLOW_DEFAULT_NAME, ConfigArgs};
+use crate::{
+	config::{workflow::WORKFLOW_DEFAULT_NAME, ConfigArgs},
+	log,
+};
 
 #[derive(Default, Debug, clap::Parser)]
 pub struct RunCmd {

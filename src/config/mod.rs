@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
-use crate::config::workflow::WorkflowFile;
+pub mod semver;
+pub mod workflow;
+
+use crate::{config::workflow::WorkflowFile, log};
 
 use std::{
 	fs::canonicalize,
 	path::{Path, PathBuf},
 };
-
-pub mod semver;
-pub mod workflow;
 
 #[derive(Default, Debug, clap::Parser)]
 pub struct ConfigArgs {

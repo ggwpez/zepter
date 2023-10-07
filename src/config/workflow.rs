@@ -43,6 +43,7 @@ pub struct WorkflowHelp {
 impl Workflow {
 	pub fn run(self, _g: &GlobalArgs) -> Result<(), String> {
 		for (i, step) in self.0.iter().enumerate() {
+			let _ = i;
 			let args = &step.0;
 			let cmd = std::env::args().next().unwrap_or("zepter".into());
 
@@ -55,7 +56,7 @@ impl Workflow {
 
 			let first_two_args =
 				args.iter().take(2).map(|s| s.as_str()).collect::<Vec<_>>().join(" ");
-			
+
 			if !status.success() {
 				return Err(format!(
 					"Command '{}' failed with exit code {}",
@@ -98,11 +99,7 @@ impl WorkflowFile {
 		let links = if !help.links.is_empty() {
 			format!(
 				"\n\nFor more information, see:\n{}",
-				help.links
-					.iter()
-					.map(|s| format!("  - {}", s))
-					.collect::<Vec<_>>()
-					.join("\n")
+				help.links.iter().map(|s| format!("  - {}", s)).collect::<Vec<_>>().join("\n")
 			)
 		} else {
 			"".into()
@@ -119,9 +116,7 @@ impl WorkflowFile {
 	pub fn resolve(&mut self) -> Result<(), String> {
 		let wfs = self.workflows.clone();
 
-		for (name, wf) in self.workflows.iter_mut() {
-			log::trace!("Resolving workflow '{name}'");
-
+		for (_name, wf) in self.workflows.iter_mut() {
 			for step in wf.0.iter_mut() {
 				for (i, orig_line) in step.0.iter_mut().enumerate() {
 					if let Some(line) = orig_line.strip_prefix('$') {
@@ -138,7 +133,7 @@ impl WorkflowFile {
 						for line in value.0[index as usize].0.iter().rev() {
 							step.0.insert(i, line.clone());
 						}
-						
+
 						break
 					}
 				}

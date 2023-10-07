@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
-use crate::{autofix::*, grammar::*, log};
+use crate::{autofix::*, log};
 use cargo_metadata::DependencyKind as DepKind;
 use std::{
 	collections::{BTreeMap as Map, HashMap},
@@ -106,7 +106,7 @@ impl LiftToWorkspaceCmd {
 				*by_kind.entry(dep.kind).or_default() += 1;
 			}
 		}
-		let Some(version) = found_version else {
+		let Some(_version) = found_version else {
 			panic!("Could not find any dependency named '{}'", global.red(&self.dependency));
 		};
 

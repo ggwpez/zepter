@@ -429,6 +429,7 @@ impl PropagateFeatureCmd {
 					(p == &pkg.id.repr && f == "#entrypoint") || (p == &dep.pkg.id.repr)
 				});
 				if let Some(p) = sub_dag.any_path(&default_entrypoint, &target) {
+					let _ = p;
 					// Easy case, all good.
 					log::debug!(
 						"Reachable from the default entrypoint: {:?} vis {:?}",

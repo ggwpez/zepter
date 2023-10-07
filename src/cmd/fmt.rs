@@ -210,7 +210,7 @@ impl FormatFeaturesCmd {
 
 			std::process::exit(0);
 		} else {
-			println!("Run again without --check to format them.");
+			println!("Run again --fix to format them.");
 		}
 
 		std::process::exit(global.error_code())

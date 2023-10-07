@@ -118,7 +118,7 @@ impl ConfigArgs {
 		let path =
 			String::from_utf8(path).expect("Failed to parse output of `cargo locate-project`");
 		let path: serde_json::Value =
-			serde_json::from_str(&path).expect("Failed to parse output of `cargo locate-project`");
+			serde_json::from_str(&path).expect(&format!("Failed to parse output of `cargo locate-project`: '{}'", path));
 		let path = path["root"].as_str().expect("Failed to parse output of `cargo locate-project`");
 		let path = PathBuf::from(path);
 		let root = path.parent().expect("Failed to get parent of workspace root");

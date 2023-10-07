@@ -1,7 +1,0 @@
-repo:
-  name: polkadot-sdk
-  ref: a181ced46b6924d6179288e5142e81fdd0927d30
-cases:
-- cmd: run 
-  stdout: "adsf"
-  diff: "todo"

@@ -129,8 +129,8 @@ pub struct PropagateFeatureCmd {
 	cargo_args: super::CargoArgs,
 
 	/// The feature to check.
-	#[clap(long, required = true)]
-	feature: String,
+	#[clap(long, alias = "feature", value_delimiter = ',', required = true)]
+	features: Vec<String>,
 
 	/// The packages to check. If empty, all packages are checked.
 	#[clap(long, short, num_args(0..))]
@@ -156,9 +156,17 @@ pub struct PropagateFeatureCmd {
 	#[clap(long, value_enum, value_name = "MUTE_SETTING", default_value_t = MuteSetting::Fix, verbatim_doc_comment)]
 	left_side_feature_missing: MuteSetting,
 
+	/// How to handle the case that the LHS is outside the workspace.
+	#[clap(long, value_enum, value_name = "MUTE_SETTING", default_value_t = MuteSetting::Fix, verbatim_doc_comment)]
+	left_side_outside_workspace: MuteSetting,
+
 	/// Show crate versions in the output.
 	#[clap(long)]
 	show_version: bool,
+
+	/// Show crate manifest paths in the output.
+	#[clap(long)]
+	show_path: bool,
 
 	#[allow(missing_docs)]
 	#[clap(flatten)]
@@ -199,8 +207,8 @@ impl LintCmd {
 	}
 }
 
-#[derive(Clone, Eq, Ord, PartialEq, PartialOrd, Debug)]
-struct CrateAndFeature(String, String);
+#[derive(Clone, Eq, Ord, PartialEq, PartialOrd, Debug, Hash)]
+pub struct CrateAndFeature(pub String, pub String);
 
 impl Display for CrateAndFeature {
 	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
@@ -338,12 +346,24 @@ impl NeverEnablesCmd {
 
 impl PropagateFeatureCmd {
 	pub fn run(&self, global: &GlobalArgs) {
-		let feature = self.feature.clone();
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
+		let dag = build_feature_dag(&meta, &meta.packages);
+
+		for feature in self.features.iter() {
+			self.run_feature(&meta, &dag, feature.clone(), global);
+		}
+	}
+
+	fn run_feature(
+		&self,
+		meta: &Metadata,
+		dag: &Dag<CrateAndFeature>,
+		feature: String,
+		global: &GlobalArgs,
+	) {
 		// Allowed dir that we can write to.
 		let allowed_dir = canonicalize(meta.workspace_root.as_std_path()).unwrap();
 
-		let dag = build_feature_dag(&meta, &meta.packages);
 		let pkgs = meta.packages.iter().collect::<Vec<_>>();
 		let mut to_check = pkgs.clone();
 		if !self.packages.is_empty() {
@@ -368,6 +388,10 @@ impl PropagateFeatureCmd {
 
 		for pkg in to_check.iter() {
 			// TODO that it does not enable other features.
+			let in_workspace = meta.workspace_members.iter().any(|m| m == &pkg.id);
+			if !in_workspace && self.left_side_outside_workspace == MuteSetting::Ignore {
+				continue
+			}
 
 			for dep in pkg.dependencies.iter() {
 				// TODO handle default features.
@@ -428,9 +452,10 @@ impl PropagateFeatureCmd {
 		let mut fixes = 0;
 		for krate in faulty_crates {
 			let krate = lookup(&krate);
+			let in_workspace = meta.workspace_members.iter().any(|m| m == &krate.id);
 			// check if we can modify in allowed_dir
 			let krate_path = canonicalize(krate.manifest_path.clone().into_std_path_buf()).unwrap();
-
+			// TODO move down
 			let mut fixer = if self.fixer_args.enable {
 				if krate_path.starts_with(&allowed_dir) ||
 					self.modify_paths.iter().any(|p| krate_path.starts_with(p))
@@ -447,7 +472,13 @@ impl PropagateFeatureCmd {
 			} else {
 				None
 			};
-			println!("crate '{}'\n  feature '{}'", krate.name, feature);
+
+			let mut krate_str = format!("'{}'", krate.name);
+			if self.show_path {
+				krate_str.push_str(&format!(" ({})", krate.manifest_path));
+			}
+
+			println!("crate {krate_str}\n  feature '{}'", feature);
 
 			if let Some(deps) = feature_missing.get(&krate.id.to_string()) {
 				let joined =
@@ -461,7 +492,8 @@ impl PropagateFeatureCmd {
 
 				if self.fixer_args.enable &&
 					self.fix_package.as_ref().map_or(true, |p| p == &krate.name) &&
-					self.left_side_feature_missing == MuteSetting::Fix
+					self.left_side_feature_missing == MuteSetting::Fix &&
+					(self.left_side_outside_workspace == MuteSetting::Fix || in_workspace)
 				{
 					let Some(fixer) = fixer.as_mut() else { continue };
 					fixer.add_feature(&feature).unwrap();
@@ -548,6 +580,9 @@ fn error_stats(
 		let fixed = format!(" fixed {}", fixes);
 		if fixes > 0 {
 			ret.push_str(&global.green(&fixed));
+			if fixes == warnings + errors {
+				ret.push_str(" (all fixed)");
+			}
 		} else {
 			ret.push_str(&fixed);
 		}
@@ -634,7 +669,7 @@ impl WhyEnabledCmd {
 			println!("Package {} does not have feature {}", self.package, self.feature);
 			std::process::exit(1);
 		}
-		assert!(!enabled_by.is_empty());
+		debug_assert!(!enabled_by.is_empty());
 		println!("Feature {}/{} is enabled by:", self.feature, self.package);
 		for (name, feature) in enabled_by {
 			println!("  {}/{}", name, feature);
@@ -642,7 +677,8 @@ impl WhyEnabledCmd {
 	}
 }
 
-fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeature> {
+// Complexity is `O(x ^ 4) with x=pkgs.len()`.
+pub fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeature> {
 	let mut dag = Dag::new();
 
 	for pkg in pkgs.iter() {
@@ -660,7 +696,6 @@ fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeature> 
 					CrateAndFeature(pkg.id.to_string(), "#entrypoint".into()),
 					CrateAndFeature(dep_id.pkg.id.repr.clone(), "default".into()),
 				);
-				log::debug!("Adding default entrypoint for {} on {}", dep.name, pkg.name);
 			}
 			for feature in &dep.features {
 				dag.add_edge(
@@ -676,12 +711,10 @@ fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeature> 
 					let mut splits = dep.split(':');
 					let dep = splits.nth(1).unwrap();
 					let dep_feature = "default";
-					//log::info!("Resolving '{}' as dependency of {}: {:?}", dep, pkg.name,
-					// pkg.dependencies.iter().find(|d| d.name == dep));
 					let dep = pkg
 						.dependencies
 						.iter()
-						.find(|d| d.rename.clone().unwrap_or(d.name.clone()) == dep)
+						.find(|d| d.rename.as_ref().unwrap_or(&d.name) == dep)
 						.unwrap();
 
 					let dep_id = match resolve_dep(pkg, dep, meta) {
@@ -705,7 +738,7 @@ fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeature> 
 					let dep = pkg
 						.dependencies
 						.iter()
-						.find(|d| d.rename.clone().unwrap_or(d.name.clone()) == dep)
+						.find(|d| d.rename.as_ref().unwrap_or(&d.name) == &dep)
 						.unwrap_or_else(|| {
 							panic!("Could not resolve dep {} of {}", dep, pkg.id.to_string())
 						});
@@ -723,26 +756,11 @@ fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeature> 
 						CrateAndFeature(pkg.id.to_string(), feature.clone()),
 						CrateAndFeature(dep_id.clone(), dep_feature.into()),
 					);
-
-				//log::info!(
-				//	"Adding: ({}, {}) -> ({}, {})",
-				//	pkg.name,
-				//	feature,
-				//	dep.name,
-				//	dep_feature
-				//);
 				} else {
 					let dep_feature = dep;
 					// Sanity check
-					assert!(pkg.features.contains_key(dep_feature));
+					debug_assert!(pkg.features.contains_key(dep_feature));
 					// Enables one of its own features.
-					//log::info!(
-					//	"Adding: ({}, {}) -> ({}, {})",
-					//	pkg.name,
-					//	feature,
-					//	pkg.name,
-					//	dep_feature
-					//);
 					dag.add_edge(
 						CrateAndFeature(pkg.id.to_string(), feature.clone()),
 						CrateAndFeature(pkg.id.to_string(), dep_feature.into()),

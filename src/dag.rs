@@ -16,8 +16,8 @@ use std::{
 /// Represents *Directed Acyclic Graph* through its edge relation.
 ///
 /// A "node" in that sense is anything on the left- or right-hand side of this relation.
-#[derive(Clone)]
-pub struct Dag<T> {
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
+pub struct Dag<T: Ord> {
 	/// Dependant -> Dependency
 	/// eg: Polkadot -> Substrate or Me -> Rust
 	pub edges: BTreeMap<T, BTreeSet<T>>,
@@ -25,7 +25,7 @@ pub struct Dag<T> {
 
 impl<T> Display for Dag<T>
 where
-	T: Display,
+	T: Display + Ord,
 {
 	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
 		for (from, tos) in self.edges.iter() {
@@ -37,7 +37,7 @@ where
 	}
 }
 
-impl<T> Default for Dag<T> {
+impl<T: Ord> Default for Dag<T> {
 	fn default() -> Self {
 		Self { edges: BTreeMap::new() }
 	}
@@ -57,12 +57,15 @@ where
 	///
 	/// This is one less than the number of nodes.
 	pub fn num_hops(&self) -> usize {
-		match self.0.len() {
+		match self.num_nodes() {
 			0 => unreachable!("Paths cannot be empty"),
 			l => l - 1,
 		}
 	}
 
+	/// The number of nodes within the path.
+	///
+	/// This is one less than the number of edges and never zero.
 	pub fn num_nodes(&self) -> usize {
 		self.0.len()
 	}
@@ -137,6 +140,10 @@ where
 	/// Add a node to the Dag without any edges.
 	pub fn add_node(&mut self, node: T) {
 		self.edges.entry(node).or_default();
+	}
+
+	pub fn degree(&self, node: &T) -> usize {
+		self.edges.get(node).map_or(0, |v| v.len())
 	}
 
 	/// Whether `from` is directly adjacent to `to`.
@@ -322,6 +329,19 @@ where
 	/// The number of nodes in the graph.
 	pub fn num_nodes(&self) -> usize {
 		self.edges.len()
+	}
+
+	pub fn lhs_iter(&self) -> impl Iterator<Item = &T> {
+		self.edges.iter().map(|(k, _)| k)
+	}
+
+	pub fn rhs_iter(&self) -> impl Iterator<Item = &T> {
+		self.edges.iter().flat_map(|(_, v)| v.iter())
+	}
+
+	/// Iterate though all LHS and RHS nodes.
+	pub fn node_iter(&self) -> impl Iterator<Item = &T> {
+		self.lhs_iter().chain(self.rhs_iter())
 	}
 }
 

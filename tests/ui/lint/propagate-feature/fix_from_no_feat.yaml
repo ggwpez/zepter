@@ -12,7 +12,7 @@ cases:
       feature 'F0'
         is required by 1 dependency:
           B
-    Found 1 issue and fixed 1.
+    Found 1 issue and fixed 1 (all fixed).
   code: 0
   diff: |
     diff --git A/Cargo.toml A/Cargo.toml
@@ -27,7 +27,7 @@ cases:
       feature 'F0'
         is required by 1 dependency:
           B
-    Found 1 issue and fixed 1.
+    Found 1 issue and fixed 1 (all fixed).
   code: 0
   diff: |
     diff --git A/Cargo.toml A/Cargo.toml

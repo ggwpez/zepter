@@ -14,7 +14,7 @@ cases:
       feature 'F0'
         must propagate to:
           B
-    Found 1 issue and fixed 1.
+    Found 1 issue and fixed 1 (all fixed).
   diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex cf8d3d50bd..b4a43ee9c4 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"B/F0\"\n"
 - cmd: lint propagate-feature -p A --feature F0 --fix
   stdout: |
@@ -22,7 +22,7 @@ cases:
       feature 'F0'
         must propagate to:
           B
-    Found 1 issue and fixed 1.
+    Found 1 issue and fixed 1 (all fixed).
   diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex cf8d3d50bd..b4a43ee9c4 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"B/F0\"\n"
 - cmd: lint propagate-feature -p B --feature F0 --fix
 - cmd: lint propagate-feature -p B --feature F1 --fix
@@ -32,7 +32,7 @@ cases:
       feature 'F0'
         must propagate to:
           B
-    Found 1 issue and fixed 1.
+    Found 1 issue and fixed 1 (all fixed).
   diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex cf8d3d50bd..b4a43ee9c4 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"B/F0\"\n"
 - cmd: lint propagate-feature -p A --feature F0 --workspace --fix
   stdout: |
@@ -40,7 +40,7 @@ cases:
       feature 'F0'
         must propagate to:
           B
-    Found 1 issue and fixed 1.
+    Found 1 issue and fixed 1 (all fixed).
   diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex cf8d3d50bd..b4a43ee9c4 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"B/F0\"\n"
 - cmd: lint propagate-feature -p B --feature F0 --workspace --fix
 - cmd: lint propagate-feature -p B --feature F1 --workspace --fix

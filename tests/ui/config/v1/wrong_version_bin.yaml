@@ -1,0 +1,18 @@
+crates:
+- name: A
+cases:
+- cmd: run default
+  code: 101
+
+configs:
+- to_path: .zepter.yaml
+  from_path: null
+  verbatim: |
+    version:
+      format: 1.2
+      binary: 0.12.0
+
+    workflows:
+      default:
+        - [ ]
+no_default_args: true

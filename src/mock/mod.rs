@@ -128,14 +128,15 @@ impl UiCaseFile {
 	}
 
 	fn generate_config(&self, root: &Path) -> Result<(), anyhow::Error> {
-		let Some(configs) = &self.configs else {
-			return Ok(())
-		};
+		let Some(configs) = &self.configs else { return Ok(()) };
 
 		for cfg in configs.iter() {
 			let to_path = root.join(&cfg.to_path);
-		
-			assert!(cfg.verbatim.is_some() ^ cfg.from_path.is_some(), "Either `verbatim` or `from_path` must be set, but not both");
+
+			assert!(
+				cfg.verbatim.is_some() ^ cfg.from_path.is_some(),
+				"Either `verbatim` or `from_path` must be set, but not both"
+			);
 			if let Some(verbatim) = &cfg.verbatim {
 				fs::write(&to_path, verbatim)?;
 			} else if let Some(from_path) = &cfg.from_path {

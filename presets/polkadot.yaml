@@ -39,5 +39,5 @@ help:
     It looks like one more more checks failed.
     To address them, it should be enough to run `$ zepter` in the root folder of the project. Otherwise please ask directly in your Merge Request or in Matrix chat.
   links:
-    - TODO
-    - https://github.com/ggwpez/zepter
+    - "FAIL-CI TODO"
+    - "https://github.com/ggwpez/zepter"

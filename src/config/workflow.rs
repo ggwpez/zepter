@@ -105,15 +105,16 @@ impl WorkflowFile {
 			"".into()
 		};
 
-		format!("{}\n{}", help.text, links).into()
+		let text = help.text.strip_suffix('\n').unwrap_or("");
+		format!("{}{}", text, links).into()
 	}
 
 	pub fn into_resolved(mut self) -> Result<Self, String> {
-		self.resolve()?;
+		while self.resolve_once()? {}
 		Ok(self)
 	}
 
-	pub fn resolve(&mut self) -> Result<(), String> {
+	pub fn resolve_once(&mut self) -> Result<bool, String> {
 		let wfs = self.workflows.clone();
 
 		for (_name, wf) in self.workflows.iter_mut() {
@@ -134,13 +135,13 @@ impl WorkflowFile {
 							step.0.insert(i, line.clone());
 						}
 
-						break
+						return Ok(true)
 					}
 				}
 			}
 		}
 
-		Ok(())
+		Ok(false)
 	}
 
 	pub fn check_cfg_compatibility(&self) -> Result<(), String> {

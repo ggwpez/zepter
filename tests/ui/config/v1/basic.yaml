@@ -1,0 +1,49 @@
+crates:
+- name: A
+cases:
+- cmd: run default
+  stdout: |
+    zepter 0.12.0
+- cmd: run
+  stdout: |
+    zepter 0.12.0
+- cmd: ''
+  stdout: |
+    zepter 0.12.0
+- cmd: run my_version
+  stdout: |
+    zepter 0.12.0
+- cmd: run my_debug
+  stdout: |+
+    Num workspace members: 1
+    Num dependencies: 1
+    DAG nodes: 0, links: 0
+    # Number of samples = 0
+
+- cmd: run both
+  stdout: |+
+    zepter 0.12.0
+    Num workspace members: 1
+    Num dependencies: 1
+    DAG nodes: 0, links: 0
+    # Number of samples = 0
+
+configs:
+- to_path: .zepter.yaml
+  from_path: null
+  verbatim: |
+    version:
+      format: 1
+      binary: 0.12.0
+
+    workflows:
+      my_version:
+        - [ '--version' ]
+      my_debug:
+        - [ 'debug', '--no-benchmark', '--no-root' ]
+      default:
+        - [ $my_version.0 ]
+      both:
+        - [ $my_version.0 ]
+        - [ $my_debug.0 ]
+no_default_args: true

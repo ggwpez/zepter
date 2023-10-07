@@ -113,12 +113,12 @@ impl ConfigArgs {
 		if let Some(path) = &self.manifest_path {
 			cmd.arg("--manifest-path").arg(path);
 		}
-		let output = cmd.output();
-		let path = output.expect("Failed to run `cargo locate-project`").stdout;
+		let output = cmd.output().expect("Failed to run `cargo locate-project`");
+		let path = output.stdout;
 		let path =
 			String::from_utf8(path).expect("Failed to parse output of `cargo locate-project`");
 		let path: serde_json::Value =
-			serde_json::from_str(&path).expect(&format!("Failed to parse output of `cargo locate-project`: '{}'", path));
+			serde_json::from_str(&path).expect(&format!("Failed to parse output of `cargo locate-project`: '{}'", String::from_utf8_lossy(& output.stderr)));
 		let path = path["root"].as_str().expect("Failed to parse output of `cargo locate-project`");
 		let path = PathBuf::from(path);
 		let root = path.parent().expect("Failed to get parent of workspace root");

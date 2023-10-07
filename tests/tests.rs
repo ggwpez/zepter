@@ -36,11 +36,18 @@ fn integration() {
 			for arg in case.cmd.split_whitespace() {
 				cmd.arg(arg);
 			}
-			cmd.args(["--manifest-path", workspace.as_path().to_str().unwrap()]);
-			if i > 0 {
-				cmd.arg("--offline");
+
+			if config.default_args() {
+				let toml_path = workspace.as_path().join("Cargo.toml");
+				cmd.args(["--manifest-path", toml_path.as_path().to_str().unwrap()]);
+				if i > 0 {
+					cmd.arg("--offline");
+				}
+			} else {
+				cmd.current_dir(workspace.as_path());
 			}
 
+			dbg!(format!("{:?}", cmd));
 			// remove empty trailing and suffix lines
 			let res = cmd.output().unwrap();
 			if let Some(code) = case.code {

@@ -13,6 +13,12 @@ pub struct DebugCmd {
 	#[allow(missing_docs)]
 	#[clap(flatten)]
 	cargo_args: super::CargoArgs,
+
+	#[clap(long)]
+	no_benchmark: bool,
+
+	#[clap(long)]
+	no_root: bool,
 }
 
 impl DebugCmd {
@@ -21,13 +27,17 @@ impl DebugCmd {
 		let dag = build_feature_dag(&meta, &meta.packages);
 
 		log::warn!("Unstable feature - do not rely on this!");
-		println!("Root: {}", meta.workspace_root.to_string());
+		if !self.no_root {
+			println!("Root: {}", meta.workspace_root.to_string());
+		}
 		println!("Num workspace members: {}", meta.workspace_members.len());
 		println!("Num dependencies: {}", meta.packages.len());
 		println!("DAG nodes: {}, links: {}", dag.num_nodes(), dag.num_edges());
 		self.connectivity_buckets(&dag);
-		let (took, points) = Self::measure(&meta);
-		println!("DAG setup time: {:.2?} (avg from {} runs)", took, points);
+		if !self.no_benchmark {
+			let (took, points) = Self::measure(&meta);
+			println!("DAG setup time: {:.2?} (avg from {} runs)", took, points);
+		}
 	}
 
 	pub fn connectivity_buckets(&self, dag: &Dag<CrateAndFeature>) {

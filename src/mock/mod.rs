@@ -68,6 +68,13 @@ impl CaseFile {
 		.map_err(|e| anyhow::anyhow!("Failed to write case file: {}", e))
 	}
 
+	pub fn default_args(&self) -> bool {
+		match self {
+			CaseFile::Ui(ui) => !ui.no_default_args.unwrap_or_default(),
+			CaseFile::Integration(_) => true,
+		}
+	}
+
 	pub fn cases(&self) -> &[Case] {
 		match self {
 			CaseFile::Ui(ui) => &ui.cases,
@@ -98,6 +105,8 @@ impl CaseFile {
 pub struct UiCaseFile {
 	pub crates: Vec<CrateConfig>,
 	pub cases: Vec<Case>,
+	pub configs: Option<Vec<ZepterConfig>>,
+	pub no_default_args: Option<bool>,
 }
 
 impl UiCaseFile {
@@ -108,6 +117,7 @@ impl UiCaseFile {
 		}
 		ctx.create_workspace(&self.crates)?;
 		git_init(ctx.root.path())?;
+		self.generate_config(ctx.root.path())?;
 		Ok(ctx)
 	}
 
@@ -115,6 +125,25 @@ impl UiCaseFile {
 		let content = fs::read_to_string(path).unwrap();
 		let content = content.replace('\t', "  ");
 		serde_yaml::from_str(&content).map_err(|e| anyhow::anyhow!("Failed to parse: {}", e))
+	}
+
+	fn generate_config(&self, root: &Path) -> Result<(), anyhow::Error> {
+		let Some(configs) = &self.configs else {
+			return Ok(())
+		};
+
+		for cfg in configs.iter() {
+			let to_path = root.join(&cfg.to_path);
+		
+			assert!(cfg.verbatim.is_some() ^ cfg.from_path.is_some(), "Either `verbatim` or `from_path` must be set, but not both");
+			if let Some(verbatim) = &cfg.verbatim {
+				fs::write(&to_path, verbatim)?;
+			} else if let Some(from_path) = &cfg.from_path {
+				let from_path = root.join(from_path);
+				fs::copy(&from_path, &to_path)?;
+			}
+		}
+		Ok(())
 	}
 }
 
@@ -153,6 +182,13 @@ impl CrateConfig {
 	pub fn path(&self) -> String {
 		crate_name_to_path(&self.name)
 	}
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
+pub struct ZepterConfig {
+	to_path: String,
+	from_path: Option<String>,
+	verbatim: Option<String>,
 }
 
 pub struct Context {

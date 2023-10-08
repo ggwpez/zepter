@@ -152,12 +152,13 @@ node-cli -> try-runtime-cli -> substrate-rpc-client -> sc-rpc-api -> sc-chain-sp
 ⚠️ the syntax for workflows is highly experimental and bound to change.
 
 The first step is that Zepter checks that it is executed in a rust workspace. Otherwise it fails directly. Then a workflow file is located as follows:
-- `$CWD/zepter.yaml`
-- `$CWD/.zepter.yaml`
-- `$CWD/.cargo/zepter.yaml`
-- `$CWD/.cargo/.zepter.yaml`
 
-It then proceeds to recurse upwards in the folder structure until the workspace root folder is found. It uses the first file that is found and errors if none is found.
+- `$WORKSPACE/zepter.yaml`
+- `$WORKSPACE/.zepter.yaml`
+- `$WORKSPACE/.cargo/zepter.yaml`
+- `$WORKSPACE/.cargo/.zepter.yaml`
+
+It uses the first file that is found and errors if none is found. Currently it not possible to overwrite the config in a sub-folder.
 
 ### Workflows
 

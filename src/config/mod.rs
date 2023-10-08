@@ -40,13 +40,11 @@ impl Default for Toggle {
 	}
 }
 
-pub const WELL_KNOWN_CFG_PATHS: &[&'static str] =
-	&["zepter.yaml", "zepter.yml", ".zepter.yaml", ".zepter.yml"];
+pub const WELL_KNOWN_CFG_PATHS: &[&'static str] = &["zepter.yaml", ".zepter.yaml"];
 
-/// Search for `zepter.yaml`, `zepter.yml`, `.zepter.yaml` or `.zepter.yml` in the folders:
+/// Search for `zepter.yaml`, `zepter`, `.zepter.yaml` or `.zepter` in the folders:
 /// - `./`
 /// - `./.cargo/`
-/// - `./.maintain/`
 pub fn search_config<P: AsRef<Path>>(workspace: P) -> Result<PathBuf, Vec<PathBuf>> {
 	let paths: Vec<PathBuf> =
 		vec![workspace.as_ref().to_path_buf(), workspace.as_ref().join(".cargo")];
@@ -109,7 +107,7 @@ impl ConfigArgs {
 
 	fn locate_workspace(&self) -> Result<PathBuf, String> {
 		let mut cmd = std::process::Command::new("cargo");
-		cmd.arg("locate-project").args(&["--offline", "--locked"]);
+		cmd.arg("locate-project").args(&["--workspace", "--offline", "--locked"]);
 		if let Some(path) = &self.manifest_path {
 			cmd.arg("--manifest-path").arg(path);
 		}

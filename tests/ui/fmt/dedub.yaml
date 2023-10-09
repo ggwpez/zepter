@@ -12,7 +12,7 @@ crates:
   features:
     F0: null
 cases:
-- cmd: format f
+- cmd: format f -f
   stdout: |
     Found 2 crates with unformatted features:
       A
@@ -37,3 +37,10 @@ cases:
     -F0 = [
     -]
     +F0 = []
+- cmd: format f
+  stdout: |
+    Found 2 crates with unformatted features:
+      A
+      B
+    Run again --fix to format them.
+  code: 1

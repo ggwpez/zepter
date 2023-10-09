@@ -29,7 +29,7 @@ cases:
       A
       B
       C
-    Run again without --check to format them.
+    Run again --fix to format them.
   code: 1
 - cmd: f f -c
   stdout: |
@@ -37,9 +37,9 @@ cases:
       A
       B
       C
-    Run again without --check to format them.
+    Run again --fix to format them.
   code: 1
-- cmd: format features --exit-code-zero
+- cmd: format features --exit-code-zero --fix
   stdout: |
     Found 3 crates with unformatted features:
       A
@@ -84,7 +84,7 @@ cases:
     -]
     +F0 = []
     +G0 = []
-- cmd: format features
+- cmd: format features -f
   stdout: |
     Found 3 crates with unformatted features:
       A
@@ -136,7 +136,7 @@ cases:
       A
       B
       C
-    Run again without --check to format them.
+    Run again --fix to format them.
   code: 1
 - cmd: format features --check --mode-per-feature "F0:sort"
   stdout: |
@@ -144,7 +144,7 @@ cases:
       A
       B
       C
-    Run again without --check to format them.
+    Run again --fix to format them.
   code: 1
 - cmd: format features --ignore-feature F0,G0
 - cmd: format features --ignore-feature F0,G0 --mode-per-feature "F0:sort"

@@ -1,0 +1,51 @@
+crates:
+- name: A
+  deps:
+  - B
+  features:
+    F0:
+    - - B
+      - F0
+    - - B
+      - F0
+- name: B
+  features:
+    F0: null
+cases:
+- cmd: ''
+  stdout: |
+    Found 2 crates with unformatted features:
+      A
+      B
+    Run again --fix to format them.
+    Error: Command 'f f' failed with exit code 1
+
+    <Custom Help Text Line #1>
+    <Custom Help Text Line #2>
+    <Custom Help Text Line #3>
+
+    For more information, see:
+      - <Custom Help Link #1>
+      - <Custom Help Link #2>
+      - <Custom Help Link #3>
+configs:
+- to_path: .zepter.yaml
+  from_path: null
+  verbatim: |
+    version:
+      format: 1
+      binary: 0.12.0
+
+    workflows:
+      default:
+        - [ f, f ]
+    help:
+      text: |
+        <Custom Help Text Line #1>
+        <Custom Help Text Line #2>
+        <Custom Help Text Line #3>
+      links:
+        - "<Custom Help Link #1>"
+        - "<Custom Help Link #2>"
+        - "<Custom Help Link #3>"
+no_default_args: true

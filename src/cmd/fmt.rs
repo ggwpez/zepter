@@ -3,11 +3,11 @@
 
 //! Format features in the crate manifest.
 
+use super::GlobalArgs;
 use crate::{autofix::*, cmd::parse_key_val, grammar::*, log};
+
 use cargo_metadata::Metadata;
 use std::{collections::BTreeMap as Map, fs::canonicalize, path::PathBuf, str::FromStr};
-
-use super::GlobalArgs;
 
 /// Format the features in your manifest files.
 #[derive(Debug, clap::Parser)]
@@ -40,9 +40,13 @@ pub struct FormatFeaturesCmd {
 	#[clap(long)]
 	modify_paths: Vec<PathBuf>,
 
-	/// Only check if the features are formatted but do not modify them.
+	/// DEPRECATED AND IGNORED
+	#[clap(long = "check", short = 'c')]
+	unused_check: bool,
+
+	/// Fix the formatting errors automatically.
 	#[clap(long, short)]
-	check: bool,
+	fix: bool,
 
 	/// The maximal length of a line for a feature.
 	#[clap(long, default_value_t = 80)]
@@ -104,6 +108,10 @@ impl FormatCmd {
 
 impl FormatFeaturesCmd {
 	pub fn run(&self, global: &GlobalArgs) {
+		if self.unused_check {
+			log::warn!("The `--check` is now implicit and ignored");
+		}
+
 		let modes = self.parse_mode_per_feature();
 		let meta = self.load_metadata(global);
 		// Allowed dir that we can write to.
@@ -165,7 +173,7 @@ impl FormatFeaturesCmd {
 				self.print_paths.then(|| format!(" {}", path.display())).unwrap_or_default();
 			println!("  {}{}", global.bold(pkg), psuffix);
 
-			if self.check {
+			if !self.fix {
 				continue
 			}
 
@@ -184,7 +192,7 @@ impl FormatFeaturesCmd {
 			fixed += 1;
 		}
 
-		if !self.check {
+		if self.fix {
 			if fixed == offenders.len() {
 				println!(
 					"Formatted {} crate{} (all fixed).",
@@ -202,7 +210,7 @@ impl FormatFeaturesCmd {
 
 			std::process::exit(0);
 		} else {
-			println!("Run again without --check to format them.");
+			println!("Run again --fix to format them.");
 		}
 
 		std::process::exit(global.error_code())

@@ -1,0 +1,87 @@
+crates:
+- name: A
+  deps:
+  - B
+  features:
+    F0:
+    - - B
+      - F0
+    - - B
+      - F0
+- name: B
+  features:
+    F0: null
+cases:
+- cmd: run default
+  stdout: |
+    Found 2 crates with unformatted features:
+      A
+      B
+    Formatted 2 crates (all fixed).
+  diff: |
+    diff --git A/Cargo.toml A/Cargo.toml
+    index 45aeabe66a..32d1776aca 100644
+    --- A/Cargo.toml
+    +++ A/Cargo.toml
+    @@ -12,4 +12 @@ B = { version = "*", path = "../B"}
+    -F0 = [
+    -"B/F0",
+    -"B/F0",
+    -]
+    +F0 = [ "B/F0" ]
+    diff --git B/Cargo.toml B/Cargo.toml
+    index e35c7e12aa..8bd6bd1048 100644
+    --- B/Cargo.toml
+    +++ B/Cargo.toml
+    @@ -11,2 +11 @@ edition = "2021"
+    -F0 = [
+    -]
+    +F0 = []
+- cmd: run check
+  stdout: |
+    Found 2 crates with unformatted features:
+      A
+      B
+    Run again --fix to format them.
+    Error: Command 'f f' failed with exit code 1
+- cmd: run fix
+  stdout: |
+    Found 2 crates with unformatted features:
+      A
+      B
+    Formatted 2 crates (all fixed).
+  diff: |
+    diff --git A/Cargo.toml A/Cargo.toml
+    index 45aeabe66a..32d1776aca 100644
+    --- A/Cargo.toml
+    +++ A/Cargo.toml
+    @@ -12,4 +12 @@ B = { version = "*", path = "../B"}
+    -F0 = [
+    -"B/F0",
+    -"B/F0",
+    -]
+    +F0 = [ "B/F0" ]
+    diff --git B/Cargo.toml B/Cargo.toml
+    index e35c7e12aa..8bd6bd1048 100644
+    --- B/Cargo.toml
+    +++ B/Cargo.toml
+    @@ -11,2 +11 @@ edition = "2021"
+    -F0 = [
+    -]
+    +F0 = []
+configs:
+- to_path: .zepter.yaml
+  from_path: null
+  verbatim: |
+    version:
+      format: 1
+      binary: 0.12.0
+
+    workflows:
+      check:
+        - [ 'f', 'f' ]
+      fix:
+        - [ $check.0, '--fix' ]
+      default:
+        - [ $fix.0 ]
+no_default_args: true

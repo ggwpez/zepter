@@ -22,7 +22,7 @@ cases:
           frame-system
           pallet-balances
           sp-runtime
-    Found 1 issue and fixed 1.
+    Found 1 issue and fixed 1 (all fixed).
   code: 0
   diff: |
     diff --git frame/name-service/Cargo.toml frame/name-service/Cargo.toml

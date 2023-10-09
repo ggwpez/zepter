@@ -22,7 +22,7 @@ fn integration() {
 	}
 
 	// Update each time you add a test.
-	for file in files.filter_map(Result::ok) {
+	for file in files.filter_map(Result::ok).filter(|f| f.is_file()) {
 		let mut config = CaseFile::from_file(&file);
 		let (workspace, ctx) = config.init().unwrap();
 		let mut overwrites = HashMap::new();
@@ -30,17 +30,25 @@ fn integration() {
 		let m = config.cases().len();
 
 		for (i, case) in config.cases().iter().enumerate() {
+			let _init = case.init(workspace.as_path()).unwrap();
 			colour::white!("{} {}/{} ", file.display(), i + 1, m);
 			git_reset(workspace.as_path()).unwrap();
 			let mut cmd = Command::cargo_bin("zepter").unwrap();
 			for arg in case.cmd.split_whitespace() {
 				cmd.arg(arg);
 			}
-			cmd.args(["--manifest-path", workspace.as_path().to_str().unwrap()]);
-			if i > 0 {
-				cmd.arg("--offline");
+
+			if config.default_args() {
+				let toml_path = workspace.as_path().join("Cargo.toml");
+				cmd.args(["--manifest-path", toml_path.as_path().to_str().unwrap()]);
+				if i > 0 {
+					cmd.arg("--offline");
+				}
+			} else {
+				cmd.current_dir(workspace.as_path());
 			}
 
+			dbg!(format!("{:?}", cmd));
 			// remove empty trailing and suffix lines
 			let res = cmd.output().unwrap();
 			if let Some(code) = case.code {

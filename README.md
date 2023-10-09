@@ -147,14 +147,55 @@ It reports that `snow` is pulled in from libp2p - good to know. In this case, al
 node-cli -> try-runtime-cli -> substrate-rpc-client -> sc-rpc-api -> sc-chain-spec -> sc-telemetry -> libp2p -> libp2p-webrtc -> libp2p-noise -> snow
 ```
 
+## Config Files
+
+⚠️ the syntax for workflows is highly experimental and bound to change.
+
+The first step is that Zepter checks that it is executed in a rust workspace. Otherwise it fails directly. Then a workflow file is located as follows:
+
+- `$WORKSPACE/zepter.yaml`
+- `$WORKSPACE/.zepter.yaml`
+- `$WORKSPACE/.cargo/zepter.yaml`
+- `$WORKSPACE/.cargo/.zepter.yaml`
+
+It uses the first file that is found and errors if none is found. Currently it not possible to overwrite the config in a sub-folder.
+
+### Workflows
+
+It is possible to aggregate the long commands into workflows instead of typing them each time. Zepter tries to locate a config file and run the `default` workflow when it is bare invoked without any arguments.  
+Alternately, it is possible to use `zepter run default`, or any other workflow name.
+
+Config files can contain workflows like this:
+
+```yaml
+workflows:
+  default:
+    - [ 'propagate-features', ... ]
+    - ...
+```
+
+It is also possible to extend previous steps:
+
+```yaml
+workflows:
+  check:
+    - ...
+  default:
+    - [ $check.0, '--fix' ]
+    - ...
+```
+
+A full working example is in [presets/polkadot.yaml](presets/polkadot.yaml).
+
 ## CI Usage
 
-Zepter is currently being used experimentially in the [Substrate](https://github.com/paritytech/substrate/blob/19971bd3eafa6394d918030f4142f85ea54404c0/scripts/ci/gitlab/pipeline/check.yml#L56-L60) CI to spot missing features. Usage in the Polkadot repository will be added soon as well.  
+Zepter is currently being used in the [Substrate](https://github.com/paritytech/substrate/blob/19971bd3eafa6394d918030f4142f85ea54404c0/scripts/ci/gitlab/pipeline/check.yml#L56-L60) [Polkadot-SDK](https://github.com/paritytech/polkadot-sdk/pull/1194) CI to spot missing features.  
 When these two experiments proove the usefulness and reliability of Zepter for CI application, then a more streamlined process will be introduced (possibly in the form of CI actions).
 
 ## Testing
 
-UI and integration tests are run with the normal `cargo test`.  
+Unit tests are with the normal `cargo test`. UI and integration tests are normally ignored and can be run with `cargo test -- --ignored`.
+
 Environment overwrites exist for:
 - `OVERWRITE`: Update the `cout` and `diff` locks.
 - `UI_FILTER`: Regex to selectively run files.
@@ -164,8 +205,9 @@ Environment overwrites exist for:
 
 - [x] Add feature information to the enabled deps
 - [x] Optimize `shortest_path` function
-- [ ] Add support for config files
-- [ ] Feature sorting and deduplication
+- [x] Add support for config files
+- [x] Feature sorting and deduplication
+- [ ] 
 
 <!-- LINKS -->
 [Cumulus]: https://github.com/paritytech/cumulus

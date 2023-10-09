@@ -35,6 +35,10 @@ pub struct Case {
 	#[serde(skip_serializing_if = "String::is_empty")]
 	#[serde(default)]
 	pub diff: String,
+
+	#[serde(skip_serializing_if = "Option::is_none")]
+	#[serde(default)]
+	pub config: Option<ZepterConfig>,
 }
 
 /// A specific github repo checkout.
@@ -48,6 +52,26 @@ pub struct Repo {
 pub enum CaseFile {
 	Ui(UiCaseFile),
 	Integration(IntegrationCaseFile),
+}
+
+#[derive(Default)]
+pub struct CaseCleanupGuard {
+	cfg_path: Option<PathBuf>,
+}
+
+impl Case {
+	pub fn init(&self, root: &Path) -> Result<CaseCleanupGuard, anyhow::Error> {
+		let Some(cfg) = &self.config else { return Ok(CaseCleanupGuard::default()) };
+
+		let cfg_path = cfg.write(root)?;
+		Ok(CaseCleanupGuard { cfg_path: Some(cfg_path) })
+	}
+}
+
+impl Drop for CaseCleanupGuard {
+	fn drop(&mut self) {
+		self.cfg_path.take().map(|p| fs::remove_file(p).unwrap());
+	}
 }
 
 impl CaseFile {
@@ -66,6 +90,13 @@ impl CaseFile {
 			CaseFile::Integration(integration) => serde_yaml::to_writer(&mut fd, &integration),
 		}
 		.map_err(|e| anyhow::anyhow!("Failed to write case file: {}", e))
+	}
+
+	pub fn default_args(&self) -> bool {
+		match self {
+			CaseFile::Ui(ui) => !ui.no_default_args.unwrap_or_default(),
+			CaseFile::Integration(_) => true,
+		}
 	}
 
 	pub fn cases(&self) -> &[Case] {
@@ -98,6 +129,8 @@ impl CaseFile {
 pub struct UiCaseFile {
 	pub crates: Vec<CrateConfig>,
 	pub cases: Vec<Case>,
+	pub configs: Option<Vec<ZepterConfig>>,
+	pub no_default_args: Option<bool>,
 }
 
 impl UiCaseFile {
@@ -108,13 +141,24 @@ impl UiCaseFile {
 		}
 		ctx.create_workspace(&self.crates)?;
 		git_init(ctx.root.path())?;
+		self.generate_config(ctx.root.path())?;
 		Ok(ctx)
 	}
 
 	pub fn from_file(path: &Path) -> Result<Self, anyhow::Error> {
-		let content = fs::read_to_string(path).unwrap();
+		let content = fs::read_to_string(path)?;
 		let content = content.replace('\t', "  ");
 		serde_yaml::from_str(&content).map_err(|e| anyhow::anyhow!("Failed to parse: {}", e))
+	}
+
+	fn generate_config(&self, root: &Path) -> Result<(), anyhow::Error> {
+		let Some(configs) = &self.configs else { return Ok(()) };
+
+		for cfg in configs.iter() {
+			cfg.write(root)?;
+		}
+
+		Ok(())
 	}
 }
 
@@ -127,7 +171,7 @@ pub struct IntegrationCaseFile {
 
 impl IntegrationCaseFile {
 	pub fn from_file(path: &Path) -> Result<Self, anyhow::Error> {
-		let content = fs::read_to_string(path).unwrap();
+		let content = fs::read_to_string(path)?;
 		let content = content.replace('\t', "  ");
 		serde_yaml::from_str(&content).map_err(|e| anyhow::anyhow!("Failed to parse: {}", e))
 	}
@@ -152,6 +196,34 @@ impl CrateConfig {
 	/// Return the file path of this crate.
 	pub fn path(&self) -> String {
 		crate_name_to_path(&self.name)
+	}
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
+pub struct ZepterConfig {
+	to_path: String,
+	from_path: Option<String>,
+	verbatim: Option<String>,
+}
+
+impl ZepterConfig {
+	pub fn write(&self, root: &Path) -> Result<PathBuf, anyhow::Error> {
+		let to_path = root.join(&self.to_path);
+		fs::create_dir_all(to_path.parent().unwrap())?;
+
+		assert!(
+			self.verbatim.is_some() ^ self.from_path.is_some(),
+			"Either `verbatim` or `from_path` must be set, but not both"
+		);
+		if let Some(verbatim) = &self.verbatim {
+			fs::write(&to_path, verbatim)?;
+			dbg!("Writing to path:", &to_path);
+		} else if let Some(from_path) = &self.from_path {
+			let from_path = root.join(from_path);
+			fs::copy(&from_path, &to_path)?;
+		}
+
+		Ok(to_path)
 	}
 }
 

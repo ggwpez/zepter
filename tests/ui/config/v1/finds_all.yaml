@@ -1,0 +1,82 @@
+crates:
+- name: A
+cases:
+- cmd:
+  stdout: |
+    zepter 0.12.0
+  config:
+    to_path: .zepter.yaml
+    from_path: null
+    verbatim: |
+      version:
+        format: 1
+        binary: 0.12.0
+      workflows:
+        default:
+          - [ '--version' ]
+- cmd:
+  stdout: |
+    zepter 0.12.0
+  config:
+    to_path: zepter.yaml
+    from_path: null
+    verbatim: |
+      version:
+        format: 1
+        binary: 0.12.0
+      workflows:
+        default:
+          - [ '--version' ]
+- cmd:
+  stdout: |
+    zepter 0.12.0
+  config:
+    to_path: .cargo/zepter.yaml
+    from_path: null
+    verbatim: |
+      version:
+        format: 1
+        binary: 0.12.0
+      workflows:
+        default:
+          - [ '--version' ]
+- cmd: run default
+  stdout: |
+    zepter 0.12.0
+  config:
+    to_path: .cargo/.zepter.yaml
+    from_path: null
+    verbatim: |
+      version:
+        format: 1
+        binary: 0.12.0
+      workflows:
+        default:
+          - [ '--version' ]
+- cmd: run default --config .cargo/polkadot.yaml
+  stdout: |
+    zepter 0.12.0
+  config:
+    to_path: .cargo/polkadot.yaml
+    from_path: null
+    verbatim: |
+      version:
+        format: 1
+        binary: 0.12.0
+      workflows:
+        default:
+          - [ '--version' ]
+- cmd: run default -c .cargo/polkadot.yaml
+  stdout: |
+    zepter 0.12.0
+  config:
+    to_path: .cargo/polkadot.yaml
+    from_path: null
+    verbatim: |
+      version:
+        format: 1
+        binary: 0.12.0
+      workflows:
+        default:
+          - [ '--version' ]
+no_default_args: true

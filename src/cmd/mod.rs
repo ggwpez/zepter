@@ -3,10 +3,14 @@
 
 //! Sub-command definition and implementation.
 
+pub mod debug;
 pub mod fmt;
 pub mod lint;
+pub mod run;
 pub mod trace;
 pub mod transpose;
+
+use crate::log;
 
 use cargo_metadata::{Dependency, Metadata, MetadataCommand, Package, Resolve};
 
@@ -15,7 +19,7 @@ use cargo_metadata::{Dependency, Metadata, MetadataCommand, Package, Resolve};
 #[command(author, version, about, long_about = None)]
 pub struct Command {
 	#[clap(subcommand)]
-	subcommand: SubCommand,
+	subcommand: Option<SubCommand>,
 
 	#[clap(flatten)]
 	global: GlobalArgs,
@@ -30,7 +34,7 @@ pub struct GlobalArgs {
 	/// Log level to use.
 	#[cfg(feature = "logging")]
 	#[clap(long = "log", global = true, default_value = "info", ignore_case = true)]
-	level: ::log::Level,
+	level: ::log::LevelFilter,
 
 	/// Log level to use.
 	#[cfg(not(feature = "logging"))]
@@ -56,19 +60,23 @@ enum SubCommand {
 	Lint(lint::LintCmd),
 	#[clap(alias = "fmt", alias = "f")]
 	Format(fmt::FormatCmd),
+	Run(run::RunCmd),
 	//#[clap(alias = "t")]
 	//Transpose(transpose::TransposeCmd),
+	Debug(debug::DebugCmd),
 }
 
 impl Command {
 	pub fn run(&self) {
 		self.global.setup_logging();
 
-		match &self.subcommand {
-			SubCommand::Trace(cmd) => cmd.run(&self.global),
-			SubCommand::Lint(cmd) => cmd.run(&self.global),
-			SubCommand::Format(cmd) => cmd.run(&self.global),
-			//SubCommand::Transpose(cmd) => cmd.run(&self.global),
+		match self.subcommand.as_ref() {
+			Some(SubCommand::Trace(cmd)) => cmd.run(&self.global),
+			Some(SubCommand::Lint(cmd)) => cmd.run(&self.global),
+			Some(SubCommand::Format(cmd)) => cmd.run(&self.global),
+			Some(SubCommand::Run(cmd)) => cmd.run(&self.global),
+			Some(SubCommand::Debug(cmd)) => cmd.run(&self.global),
+			None => run::RunCmd::default().run(&self.global),
 		}
 	}
 }
@@ -79,7 +87,7 @@ impl GlobalArgs {
 		if self.quiet {
 			::log::set_max_level(::log::LevelFilter::Error);
 		} else {
-			::log::set_max_level(self.level.to_level_filter());
+			::log::set_max_level(self.level);
 		}
 	}
 
@@ -149,11 +157,18 @@ pub struct CargoArgs {
 
 	#[clap(long, global = true)]
 	pub all_features: bool,
+
+	#[clap(long = "debug-keep-meta")]
+	pub keep_meta: Option<std::path::PathBuf>,
 }
 
 impl CargoArgs {
 	/// Load the metadata of the rust project.
 	pub fn load_metadata(&self) -> Result<Metadata, String> {
+		self.load_metadata_unsorted()
+	}
+
+	pub fn load_metadata_unsorted(&self) -> Result<Metadata, String> {
 		let mut cmd = MetadataCommand::new();
 
 		if let Some(ref manifest_path) = self.manifest_path {
@@ -177,7 +192,14 @@ impl CargoArgs {
 			cmd.other_options(vec!["--locked".to_string()]);
 		}
 
-		cmd.exec().map_err(|e| format!("Failed to load metadata: {e}"))
+		let meta = cmd.exec().map_err(|e| format!("Failed to load metadata: {e}"))?;
+
+		if let Some(path) = &self.keep_meta {
+			std::fs::write(&path, serde_json::to_string_pretty(&meta).unwrap()).unwrap();
+			log::info!("Wrote metadata to {}", path.display());
+		}
+
+		Ok(meta)
 	}
 }
 

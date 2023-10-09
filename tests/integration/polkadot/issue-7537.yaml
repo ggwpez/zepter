@@ -9,7 +9,7 @@ cases:
         must propagate to:
           environmental
           frame-benchmarking
-    Found 2 issues and fixed 2.
+    Found 2 issues and fixed 2 (all fixed).
   diff: "diff --git xcm/xcm-executor/Cargo.toml xcm/xcm-executor/Cargo.toml\nindex 41463bbfbd..8200b8e402 100644\n--- xcm/xcm-executor/Cargo.toml\n+++ xcm/xcm-executor/Cargo.toml\n@@ -38,0 +39,2 @@ std = [\n+\t\"environmental/std\",\n+\t\"frame-benchmarking?/std\"\n"
 - cmd: lint propagate-feature -p xcm-executor --feature runtime-benchmarks --fix
   stdout: |
@@ -18,7 +18,7 @@ cases:
         must propagate to:
           frame-support
           sp-runtime
-    Found 2 issues and fixed 2.
+    Found 2 issues and fixed 2 (all fixed).
   diff: "diff --git xcm/xcm-executor/Cargo.toml xcm/xcm-executor/Cargo.toml\nindex 41463bbfbd..0ebbedf148 100644\n--- xcm/xcm-executor/Cargo.toml\n+++ xcm/xcm-executor/Cargo.toml\n@@ -26,0 +27,2 @@ runtime-benchmarks = [\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\n"
 - cmd: lint propagate-feature -p xcm-executor --feature runtime-benchmarks --fix --feature-enables-dep "runtime-benchmarks:frame-benchmarking"
   stdout: |
@@ -27,5 +27,5 @@ cases:
         must propagate to:
           frame-support
           sp-runtime
-    Found 2 issues and fixed 2.
+    Found 2 issues and fixed 2 (all fixed).
   diff: "diff --git xcm/xcm-executor/Cargo.toml xcm/xcm-executor/Cargo.toml\nindex 41463bbfbd..0ebbedf148 100644\n--- xcm/xcm-executor/Cargo.toml\n+++ xcm/xcm-executor/Cargo.toml\n@@ -26,0 +27,2 @@ runtime-benchmarks = [\n+\t\"frame-support/runtime-benchmarks\",\n+\t\"sp-runtime/runtime-benchmarks\"\n"

@@ -22,7 +22,7 @@ fn integration() {
 	}
 
 	// Update each time you add a test.
-	for file in files.filter_map(Result::ok) {
+	for file in files.filter_map(Result::ok).filter(|f| f.is_file()) {
 		let mut config = CaseFile::from_file(&file);
 		let (workspace, ctx) = config.init().unwrap();
 		let mut overwrites = HashMap::new();
@@ -30,6 +30,7 @@ fn integration() {
 		let m = config.cases().len();
 
 		for (i, case) in config.cases().iter().enumerate() {
+			let _init = case.init(workspace.as_path()).unwrap();
 			colour::white!("{} {}/{} ", file.display(), i + 1, m);
 			git_reset(workspace.as_path()).unwrap();
 			let mut cmd = Command::cargo_bin("zepter").unwrap();

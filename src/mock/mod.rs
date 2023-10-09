@@ -35,6 +35,10 @@ pub struct Case {
 	#[serde(skip_serializing_if = "String::is_empty")]
 	#[serde(default)]
 	pub diff: String,
+
+	#[serde(skip_serializing_if = "Option::is_none")]
+	#[serde(default)]
+	pub config: Option<ZepterConfig>,
 }
 
 /// A specific github repo checkout.
@@ -48,6 +52,28 @@ pub struct Repo {
 pub enum CaseFile {
 	Ui(UiCaseFile),
 	Integration(IntegrationCaseFile),
+}
+
+#[derive(Default)]
+pub struct CaseCleanupGuard {
+	cfg_path: Option<PathBuf>,
+}
+
+impl Case {
+	pub fn init(&self, root: &Path) -> Result<CaseCleanupGuard, anyhow::Error> {
+		let Some(cfg) = &self.config else {
+			return Ok(CaseCleanupGuard::default())
+		};
+
+		let cfg_path = cfg.write(root)?;
+		Ok(CaseCleanupGuard { cfg_path: Some(cfg_path) })
+	}
+}
+
+impl Drop for CaseCleanupGuard {
+	fn drop(&mut self) {
+		self.cfg_path.take().map(|p| fs::remove_file(p).unwrap());
+	}
 }
 
 impl CaseFile {
@@ -122,7 +148,7 @@ impl UiCaseFile {
 	}
 
 	pub fn from_file(path: &Path) -> Result<Self, anyhow::Error> {
-		let content = fs::read_to_string(path).unwrap();
+		let content = fs::read_to_string(path)?;
 		let content = content.replace('\t', "  ");
 		serde_yaml::from_str(&content).map_err(|e| anyhow::anyhow!("Failed to parse: {}", e))
 	}
@@ -131,19 +157,9 @@ impl UiCaseFile {
 		let Some(configs) = &self.configs else { return Ok(()) };
 
 		for cfg in configs.iter() {
-			let to_path = root.join(&cfg.to_path);
-
-			assert!(
-				cfg.verbatim.is_some() ^ cfg.from_path.is_some(),
-				"Either `verbatim` or `from_path` must be set, but not both"
-			);
-			if let Some(verbatim) = &cfg.verbatim {
-				fs::write(&to_path, verbatim)?;
-			} else if let Some(from_path) = &cfg.from_path {
-				let from_path = root.join(from_path);
-				fs::copy(&from_path, &to_path)?;
-			}
+			cfg.write(root)?;
 		}
+
 		Ok(())
 	}
 }
@@ -157,7 +173,7 @@ pub struct IntegrationCaseFile {
 
 impl IntegrationCaseFile {
 	pub fn from_file(path: &Path) -> Result<Self, anyhow::Error> {
-		let content = fs::read_to_string(path).unwrap();
+		let content = fs::read_to_string(path)?;
 		let content = content.replace('\t', "  ");
 		serde_yaml::from_str(&content).map_err(|e| anyhow::anyhow!("Failed to parse: {}", e))
 	}
@@ -190,6 +206,27 @@ pub struct ZepterConfig {
 	to_path: String,
 	from_path: Option<String>,
 	verbatim: Option<String>,
+}
+
+impl ZepterConfig {
+	pub fn write(&self, root: &Path) -> Result<PathBuf, anyhow::Error> {
+		let to_path = root.join(&self.to_path);
+		fs::create_dir_all(to_path.parent().unwrap())?;
+
+		assert!(
+			self.verbatim.is_some() ^ self.from_path.is_some(),
+			"Either `verbatim` or `from_path` must be set, but not both"
+		);
+		if let Some(verbatim) = &self.verbatim {
+			fs::write(&to_path, verbatim)?;
+			dbg!("Writing to path:", &to_path);
+		} else if let Some(from_path) = &self.from_path {
+			let from_path = root.join(from_path);
+			fs::copy(&from_path, &to_path)?;
+		}
+
+		Ok(to_path)
+	}
 }
 
 pub struct Context {

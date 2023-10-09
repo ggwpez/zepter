@@ -61,9 +61,7 @@ pub struct CaseCleanupGuard {
 
 impl Case {
 	pub fn init(&self, root: &Path) -> Result<CaseCleanupGuard, anyhow::Error> {
-		let Some(cfg) = &self.config else {
-			return Ok(CaseCleanupGuard::default())
-		};
+		let Some(cfg) = &self.config else { return Ok(CaseCleanupGuard::default()) };
 
 		let cfg_path = cfg.write(root)?;
 		Ok(CaseCleanupGuard { cfg_path: Some(cfg_path) })

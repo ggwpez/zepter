@@ -1,6 +1,6 @@
 name: Integration test master
 
-# This tests that Zepter wont panic on Substrate, Polkadot or Cumulus.
+# This tests that Zepter wont panic on Polkadot-SDK, Substrate, Polkadot or Cumulus.
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

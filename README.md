@@ -16,6 +16,7 @@ cargo install -f zepter --locked
 ## Commands
 
 zepter
+- run: Run a workflow from the config file.
 - format
   - features: Format features layout and remove duplicates.
 - trace: Trace dependencies paths.
@@ -31,9 +32,9 @@ zepter
 To ensure that your features are in canonical formatting, just run:
 
 ```bash
-zepter format features --check
+zepter format features
 # Or shorter:
-zepter f f -c
+zepter f f
 ```
 
 The output will tell you which features are missing formatting:

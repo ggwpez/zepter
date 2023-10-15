@@ -53,6 +53,32 @@ cases:
       workflows:
         default:
           - [ '--version' ]
+- cmd: run default
+  stdout: |
+    zepter 0.13.0
+  config:
+    to_path: .config/.zepter.yaml
+    from_path: null
+    verbatim: |
+      version:
+        format: 1
+        binary: 0.12.0
+      workflows:
+        default:
+          - [ '--version' ]
+- cmd: run default
+  stdout: |
+    zepter 0.13.0
+  config:
+    to_path: .config/.zepter.yaml
+    from_path: null
+    verbatim: |
+      version:
+        format: 1
+        binary: 0.12.0
+      workflows:
+        default:
+          - [ '--version' ]
 - cmd: run default --config .cargo/polkadot.yaml
   stdout: |
     zepter 0.13.0

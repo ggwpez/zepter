@@ -27,7 +27,10 @@ jobs:
         cargo build --all-targets --all-features --locked -q
         cargo build --all-targets --no-default-features --locked -q
 
-    - name: Run tests
+    - name: Run Unit tests
+      run: cargo test --locked -- --nocapture
+
+    - name: Run UI tests
       run: cargo test --locked -- --nocapture --ignored
 
     - name: Clippy

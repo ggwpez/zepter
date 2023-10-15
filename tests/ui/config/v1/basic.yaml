@@ -3,16 +3,16 @@ crates:
 cases:
 - cmd: run default
   stdout: |
-    zepter 0.13.0
+    zepter 0.13.1
 - cmd: run
   stdout: |
-    zepter 0.13.0
+    zepter 0.13.1
 - cmd: ''
   stdout: |
-    zepter 0.13.0
+    zepter 0.13.1
 - cmd: run my_version
   stdout: |
-    zepter 0.13.0
+    zepter 0.13.1
 - cmd: run my_debug
   stdout: |+
     Num workspace members: 1
@@ -22,7 +22,7 @@ cases:
 
 - cmd: run both
   stdout: |+
-    zepter 0.13.0
+    zepter 0.13.1
     Num workspace members: 1
     Num dependencies: 1
     DAG nodes: 0, links: 0

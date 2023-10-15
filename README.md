@@ -158,6 +158,8 @@ The first step is that Zepter checks that it is executed in a rust workspace. Ot
 - `$WORKSPACE/.zepter.yaml`
 - `$WORKSPACE/.cargo/zepter.yaml`
 - `$WORKSPACE/.cargo/.zepter.yaml`
+- `$WORKSPACE/.config/zepter.yaml`
+- `$WORKSPACE/.config/.zepter.yaml`
 
 It uses the first file that is found and errors if none is found. Currently it not possible to overwrite the config in a sub-folder.
 

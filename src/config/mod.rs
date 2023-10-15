@@ -45,9 +45,13 @@ pub const WELL_KNOWN_CFG_PATHS: &[&'static str] = &["zepter.yaml", ".zepter.yaml
 /// Search for `zepter.yaml`, `zepter`, `.zepter.yaml` or `.zepter` in the folders:
 /// - `./`
 /// - `./.cargo/`
+/// - `./.config`
 pub fn search_config<P: AsRef<Path>>(workspace: P) -> Result<PathBuf, Vec<PathBuf>> {
-	let paths: Vec<PathBuf> =
-		vec![workspace.as_ref().to_path_buf(), workspace.as_ref().join(".cargo")];
+	let paths: Vec<PathBuf> = vec![
+		workspace.as_ref().to_path_buf(),
+		workspace.as_ref().join(".cargo"),
+		workspace.as_ref().join(".config"),
+	];
 	let mut searched = vec![];
 
 	// Check all combinations of names and paths

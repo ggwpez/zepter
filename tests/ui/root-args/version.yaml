@@ -2,9 +2,9 @@ crates: []
 cases:
 - cmd: --version
   stdout: |
-    zepter 0.13.1
+    zepter 0.13.2
 - cmd: -V
   stdout: |
-    zepter 0.13.1
+    zepter 0.13.2
 configs: null
 no_default_args: null

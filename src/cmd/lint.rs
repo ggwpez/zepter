@@ -156,6 +156,10 @@ pub struct PropagateFeatureCmd {
 	#[clap(long, value_enum, value_name = "MUTE_SETTING", default_value_t = MuteSetting::Fix, verbatim_doc_comment)]
 	left_side_feature_missing: MuteSetting,
 
+	/// Ignore single missing links in the feature propagation chain.
+	#[clap(long, value_name = "CRATE/FEATURE:DEP/DEP_FEATURE", value_parser = parse_key_val::<String, String>, value_delimiter = ',', verbatim_doc_comment)]
+	ignore_missing_propagate: Option<Vec<(String, String)>>,
+
 	/// How to handle the case that the LHS is outside the workspace.
 	#[clap(long, value_enum, value_name = "MUTE_SETTING", default_value_t = MuteSetting::Fix, verbatim_doc_comment)]
 	left_side_outside_workspace: MuteSetting,
@@ -383,6 +387,7 @@ impl PropagateFeatureCmd {
 
 		// (Crate that is not forwarding the feature) -> (Dependency that it is not forwarded to)
 		let mut propagate_missing = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
+		let ignore_missing_propagate = self.ignore_missing_propagate();
 		// (Crate that missing the feature) -> (Dependency that has it)
 		let mut feature_missing = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
 
@@ -436,6 +441,23 @@ impl PropagateFeatureCmd {
 						target,
 						p.0
 					);
+					continue
+				}
+
+				if ignore_missing_propagate
+					.get(&target)
+					.map_or(false, |v| v.contains(&want_opt)) ||
+					ignore_missing_propagate
+						.get(&target)
+						.map_or(false, |v| v.contains(&want_req))
+				{
+					log::warn!(
+						"{} does not propagate {} to {} [IGNORED]",
+						pkg.id,
+						feature,
+						dep.pkg.id
+					);
+					panic!("adsf");
 					continue
 				}
 
@@ -551,6 +573,22 @@ impl PropagateFeatureCmd {
 		if errors > fixes {
 			std::process::exit(global.error_code());
 		}
+	}
+
+	fn ignore_missing_propagate(&self) -> BTreeMap<CrateAndFeature, BTreeSet<CrateAndFeature>> {
+		let Some(ignore_missing) = &self.ignore_missing_propagate else { return Default::default() };
+
+		let mut map = BTreeMap::<CrateAndFeature, BTreeSet<CrateAndFeature>>::new();
+		for (lhs, rhs) in ignore_missing {
+			let (lhs_c, lhs_f) = lhs.split_once('/').unwrap();
+			let (rhs_c, rhs_f) = rhs.split_once('/').unwrap();
+
+			let lhs = CrateAndFeature(lhs_c.into(), lhs_f.into());
+			let rhs = CrateAndFeature(rhs_c.into(), rhs_f.into());
+
+			map.entry(lhs).or_default().insert(rhs);
+		}
+		map
 	}
 }
 

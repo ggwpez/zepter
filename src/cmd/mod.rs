@@ -62,7 +62,7 @@ enum SubCommand {
 	Format(fmt::FormatCmd),
 	Run(run::RunCmd),
 	//#[clap(alias = "t")]
-	//Transpose(transpose::TransposeCmd),
+	Transpose(transpose::TransposeCmd),
 	Debug(debug::DebugCmd),
 }
 
@@ -75,6 +75,7 @@ impl Command {
 			Some(SubCommand::Lint(cmd)) => cmd.run(&self.global),
 			Some(SubCommand::Format(cmd)) => cmd.run(&self.global),
 			Some(SubCommand::Run(cmd)) => cmd.run(&self.global),
+			Some(SubCommand::Transpose(cmd)) => cmd.run(&self.global),
 			Some(SubCommand::Debug(cmd)) => cmd.run(&self.global),
 			None => run::RunCmd::default().run(&self.global),
 		}

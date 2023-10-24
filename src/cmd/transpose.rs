@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
-use crate::{autofix::*, log};
-use cargo_metadata::DependencyKind as DepKind;
+use super::GlobalArgs;
+use crate::{autofix::*, grammar::*, log};
+
+use cargo_metadata::{Dependency as Dep, Package};
+use itertools::Itertools;
 use std::{
 	collections::{BTreeMap as Map, HashMap},
 	fs::canonicalize,
 };
-
-use super::GlobalArgs;
 
 /// Transpose dependencies in the workspace.
 #[derive(Debug, clap::Parser)]
@@ -72,15 +73,13 @@ pub enum DefaultFeatureMode {
 }
 
 impl LiftToWorkspaceCmd {
-	pub fn run(&self, global: &GlobalArgs) {
+	pub fn run(&self, g: &GlobalArgs) {
 		let mut args = self.cargo_args.clone();
 		args.workspace = true;
 		let meta = args.load_metadata().expect("Loads metadata");
 		log::debug!("Scanning workspace for '{}'", self.dependency);
-		// crate -> dependency
-		let mut found = Vec::new();
-		let mut by_kind = HashMap::<DepKind, u32>::new();
-		let mut found_version: Option<cargo_metadata::semver::VersionReq> = None;
+		// version -> crate
+		let mut by_version = HashMap::<semver::VersionReq, Vec<(Package, Dep)>>::new();
 
 		for pkg in meta.packages.iter() {
 			for dep in pkg.dependencies.iter() {
@@ -88,42 +87,59 @@ impl LiftToWorkspaceCmd {
 					continue
 				}
 
-				found.push((pkg.clone(), dep.clone()));
-
-				if found_version.as_ref().map_or(false, |f| f.ne(&dep.req)) {
-					panic!(
-						"Found different versions of '{}' in the workspace: {} vs {}. Please use 'cargo upgrade -p {}' first.",
-						global.bold(&self.dependency), global.red(&format!("{}", found_version.unwrap())), global.red(&format!("{}", dep.req)), &self.dependency
-					);
-				}
-				found_version = Some(dep.req.clone());
-				log::debug!(
-					"Found '{}' in package '{}' with version '{}'",
-					self.dependency,
-					pkg.name,
-					dep.req
-				);
-				*by_kind.entry(dep.kind).or_default() += 1;
+				by_version.entry(dep.req.clone()).or_default().push((pkg.clone(), dep.clone()));
 			}
 		}
-		let Some(version) = found_version else {
-			panic!("Could not find any dependency named '{}'", global.red(&self.dependency));
+
+		let versions = by_version.keys().collect::<Vec<_>>();
+		if versions.len() > 1 {
+			let longest = versions.iter().map(|v| v.to_string().len()).max().unwrap();
+			let mut err = String::new();
+			// iter by descending frequence
+			for (version, pkgs) in by_version.iter().sorted_by_key(|(_, pkgs)| pkgs.len()).rev() {
+				let ddd = if pkgs.len() > 3 { ", …" } else { "" };
+				let s = plural_or(pkgs.len(), " ");
+				// TODO plural s
+				err.push_str(&format!(
+					"  {: <width$}: {: >3} time{s} ({}{ddd})\n",
+					version.to_string(),
+					pkgs.len(),
+					pkgs.iter()
+						.map(|(c, _)| c.name.as_str())
+						.take(3)
+						.collect::<Vec<_>>()
+						.join(", "),
+					width = longest
+				));
+			}
+
+			let _hint = format!("cargo upgrade -p {}@version", &self.dependency);
+			panic!(
+				"\nFound {} different versions of '{}' in the workspace:\n{err}",
+				versions.len(),
+				&self.dependency,
+			);
+		}
+
+		let Some(version) = by_version.keys().next() else {
+			panic!("Could not find any dependency named '{}'", g.red(&self.dependency));
 		};
 		let _ = version;
+		let found = by_version.values().map(Vec::len).sum();
 
 		log::info!(
-			"Selected '{} {}' for lift up ({} occurrence{}: N={}, D={}, B={})",
+			"Selected '{} {}' for lift up ({} occurrence{})", //: N={}, D={}, B={})",
 			&self.dependency,
 			&version,
-			found.len(),
-			crate::grammar::plural(found.len()),
-			by_kind.get(&DepKind::Normal).unwrap_or(&0),
-			by_kind.get(&DepKind::Development).unwrap_or(&0),
-			by_kind.get(&DepKind::Build).unwrap_or(&0)
+			found,
+			crate::grammar::plural(found),
+			//by_kind.get(&DepKind::Normal).unwrap_or(&0),
+			//by_kind.get(&DepKind::Development).unwrap_or(&0),
+			//by_kind.get(&DepKind::Build).unwrap_or(&0)
 		);
 
 		let mut fixers = Map::new();
-		for (pkg, dep) in found {
+		for (pkg, dep) in by_version.values().flatten() {
 			let krate_path = canonicalize(pkg.manifest_path.clone().into_std_path_buf()).unwrap();
 			fixers
 				.entry(pkg.name.clone())

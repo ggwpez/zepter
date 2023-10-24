@@ -129,7 +129,9 @@ impl CaseFile {
 pub struct UiCaseFile {
 	pub crates: Vec<CrateConfig>,
 	pub cases: Vec<Case>,
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub configs: Option<Vec<ZepterConfig>>,
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub no_default_args: Option<bool>,
 }
 

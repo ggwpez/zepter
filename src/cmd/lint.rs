@@ -444,21 +444,15 @@ impl PropagateFeatureCmd {
 					continue
 				}
 
-				if ignore_missing_propagate
-					.get(&target)
-					.map_or(false, |v| v.contains(&want_opt)) ||
-					ignore_missing_propagate
-						.get(&target)
-						.map_or(false, |v| v.contains(&want_req))
+				if let Some((_, lhs_ignore)) = ignore_missing_propagate
+					.iter()
+					.find(|(c, _)| pkg.id.repr.starts_with(&format!("{} ", c.0)) && c.1 == feature)
 				{
-					log::warn!(
-						"{} does not propagate {} to {} [IGNORED]",
-						pkg.id,
-						feature,
-						dep.pkg.id
-					);
-					panic!("adsf");
-					continue
+					if lhs_ignore.iter().any(|i| {
+						dep.pkg.id.repr.starts_with(&format!("{} ", i.0)) && i.1 == feature
+					}) {
+						continue
+					}
 				}
 
 				propagate_missing.entry(pkg.id.to_string()).or_default().insert(dep);
@@ -576,7 +570,9 @@ impl PropagateFeatureCmd {
 	}
 
 	fn ignore_missing_propagate(&self) -> BTreeMap<CrateAndFeature, BTreeSet<CrateAndFeature>> {
-		let Some(ignore_missing) = &self.ignore_missing_propagate else { return Default::default() };
+		let Some(ignore_missing) = &self.ignore_missing_propagate else {
+			return Default::default()
+		};
 
 		let mut map = BTreeMap::<CrateAndFeature, BTreeSet<CrateAndFeature>>::new();
 		for (lhs, rhs) in ignore_missing {

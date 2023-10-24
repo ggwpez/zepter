@@ -1,0 +1,44 @@
+crates:
+- name: A
+  deps:
+  - B
+  features:
+    F0: null
+- name: B
+  deps:
+  - C
+  features:
+    F0: null
+- name: C
+  features:
+    F0: null
+cases:
+- cmd: lint propagate-feature --feature F0 --fix --ignore-missing-propagate=A/F0:B/F0,B/F0:C/F0
+- cmd: lint propagate-feature --feature F0 --fix --ignore-missing-propagate=A/F0:B/F0
+  stdout: |
+    crate 'B'
+      feature 'F0'
+        must propagate to:
+          C
+    Found 1 issue and fixed 1 (all fixed).
+  diff: "diff --git B/Cargo.toml B/Cargo.toml\nindex 31a4ea0337..cf195290f1 100644\n--- B/Cargo.toml\n+++ B/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"C/F0\"\n"
+- cmd: lint propagate-feature --feature F0 --fix --ignore-missing-propagate=B/F0:C/F0
+  stdout: |
+    crate 'A'
+      feature 'F0'
+        must propagate to:
+          B
+    Found 1 issue and fixed 1 (all fixed).
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex cf8d3d50bd..b4a43ee9c4 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"B/F0\"\n"
+- cmd: lint propagate-feature --feature F0 --fix --ignore-missing-propagate=A/F0:C/F0
+  stdout: |
+    crate 'A'
+      feature 'F0'
+        must propagate to:
+          B
+    crate 'B'
+      feature 'F0'
+        must propagate to:
+          C
+    Found 2 issues and fixed 2 (all fixed).
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex cf8d3d50bd..b4a43ee9c4 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"B/F0\"\ndiff --git B/Cargo.toml B/Cargo.toml\nindex 31a4ea0337..cf195290f1 100644\n--- B/Cargo.toml\n+++ B/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"C/F0\"\n"

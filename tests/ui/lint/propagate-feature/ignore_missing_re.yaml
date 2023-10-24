@@ -1,0 +1,20 @@
+crates:
+- name: A
+  deps:
+  - name: B
+    rename: b
+  features:
+    F0: null
+- name: B
+  features:
+    F0: null
+cases:
+- cmd: lint propagate-feature --feature F0 --fix --ignore-missing-propagate=A/F0:B/F0
+- cmd: lint propagate-feature --feature F0 --fix --ignore-missing-propagate=A/F0:b/F0
+  stdout: |
+    crate 'A'
+      feature 'F0'
+        must propagate to:
+          b (renamed from B)
+    Found 1 issue and fixed 1 (all fixed).
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 32139a60e3..78da8557a9 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -12,0 +13 @@ F0 = [\n+\t\"b/F0\"\n"

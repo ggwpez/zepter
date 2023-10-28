@@ -92,6 +92,10 @@ impl GlobalArgs {
 		}
 	}
 
+	pub fn warn_unstable(&self) {
+		log::warn!("Unstable feature - do not rely on this!");
+	}
+
 	pub fn error_code(&self) -> i32 {
 		if self.exit_code_zero {
 			0

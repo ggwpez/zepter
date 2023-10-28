@@ -6,6 +6,7 @@ use crate::{autofix::*, grammar::*, log};
 
 use cargo_metadata::{Dependency as Dep, Package};
 use itertools::Itertools;
+use semver::{Version, VersionReq, Op};
 use std::{
 	collections::{BTreeMap as Map, HashMap},
 	fs::canonicalize,
@@ -74,6 +75,8 @@ pub enum DefaultFeatureMode {
 
 impl LiftToWorkspaceCmd {
 	pub fn run(&self, g: &GlobalArgs) {
+		g.warn_unstable();
+
 		let mut args = self.cargo_args.clone();
 		args.workspace = true;
 		let meta = args.load_metadata().expect("Loads metadata");
@@ -93,7 +96,7 @@ impl LiftToWorkspaceCmd {
 
 		let versions = by_version.keys().collect::<Vec<_>>();
 		if versions.len() > 1 {
-			let longest = versions.iter().map(|v| v.to_string().len()).max().unwrap();
+			let str_width = versions.iter().map(|v| v.to_string().len()).max().unwrap();
 			let mut err = String::new();
 			// iter by descending frequence
 			for (version, pkgs) in by_version.iter().sorted_by_key(|(_, pkgs)| pkgs.len()).rev() {
@@ -109,15 +112,23 @@ impl LiftToWorkspaceCmd {
 						.take(3)
 						.collect::<Vec<_>>()
 						.join(", "),
-					width = longest
+					width = str_width
 				));
 			}
 
-			let _hint = format!("cargo upgrade -p {}@version", &self.dependency);
+			let version_hint = match try_find_latest(by_version.keys()) {
+				Ok(latest) => latest.to_string(),
+				Err(e) => {
+					log::warn!("Could not find determine latest common version: {}", e);
+					"version".to_string()
+				},
+			};
+			let hint = format!("cargo upgrade -p {}@{version_hint}", &self.dependency);
 			panic!(
-				"\nFound {} different versions of '{}' in the workspace:\n{err}",
+				"\nFound {} different versions of '{}' in the workspace:\n\n{err}\nHint: {}\n",
 				versions.len(),
 				&self.dependency,
+				g.bold(&hint),
 			);
 		}
 
@@ -133,9 +144,6 @@ impl LiftToWorkspaceCmd {
 			&version,
 			found,
 			crate::grammar::plural(found),
-			//by_kind.get(&DepKind::Normal).unwrap_or(&0),
-			//by_kind.get(&DepKind::Development).unwrap_or(&0),
-			//by_kind.get(&DepKind::Build).unwrap_or(&0)
 		);
 
 		let mut fixers = Map::new();
@@ -154,9 +162,40 @@ impl LiftToWorkspaceCmd {
 		}
 
 		// Now create fixer for the root package
-		//let mut fixer =
-		// AutoFixer::from_manifest(&meta.workspace_root.into_std_path_buf()).unwrap();
-		// fixer.add_workspace_dep(&found_dep.unwrap(), false);
-		//fixer.save().unwrap();
+		let root_manifest_path = meta.workspace_root.join("Cargo.toml");
+		let mut fixer =
+		 AutoFixer::from_manifest(&root_manifest_path.into_std_path_buf()).unwrap();
+		let dep = by_version.values().next().unwrap().first().unwrap().1.clone();
+		fixer.add_workspace_dep(&dep, false).unwrap();
+		fixer.save().unwrap();
 	}
+}
+
+fn try_find_latest<'a, I: Iterator<Item = &'a VersionReq>>(reqs: I) -> Result<Version, String> {
+	let mut versions = Vec::<Version>::new();
+
+	// Try to convert each to a version. This is done as best-effort:
+	for req in reqs {
+		if req.comparators.len() != 1 {
+			return Err(format!("Invalid version requirement: '{}'", req));
+		}
+		let comp = req.comparators.first().unwrap();
+		if comp.op != Op::Caret {
+			return Err(format!("Only caret is supported, but got: '{}'", req));
+		}
+		if !comp.pre.is_empty() {
+			return Err(format!("Pre-release versions are not supported: '{}'", req));
+		}
+
+		versions.push(Version {
+			major: comp.major,
+			minor: comp.minor.unwrap_or(0),
+			patch: comp.patch.unwrap_or(0),
+			pre: Default::default(),
+			build: Default::default(),
+		});
+	}
+
+	let latest = versions.iter().max().ok_or_else(|| "No versions found".to_string())?;
+	Ok(latest.clone())
 }

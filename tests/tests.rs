@@ -25,7 +25,8 @@ fn integration() {
 	for file in files.filter_map(Result::ok).filter(|f| f.is_file()) {
 		let mut config = CaseFile::from_file(&file);
 		let (workspace, ctx) = config.init().unwrap();
-		let mut overwrites = HashMap::new();
+		let mut cout_overwrites = HashMap::new();
+		let mut cerr_overwrites = HashMap::new();
 		let mut diff_overwrites = HashMap::new();
 		let m = config.cases().len();
 
@@ -40,7 +41,7 @@ fn integration() {
 
 			if config.default_args() {
 				let toml_path = workspace.as_path().join("Cargo.toml");
-				cmd.args(["--manifest-path", toml_path.as_path().to_str().unwrap()]);
+				cmd.args(["--manifest-path", toml_path.as_path().to_str().unwrap(), "--log", "warn"]);
 				if i > 0 {
 					cmd.arg("--offline");
 				}
@@ -57,30 +58,51 @@ fn integration() {
 				res.clone().assert().success();
 			}
 
-			match res.stdout == case.stdout.as_bytes() {
-				true => {
+			match (res.stdout == case.stdout.as_bytes(), res.stderr == case.stderr.as_bytes()) {
+				(true, true) => {
 					colour::white!("cout:");
 					colour::green!("OK");
 					colour::white!(" ");
 					good += 1;
 				},
-				false if !overwrite => {
-					colour::white!("cout:");
+				(false, _) if !overwrite => {
+					colour::white!("cerr:");
 					colour::red!("FAIL");
 					colour::white!(" ");
 					if !keep_going {
 						pretty_assertions::assert_eq!(
 							&String::from_utf8_lossy(&res.stdout),
-							&normalize(&case.stdout)
+							&normalize(&case.stdout),
 						);
 						unreachable!()
 					}
 				},
-				false => {
+				(true, false) if !overwrite => {
+					colour::white!("cerr:");
+					colour::red!("FAIL");
+					colour::white!(" ");
+					if !keep_going {
+						pretty_assertions::assert_eq!(
+							&String::from_utf8_lossy(&res.stderr),
+							&normalize(&case.stderr),
+						);
+						unreachable!()
+					}
+				},
+				(true, false) => {
+					colour::white!("cerr:");
+					colour::yellow!("OVERWRITE");
+					colour::white!(" ");
+					cerr_overwrites.insert(i, String::from_utf8_lossy(&res.stderr).to_string());
+					
+					failed += 1;
+				},
+				(false, _) => {
 					colour::white!("cout:");
 					colour::yellow!("OVERWRITE");
 					colour::white!(" ");
-					overwrites.insert(i, String::from_utf8_lossy(&res.stdout).to_string());
+					cout_overwrites.insert(i, String::from_utf8_lossy(&res.stdout).to_string());
+					
 					failed += 1;
 				},
 			}
@@ -118,12 +140,15 @@ fn integration() {
 		}
 
 		if std::env::var("OVERWRITE").is_ok() {
-			if overwrites.is_empty() && diff_overwrites.is_empty() {
+			if cout_overwrites.is_empty() && cerr_overwrites.is_empty() && diff_overwrites.is_empty() {
 				continue
 			}
 
-			for (i, stdout) in overwrites {
+			for (i, stdout) in cout_overwrites {
 				config.case_mut(i).stdout = stdout;
+			}
+			for (i, stderr) in cerr_overwrites {
+				config.case_mut(i).stderr = stderr;
 			}
 			for (i, diff) in diff_overwrites {
 				config.case_mut(i).diff = diff;

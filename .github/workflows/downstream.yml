@@ -48,15 +48,9 @@ jobs:
     - if: matrix.repo == 'polkadot-sdk'
       name: Zepter passes
       run: |
-        echo "Checking features #1"
-        zepter lint propagate-feature --feature try-runtime --left-side-feature-missing=ignore --workspace --fix --feature-enables-dep="try-runtime:frame-try-runtime"
-        echo "Checking features #2"
-        zepter lint propagate-feature --feature runtime-benchmarks --left-side-feature-missing=ignore --workspace --feature-enables-dep="runtime-benchmarks:frame-benchmarking"
-        echo "Checking features #3"
-        zepter lint propagate-feature --feature std --left-side-feature-missing=ignore --workspace
-        echo "Checking formatting #1"
-        zepter f f
-    - if: matrix.repo != 'substrate' && matrix.repo != 'polkadot-sdk'
+        echo "Checking..."
+        zepter run check
+    - if: matrix.repo == 'cumulus'
       name: Zepter doesnt panic
       # Polkadot and Cumulus can be red, but should not panic. Hence the `--exit-code-zero`.
       run: |

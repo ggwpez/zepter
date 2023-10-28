@@ -471,11 +471,11 @@ impl AutoFixer {
 		if let Some(as_str) = dep.as_str() {
 			cargo_metadata::semver::VersionReq::parse(as_str).expect("Is semver");
 			let mut table = InlineTable::new();
-			table.insert("workspace", Value::Boolean(Formatted::new(true)));
+			table.remove("default-features");// We also remove it to get the order right.
 
-			if default_feats {
-				table.insert("default-features", Value::Boolean(Formatted::new(true)));
-			}
+			table.insert("workspace", Value::Boolean(Formatted::new(true)));
+			table.insert("default-features", Value::Boolean(Formatted::new(default_feats)));
+			
 			table.set_dotted(false);
 
 			*dep = Item::Value(Value::InlineTable(table));
@@ -484,10 +484,10 @@ impl AutoFixer {
 				return Err("'git' or 'path' dependency are currently not supported".into())
 			}
 			as_table.remove("version");
+			as_table.remove("default-features");// We also remove it to get the order right.
+
 			as_table.insert("workspace", Value::Boolean(Formatted::new(true)));
-			if default_feats {
-				as_table.insert("default-features", Value::Boolean(Formatted::new(true)));
-			}
+			as_table.insert("default-features", Value::Boolean(Formatted::new(default_feats)));			
 		} else {
 			unreachable!("Unknown kind of dependency: {:?}", dep);
 		}
@@ -496,10 +496,33 @@ impl AutoFixer {
 
 	pub fn add_workspace_dep(
 		&mut self,
-		_dep: &Dependency,
-		_default_feats: bool,
+		dep: &Dependency,
+		default_feats: bool,
 	) -> Result<(), String> {
-		panic!("todo");
+		let doc: &mut Document = self.doc.as_mut().unwrap();
+
+		if !doc.contains_table("workspace") {
+			return Err("No workspace table".into())
+		}
+		let workspace = doc["workspace"].as_table_mut().unwrap();
+
+		if !workspace.contains_table("dependencies") {
+			workspace.insert("dependencies", table());
+		}
+
+		let deps = workspace["dependencies"].as_table_mut().unwrap();
+
+		if deps.contains_key(&dep.name) {
+			return Err("Dependency already exists in the workspace".into())
+		}
+
+		let mut t = InlineTable::new();
+		t.insert("version", Value::String(Formatted::new(dep.req.to_string())));
+		t.insert("default-features", Value::Boolean(Formatted::new(default_feats)));
+
+		deps.insert(&dep.name, Item::Value(Value::InlineTable(t)));
+
+		Ok(())
 	}
 
 	pub fn modified(&self) -> bool {

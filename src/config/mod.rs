@@ -101,7 +101,7 @@ impl ConfigArgs {
 				Err(searched) => {
 					println!("Failed to find config file in any of these locations:");
 					for path in searched {
-						println!("  - {}", path.display());
+						println!(" - {}", path.display());
 					}
 					Err("Could not find a config file".into())
 				},

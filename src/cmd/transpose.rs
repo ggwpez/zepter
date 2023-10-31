@@ -154,7 +154,7 @@ impl LiftToWorkspaceCmd {
 				.or_insert_with(|| AutoFixer::from_manifest(&krate_path).unwrap());
 			let fixer = fixers.get_mut(&pkg.name).unwrap();
 
-			fixer.lift_dependency(&dep.name, dep.uses_default_features).unwrap(); // TODO
+			fixer.lift_dependency(&dep.name, None).unwrap(); // TODO
 		}
 
 		for fixer in fixers.values_mut() {

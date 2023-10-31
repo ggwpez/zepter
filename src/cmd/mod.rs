@@ -61,7 +61,7 @@ enum SubCommand {
 	#[clap(alias = "fmt", alias = "f")]
 	Format(fmt::FormatCmd),
 	Run(run::RunCmd),
-	//#[clap(alias = "t")]
+	#[clap(hide = true)]
 	Transpose(transpose::TransposeCmd),
 	Debug(debug::DebugCmd),
 }

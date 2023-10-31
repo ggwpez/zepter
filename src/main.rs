@@ -15,8 +15,7 @@ fn main() {
 		args.remove(1);
 	}
 
-	let cmd = Command::parse_from(args);
-	cmd.run();
+	Command::parse_from(args).run();
 }
 
 #[cfg(not(feature = "logging"))]

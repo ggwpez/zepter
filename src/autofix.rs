@@ -447,7 +447,7 @@ impl AutoFixer {
 		Ok(())
 	}
 
-	pub fn lift_dependency(&mut self, dname: &str, default_feats: bool) -> Result<(), String> {
+	pub fn lift_dependency(&mut self, dname: &str, default_feats: Option<bool>) -> Result<(), String> {
 		let doc: &mut Document = self.doc.as_mut().unwrap();
 
 		for kind in &["dependencies", "dev-dependencies", "build-dependencies"] {
@@ -467,14 +467,16 @@ impl AutoFixer {
 		Ok(())
 	}
 
-	pub fn lift_some_dependency(dep: &mut Item, default_feats: bool) -> Result<(), String> {
+	pub fn lift_some_dependency(dep: &mut Item, default_feats: Option<bool>) -> Result<(), String> {
 		if let Some(as_str) = dep.as_str() {
 			cargo_metadata::semver::VersionReq::parse(as_str).expect("Is semver");
 			let mut table = InlineTable::new();
 			table.remove("default-features");// We also remove it to get the order right.
 
 			table.insert("workspace", Value::Boolean(Formatted::new(true)));
-			table.insert("default-features", Value::Boolean(Formatted::new(default_feats)));
+			if let Some(default_feats) = default_feats {
+				table.insert("default-features", Value::Boolean(Formatted::new(default_feats)));
+			}
 			
 			table.set_dotted(false);
 
@@ -487,7 +489,9 @@ impl AutoFixer {
 			as_table.remove("default-features");// We also remove it to get the order right.
 
 			as_table.insert("workspace", Value::Boolean(Formatted::new(true)));
-			as_table.insert("default-features", Value::Boolean(Formatted::new(default_feats)));			
+			if let Some(default_feats) = default_feats {
+				as_table.insert("default-features", Value::Boolean(Formatted::new(default_feats)));
+			}
 		} else {
 			unreachable!("Unknown kind of dependency: {:?}", dep);
 		}

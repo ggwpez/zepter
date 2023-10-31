@@ -118,8 +118,8 @@ impl LiftToWorkspaceCmd {
 
 			let version_hint = match try_find_latest(by_version.keys()) {
 				Ok(latest) => latest.to_string(),
-				Err(e) => {
-					log::warn!("Could not find determine latest common version: {}", e);
+				Err(_e) => {
+					log::warn!("Could not find determine latest common version: {}", _e);
 					"version".to_string()
 				},
 			};
@@ -136,14 +136,14 @@ impl LiftToWorkspaceCmd {
 			panic!("Could not find any dependency named '{}'", g.red(&self.dependency));
 		};
 		let _ = version;
-		let found = by_version.values().map(Vec::len).sum();
+		let _found: usize = by_version.values().map(Vec::len).sum();
 
 		log::info!(
 			"Selected '{} {}' for lift up ({} occurrence{})", //: N={}, D={}, B={})",
 			&self.dependency,
 			&version,
-			found,
-			crate::grammar::plural(found),
+			_found,
+			crate::grammar::plural(_found),
 		);
 
 		let mut fixers = Map::new();

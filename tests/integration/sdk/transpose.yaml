@@ -12,8 +12,8 @@ cases:
       ^3.0.0:  51 times (pallet-broker, cumulus-client-cli, cumulus-client-collator, …)
       ^3.1.5:  19 times (bridge-runtime-common, bp-header-chain, bp-runtime, …)
       ^3.2.2:   5 times (pallet-asset-conversion-tx-payment, pallet-safe-mode, pallet-tx-pause, …)
-      ^3.4.0:   4 times (asset-hub-rococo-integration-tests, integration-tests-common, asset-hub-westend-integration-tests, …)
       ^3.6.4:   4 times (cumulus-relay-chain-interface, polkadot-node-core-prospective-parachains, cumulus-relay-chain-rpc-interface, …)
+      ^3.4.0:   4 times (asset-hub-rococo-integration-tests, integration-tests-common, asset-hub-westend-integration-tests, …)
 
     Hint: cargo upgrade -p parity-scale-codec@3.6.4
     ', src/cmd/transpose.rs:127:13
@@ -30,8 +30,8 @@ cases:
       ^0.4   :   7 times (sc-utils, pallet-contracts, substrate-rpc-client, …)
       ^0.4.16:   4 times (sc-network-light, pallet-core-fellowship, pallet-ranked-collective, …)
       ^0.4.14:   4 times (pallet-alliance, pallet-elections-phragmen, pallet-glutton, …)
-      ^0.4.0 :   2 times (pallet-nomination-pools, pallet-nomination-pools-test-staking)
       ^0.4.19:   2 times (bp-runtime, parachains-common)
+      ^0.4.0 :   2 times (pallet-nomination-pools, pallet-nomination-pools-test-staking)
       ^0.4.8 :   1 time  (sc-consensus-grandpa-rpc)
 
     Hint: cargo upgrade -p log@0.4.20
@@ -51,19 +51,19 @@ cases:
     +macro_magic = { version = "^0.5.0", default-features = false }
     +
     diff --git substrate/frame/support/Cargo.toml substrate/frame/support/Cargo.toml
-    index 5caf993bb3..8259257314 100644
+    index 5caf993bb3..71d14e587d 100644
     --- substrate/frame/support/Cargo.toml
     +++ substrate/frame/support/Cargo.toml
     @@ -33 +33 @@ tt-call = "1.0.8"
     -macro_magic = "0.5.0"
-    +macro_magic = { workspace = true, default-features = true }
+    +macro_magic = { workspace = true }
     diff --git substrate/frame/support/procedural/Cargo.toml substrate/frame/support/procedural/Cargo.toml
-    index 45ed1750a5..0e5400b0ac 100644
+    index 45ed1750a5..9b84497581 100644
     --- substrate/frame/support/procedural/Cargo.toml
     +++ substrate/frame/support/procedural/Cargo.toml
     @@ -26 +26 @@ frame-support-procedural-tools = { path = "tools" }
     -macro_magic = { version = "0.5.0", features = ["proc_support"] }
-    +macro_magic = { features = ["proc_support"] , workspace = true, default-features = true }
+    +macro_magic = { features = ["proc_support"] , workspace = true }
 - cmd: zepter transpose dependency lift-to-workspace tt-call
   stderr: |
     [WARN] Unstable feature - do not rely on this!
@@ -77,9 +77,9 @@ cases:
     +tt-call = { version = "^1.0.8", default-features = false }
     +
     diff --git substrate/frame/support/Cargo.toml substrate/frame/support/Cargo.toml
-    index 5caf993bb3..eb2562ff86 100644
+    index 5caf993bb3..d98bcf54a7 100644
     --- substrate/frame/support/Cargo.toml
     +++ substrate/frame/support/Cargo.toml
     @@ -32 +32 @@ sp-metadata-ir = { path = "../../primitives/metadata-ir", default-features = fal
     -tt-call = "1.0.8"
-    +tt-call = { workspace = true, default-features = true }
+    +tt-call = { workspace = true }

@@ -20,8 +20,6 @@ cases:
     Formatted 2 crates (all fixed).
   stderr: |
     [INFO] Running workflow 'default'
-    [INFO] Modified manifest "/tmp/.tmpLVawnA/A/Cargo.toml"
-    [INFO] Modified manifest "/tmp/.tmpLVawnA/B/Cargo.toml"
     [INFO] 1/1 f f
   diff: |
     diff --git A/Cargo.toml A/Cargo.toml
@@ -51,6 +49,7 @@ cases:
     Error: Command 'f f' failed with exit code 1
   stderr: |
     [INFO] Running workflow 'check'
+  code: 1
 - cmd: run fix
   stdout: |
     Found 2 crates with unformatted features:
@@ -59,8 +58,6 @@ cases:
     Formatted 2 crates (all fixed).
   stderr: |
     [INFO] Running workflow 'fix'
-    [INFO] Modified manifest "/tmp/.tmpLVawnA/A/Cargo.toml"
-    [INFO] Modified manifest "/tmp/.tmpLVawnA/B/Cargo.toml"
     [INFO] 1/1 f f
   diff: |
     diff --git A/Cargo.toml A/Cargo.toml

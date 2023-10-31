@@ -13,6 +13,7 @@ crates:
     F0: null
 cases:
 - cmd: ''
+  code: 1
   stdout: |
     Found 2 crates with unformatted features:
       A

@@ -537,7 +537,7 @@ impl AutoFixer {
 		if let (Some(doc), Some(path)) = (self.doc.take(), &self.manifest) {
 			std::fs::write(path, doc.to_string())
 				.map_err(|e| format!("Failed to write manifest: {:?}: {:?}", path.display(), e))?;
-			log::info!("Modified manifest {:?}", path.display());
+			log::debug!("Modified manifest {:?}", path.display());
 		}
 		Ok(())
 	}

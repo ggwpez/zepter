@@ -410,4 +410,6 @@ cases:
       frame-support-test-compile-pass
       sp-npos-elections-fuzzer
     Run again --fix to format them.
+  stderr: |
+    [WARN] The `--check` is now implicit and ignored
   code: 1

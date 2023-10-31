@@ -99,7 +99,7 @@ impl LiftToWorkspaceCmd {
 			let str_width = versions.iter().map(|v| v.to_string().len()).max().unwrap();
 			let mut err = String::new();
 			// iter by descending frequence
-			for (version, pkgs) in by_version.iter().sorted_by_key(|(_, pkgs)| pkgs.len()).rev() {
+			for (version, pkgs) in by_version.iter().sorted_by_key(|(v, pkgs)| (pkgs.len(), v.to_string())).rev() {
 				let ddd = if pkgs.len() > 3 { ", …" } else { "" };
 				let s = plural_or(pkgs.len(), " ");
 				// TODO plural s

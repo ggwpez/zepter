@@ -1,0 +1,38 @@
+name: Integration test SDK
+
+# This tests that Zepter wont panic on Polkadot-SDK.
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+on:
+  schedule:
+  - cron: "0 0 * * *"
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  dotsama:
+    runs-on: self-hosted
+    name: "Check"
+    strategy:
+      matrix:
+        repo: [polkadot-sdk]
+
+    steps:
+    - uses: actions/checkout@master
+      name: Clone ${{ matrix.repo }}
+      with:
+        repository: paritytech/${{ matrix.repo }}
+        depth: 1
+    
+    - name: Install
+      run: cargo install zepter -f --locked -q --no-default-features
+    
+    - name: Zepter passes
+      run: |
+        zepter run check
+        zepter
+        git diff --exit-code

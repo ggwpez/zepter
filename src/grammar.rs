@@ -11,3 +11,11 @@ pub(crate) fn plural(n: usize) -> &'static str {
 		"s"
 	}
 }
+
+pub(crate) fn plural_or(n: usize, or: &str) -> String {
+	if n == 1 {
+		or.to_string()
+	} else {
+		"s".to_string()
+	}
+}

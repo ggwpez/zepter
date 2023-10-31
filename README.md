@@ -26,6 +26,10 @@ zepter
   - never-implies *(⚠️ unstable)*: A feature should never transitively imply another one.
   - only-enables *(⚠️ unstable)*: A features should exclusively enable another one.
   - why-enables *(⚠️ unstable)*: Find out why a specific feature is enables.
+- debug: *(⚠️ unstable)* just for quick debugging some stuff.
+- transpose (⚠️ unstable)*
+  - dependency
+    - lift-to-workspace: Lifts crate dependencies to the workspace.
 
 ## Example - Feature Formatting
 

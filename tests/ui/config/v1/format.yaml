@@ -18,6 +18,9 @@ cases:
       A
       B
     Formatted 2 crates (all fixed).
+  stderr: |
+    [INFO] Running workflow 'default'
+    [INFO] 1/1 f f
   diff: |
     diff --git A/Cargo.toml A/Cargo.toml
     index 45aeabe66a..32d1776aca 100644
@@ -44,12 +47,18 @@ cases:
       B
     Run again --fix to format them.
     Error: Command 'f f' failed with exit code 1
+  stderr: |
+    [INFO] Running workflow 'check'
+  code: 1
 - cmd: run fix
   stdout: |
     Found 2 crates with unformatted features:
       A
       B
     Formatted 2 crates (all fixed).
+  stderr: |
+    [INFO] Running workflow 'fix'
+    [INFO] 1/1 f f
   diff: |
     diff --git A/Cargo.toml A/Cargo.toml
     index 45aeabe66a..32d1776aca 100644

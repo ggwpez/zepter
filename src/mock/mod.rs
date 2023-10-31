@@ -29,6 +29,10 @@ pub struct Case {
 	#[serde(default)]
 	pub stdout: String,
 
+	#[serde(skip_serializing_if = "String::is_empty")]
+	#[serde(default)]
+	pub stderr: String,
+
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub code: Option<i32>,
 
@@ -95,7 +99,7 @@ impl CaseFile {
 	pub fn default_args(&self) -> bool {
 		match self {
 			CaseFile::Ui(ui) => !ui.no_default_args.unwrap_or_default(),
-			CaseFile::Integration(_) => true,
+			CaseFile::Integration(ig) => !ig.no_default_args.unwrap_or_default(),
 		}
 	}
 
@@ -169,6 +173,8 @@ impl UiCaseFile {
 pub struct IntegrationCaseFile {
 	pub repo: Repo,
 	pub cases: Vec<Case>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub no_default_args: Option<bool>,
 }
 
 impl IntegrationCaseFile {

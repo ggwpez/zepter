@@ -61,8 +61,8 @@ enum SubCommand {
 	#[clap(alias = "fmt", alias = "f")]
 	Format(fmt::FormatCmd),
 	Run(run::RunCmd),
-	//#[clap(alias = "t")]
-	//Transpose(transpose::TransposeCmd),
+	#[clap(hide = true)]
+	Transpose(transpose::TransposeCmd),
 	Debug(debug::DebugCmd),
 }
 
@@ -75,6 +75,7 @@ impl Command {
 			Some(SubCommand::Lint(cmd)) => cmd.run(&self.global),
 			Some(SubCommand::Format(cmd)) => cmd.run(&self.global),
 			Some(SubCommand::Run(cmd)) => cmd.run(&self.global),
+			Some(SubCommand::Transpose(cmd)) => cmd.run(&self.global),
 			Some(SubCommand::Debug(cmd)) => cmd.run(&self.global),
 			None => run::RunCmd::default().run(&self.global),
 		}
@@ -89,6 +90,10 @@ impl GlobalArgs {
 		} else {
 			::log::set_max_level(self.level);
 		}
+	}
+
+	pub fn warn_unstable(&self) {
+		log::warn!("Unstable feature - do not rely on this!");
 	}
 
 	pub fn error_code(&self) -> i32 {

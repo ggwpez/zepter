@@ -61,7 +61,7 @@ impl Workflow {
 				return Err(format!(
 					"Command '{}' failed with exit code {}",
 					first_two_args,
-					status.code().unwrap_or(-1)
+					status.code().unwrap_or(1)
 				))
 			}
 
@@ -117,7 +117,7 @@ impl WorkflowFile {
 	pub fn resolve_once(&mut self) -> Result<bool, String> {
 		let wfs = self.workflows.clone();
 
-		for (_name, wf) in self.workflows.iter_mut() {
+		for wf in self.workflows.values_mut() {
 			for step in wf.0.iter_mut() {
 				for (i, orig_line) in step.0.iter_mut().enumerate() {
 					if let Some(line) = orig_line.strip_prefix('$') {

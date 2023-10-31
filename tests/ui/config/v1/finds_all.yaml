@@ -3,7 +3,10 @@ crates:
 cases:
 - cmd: ''
   stdout: |
-    zepter 0.13.2
+    zepter 0.13.3
+  stderr: |
+    [INFO] Running workflow 'default'
+    [INFO] 1/1 --version
   config:
     to_path: .zepter.yaml
     from_path: null
@@ -16,7 +19,10 @@ cases:
           - [ '--version' ]
 - cmd: ''
   stdout: |
-    zepter 0.13.2
+    zepter 0.13.3
+  stderr: |
+    [INFO] Running workflow 'default'
+    [INFO] 1/1 --version
   config:
     to_path: zepter.yaml
     from_path: null
@@ -29,7 +35,10 @@ cases:
           - [ '--version' ]
 - cmd: ''
   stdout: |
-    zepter 0.13.2
+    zepter 0.13.3
+  stderr: |
+    [INFO] Running workflow 'default'
+    [INFO] 1/1 --version
   config:
     to_path: .cargo/zepter.yaml
     from_path: null
@@ -42,7 +51,10 @@ cases:
           - [ '--version' ]
 - cmd: run default
   stdout: |
-    zepter 0.13.2
+    zepter 0.13.3
+  stderr: |
+    [INFO] Running workflow 'default'
+    [INFO] 1/1 --version
   config:
     to_path: .cargo/.zepter.yaml
     from_path: null
@@ -55,7 +67,10 @@ cases:
           - [ '--version' ]
 - cmd: run default
   stdout: |
-    zepter 0.13.2
+    zepter 0.13.3
+  stderr: |
+    [INFO] Running workflow 'default'
+    [INFO] 1/1 --version
   config:
     to_path: .config/.zepter.yaml
     from_path: null
@@ -68,7 +83,10 @@ cases:
           - [ '--version' ]
 - cmd: run default
   stdout: |
-    zepter 0.13.2
+    zepter 0.13.3
+  stderr: |
+    [INFO] Running workflow 'default'
+    [INFO] 1/1 --version
   config:
     to_path: .config/.zepter.yaml
     from_path: null
@@ -81,7 +99,10 @@ cases:
           - [ '--version' ]
 - cmd: run default --config .cargo/polkadot.yaml
   stdout: |
-    zepter 0.13.2
+    zepter 0.13.3
+  stderr: |
+    [INFO] Running workflow 'default'
+    [INFO] 1/1 --version
   config:
     to_path: .cargo/polkadot.yaml
     from_path: null
@@ -94,7 +115,10 @@ cases:
           - [ '--version' ]
 - cmd: run default -c .cargo/polkadot.yaml
   stdout: |
-    zepter 0.13.2
+    zepter 0.13.3
+  stderr: |
+    [INFO] Running workflow 'default'
+    [INFO] 1/1 --version
   config:
     to_path: .cargo/polkadot.yaml
     from_path: null
@@ -105,5 +129,4 @@ cases:
       workflows:
         default:
           - [ '--version' ]
-configs: null
 no_default_args: true

@@ -38,6 +38,8 @@ impl RunCmd {
 			if let Some(help) = config.fmt_help() {
 				println!("\n{}", help);
 			}
+
+			std::process::exit(1);
 		}
 	}
 }

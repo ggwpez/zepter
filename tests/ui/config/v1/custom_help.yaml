@@ -13,6 +13,7 @@ crates:
     F0: null
 cases:
 - cmd: ''
+  code: 1
   stdout: |
     Found 2 crates with unformatted features:
       A
@@ -28,6 +29,8 @@ cases:
       - <Custom Help Link #1>
       - <Custom Help Link #2>
       - <Custom Help Link #3>
+  stderr: |
+    [INFO] Running workflow 'default'
 configs:
 - to_path: .zepter.yaml
   from_path: null

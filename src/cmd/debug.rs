@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
 use super::{lint::CrateAndFeature, GlobalArgs};
-use crate::{cmd::lint::build_feature_dag, log, prelude::Dag};
+use crate::{cmd::lint::build_feature_dag, prelude::Dag};
 
 use cargo_metadata::Metadata;
 use histo::Histogram;
@@ -22,11 +22,11 @@ pub struct DebugCmd {
 }
 
 impl DebugCmd {
-	pub fn run(&self, _g: &GlobalArgs) {
+	pub fn run(&self, g: &GlobalArgs) {
+		g.warn_unstable();
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
 		let dag = build_feature_dag(&meta, &meta.packages);
 
-		log::warn!("Unstable feature - do not rely on this!");
 		if !self.no_root {
 			println!("Root: {}", meta.workspace_root.to_string());
 		}

@@ -1,0 +1,25 @@
+crates:
+- name: A
+cases:
+- cmd: ''
+  stdout: |
+    Error: Command '--wrong' failed with exit code 2
+  stderr: |
+    [INFO] Running workflow 'default'
+    error: unexpected argument '--wrong' found
+
+    Usage: zepter [OPTIONS] [COMMAND]
+
+    For more information, try '--help'.
+  code: 1
+  config:
+    to_path: .zepter.yaml
+    from_path: null
+    verbatim: |
+      version:
+        format: 1
+        binary: 0.12.0
+      workflows:
+        default:
+          - [ '--wrong' ]
+no_default_args: true

@@ -26,7 +26,7 @@ impl DebugCmd {
 		g.warn_unstable();
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
 		let dag = build_feature_dag(&meta, &meta.packages);
-		
+
 		if !self.no_root {
 			println!("Root: {}", meta.workspace_root.to_string());
 		}

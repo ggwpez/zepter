@@ -41,7 +41,12 @@ fn integration() {
 
 			if config.default_args() {
 				let toml_path = workspace.as_path().join("Cargo.toml");
-				cmd.args(["--manifest-path", toml_path.as_path().to_str().unwrap(), "--log", "warn"]);
+				cmd.args([
+					"--manifest-path",
+					toml_path.as_path().to_str().unwrap(),
+					"--log",
+					"warn",
+				]);
 				if i > 0 {
 					cmd.arg("--offline");
 				}
@@ -94,7 +99,7 @@ fn integration() {
 					colour::yellow!("OVERWRITE");
 					colour::white!(" ");
 					cerr_overwrites.insert(i, String::from_utf8_lossy(&res.stderr).to_string());
-					
+
 					failed += 1;
 				},
 				(false, _) => {
@@ -102,7 +107,7 @@ fn integration() {
 					colour::yellow!("OVERWRITE");
 					colour::white!(" ");
 					cout_overwrites.insert(i, String::from_utf8_lossy(&res.stdout).to_string());
-					
+
 					failed += 1;
 				},
 			}
@@ -140,7 +145,10 @@ fn integration() {
 		}
 
 		if std::env::var("OVERWRITE").is_ok() {
-			if cout_overwrites.is_empty() && cerr_overwrites.is_empty() && diff_overwrites.is_empty() {
+			if cout_overwrites.is_empty() &&
+				cerr_overwrites.is_empty() &&
+				diff_overwrites.is_empty()
+			{
 				continue
 			}
 

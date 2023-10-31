@@ -6,7 +6,7 @@ use crate::{autofix::*, grammar::*, log};
 
 use cargo_metadata::{Dependency as Dep, Package};
 use itertools::Itertools;
-use semver::{Version, VersionReq, Op};
+use semver::{Op, Version, VersionReq};
 use std::{
 	collections::{BTreeMap as Map, HashMap},
 	fs::canonicalize,
@@ -99,7 +99,9 @@ impl LiftToWorkspaceCmd {
 			let str_width = versions.iter().map(|v| v.to_string().len()).max().unwrap();
 			let mut err = String::new();
 			// iter by descending frequence
-			for (version, pkgs) in by_version.iter().sorted_by_key(|(v, pkgs)| (pkgs.len(), v.to_string())).rev() {
+			for (version, pkgs) in
+				by_version.iter().sorted_by_key(|(v, pkgs)| (pkgs.len(), v.to_string())).rev()
+			{
 				let ddd = if pkgs.len() > 3 { ", …" } else { "" };
 				let s = plural_or(pkgs.len(), " ");
 				// TODO plural s
@@ -163,8 +165,7 @@ impl LiftToWorkspaceCmd {
 
 		// Now create fixer for the root package
 		let root_manifest_path = meta.workspace_root.join("Cargo.toml");
-		let mut fixer =
-		 AutoFixer::from_manifest(&root_manifest_path.into_std_path_buf()).unwrap();
+		let mut fixer = AutoFixer::from_manifest(&root_manifest_path.into_std_path_buf()).unwrap();
 		let dep = by_version.values().next().unwrap().first().unwrap().1.clone();
 		fixer.add_workspace_dep(&dep, false).unwrap();
 		fixer.save().unwrap();
@@ -177,14 +178,14 @@ fn try_find_latest<'a, I: Iterator<Item = &'a VersionReq>>(reqs: I) -> Result<Ve
 	// Try to convert each to a version. This is done as best-effort:
 	for req in reqs {
 		if req.comparators.len() != 1 {
-			return Err(format!("Invalid version requirement: '{}'", req));
+			return Err(format!("Invalid version requirement: '{}'", req))
 		}
 		let comp = req.comparators.first().unwrap();
 		if comp.op != Op::Caret {
-			return Err(format!("Only caret is supported, but got: '{}'", req));
+			return Err(format!("Only caret is supported, but got: '{}'", req))
 		}
 		if !comp.pre.is_empty() {
-			return Err(format!("Pre-release versions are not supported: '{}'", req));
+			return Err(format!("Pre-release versions are not supported: '{}'", req))
 		}
 
 		versions.push(Version {

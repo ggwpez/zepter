@@ -447,7 +447,11 @@ impl AutoFixer {
 		Ok(())
 	}
 
-	pub fn lift_dependency(&mut self, dname: &str, default_feats: Option<bool>) -> Result<(), String> {
+	pub fn lift_dependency(
+		&mut self,
+		dname: &str,
+		default_feats: Option<bool>,
+	) -> Result<(), String> {
 		let doc: &mut Document = self.doc.as_mut().unwrap();
 
 		for kind in &["dependencies", "dev-dependencies", "build-dependencies"] {
@@ -471,13 +475,13 @@ impl AutoFixer {
 		if let Some(as_str) = dep.as_str() {
 			cargo_metadata::semver::VersionReq::parse(as_str).expect("Is semver");
 			let mut table = InlineTable::new();
-			table.remove("default-features");// We also remove it to get the order right.
+			table.remove("default-features"); // We also remove it to get the order right.
 
 			table.insert("workspace", Value::Boolean(Formatted::new(true)));
 			if let Some(default_feats) = default_feats {
 				table.insert("default-features", Value::Boolean(Formatted::new(default_feats)));
 			}
-			
+
 			table.set_dotted(false);
 
 			*dep = Item::Value(Value::InlineTable(table));
@@ -486,7 +490,7 @@ impl AutoFixer {
 				return Err("'git' or 'path' dependency are currently not supported".into())
 			}
 			as_table.remove("version");
-			as_table.remove("default-features");// We also remove it to get the order right.
+			as_table.remove("default-features"); // We also remove it to get the order right.
 
 			as_table.insert("workspace", Value::Boolean(Formatted::new(true)));
 			if let Some(default_feats) = default_feats {

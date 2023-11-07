@@ -53,8 +53,9 @@ pub struct GlobalArgs {
 	exit_code_zero: bool,
 
 	/// Dont print any hints on how to fix the error.
-	/// 
-	/// This is mostly used internally when dispatching, workflows since they come with their hints.
+	///
+	/// This is mostly used internally when dispatching, workflows since they come with their
+	/// hints.
 	#[clap(long, global = true, value_enum, verbatim_doc_comment, default_value_t = FixHint::On)]
 	fix_hint: FixHint,
 }

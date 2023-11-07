@@ -55,8 +55,15 @@ impl Workflow {
 				.status()
 				.map_err(|e| format!("Failed to run command '{}': {}", cmd, e))?;
 
-			let first_two_args =
-				args.iter().rev().skip(1).rev().take(2).map(|s| s.as_str()).collect::<Vec<_>>().join(" ");
+			let first_two_args = args
+				.iter()
+				.rev()
+				.skip(1)
+				.rev()
+				.take(2)
+				.map(String::as_str)
+				.collect::<Vec<_>>()
+				.join(" ");
 
 			if !status.success() {
 				return Err(format!(
@@ -77,7 +84,8 @@ impl FromStr for WorkflowFile {
 	type Err = String;
 
 	fn from_str(content: &str) -> Result<Self, Self::Err> {
-		let parsed = serde_yaml::from_str::<WorkflowFile>(&content).map_err(|e| format!("yaml parsing: {}", e))?;
+		let parsed = serde_yaml::from_str::<WorkflowFile>(&content)
+			.map_err(|e| format!("yaml parsing: {}", e))?;
 
 		if parsed.version.format != (1, 0, 0).into() {
 			return Err("Can only parse workflow files with version '1'".into())

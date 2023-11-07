@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
 //! Very simple semver implementation. Only supports `major.minor.patch`.
-//! 
+//!
 //! Used to lock in config format and binary version.
 
 use serde::{de, Deserialize, Deserializer};
@@ -54,7 +54,7 @@ impl Semver {
 	}
 
 	/// Whether `self` is newer or equal to `other`.
-	/// 
+	///
 	/// "Newer" in this case means compatible in the semver sense.
 	pub fn is_newer_or_equal(&self, other: &Self) -> bool {
 		self.major > other.major ||

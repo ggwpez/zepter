@@ -3,7 +3,7 @@ crates:
 cases:
 - cmd: run default
   stderr: |
-    thread 'main' panicked at 'Invalid config file: "Only format version '1' is currently supported."', src/cmd/run.rs:27:46
+    thread 'main' panicked at 'Invalid config file: "Can only parse workflow files with version '1'"', src/cmd/run.rs:27:46
     note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
   code: 101
 configs:

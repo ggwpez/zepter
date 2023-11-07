@@ -1,20 +1,22 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
+//! Very simple semver implementation. Only supports `major.minor.patch`.
+//! 
+//! Used to lock in config format and binary version.
+
 use serde::{de, Deserialize, Deserializer};
 use std::fmt::{self, Display, Formatter};
 
+/// A semantic version.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Semver {
+	/// The major version.
 	pub major: u8,
+	/// The minor version.
 	pub minor: u8,
+	/// The patch version.
 	pub patch: u8,
-}
-
-impl Display for Semver {
-	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-		write!(f, "{}.{}.{}", self.major, self.minor, self.patch)
-	}
 }
 
 impl TryFrom<&str> for Semver {
@@ -30,6 +32,18 @@ impl TryFrom<&str> for Semver {
 	}
 }
 
+impl From<(u8, u8, u8)> for Semver {
+	fn from((major, minor, patch): (u8, u8, u8)) -> Self {
+		Self { major, minor, patch }
+	}
+}
+
+impl Display for Semver {
+	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+		write!(f, "{}.{}.{}", self.major, self.minor, self.patch)
+	}
+}
+
 impl Semver {
 	pub fn from_serde<'de, D>(deserializer: D) -> Result<Self, D::Error>
 	where
@@ -39,17 +53,14 @@ impl Semver {
 		Self::try_from(s.as_str()).map_err(|_| de::Error::custom("Invalid semver"))
 	}
 
+	/// Whether `self` is newer or equal to `other`.
+	/// 
+	/// "Newer" in this case means compatible in the semver sense.
 	pub fn is_newer_or_equal(&self, other: &Self) -> bool {
 		self.major > other.major ||
 			(self.major == other.major &&
 				(self.minor > other.minor ||
 					(self.minor == other.minor && self.patch >= other.patch)))
-	}
-}
-
-impl From<(u8, u8, u8)> for Semver {
-	fn from((major, minor, patch): (u8, u8, u8)) -> Self {
-		Self { major, minor, patch }
 	}
 }
 

@@ -9,14 +9,15 @@ Analyze, Fix and Format features in your Rust workspace. The goal of this tool i
 
 ## Install
 
-```bash
-cargo install -f zepter --locked
+```sh
+cargo install zepter -f --locked
 ```
 
 ## Commands
 
 zepter
-- run: Run a workflow from the config file.
+- : this is the same as `run`.
+- run: Run a workflow from the config file. Uses `default` if none is specified.
 - format
   - features: Format features layout and remove duplicates.
 - trace: Trace dependencies paths.
@@ -27,7 +28,7 @@ zepter
   - only-enables *(⚠️ unstable)*: A features should exclusively enable another one.
   - why-enables *(⚠️ unstable)*: Find out why a specific feature is enables.
 - debug: *(⚠️ unstable)* just for quick debugging some stuff.
-- transpose (⚠️ unstable)*
+- transpose *(⚠️ unstable)*
   - dependency
     - lift-to-workspace: Lifts crate dependencies to the workspace.
 
@@ -44,18 +45,18 @@ zepter f f
 The output will tell you which features are missing formatting:
 
 ```pre
-Found 3 crates with unformatted features:
+Found 37 crates with unformatted features:
   polkadot-cli
   polkadot-runtime-common
   polkadot-runtime-parachains
   ...
-Run again without --check to format them.
+Run again with `--fix` to format them.
 ```
 
-You can then re-run without the `check`/`c` flag to get it fixed automatically:
+Re-running with `--fix`/`-f`:
 
 ```pre
-Found 3 crates with unformatted features:
+Found 37 crates with unformatted features:
   polkadot-cli
   polkadot-parachain
   polkadot-core-primitives
@@ -169,6 +170,10 @@ It uses the first file that is found and errors if none is found. Currently it n
 
 ### Workflows
 
+> [!NOTE]
+> A production example can be found in the [Polkadot-SDK](https://github.com/paritytech/polkadot-sdk/blob/8ebb5c3319fa52d68f2d76f90f5787a96de254be/.config/zepter.yaml) or in the [`presets`](presets/polkadot.yaml).
+
+
 It is possible to aggregate the long commands into workflows instead of typing them each time. Zepter tries to locate a config file and run the `default` workflow when it is bare invoked without any arguments.  
 Alternately, it is possible to use `zepter run default`, or any other workflow name.
 
@@ -192,21 +197,20 @@ workflows:
     - ...
 ```
 
-A full working example is in [presets/polkadot.yaml](presets/polkadot.yaml).
-
 ## CI Usage
 
-Zepter is currently being used in the [Substrate](https://github.com/paritytech/substrate/blob/19971bd3eafa6394d918030f4142f85ea54404c0/scripts/ci/gitlab/pipeline/check.yml#L56-L60) [Polkadot-SDK](https://github.com/paritytech/polkadot-sdk/pull/1194) CI to spot missing features.  
+Zepter is currently being used in the [Polkadot-SDK](https://github.com/paritytech/polkadot-sdk/pull/1194) CI to spot missing features.  
 When these two experiments proove the usefulness and reliability of Zepter for CI application, then a more streamlined process will be introduced (possibly in the form of CI actions).
 
 ## Testing
 
-Unit tests are with the normal `cargo test`. UI and integration tests are normally ignored and can be run with `cargo test -- --ignored`.
+Unit tests are with the normal `cargo test`.  
+UI and integration tests are normally ignored and can be run with `cargo test -- --ignored`.
 
 Environment overwrites exist for:
-- `OVERWRITE`: Update the `cout` and `diff` locks.
+- `OVERWRITE`: Update the UI diff locks.
 - `UI_FILTER`: Regex to selectively run files.
-- `KEEP_GOING`: Print `FAILED` but don't abort. TODO: It's buggy
+- `KEEP_GOING`: Print `FAILED` but don't abort.
 
 ## Planned Features
 

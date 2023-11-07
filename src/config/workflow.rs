@@ -98,7 +98,7 @@ impl WorkflowFile {
 		let content = std::fs::read_to_string(path)
 			.map_err(|e| format!("Failed to read config file {:?}: {}", path, e))?;
 
-		content.parse().map_err(|e| format!("Failed to parse config file {:?}: {}", path, e))
+		content.parse()
 	}
 
 	/// Format the user-provided help message.

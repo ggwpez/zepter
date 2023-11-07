@@ -1,0 +1,19 @@
+on:
+  push:
+    branches: [master, dev]
+    tags: ["v*.*.*"]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    name: Validate Changelog
+    steps:
+      - uses: actions/checkout@v3
+      - uses: zattoo/changelog@v1
+        with:
+          token: ${{github.token}}

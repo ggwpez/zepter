@@ -204,13 +204,13 @@ When these two experiments proove the usefulness and reliability of Zepter for C
 
 ## Testing
 
-Unit tests are with the normal `cargo test`.  
-UI and integration tests are normally ignored and can be run with `cargo test -- --ignored`.
+Unit tests: `cargo test`
+UI and downstream integration tests: `cargo test -- --ignored`
 
-Environment overwrites exist for:
+Environment overwrites exist for the UI tests to:
 - `OVERWRITE`: Update the UI diff locks.
-- `UI_FILTER`: Regex to selectively run files.
-- `KEEP_GOING`: Print `FAILED` but don't abort.
+- `UI_FILTER`: Regex to selectively run UI test.
+- `KEEP_GOING`: Print `FAILED` but don't abort on the first failed UI test.
 
 ## Planned Features
 

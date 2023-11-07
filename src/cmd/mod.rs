@@ -36,7 +36,7 @@ pub struct GlobalArgs {
 	#[clap(long = "log", global = true, default_value = "info", ignore_case = true)]
 	level: ::log::LevelFilter,
 
-	/// Log level to use.
+	/// LOGGING IS DISABLED IN THIS BUILD; FLAG IGNORED.
 	#[cfg(not(feature = "logging"))]
 	#[clap(long = "log", global = true, default_value = "info", ignore_case = true)]
 	level: String,

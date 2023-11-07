@@ -29,7 +29,7 @@ cases:
       A
       B
       C
-    Run again --fix to format them.
+    Run again with `--fix` to format them.
   stderr: |
     [WARN] The `--check` is now implicit and ignored
   code: 1
@@ -39,7 +39,7 @@ cases:
       A
       B
       C
-    Run again --fix to format them.
+    Run again with `--fix` to format them.
   stderr: |
     [WARN] The `--check` is now implicit and ignored
   code: 1
@@ -140,7 +140,7 @@ cases:
       A
       B
       C
-    Run again --fix to format them.
+    Run again with `--fix` to format them.
   stderr: |
     [WARN] The `--check` is now implicit and ignored
   code: 1
@@ -150,7 +150,7 @@ cases:
       A
       B
       C
-    Run again --fix to format them.
+    Run again with `--fix` to format them.
   stderr: |
     [WARN] The `--check` is now implicit and ignored
   code: 1

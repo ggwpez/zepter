@@ -13,12 +13,11 @@ crates:
     F0: null
 cases:
 - cmd: ''
-  code: 1
   stdout: |
     Found 2 crates with unformatted features:
       A
       B
-    Run again --fix to format them.
+    Run again with `--fix` to format them.
     Error: Command 'f f' failed with exit code 1
 
     <Custom Help Text Line #1>
@@ -31,6 +30,7 @@ cases:
       - <Custom Help Link #3>
   stderr: |
     [INFO] Running workflow 'default'
+  code: 1
 configs:
 - to_path: .zepter.yaml
   from_path: null

@@ -36,7 +36,7 @@ pub struct GlobalArgs {
 	#[clap(long = "log", global = true, default_value = "info", ignore_case = true)]
 	level: ::log::LevelFilter,
 
-	/// Log level to use.
+	/// LOGGING IS DISABLED IN THIS BUILD; FLAG IGNORED.
 	#[cfg(not(feature = "logging"))]
 	#[clap(long = "log", global = true, default_value = "info", ignore_case = true)]
 	level: String,
@@ -51,6 +51,13 @@ pub struct GlobalArgs {
 	/// (aka software bug).
 	#[clap(long, global = true, verbatim_doc_comment)]
 	exit_code_zero: bool,
+
+	/// Dont print any hints on how to fix the error.
+	///
+	/// This is mostly used internally when dispatching, workflows since they come with their
+	/// hints.
+	#[clap(long, global = true, value_enum, verbatim_doc_comment, default_value_t = FixHint::On)]
+	fix_hint: FixHint,
 }
 
 /// Sub-commands of the [Root](Command) command.
@@ -64,6 +71,16 @@ enum SubCommand {
 	#[clap(hide = true)]
 	Transpose(transpose::TransposeCmd),
 	Debug(debug::DebugCmd),
+}
+
+/// A hint on how to fix the error.
+#[derive(Debug, Clone, PartialEq, clap::ValueEnum)]
+pub enum FixHint {
+	/// Prints some hint that is (hopefully) helpful.
+	On,
+	/// Prints no hint at all.
+	Off,
+	// NOTE: We could have a `Custom` here one day
 }
 
 impl Command {
@@ -94,6 +111,13 @@ impl GlobalArgs {
 
 	pub fn warn_unstable(&self) {
 		log::warn!("Unstable feature - do not rely on this!");
+	}
+	pub fn show_hints(&self) -> bool {
+		// We use exahausive match to make sure to not forget a new variant in the future.
+		match self.fix_hint {
+			FixHint::On => true,
+			FixHint::Off => false,
+		}
 	}
 
 	pub fn error_code(&self) -> i32 {

@@ -42,5 +42,5 @@ cases:
     Found 2 crates with unformatted features:
       A
       B
-    Run again --fix to format them.
+    Run again with `--fix` to format them.
   code: 1

@@ -1,11 +1,16 @@
+# Configuration for the Zepter CLI to ensure correct feature configuration in the Rust workspace.
+# <https://crates.io/crates/zepter>
+
 version:
+  # File format for parsing it:
   format: 1
   # Minimum version of the binary that is expected to work. This is just for printing a nice error
-  # message when someone tries to use an oder version.
+  # message when someone tries to use an older version.
   binary: 0.13.2
 
 # The examples in this file assume crate `A` to have a dependency on crate `B`.
 workflows:
+  # Check that everything is good without modifying anything:
   check:
     - [
         'lint',
@@ -15,21 +20,20 @@ workflows:
         '--features=try-runtime,runtime-benchmarks,std',
         # Do not try to add a new section into `[features]` of `A` only because `B` expose that feature. There are edge-cases where this is still needed, but we can add them manually.
         '--left-side-feature-missing=ignore',
-        # Enabling this feature somehow pulls in two versions of `sp-runtime-interface` and makes it impossible to build that crate with `cargo b -p sp-runtime-interface`. We therefore disable it for now. This is a tracked in: <(FAIL-CI add link to ticket)>
-        '--ignore-missing-propagate=sp-core/std:bandersnatch_vrfs/std',
         # Ignore the case that `A` it outside of the workspace. Otherwise it will report errors in external dependencies that we have no influence on.
         '--left-side-outside-workspace=ignore',
         # Some features imply that they activate a specific dependency as non-optional. Otherwise the default behaviour with a `?` is used.
         '--feature-enables-dep=try-runtime:frame-try-runtime,runtime-benchmarks:frame-benchmarking',
-        # Actually modify the files and not just report the issues:
+        # Show the paths of failed crates to have them clickable in the terminal: 
+        '--show-path',
+        # Aux
         '--offline',
         '--locked',
-        '--show-path',
         '--quiet',
       ]
       # Format the features into canonical format:
     - ['format', 'features', '--offline', '--locked', '--quiet']
-  # Same as `check`, but with the `--fix` flag.
+  # Same as `check`, but actually fix the issues instead of just reporting them:
   default:
     - [ $check.0, '--fix' ]
     - [ $check.1, '--fix' ]
@@ -38,8 +42,8 @@ workflows:
 help:
   text: |
     Polkadot-SDK uses the Zepter CLI to detect abnormalities in the feature configuration.
-    It looks like one more more checks failed. To address them, it should be enough to run `zepter`.
-    Otherwise please ask directly in your Merge Request or Matrix chat.
+    It looks like one more more checks failed; please check the console output. You can try to automatically address them by running `zepter`.
+    Otherwise please ask directly in the Merge Request, GitHub Discussions or on Matrix Chat, thank you.
   links:
-    - "FAIL-CI TODO"
+    - "https://github.com/paritytech/polkadot-sdk/issues/1831"
     - "https://github.com/ggwpez/zepter"

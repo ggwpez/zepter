@@ -14,7 +14,7 @@ cases:
       feature 'F0'
         must propagate to:
           B
-    Found 1 issue (run with --fix to fix).
+    Found 1 issue (run with `--fix` to fix).
   code: 1
 - cmd: lint propagate-feature -p A --feature F0
   stdout: |
@@ -22,7 +22,7 @@ cases:
       feature 'F0'
         must propagate to:
           B
-    Found 1 issue (run with --fix to fix).
+    Found 1 issue (run with `--fix` to fix).
   code: 1
 - cmd: lint propagate-feature -p B --feature F0
 - cmd: lint propagate-feature -p B --feature F1
@@ -32,7 +32,7 @@ cases:
       feature 'F0'
         must propagate to:
           B
-    Found 1 issue (run with --fix to fix).
+    Found 1 issue (run with `--fix` to fix).
   code: 1
 - cmd: lint propagate-feature -p A --feature F0 --workspace
   stdout: |
@@ -40,7 +40,7 @@ cases:
       feature 'F0'
         must propagate to:
           B
-    Found 1 issue (run with --fix to fix).
+    Found 1 issue (run with `--fix` to fix).
   code: 1
 - cmd: lint propagate-feature -p B --feature F0 --workspace
 - cmd: lint propagate-feature -p B --feature F1 --workspace
@@ -50,4 +50,4 @@ cases:
       feature 'F0'
         must propagate to:
           B
-    Found 1 issue (run with --fix to fix).
+    Found 1 issue (run with `--fix` to fix).

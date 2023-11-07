@@ -11,7 +11,7 @@ cases:
           frame-system
           pallet-balances
           sp-runtime
-    Found 1 issue (run with --fix to fix).
+    Found 1 issue (run with `--fix` to fix).
   code: 1
 - cmd: lint propagate-feature -p pallet-name-service --feature try-runtime --fix
   stdout: |

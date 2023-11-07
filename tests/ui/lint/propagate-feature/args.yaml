@@ -14,17 +14,17 @@ cases:
       feature 'F0'
         must propagate to:
           B
-    Found 1 issue (run with --fix to fix).
+    Found 1 issue (run with `--fix` to fix).
   code: 1
 - cmd: lint propagate-feature --show-version --workspace --feature F0 --color
-  stdout: "crate 'A'\n  feature 'F0'\n    must propagate to:\n      B\nFound \e[31m1 issue\e[0m (run with --fix to fix).\n"
+  stdout: "crate 'A'\n  feature 'F0'\n    must propagate to:\n      B\nFound \e[31m1 issue\e[0m (run with `--fix` to fix).\n"
   code: 1
 - cmd: lint propagate-feature --show-version --workspace --feature F0 --color --quiet
-  stdout: "crate 'A'\n  feature 'F0'\n    must propagate to:\n      B\nFound \e[31m1 issue\e[0m (run with --fix to fix).\n"
+  stdout: "crate 'A'\n  feature 'F0'\n    must propagate to:\n      B\nFound \e[31m1 issue\e[0m (run with `--fix` to fix).\n"
   code: 1
 - cmd: lint propagate-feature --show-version --workspace --feature F0 --color --quiet
-  stdout: "crate 'A'\n  feature 'F0'\n    must propagate to:\n      B\nFound \e[31m1 issue\e[0m (run with --fix to fix).\n"
+  stdout: "crate 'A'\n  feature 'F0'\n    must propagate to:\n      B\nFound \e[31m1 issue\e[0m (run with `--fix` to fix).\n"
   code: 1
 - cmd: lint propagate-feature --show-version --workspace --feature F0 --color --quiet --left-side-feature-missing=ignore --left-side-outside-workspace=ignore
-  stdout: "crate 'A'\n  feature 'F0'\n    must propagate to:\n      B\nFound \e[31m1 issue\e[0m (run with --fix to fix).\n"
+  stdout: "crate 'A'\n  feature 'F0'\n    must propagate to:\n      B\nFound \e[31m1 issue\e[0m (run with `--fix` to fix).\n"
   code: 1

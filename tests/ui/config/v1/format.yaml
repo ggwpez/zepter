@@ -45,7 +45,6 @@ cases:
     Found 2 crates with unformatted features:
       A
       B
-    Run again --fix to format them.
     Error: Command 'f f' failed with exit code 1
   stderr: |
     [INFO] Running workflow 'check'

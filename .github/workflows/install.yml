@@ -6,9 +6,9 @@ concurrency:
 
 on:
   push:
-    branches: [master, dev]
-    tags: ["v*.*.*"]
+    branches: [ "master" ]
   pull_request:
+    branches: [ "master" ]
 
 env:
   CARGO_TERM_COLOR: always

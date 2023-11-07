@@ -11,7 +11,7 @@ cases:
         must propagate to:
           once_cell
           sp-debug-derive
-    Found 2 issues (run with --fix to fix).
+    Found 2 issues (run with `--fix` to fix).
   code: 1
 - cmd: lint propagate-feature -p frame-support --feature std --workspace
   stdout: |
@@ -19,7 +19,7 @@ cases:
       feature 'std'
         must propagate to:
           sp-debug-derive
-    Found 1 issue (run with --fix to fix).
+    Found 1 issue (run with `--fix` to fix).
   code: 1
 - cmd: lint propagate-feature -p frame-support --feature try-runtime
   stdout: |
@@ -28,7 +28,7 @@ cases:
         must propagate to:
           frame-system
           sp-runtime
-    Found 2 issues (run with --fix to fix).
+    Found 2 issues (run with `--fix` to fix).
   code: 1
 - cmd: lint propagate-feature -p frame-support --feature try-runtime --workspace
   stdout: |
@@ -37,5 +37,5 @@ cases:
         must propagate to:
           frame-system
           sp-runtime
-    Found 2 issues (run with --fix to fix).
+    Found 2 issues (run with `--fix` to fix).
   code: 1

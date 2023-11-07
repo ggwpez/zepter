@@ -17,7 +17,6 @@ cases:
     Found 2 crates with unformatted features:
       A
       B
-    Run again with `--fix` to format them.
     Error: Command 'f f' failed with exit code 1
 
     <Custom Help Text Line #1>

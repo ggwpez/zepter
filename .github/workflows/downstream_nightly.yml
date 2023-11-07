@@ -1,6 +1,6 @@
 name: Integration test SDK
 
-# This tests that Zepter wont panic on Polkadot-SDK.
+# This tests that Zepter passes on the Polkadot-SDK.
 
 concurrency:
   group: ${{ github.workflow }}
@@ -26,7 +26,7 @@ jobs:
       name: Clone ${{ matrix.repo }}
       with:
         repository: paritytech/${{ matrix.repo }}
-        depth: 1
+        fetch-depth: 1
     
     - name: Install
       run: cargo install zepter -f --locked -q --no-default-features

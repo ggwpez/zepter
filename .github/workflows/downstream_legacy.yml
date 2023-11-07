@@ -28,7 +28,7 @@ jobs:
       name: Clone ${{ matrix.repo }}
       with:
         repository: paritytech/${{ matrix.repo }}
-        depth: 1
+        fetch-depth: 1
     
     - name: Cargo install
       run: cargo install --git ${{ github.server_url }}/${{ github.repository }} zepter --rev $GITHUB_SHA --locked -q

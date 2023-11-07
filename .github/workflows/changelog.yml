@@ -1,8 +1,8 @@
 on:
   push:
-    branches: [master, dev]
-    tags: ["v*.*.*"]
+    branches: [ "master" ]
   pull_request:
+    branches: [ "master" ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

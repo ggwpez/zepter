@@ -8,7 +8,7 @@ concurrency:
 
 on:
   push:
-    branches: [ "master", "dev" ]
+    branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
 

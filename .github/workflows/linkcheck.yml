@@ -6,9 +6,8 @@ concurrency:
 
 on:
   push:
-    branches: [master, dev]
+    branches: [ "master" ]
   pull_request:
-    types: [review_requested, ready_for_review]
 
 env:
   CARGO_TERM_COLOR: always

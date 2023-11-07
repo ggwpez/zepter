@@ -209,7 +209,7 @@ impl FormatFeaturesCmd {
 			}
 
 			std::process::exit(0);
-		} else {
+		} else if global.show_hints() {
 			println!("Run again with `--fix` to format them.");
 		}
 

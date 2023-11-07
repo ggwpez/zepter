@@ -626,8 +626,8 @@ fn error_stats(
 			let could_not = format!(" ({} could not be fixed)", errors - fixes);
 			ret.push_str(&global.red(&could_not));
 		}
-	} else {
-		ret.push_str(" (run with --fix to fix)");
+	} else if global.show_hints() {
+		ret.push_str(" (run with `--fix` to fix)");
 	}
 	Some(format!("{}.", ret))
 }

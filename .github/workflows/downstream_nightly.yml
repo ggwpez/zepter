@@ -1,12 +1,14 @@
-name: Integration test SDK
+# Prevents accidential breackage for known downstream projects.
 
-# This tests that Zepter passes on the Polkadot-SDK.
+name: Downstream Integration
 
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: true
 
 on:
+  push:
+    branches: [ "master" ]
   schedule:
   - cron: "0 0 * * *"
 
@@ -20,6 +22,7 @@ jobs:
     strategy:
       matrix:
         repo: [polkadot-sdk]
+        version: [0.13.2, 0.13.3, 0.14.0]
 
     steps:
     - uses: actions/checkout@master
@@ -29,7 +32,7 @@ jobs:
         fetch-depth: 1
     
     - name: Install
-      run: cargo install zepter -f --locked -q --no-default-features
+      run: cargo install zepter --version ${{ matrix.version }} -f --locked -q --no-default-features
     
     - name: Zepter passes
       run: |

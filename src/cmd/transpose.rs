@@ -23,6 +23,7 @@ impl TransposeCmd {
 	pub fn run(&self, global: &GlobalArgs) {
 		match &self.subcommand {
 			TransposeSubCmd::Dependency(cmd) => cmd.run(global),
+			TransposeSubCmd::Features(cmd) => cmd.run(global),
 		}
 	}
 }
@@ -32,6 +33,8 @@ impl TransposeCmd {
 pub enum TransposeSubCmd {
 	#[clap(alias = "dep", alias = "d")]
 	Dependency(DependencyCmd),
+	#[clap(alias = "f")]
+	Features(FeaturesCmd),
 }
 
 #[derive(Debug, clap::Parser)]
@@ -44,7 +47,20 @@ impl DependencyCmd {
 	pub fn run(&self, global: &GlobalArgs) {
 		match &self.subcommand {
 			DependencySubCmd::LiftToWorkspace(cmd) => cmd.run(global),
-			DependencySubCmd::StripDevFeatures(cmd) => cmd.run(global),
+		}
+	}
+}
+
+#[derive(Debug, clap::Parser)]
+pub struct FeaturesCmd {
+	#[clap(subcommand)]
+	subcommand: FeaturesSubCmd,
+}
+
+impl FeaturesCmd {
+	pub fn run(&self, global: &GlobalArgs) {
+		match &self.subcommand {
+			FeaturesSubCmd::StripDevOnly(cmd) => cmd.run(global),
 		}
 	}
 }
@@ -53,8 +69,12 @@ impl DependencyCmd {
 pub enum DependencySubCmd {
 	#[clap(alias = "lift", alias = "l")]
 	LiftToWorkspace(LiftToWorkspaceCmd),
+}
+
+#[derive(Debug, clap::Subcommand)]
+pub enum FeaturesSubCmd {
 	/// Strip out dev dependencies.
-	StripDevFeatures(StripDevDepsCmd),
+	StripDevOnly(StripDevDepsCmd),
 }
 
 /// Lift up a dependency to the workspace and reference it from all packages.

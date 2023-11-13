@@ -21,20 +21,20 @@ jobs:
     name: "Check"
     strategy:
       matrix:
-        repo: [polkadot-sdk]
-        version: [0.13.2, 0.13.3, 0.14.0]
+        repo: ["paritytech/polkadot-sdk", "open-web3-stack/open-runtime-module-library"]
+        version: [0.13.2, 0.13.3, "*"]
 
     steps:
     - uses: actions/checkout@master
-      name: Clone ${{ matrix.repo }}
+      name: Clone repo
       with:
-        repository: paritytech/${{ matrix.repo }}
+        repository: ${{ matrix.repo }}
         fetch-depth: 1
     
     - name: Install
-      run: cargo install zepter --version ${{ matrix.version }} -f --locked -q --no-default-features
+      run: cargo install zepter --version '${{ matrix.version }}' -f --locked -q --no-default-features
     
-    - name: Zepter passes
+    - name: Zepter Passes on ${{ matrix.repo }}
       run: |
         zepter run check
         zepter

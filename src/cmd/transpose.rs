@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
-use super::GlobalArgs;
-use crate::{autofix::*, grammar::*, log};
+use super::{lint::DepKind, GlobalArgs};
+use crate::{autofix::*, cmd::resolve_dep, grammar::*, log};
 
-use cargo_metadata::{Dependency as Dep, Package};
+use cargo_metadata::{Dependency as Dep, DependencyKind, Package};
 use itertools::Itertools;
 use semver::{Op, Version, VersionReq};
 use std::{
@@ -44,6 +44,7 @@ impl DependencyCmd {
 	pub fn run(&self, global: &GlobalArgs) {
 		match &self.subcommand {
 			DependencySubCmd::LiftToWorkspace(cmd) => cmd.run(global),
+			DependencySubCmd::StripDevFeatures(cmd) => cmd.run(global),
 		}
 	}
 }
@@ -52,6 +53,8 @@ impl DependencyCmd {
 pub enum DependencySubCmd {
 	#[clap(alias = "lift", alias = "l")]
 	LiftToWorkspace(LiftToWorkspaceCmd),
+	/// Strip out dev dependencies.
+	StripDevFeatures(StripDevDepsCmd),
 }
 
 /// Lift up a dependency to the workspace and reference it from all packages.
@@ -66,6 +69,17 @@ pub struct LiftToWorkspaceCmd {
 
 	#[clap(long, value_enum, default_value_t = DefaultFeatureMode::False)]
 	default_feature: DefaultFeatureMode,
+}
+
+#[derive(Debug, clap::Parser)]
+pub struct StripDevDepsCmd {
+	#[allow(missing_docs)]
+	#[clap(flatten)]
+	cargo_args: super::CargoArgs,
+
+	/// Only consider these packages.
+	#[clap(long, short = 'p', value_delimiter = ',', verbatim_doc_comment)]
+	packages: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, PartialEq, clap::ValueEnum)]
@@ -199,4 +213,65 @@ fn try_find_latest<'a, I: Iterator<Item = &'a VersionReq>>(reqs: I) -> Result<Ve
 
 	let latest = versions.iter().max().ok_or_else(|| "No versions found".to_string())?;
 	Ok(latest.clone())
+}
+
+impl StripDevDepsCmd {
+	pub fn run(&self, g: &GlobalArgs) {
+		g.warn_unstable();
+
+		let mut args = self.cargo_args.clone();
+		args.workspace = true;
+		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
+		let kind = DependencyKind::Development;
+		// Allowed dir that we can write to.
+		let allowed_dir = canonicalize(meta.workspace_root.as_std_path()).unwrap();
+
+		for name in self.packages.iter().flatten() {
+			if !meta.packages.iter().any(|p| p.name == *name) {
+				panic!("Could not find package named '{}'", g.red(name));
+			}
+		}
+
+		let mut fixers = Map::new();
+		for pkg in meta.packages.iter() {
+			if let Some(packages) = &self.packages {
+				if !packages.contains(&pkg.name) {
+					continue
+				}
+			}
+
+			// Are we allowed to modify this file path?
+			let krate_path = canonicalize(pkg.manifest_path.clone().into_std_path_buf()).unwrap();
+			if !krate_path.starts_with(&allowed_dir) {
+				continue
+			}
+			let mut fixer = AutoFixer::from_manifest(&krate_path).unwrap();
+
+			// Find all dependencies that are only used as dev dependencies in this package.
+			let devs = pkg.dependencies.iter().filter(|d| d.kind == kind);
+			let only_dev = devs
+				.filter(|dev| {
+					pkg.dependencies.iter().filter(|d| d.name == dev.name).all(|d| d.kind == kind)
+				})
+				.collect::<Vec<_>>();
+
+			for dep in only_dev.iter() {
+				// Account for renamed crates:
+				let Some(dep) = resolve_dep(pkg, dep, &meta) else {
+					panic!("Could not resolve dependency '{}'", g.red(&dep.name));
+				};
+
+				fixer.remove_feature(&format!("{}/", dep.name()));
+				fixer.remove_feature(&format!("{}?/", dep.name()));
+			}
+
+			if fixer.modified() {
+				fixers.insert(pkg.name.clone(), fixer);
+			}
+		}
+
+		for fixer in fixers.values_mut() {
+			fixer.save().unwrap();
+		}
+	}
 }

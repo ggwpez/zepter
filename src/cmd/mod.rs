@@ -295,6 +295,10 @@ impl RenamedPackage {
 		self.rename.clone().unwrap_or(self.pkg.name.clone())
 	}
 
+	pub fn original_name(&self) -> String {
+		self.pkg.name.clone()
+	}
+
 	pub fn display_name(&self) -> String {
 		match &self.rename {
 			Some(rename) => format!("{} (renamed from {})", rename, self.pkg.name),

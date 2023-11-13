@@ -3,7 +3,10 @@
 
 //! Automatically fix problems by modifying `Cargo.toml` files.
 
-use crate::{cmd::fmt::Mode, log};
+use crate::{
+	cmd::{fmt::Mode, lint::DepKind},
+	log,
+};
 use cargo_metadata::Dependency;
 use std::{
 	collections::BTreeMap as Map,
@@ -531,6 +534,30 @@ impl AutoFixer {
 		deps.insert(&dep.name, Item::Value(Value::InlineTable(t)));
 
 		Ok(())
+	}
+
+	pub fn remove_feature(&mut self, name: &str) {
+		let doc: &mut Document = self.doc.as_mut().unwrap();
+
+		if !doc.contains_table("features") {
+			return
+		}
+		let features = doc["features"].as_table_mut().unwrap();
+
+		for feature in features.iter_mut() {
+			let feature = feature.1.as_array_mut().unwrap();
+
+			// remove all values that start with `name`
+			let mut i = 0;
+			while i < feature.len() {
+				let value = feature.get(i).unwrap().as_str().unwrap();
+				if value.starts_with(name) {
+					feature.remove(i);
+				} else {
+					i += 1;
+				}
+			}
+		}
 	}
 
 	pub fn modified(&self) -> bool {

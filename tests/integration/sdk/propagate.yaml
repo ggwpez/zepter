@@ -1,5 +1,5 @@
 repo:
-  name: polkadot-sdk
+  name: paritytech/polkadot-sdk
   ref: 70ab64bd1593dc15e6813de71f8ba280f2fb56f1
 cases:
 - cmd: lint propagate-feature --feature std --left-side-feature-missing=ignore --workspace --fix

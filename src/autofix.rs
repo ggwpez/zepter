@@ -3,10 +3,7 @@
 
 //! Automatically fix problems by modifying `Cargo.toml` files.
 
-use crate::{
-	cmd::{fmt::Mode, lint::DepKind},
-	log,
-};
+use crate::{cmd::fmt::Mode, log};
 use cargo_metadata::Dependency;
 use std::{
 	collections::BTreeMap as Map,

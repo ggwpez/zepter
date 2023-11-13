@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
-use super::{lint::DepKind, GlobalArgs};
+use super::GlobalArgs;
 use crate::{autofix::*, cmd::resolve_dep, grammar::*, log};
 
 use cargo_metadata::{Dependency as Dep, DependencyKind, Package};

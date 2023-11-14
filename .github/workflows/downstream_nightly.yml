@@ -38,7 +38,9 @@ jobs:
     
     - if: matrix.repo == 'open-web3-stack/open-runtime-module-library'
       name: Copy cargo toml
-      run: cp Cargo.dev.toml Cargo.toml
+      run: |
+        cp Cargo.dev.toml Cargo.toml
+        cargo generate-lockfile
 
     - name: Zepter Passes on ${{ matrix.repo }}
       run: |

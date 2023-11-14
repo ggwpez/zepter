@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.15.0] - 2023-11-14
 
 ### Added
 - Subcommand `transpose features strip-dev-only` to remove dev-only features as preparation for publishing.

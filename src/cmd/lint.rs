@@ -17,7 +17,7 @@ use core::{
 	fmt::{Display, Formatter},
 };
 use std::{
-	collections::{BTreeMap, BTreeSet},
+	collections::{BTreeMap, BTreeSet, HashMap},
 	fs::canonicalize,
 	path::PathBuf,
 };
@@ -164,6 +164,10 @@ pub struct PropagateFeatureCmd {
 	#[clap(long, value_enum, value_name = "MUTE_SETTING", default_value_t = MuteSetting::Fix, verbatim_doc_comment)]
 	left_side_outside_workspace: MuteSetting,
 
+	/// How to handle dev-dependencies.
+	#[clap(long, value_name = "KIND/MUTE_SETTING", value_parser = parse_key_val::<String, String>, value_delimiter = ',', verbatim_doc_comment, default_value = "normal:check,dev:check,build:check")]
+	dep_kinds: Option<Vec<(String, String)>>,
+
 	/// Show crate versions in the output.
 	#[clap(long)]
 	show_version: bool,
@@ -197,6 +201,55 @@ pub enum MuteSetting {
 	Report,
 	/// Fix if `--fix` is passed.
 	Fix,
+}
+
+#[derive(Debug, Clone, PartialEq, clap::ValueEnum)]
+pub enum IgnoreSetting {
+	Ignore,
+	Check,
+}
+
+#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Copy)]
+pub enum DepKind {
+	Normal,
+	Dev,
+	Build,
+}
+
+impl core::str::FromStr for DepKind {
+	type Err = String;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s.to_ascii_lowercase().as_str() {
+			"normal" => Ok(Self::Normal),
+			"dev" => Ok(Self::Dev),
+			"build" => Ok(Self::Build),
+			_ => Err(format!("Unknown dependency kind '{}'", s)),
+		}
+	}
+}
+
+impl From<DepKind> for cargo_metadata::DependencyKind {
+	// oh god, someone clean this up.
+	fn from(kind: DepKind) -> Self {
+		match kind {
+			DepKind::Normal => Self::Normal,
+			DepKind::Dev => Self::Development,
+			DepKind::Build => Self::Build,
+		}
+	}
+}
+
+impl core::str::FromStr for IgnoreSetting {
+	type Err = String;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s.to_ascii_lowercase().as_str() {
+			"ignore" => Ok(Self::Ignore),
+			"check" => Ok(Self::Check),
+			_ => Err(format!("Unknown ignore setting '{}'", s)),
+		}
+	}
 }
 
 impl LintCmd {
@@ -388,6 +441,7 @@ impl PropagateFeatureCmd {
 		// (Crate that is not forwarding the feature) -> (Dependency that it is not forwarded to)
 		let mut propagate_missing = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
 		let ignore_missing_propagate = self.ignore_missing_propagate();
+		let dep_kinds = self.parse_dep_kinds().expect("Parse dependency kinds");
 		// (Crate that missing the feature) -> (Dependency that has it)
 		let mut feature_missing = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
 
@@ -399,6 +453,10 @@ impl PropagateFeatureCmd {
 			}
 
 			for dep in pkg.dependencies.iter() {
+				let mute = dep_kinds.get(&dep.kind).unwrap_or(&IgnoreSetting::Check);
+				if mute == &IgnoreSetting::Ignore {
+					continue
+				}
 				// TODO handle default features.
 				// Resolve the dep according to the metadata.
 				let Some(dep) = resolve_dep(pkg, dep, &meta) else {
@@ -585,6 +643,18 @@ impl PropagateFeatureCmd {
 			map.entry(lhs).or_default().insert(rhs);
 		}
 		map
+	}
+
+	fn parse_dep_kinds(
+		&self,
+	) -> Result<HashMap<cargo_metadata::DependencyKind, IgnoreSetting>, String> {
+		let mut map = HashMap::new();
+		if let Some(kinds) = &self.dep_kinds {
+			for (kind, mute) in kinds {
+				map.insert(kind.parse::<DepKind>()?.into(), mute.parse()?);
+			}
+		}
+		Ok(map)
 	}
 }
 

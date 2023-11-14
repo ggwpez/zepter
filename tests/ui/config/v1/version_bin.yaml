@@ -3,7 +3,7 @@ crates:
 cases:
 - cmd: run default
   stderr: |
-    thread 'main' panicked at 'Invalid config file: "Config file version is too new. The file requires at least 0.100.0, but the current version is 0.14.0. Please update Zepter or ignore this check with `--check-cfg-compatibility=off`."', src/cmd/run.rs:27:46
+    thread 'main' panicked at 'Invalid config file: "Config file version is too new. The file requires at least 0.100.0, but the current version is 0.15.0. Please update Zepter or ignore this check with `--check-cfg-compatibility=off`."', src/cmd/run.rs:27:46
     note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
   code: 101
 configs:

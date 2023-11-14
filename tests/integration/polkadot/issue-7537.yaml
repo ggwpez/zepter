@@ -1,5 +1,5 @@
 repo:
-  name: polkadot
+  name: paritytech/polkadot
   ref: 30a0be939e09c3ad9c471960091b32a5b3f9c622
 cases:
 - cmd: lint propagate-feature -p xcm-executor --feature std --fix

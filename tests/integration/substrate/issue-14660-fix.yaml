@@ -1,5 +1,5 @@
 repo:
-  name: substrate
+  name: paritytech/substrate
   ref: 2f205d28cddd2f71c229df091bf330951fec8500
 cases:
 - cmd: lint propagate-feature --feature try-runtime --left-side-feature-missing=ignore --workspace --fix --feature-enables-dep="try-runtime:frame-try-runtime"

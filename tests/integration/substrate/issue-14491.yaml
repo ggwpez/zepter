@@ -1,5 +1,5 @@
 repo:
-  name: substrate
+  name: paritytech/substrate
   ref: 9705afd8b17d3e0c8557fe220cfccffd8986bd6a
 cases:
 - cmd: lint propagate-feature -p pallet-name-service --feature try-runtime

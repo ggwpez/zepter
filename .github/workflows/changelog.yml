@@ -17,4 +17,5 @@ jobs:
       - uses: zattoo/changelog@v1
         with:
           token: ${{github.token}}
-          sources: 'src/, benches/, presets/, tests/, rust-toolchain.toml'
+          sources: '.'
+          exclude: '.github/'

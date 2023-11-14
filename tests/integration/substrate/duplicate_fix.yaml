@@ -1,5 +1,5 @@
 repo:
-  name: substrate
+  name: paritytech/substrate
   ref: cc370aa61e15c18d23a2f686b812fd576a630afe
 cases:
 - cmd: f f -f

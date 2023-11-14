@@ -1,5 +1,5 @@
 repo:
-  name: polkadot-sdk
+  name: paritytech/polkadot-sdk
   ref: c86b633695299ed27053940d5ea5c5a2392964b3
 cases:
 - cmd: transpose dependency lift-to-workspace parity-scale-codec
@@ -16,7 +16,7 @@ cases:
       ^3.4.0:   4 times (asset-hub-rococo-integration-tests, integration-tests-common, asset-hub-westend-integration-tests, …)
 
     Hint: cargo upgrade -p parity-scale-codec@3.6.4
-    ', src/cmd/transpose.rs:129:13
+    ', src/cmd/transpose.rs:163:13
     note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
   code: 101
 - cmd: transpose dependency lift-to-workspace log
@@ -35,7 +35,7 @@ cases:
       ^0.4.8 :   1 time  (sc-consensus-grandpa-rpc)
 
     Hint: cargo upgrade -p log@0.4.20
-    ', src/cmd/transpose.rs:129:13
+    ', src/cmd/transpose.rs:163:13
     note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
   code: 101
 - cmd: zepter transpose dependency lift-to-workspace macro_magic

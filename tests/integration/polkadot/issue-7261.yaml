@@ -1,5 +1,5 @@
 repo:
-  name: polkadot
+  name: paritytech/polkadot
   ref: dbff1eb1bda7a70d8eef3e9662b369e2188ca563
 cases:
 - cmd: lint propagate-feature -p polkadot-test-runtime --feature std --fix

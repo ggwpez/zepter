@@ -1,5 +1,5 @@
 repo:
-  name: polkadot-sdk
+  name: paritytech/polkadot-sdk
   ref: c86b633695299ed27053940d5ea5c5a2392964b3
 cases:
 - cmd: run check

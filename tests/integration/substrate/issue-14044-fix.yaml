@@ -1,5 +1,5 @@
 repo:
-  name: substrate
+  name: paritytech/substrate
   ref: de80d0107336a9c7a2efdc0199015e4d67fcbdb5
 cases:
 - cmd: lint propagate-feature -p frame-support --feature runtime-benchmarks

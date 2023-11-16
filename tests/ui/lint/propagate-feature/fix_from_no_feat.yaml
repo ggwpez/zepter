@@ -16,10 +16,10 @@ cases:
   code: 0
   diff: |
     diff --git A/Cargo.toml A/Cargo.toml
-    index d5ba479999..af1fb01d77 100644
+    index b7a1745505..cce8f20e73 100644
     --- A/Cargo.toml
     +++ A/Cargo.toml
-    @@ -11,0 +12 @@ B = { version = "*", path = "../B"}
+    @@ -16,0 +17 @@ B = { version = "*", path = "../B"}
     +F0 = []
 - cmd: lint propagate-feature --feature F0 --workspace --fix
   stdout: |
@@ -31,8 +31,8 @@ cases:
   code: 0
   diff: |
     diff --git A/Cargo.toml A/Cargo.toml
-    index d5ba479999..af1fb01d77 100644
+    index b7a1745505..cce8f20e73 100644
     --- A/Cargo.toml
     +++ A/Cargo.toml
-    @@ -11,0 +12 @@ B = { version = "*", path = "../B"}
+    @@ -16,0 +17 @@ B = { version = "*", path = "../B"}
     +F0 = []

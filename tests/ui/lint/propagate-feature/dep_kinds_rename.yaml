@@ -1,0 +1,34 @@
+comment: Test that the --dep-kinds argument works with renamed deps.
+crates:
+- name: A
+  deps:
+  - name: RD
+    rename: rd
+    kind: dev
+  - name: RD
+    rename: rd
+  - name: RNDB
+    rename: rndb
+  - name: RNDB
+    rename: rndb
+    kind: build
+  - name: RNDB
+    rename: rndb
+    kind: dev
+- name: RD
+  features:
+    F0: null
+- name: RNDB
+  features:
+    F0: null
+cases:
+- cmd: lint propagate-feature --feature F0 --dep-kinds="normal:ignore,dev:ignore,build:ignore"
+- cmd: lint propagate-feature --feature F0
+  stdout: |
+    crate 'A'
+      feature 'F0'
+        is required by 2 dependencies:
+          rd (renamed from RD)
+          rndb (renamed from RNDB)
+    Found 1 issue (run with `--fix` to fix).
+  code: 1

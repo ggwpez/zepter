@@ -9,7 +9,7 @@ pub mod git;
 pub use git::*;
 
 use std::{
-	collections::BTreeMap,
+	collections::{BTreeMap, HashMap},
 	fs,
 	io::Write,
 	path::{Path, PathBuf},
@@ -131,6 +131,8 @@ impl CaseFile {
 /// Describes the setup for a UI test.
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct UiCaseFile {
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub comment: Option<String>,
 	pub crates: Vec<CrateConfig>,
 	pub cases: Vec<Case>,
 	#[serde(skip_serializing_if = "Option::is_none")]
@@ -171,6 +173,8 @@ impl UiCaseFile {
 /// Describes the setup for an integration test.
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct IntegrationCaseFile {
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub comment: Option<String>,
 	pub repo: Repo,
 	pub cases: Vec<Case>,
 	#[serde(skip_serializing_if = "Option::is_none")]
@@ -262,9 +266,9 @@ impl Context {
 		let toml_path = self.root.path().join(&module.path()).join("Cargo.toml");
 		assert!(toml_path.exists(), "Crate must exist");
 		// Add the deps
-		let mut out_deps = String::from("");
+		let mut out_deps = HashMap::<cargo_metadata::DependencyKind, String>::new();
 		for dep in module.deps.iter().flatten() {
-			out_deps.push_str(&dep.def());
+			out_deps.entry(dep.kind()).or_insert_with(String::new).push_str(&dep.def());
 		}
 
 		let mut txt = String::from("[features]\n");
@@ -276,7 +280,16 @@ impl Context {
 			txt.push_str("]\n");
 		}
 
-		let output = format!("{}\n{}", out_deps, txt);
+		let deps = format!(
+			"{}\n[dev-dependencies]\n{}\n[build-dependencies]\n{}\n",
+			out_deps.remove(&cargo_metadata::DependencyKind::Normal).unwrap_or_default(),
+			out_deps
+				.remove(&cargo_metadata::DependencyKind::Development)
+				.unwrap_or_default(),
+			out_deps.remove(&cargo_metadata::DependencyKind::Build).unwrap_or_default(),
+		);
+
+		let output = format!("{}\n{}", deps, txt);
 		// Append to the toml
 		let mut file = fs::OpenOptions::new().append(true).open(toml_path).unwrap();
 		file.write_all(output.as_bytes()).unwrap();
@@ -337,6 +350,8 @@ pub enum CrateDependency {
 		rename: Option<String>,
 		#[serde(skip_serializing_if = "is_false")]
 		optional: Option<bool>,
+		#[serde(skip_serializing_if = "Option::is_none")]
+		kind: Option<cargo_metadata::DependencyKind>,
 	},
 }
 
@@ -354,6 +369,13 @@ impl CrateDependency {
 
 	fn path(&self) -> String {
 		crate_name_to_path(&self.name())
+	}
+
+	fn kind(&self) -> cargo_metadata::DependencyKind {
+		match self {
+			Self::Explicit { kind, .. } => kind.unwrap_or_default(),
+			Self::Implicit(_) => cargo_metadata::DependencyKind::Normal,
+		}
 	}
 
 	fn name(&self) -> String {

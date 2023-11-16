@@ -1,0 +1,83 @@
+comment: Test that the --dep-kinds argument works
+crates:
+- name: A
+  deps:
+  - name: D
+    kind: dev
+  - name: B
+    kind: build
+  - name: N
+  features:
+    F0: null
+- name: B
+  features:
+    F0: null
+- name: D
+  features:
+    F0: null
+- name: N
+  features:
+    F0: null
+cases:
+- cmd: lint propagate-feature --feature F0 --dep-kinds="normal:ignore,dev:ignore,build:ignore"
+- cmd: lint propagate-feature --feature F0
+  stdout: |
+    crate 'A'
+      feature 'F0'
+        must propagate to:
+          B
+          D
+          N
+    Found 3 issues (run with `--fix` to fix).
+  code: 1
+- cmd: lint propagate-feature --feature F0 --dep-kinds="normal:ignore"
+  stdout: |
+    crate 'A'
+      feature 'F0'
+        must propagate to:
+          B
+          D
+    Found 2 issues (run with `--fix` to fix).
+  code: 1
+- cmd: lint propagate-feature --feature F0 --dep-kinds="dev:ignore"
+  stdout: |
+    crate 'A'
+      feature 'F0'
+        must propagate to:
+          B
+          N
+    Found 2 issues (run with `--fix` to fix).
+  code: 1
+- cmd: lint propagate-feature --feature F0 --dep-kinds="build:ignore"
+  stdout: |
+    crate 'A'
+      feature 'F0'
+        must propagate to:
+          D
+          N
+    Found 2 issues (run with `--fix` to fix).
+  code: 1
+- cmd: lint propagate-feature --feature F0 --dep-kinds="dev:ignore,build:ignore"
+  stdout: |
+    crate 'A'
+      feature 'F0'
+        must propagate to:
+          N
+    Found 1 issue (run with `--fix` to fix).
+  code: 1
+- cmd: lint propagate-feature --feature F0 --dep-kinds="normal:ignore,build:ignore"
+  stdout: |
+    crate 'A'
+      feature 'F0'
+        must propagate to:
+          D
+    Found 1 issue (run with `--fix` to fix).
+  code: 1
+- cmd: lint propagate-feature --feature F0 --dep-kinds="normal:ignore,dev:ignore"
+  stdout: |
+    crate 'A'
+      feature 'F0'
+        must propagate to:
+          B
+    Found 1 issue (run with `--fix` to fix).
+  code: 1

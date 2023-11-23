@@ -36,7 +36,7 @@ jobs:
     - name: Install
       run: cargo install zepter --version '${{ matrix.version }}' -f --locked -q --no-default-features
     
-    - if: matrix.repo == 'open-web3-stack/open-runtime-module-library'
+    - if: matrix.repo == 'open-web3-stack/open-runtime-module-library' && matrix.version == '*'
       name: Copy cargo toml
       run: |
         cp Cargo.dev.toml Cargo.toml

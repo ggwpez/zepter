@@ -10,6 +10,20 @@ use std::time::{Duration, Instant};
 
 #[derive(Debug, clap::Parser)]
 pub struct DebugCmd {
+	#[clap(subcommand)]
+	subcommand: DebugSubCmd,
+}
+
+#[derive(Debug, clap::Subcommand)]
+pub enum DebugSubCmd {
+	#[clap(alias = "dep", alias = "d")]
+	Benchmark(BenchmarkCmd),
+	#[clap(alias = "f")]
+	Stats(StatsCmd),
+}
+
+#[derive(Debug, clap::Parser)]
+pub struct BenchmarkCmd {
 	#[allow(missing_docs)]
 	#[clap(flatten)]
 	cargo_args: super::CargoArgs,
@@ -21,7 +35,35 @@ pub struct DebugCmd {
 	no_root: bool,
 }
 
+#[derive(Debug, clap::Parser)]
+pub struct StatsCmd {
+	#[allow(missing_docs)]
+	#[clap(flatten)]
+	cargo_args: super::CargoArgs,
+}
+
 impl DebugCmd {
+	pub fn run(&self, global: &GlobalArgs) {
+		match &self.subcommand {
+			DebugSubCmd::Benchmark(cmd) => cmd.run(global),
+			DebugSubCmd::Stats(cmd) => cmd.run(global),
+		}
+	}
+}
+
+impl StatsCmd {
+	pub fn run(&self, g: &GlobalArgs) {
+		g.warn_unstable();
+		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
+
+		let total = meta.packages.len();
+		let published = meta.packages.iter().filter(|p| p.publish.is_some()).count();
+		println!("Total: {}", total);
+		println!("Published: {}", published);
+	}
+}
+
+impl BenchmarkCmd {
 	pub fn run(&self, g: &GlobalArgs) {
 		g.warn_unstable();
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");

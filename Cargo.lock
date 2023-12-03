@@ -1454,6 +1454,7 @@ dependencies = [
  "log",
  "pretty_assertions",
  "rand",
+ "regex",
  "rstest",
  "semver",
  "serde",

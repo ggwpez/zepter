@@ -1,6 +1,6 @@
 [package]
 name = "zepter"
-version = "0.15.0"
+version = "1.0.0"
 edition = "2021"
 authors = [ "Oliver Tale-Yazdi" ]
 description = "Analyze, Fix and Format features in your Rust workspace."
@@ -28,6 +28,7 @@ env_logger = { version = "0.10.1", features = [ "auto-color", "humantime" ], opt
 histo = "1.0.0"
 itertools = "0.12.0"
 log = { version = "0.4.20", optional = true }
+regex = { version = "1.10.2", default-features = false, features = ["std"] }
 semver = "1"
 serde = "1.0.192"
 serde_json = "1.0.108"

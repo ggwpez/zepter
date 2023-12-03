@@ -11,13 +11,16 @@ use crate::{
 	prelude::*,
 	CrateId,
 };
+use regex::Regex;
+use std::str::FromStr;
 use cargo_metadata::{Metadata, Package, PackageId};
+use toml_edit::Table;
 use core::{
 	fmt,
 	fmt::{Display, Formatter},
 };
 use std::{
-	collections::{BTreeMap, BTreeSet, HashMap},
+	collections::{BTreeMap as Map, BTreeSet, HashMap},
 	fs::canonicalize,
 	path::PathBuf,
 };
@@ -43,6 +46,7 @@ pub enum SubCommand {
 	/// A specific feature is only implied by a specific set of other features.
 	OnlyEnables(OnlyEnablesCmd),
 	WhyEnabled(WhyEnabledCmd),
+	Workspace(LintWorkspaceCmd),
 }
 
 #[derive(Debug, clap::Parser)]
@@ -192,6 +196,32 @@ pub struct PropagateFeatureCmd {
 	fix_package: Option<String>,
 }
 
+#[derive(Debug, clap::Parser)]
+pub struct LintWorkspaceCmd {
+	#[clap(subcommand)]
+	sub: LintWorkspaceSubCmd,
+}
+
+#[derive(Debug, clap::Subcommand)]
+pub enum LintWorkspaceSubCmd {
+	UseWorkspaceConfig(UseWorkspaceConfigCmd),
+}
+
+#[derive(Debug, clap::Parser)]
+pub struct UseWorkspaceConfigCmd {
+	#[allow(missing_docs)]
+	#[clap(flatten)]
+	cargo_args: super::CargoArgs,
+
+	/// Show the path to all faulty manifests.
+	#[clap(long)]
+	show_path: bool,
+
+	/// Exclude specific config keys from either all or just some crates.
+	#[clap(long, value_name = "CRATE_NAME_REGEX:KEY", value_parser = parse_key_val::<String, String>, value_delimiter = ',', verbatim_doc_comment)]
+	exclude: Option<Vec<(String, String)>>,
+}
+
 /// Can be used to change the default error reporting behaviour of a lint.
 #[derive(Debug, Clone, PartialEq, clap::ValueEnum)]
 pub enum MuteSetting {
@@ -260,6 +290,7 @@ impl LintCmd {
 			SubCommand::NeverImplies(cmd) => cmd.run(global),
 			SubCommand::WhyEnabled(cmd) => cmd.run(global),
 			SubCommand::OnlyEnables(cmd) => cmd.run(global),
+			SubCommand::Workspace(cmd) => cmd.run(global),
 		}
 	}
 }
@@ -348,7 +379,7 @@ impl NeverEnablesCmd {
 		);
 		let pkgs = &meta.packages;
 		// (Crate -> dependencies) that invalidate the assumption.
-		let mut offenders = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
+		let mut offenders = Map::<CrateId, BTreeSet<RenamedPackage>>::new();
 
 		for lhs in pkgs.iter() {
 			let Some(enabled) = lhs.features.get(&self.precondition) else { continue };
@@ -439,11 +470,11 @@ impl PropagateFeatureCmd {
 		};
 
 		// (Crate that is not forwarding the feature) -> (Dependency that it is not forwarded to)
-		let mut propagate_missing = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
+		let mut propagate_missing = Map::<CrateId, BTreeSet<RenamedPackage>>::new();
 		let ignore_missing_propagate = self.ignore_missing_propagate();
 		let dep_kinds = self.parse_dep_kinds().expect("Parse dependency kinds");
 		// (Crate that missing the feature) -> (Dependency that has it)
-		let mut feature_missing = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
+		let mut feature_missing = Map::<CrateId, BTreeSet<RenamedPackage>>::new();
 
 		for pkg in to_check.iter() {
 			// TODO that it does not enable other features.
@@ -627,12 +658,12 @@ impl PropagateFeatureCmd {
 		}
 	}
 
-	fn ignore_missing_propagate(&self) -> BTreeMap<CrateAndFeature, BTreeSet<CrateAndFeature>> {
+	fn ignore_missing_propagate(&self) -> Map<CrateAndFeature, BTreeSet<CrateAndFeature>> {
 		let Some(ignore_missing) = &self.ignore_missing_propagate else {
 			return Default::default()
 		};
 
-		let mut map = BTreeMap::<CrateAndFeature, BTreeSet<CrateAndFeature>>::new();
+		let mut map = Map::<CrateAndFeature, BTreeSet<CrateAndFeature>>::new();
 		for (lhs, rhs) in ignore_missing {
 			let (lhs_c, lhs_f) = lhs.split_once('/').unwrap();
 			let (rhs_c, rhs_f) = rhs.split_once('/').unwrap();
@@ -875,4 +906,153 @@ pub fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeatu
 		}
 	}
 	dag
+}
+
+impl LintWorkspaceCmd {
+	pub fn run(&self, global: &GlobalArgs) {
+		match &self.sub {
+			LintWorkspaceSubCmd::UseWorkspaceConfig(cmd) => cmd.run(global),
+		}
+	}
+}
+
+#[derive(Debug, Clone)]
+pub enum CargoPackageConfigInherit {
+	Immediate(String),
+	Inherited,
+}
+
+impl UseWorkspaceConfigCmd {
+	pub fn run(&self, g: &GlobalArgs) {
+		let mut args = self.cargo_args.clone();
+		args.workspace = true;
+		let excludes = self.parse_excludes();
+
+		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
+		let workspace_manifest = meta.workspace_root.join("Cargo.toml");
+		let raw = std::fs::read_to_string(&workspace_manifest).unwrap();
+		let mut config = toml_edit::Document::from_str(&raw).unwrap();
+		
+		let Some(section) = config["workspace"].as_table_mut() else {
+			println!("No workspace found in the root Cargo.toml - exit 0");
+			return
+		};
+		let Some(section) = section["package"].as_table_mut() else {
+			println!("No workspace.package found in the root Cargo.toml - exit 0");
+			return
+		};
+		let workspace_config = Self::extract_sections(section);
+		let mut crate_configs = Vec::new();
+
+		for p in meta.packages.iter() {
+			let path = canonicalize(p.manifest_path.clone().into_std_path_buf()).unwrap();
+			// Check if this path is in the workspace:
+			if !path.starts_with(&meta.workspace_root) {
+				continue
+			}
+			
+			// Parse as TOML
+			let raw = std::fs::read_to_string(&path).unwrap();
+			let mut config = toml_edit::Document::from_str(&raw).unwrap();
+
+			// go through the "package" section:
+			let mut package = config["package"].as_table_mut().unwrap();
+			let crate_config = Self::extract_sections(&mut package);
+			crate_configs.push((p.clone(), crate_config));
+		}
+
+		let mut offenders = Vec::<(Package, Vec<(String, String)>)>::new();
+
+		// Now check that all crates use the workspace config.
+		for (p, crate_config) in crate_configs {
+			let mut excluded = Vec::new();
+			for (regex, exclude) in excludes.iter() {
+				if regex.is_match(&p.name) {
+					excluded.push(exclude.clone());
+				}
+			}
+
+			let mut bad = Vec::new();
+
+			for (k, v) in crate_config {
+				let CargoPackageConfigInherit::Immediate(imm) = v else {
+					if !workspace_config.contains_key(&k) {
+						log::error!("Cannot inherit non-existant workspace config in crate: {}: '{}'", p.name, k)
+					}
+					continue;
+				};
+
+				if excluded.contains(&k) {
+					continue
+				}
+
+				if workspace_config.contains_key(&k) {
+					bad.push((k, imm));
+				}
+			}
+
+			if !bad.is_empty() {
+				offenders.push((p, bad));
+			}
+		}
+
+		if offenders.is_empty() {
+			println!("All crates use the workspace config.");
+			return
+		}
+
+		let num = g.red(&offenders.len().to_string());
+		println!("Found {} crate{} that do not use the workspace config:", num, plural(offenders.len()));
+
+		for (pkg, bad) in offenders {
+			let path = if self.show_path {
+				format!(" ({})", pkg.manifest_path)
+			} else {
+				String::new()
+			};
+			
+			println!("  {}{}", g.bold(&pkg.name), path);
+
+			for (k, v) in bad {
+				println!("    {} = {}", k, v);
+			}
+		}
+
+		std::process::exit(g.error_code());
+	}
+
+	fn extract_sections(config: &mut Table) -> Map<String, CargoPackageConfigInherit> {
+		let mut map = Map::new();
+
+		// The lines in the package section can either be:
+		// - `key = value` (immediate)
+		// - `key.workspace = true` (inherited)
+
+		for (key, value) in config.iter_mut() {
+			if let Some(table) = value.as_table_mut() {
+				if let Some(workspace) = table.get_mut("workspace") {
+					if let Some(true) = workspace.as_bool() {
+						map.insert(key.to_string().trim().into(), CargoPackageConfigInherit::Inherited);
+					} else {
+						panic!("Invalid workspace config: {:?}", workspace);
+					}
+				}
+			} else {
+				map.insert(key.to_string().trim().into(), CargoPackageConfigInherit::Immediate(value.to_string().trim().into()));
+			}
+		}
+
+		map
+	}
+
+	fn parse_excludes(&self) -> Vec<(Regex, String)> {
+		let mut ret = Vec::new();
+		if let Some(excludes) = &self.exclude {
+			for (regex, key) in excludes {
+				let regex = Regex::new(regex).unwrap();
+				ret.push((regex, key.clone()));
+			}
+		}
+		ret
+	}
 }

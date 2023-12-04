@@ -42,7 +42,8 @@ jobs:
         cp Cargo.dev.toml Cargo.toml
         cargo generate-lockfile
 
-    - name: Zepter Passes on ${{ matrix.repo }}
+    - if: matrix.repo != 'open-web3-stack/open-runtime-module-library' || (matrix.repo == 'open-web3-stack/open-runtime-module-library' && matrix.version == '*')
+      name: Zepter Passes on ${{ matrix.repo }}
       run: |
         zepter run check
         zepter

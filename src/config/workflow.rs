@@ -173,7 +173,7 @@ impl WorkflowFile {
 			Ok(())
 		} else {
 			Err(format!(
-				"Config file version is too new. The file requires at least {}, but the current version is {}. Please update Zepter or ignore this check with `--check-cfg-compatibility=off`.",
+				"Config file version is too new. The file requires at least version {}, but the current version is {}. Please update Zepter or ignore this check with `--check-cfg-compatibility=off`.",
 				file_version, current_version
 			))
 		}

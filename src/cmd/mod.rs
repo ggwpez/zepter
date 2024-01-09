@@ -224,7 +224,7 @@ impl CargoArgs {
 		let meta = cmd.exec().map_err(|e| format!("Failed to load metadata: {e}"))?;
 
 		if let Some(path) = &self.keep_meta {
-			std::fs::write(&path, serde_json::to_string_pretty(&meta).unwrap()).unwrap();
+			std::fs::write(path, serde_json::to_string_pretty(&meta).unwrap()).unwrap();
 			log::info!("Wrote metadata to {}", path.display());
 		}
 

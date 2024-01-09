@@ -22,6 +22,7 @@ pub struct Semver {
 impl TryFrom<&str> for Semver {
 	type Error = ();
 
+	#[allow(clippy::map_err_ignore)]
 	fn try_from(s: &str) -> Result<Self, Self::Error> {
 		let mut parts = s.split('.');
 		let major = parts.next().ok_or(())?.parse().map_err(|_| ())?;
@@ -45,6 +46,7 @@ impl Display for Semver {
 }
 
 impl Semver {
+	#[allow(clippy::map_err_ignore)]
 	pub fn from_serde<'de, D>(deserializer: D) -> Result<Self, D::Error>
 	where
 		D: Deserializer<'de>,

@@ -1,13 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
-use assert_cmd::cargo;
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use rand::{Rng, SeedableRng};
-use zepter::{
-	cmd::lint::{build_feature_dag, CrateAndFeature},
-	prelude::*,
-};
+use zepter::{cmd::lint::build_feature_dag, prelude::*};
 
 fn build_dag(nodes: usize, edges: usize) -> Dag<usize> {
 	let mut rng = rand::rngs::StdRng::seed_from_u64(42);
@@ -33,37 +29,37 @@ fn dag(c: &mut Criterion) {
 	c.bench_function("DAG 1k/1k", |b| {
 		b.iter(|| {
 			any_path(&dag);
-			black_box(())
-		})
+			black_box(());
+		});
 	});
 	let dag = build_dag(1000, 5000);
 	c.bench_function("DAG 1k/5k", |b| {
 		b.iter(|| {
 			any_path(&dag);
-			black_box(())
-		})
+			black_box(());
+		});
 	});
 	let dag = build_dag(10000, 1000);
 	c.bench_function("DAG 10k/1k", |b| {
 		b.iter(|| {
 			any_path(&dag);
-			black_box(())
-		})
+			black_box(());
+		});
 	});
 	let dag = build_dag(10000, 50000);
 	c.bench_function("DAG 10k/50k", |b| {
 		b.iter(|| {
 			any_path(&dag);
-			black_box(())
-		})
+			black_box(());
+		});
 	});
 }
 
 fn polkadot_sdk(c: &mut Criterion) {
 	let path = std::env::var("META_JSON_PATH").unwrap_or("meta.json".into());
 	let path = std::fs::canonicalize(path).unwrap();
-	let file = std::fs::read_to_string(&path).unwrap();
-	let mut meta = serde_json::from_str::<cargo_metadata::Metadata>(&file).unwrap();
+	let file = std::fs::read_to_string(path).unwrap();
+	let meta = serde_json::from_str::<cargo_metadata::Metadata>(&file).unwrap();
 
 	let pkgs = &meta.packages;
 	let dag = build_feature_dag(&meta, pkgs);
@@ -77,14 +73,14 @@ fn polkadot_sdk(c: &mut Criterion) {
 
 	let from = dag.lhs_iter().find(|c| c.0.starts_with("kitchensink-runtime ")).unwrap();
 	let to = dag.rhs_iter().find(|c| c.0.starts_with("sp-io ")).unwrap();
-	assert!(dag.lhs_contains(&from), "LHS:\n{:?}", dag.lhs_nodes().collect::<Vec<_>>());
-	assert!(dag.rhs_contains(&to));
+	assert!(dag.lhs_contains(from), "LHS:\n{:?}", dag.lhs_nodes().collect::<Vec<_>>());
+	assert!(dag.rhs_contains(to));
 
 	c.bench_function("Polkadot-SDK / DAG / reachability: false", |b| {
 		b.iter(|| {
-			let p = dag.any_path(&from, &to);
+			let p = dag.any_path(from, to);
 			black_box(p)
-		})
+		});
 	});
 }
 

@@ -28,7 +28,7 @@ impl DebugCmd {
 		let dag = build_feature_dag(&meta, &meta.packages);
 
 		if !self.no_root {
-			println!("Root: {}", meta.workspace_root.to_string());
+			println!("Root: {}", meta.workspace_root);
 		}
 		println!("Num workspace members: {}", meta.workspace_members.len());
 		println!("Num dependencies: {}", meta.packages.len());

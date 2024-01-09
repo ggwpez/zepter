@@ -54,7 +54,6 @@ fn integration() {
 				cmd.current_dir(workspace.as_path());
 			}
 
-			dbg!(format!("{:?}", cmd));
 			// remove empty trailing and suffix lines
 			let res = cmd.output().unwrap();
 			if let Some(code) = case.code {

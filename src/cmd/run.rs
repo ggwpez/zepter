@@ -27,7 +27,7 @@ impl RunCmd {
 		let config = self.args.config.load().expect("Invalid config file");
 
 		let name = self.args.workflow.as_deref().unwrap_or(WORKFLOW_DEFAULT_NAME);
-		let Some(workflow) = config.workflow(&name) else {
+		let Some(workflow) = config.workflow(name) else {
 			panic!("Workflow '{}' not found", name);
 		};
 

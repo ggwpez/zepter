@@ -459,7 +459,7 @@ impl PropagateFeatureCmd {
 				}
 				// TODO handle default features.
 				// Resolve the dep according to the metadata.
-				let Some(dep) = resolve_dep(pkg, dep, &meta) else {
+				let Some(dep) = resolve_dep(pkg, dep, meta) else {
 					// Either outside workspace or not resolved, possibly due to not being used at
 					// all because of the target or whatever.
 					continue

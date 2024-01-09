@@ -74,7 +74,9 @@ impl Case {
 
 impl Drop for CaseCleanupGuard {
 	fn drop(&mut self) {
-		self.cfg_path.take().map(|p| fs::remove_file(p).unwrap());
+		if let Some(p) = self.cfg_path.take() {
+			fs::remove_file(p).unwrap();
+		}
 	}
 }
 
@@ -229,10 +231,9 @@ impl ZepterConfig {
 		);
 		if let Some(verbatim) = &self.verbatim {
 			fs::write(&to_path, verbatim)?;
-			dbg!("Writing to path:", &to_path);
 		} else if let Some(from_path) = &self.from_path {
 			let from_path = root.join(from_path);
-			fs::copy(&from_path, &to_path)?;
+			fs::copy(from_path, &to_path)?;
 		}
 
 		Ok(to_path)

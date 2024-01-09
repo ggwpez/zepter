@@ -40,7 +40,7 @@ impl Default for Toggle {
 	}
 }
 
-pub const WELL_KNOWN_CFG_PATHS: &[&'static str] = &["zepter.yaml", ".zepter.yaml"];
+pub const WELL_KNOWN_CFG_PATHS: &[&str] = &["zepter.yaml", ".zepter.yaml"];
 
 /// Search for `zepter.yaml`, `zepter`, `.zepter.yaml` or `.zepter` in the folders:
 /// - `./`
@@ -111,7 +111,7 @@ impl ConfigArgs {
 
 	fn locate_workspace(&self) -> Result<PathBuf, String> {
 		let mut cmd = std::process::Command::new("cargo");
-		cmd.arg("locate-project").args(&["--workspace", "--offline", "--locked"]);
+		cmd.arg("locate-project").args(["--workspace", "--offline", "--locked"]);
 		if let Some(path) = &self.manifest_path {
 			cmd.arg("--manifest-path").arg(path);
 		}
@@ -119,10 +119,12 @@ impl ConfigArgs {
 		let path = output.stdout;
 		let path =
 			String::from_utf8(path).expect("Failed to parse output of `cargo locate-project`");
-		let path: serde_json::Value = serde_json::from_str(&path).expect(&format!(
-			"Failed to parse output of `cargo locate-project`: '{}'",
-			String::from_utf8_lossy(&output.stderr)
-		));
+		let path: serde_json::Value = serde_json::from_str(&path).unwrap_or_else(|_| {
+			panic!(
+				"Failed to parse output of `cargo locate-project`: '{}'",
+				String::from_utf8_lossy(&output.stderr)
+			)
+		});
 		let path = path["root"].as_str().expect("Failed to parse output of `cargo locate-project`");
 		let path = PathBuf::from(path);
 		let root = path.parent().expect("Failed to get parent of workspace root");

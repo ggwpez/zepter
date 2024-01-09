@@ -332,7 +332,7 @@ where
 	}
 
 	pub fn lhs_iter(&self) -> impl Iterator<Item = &T> {
-		self.edges.iter().map(|(k, _)| k)
+		self.edges.keys()
 	}
 
 	pub fn rhs_iter(&self) -> impl Iterator<Item = &T> {

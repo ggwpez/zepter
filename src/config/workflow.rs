@@ -84,7 +84,7 @@ impl FromStr for WorkflowFile {
 	type Err = String;
 
 	fn from_str(content: &str) -> Result<Self, Self::Err> {
-		let parsed = serde_yaml::from_str::<WorkflowFile>(&content)
+		let parsed = serde_yaml::from_str::<WorkflowFile>(content)
 			.map_err(|e| format!("yaml parsing: {}", e))?;
 
 		if parsed.version.format != (1, 0, 0).into() {

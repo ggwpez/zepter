@@ -5,15 +5,13 @@ cases:
 - cmd: transpose features strip-dev-only -p asdf
   stderr: |
     [WARN] Unstable feature - do not rely on this!
-    thread 'main' panicked at 'Could not find package named 'asdf'', src/cmd/transpose.rs:251:17
-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-  code: 101
+    Could not find package named 'asdf'
+  code: 1
 - cmd: transpose features strip-dev-only -p orml-asset-registry,asdf
   stderr: |
     [WARN] Unstable feature - do not rely on this!
-    thread 'main' panicked at 'Could not find package named 'asdf'', src/cmd/transpose.rs:251:17
-    note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-  code: 101
+    Could not find package named 'asdf'
+  code: 1
 - cmd: transpose features strip-dev-only
   stderr: |
     [WARN] Unstable feature - do not rely on this!

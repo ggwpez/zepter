@@ -160,16 +160,18 @@ impl LiftToWorkspaceCmd {
 				},
 			};
 			let hint = format!("cargo upgrade -p {}@{version_hint}", &self.dependency);
-			panic!(
+			eprintln!(
 				"\nFound {} different versions of '{}' in the workspace:\n\n{err}\nHint: {}\n",
 				versions.len(),
 				&self.dependency,
 				g.bold(&hint),
 			);
+			std::process::exit(1);
 		}
 
 		let Some(version) = by_version.keys().next() else {
-			panic!("Could not find any dependency named '{}'", g.red(&self.dependency));
+			eprintln!("Could not find any dependency named '{}'", g.red(&self.dependency));
+			std::process::exit(1);
 		};
 		let _ = version;
 		let _found: usize = by_version.values().map(Vec::len).sum();
@@ -248,7 +250,8 @@ impl StripDevDepsCmd {
 
 		for name in self.packages.iter().flatten() {
 			if !meta.packages.iter().any(|p| p.name == *name) {
-				panic!("Could not find package named '{}'", g.red(name));
+				eprintln!("Could not find package named '{}'", g.red(name));
+				std::process::exit(1);
 			}
 		}
 
@@ -278,7 +281,8 @@ impl StripDevDepsCmd {
 			for dep in only_dev.iter() {
 				// Account for renamed crates:
 				let Some(dep) = resolve_dep(pkg, dep, &meta) else {
-					panic!("Could not resolve dependency '{}'", g.red(&dep.name));
+					eprintln!("Could not resolve dependency '{}'", g.red(&dep.name));
+					std::process::exit(1);
 				};
 
 				fixer.remove_feature(&format!("{}/", dep.name()));

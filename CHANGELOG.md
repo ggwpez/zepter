@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.2] - 2024-02-02
+
+### Fixed
+- Let `transpose` exit with code 1 on error instead of panic.
+
 ## [0.15.0] - 2023-11-14
 
 ### Added

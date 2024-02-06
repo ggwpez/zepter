@@ -475,11 +475,12 @@ impl AutoFixer {
 		if let Some(as_str) = dep.as_str() {
 			cargo_metadata::semver::VersionReq::parse(as_str).expect("Is semver");
 			let mut table = InlineTable::new();
-			table.remove("default-features"); // We also remove it to get the order right.
 
 			table.insert("workspace", Value::Boolean(Formatted::new(true)));
 			if let Some(default_feats) = default_feats {
 				table.insert("default-features", Value::Boolean(Formatted::new(default_feats)));
+			} else {
+				table.remove("default-features");
 			}
 
 			table.set_dotted(false);
@@ -490,11 +491,12 @@ impl AutoFixer {
 				return Err("'git' or 'path' dependency are currently not supported".into())
 			}
 			as_table.remove("version");
-			as_table.remove("default-features"); // We also remove it to get the order right.
 
 			as_table.insert("workspace", Value::Boolean(Formatted::new(true)));
 			if let Some(default_feats) = default_feats {
 				as_table.insert("default-features", Value::Boolean(Formatted::new(default_feats)));
+			} else {
+				as_table.remove("default-features");
 			}
 		} else {
 			unreachable!("Unknown kind of dependency: {:?}", dep);
@@ -507,10 +509,21 @@ impl AutoFixer {
 		dep: &Dependency,
 		default_feats: bool,
 	) -> Result<(), String> {
+		self.add_workspace_dep_inner(&dep.name, &dep.req.to_string(), default_feats)
+	}
+
+	pub(crate) fn add_workspace_dep_inner(
+		&mut self,
+		dep_name: &str,
+		dep_version: &str,
+		default_feats: bool,
+	) -> Result<(), String> {
+		// The carrot is implicit in cargo.
+		let version_str = dep_version.to_string().trim_start_matches('^').to_string();
 		let doc: &mut Document = self.doc.as_mut().unwrap();
 
 		if !doc.contains_table("workspace") {
-			return Err("No workspace table".into())
+			return Err("No workspace entry found".into())
 		}
 		let workspace = doc["workspace"].as_table_mut().unwrap();
 
@@ -519,16 +532,45 @@ impl AutoFixer {
 		}
 
 		let deps = workspace["dependencies"].as_table_mut().unwrap();
+		let mut t = InlineTable::new();
 
-		if deps.contains_key(&dep.name) {
-			return Err("Dependency already exists in the workspace".into())
+		if let Some(found) = deps.get(dep_name) {
+			if let Some(found) = found.as_inline_table() {
+				if let Some(version) = found.get("version") {
+					if remove_carrot(version.as_str().unwrap()) != version_str {
+						return Err(format!(
+							"Dependency '{}' already exists in the workspace with a different 'version' field: '{}' vs '{}'",
+							dep_name,
+							version.as_str().unwrap(),
+							dep_version
+						))
+					}
+				}
+
+				if let Some(default) = found.get("default-features") {
+					if default.as_bool().unwrap() != default_feats {
+						return Err(format!(
+							"Dependency '{}' already exists in the workspace with a different 'default-features' fields: '{}' vs '{}'",
+							dep_name,
+							default.as_bool().unwrap(),
+							default_feats
+						))
+					}
+				}
+
+				// We checked that:
+				// - There is either no version or its compatible
+				// - There is either no default-features or its compatible
+				t = found.clone();
+			} else {
+				return Err(format!("Dependency '{}' already exists in the workspace but could not validate its compatibility", dep_name))
+			}
 		}
 
-		let mut t = InlineTable::new();
-		t.insert("version", Value::String(Formatted::new(dep.req.to_string())));
+		t.insert("version", Value::String(Formatted::new(version_str)));
 		t.insert("default-features", Value::Boolean(Formatted::new(default_feats)));
 
-		deps.insert(&dep.name, Item::Value(Value::InlineTable(t)));
+		deps.insert(dep_name, Item::Value(Value::InlineTable(t)));
 
 		Ok(())
 	}
@@ -575,4 +617,8 @@ impl ToString for AutoFixer {
 	fn to_string(&self) -> String {
 		self.doc.as_ref().unwrap().to_string()
 	}
+}
+
+fn remove_carrot(version: &str) -> &str {
+	version.strip_prefix('^').unwrap_or(version)
 }

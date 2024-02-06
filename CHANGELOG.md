@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.0] - 2024-02-06
+
+### Changed
+- Make `transpose` smarter and add tests for `dependency lift-to-workspace`.
+
 ## [1.0.2] - 2024-02-02
 
 ### Fixed

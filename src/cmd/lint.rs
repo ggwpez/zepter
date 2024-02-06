@@ -844,9 +844,7 @@ pub fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeatu
 						.dependencies
 						.iter()
 						.find(|d| d.rename.as_ref().unwrap_or(&d.name) == &dep)
-						.unwrap_or_else(|| {
-							panic!("Could not resolve dep {} of {}", dep, pkg.id.to_string())
-						});
+						.unwrap_or_else(|| panic!("Could not resolve dep {} of {}", dep, pkg.id));
 
 					let dep_id = match resolve_dep(pkg, dep, meta) {
 						None => {

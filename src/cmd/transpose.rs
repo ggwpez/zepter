@@ -195,7 +195,7 @@ impl LiftToWorkspaceCmd {
 						versions.len(),
 						&self.dependency,
 						g.bold(&hint),
-					));
+					))
 				} else {
 					versions.first().unwrap().to_string()
 				}

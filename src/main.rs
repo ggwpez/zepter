@@ -6,7 +6,7 @@
 use clap::Parser;
 use zepter::cmd::Command;
 
-fn main() {
+fn main() -> Result<(), String> {
 	setup_logging();
 
 	// Need to remove this in case `cargo-zepter` is used:
@@ -15,7 +15,12 @@ fn main() {
 		args.remove(1);
 	}
 
-	Command::parse_from(args).run();
+	if let Err(err) = Command::parse_from(args).run() {
+		eprintln!("{}", err);
+		Err("see log".into())
+	} else {
+		Ok(())
+	}
 }
 
 #[cfg(not(feature = "logging"))]

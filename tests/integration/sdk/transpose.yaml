@@ -1,21 +1,22 @@
 repo:
   name: paritytech/polkadot-sdk
-  ref: c86b633695299ed27053940d5ea5c5a2392964b3
+  ref: 7df1ae3b8111d534cce108b2b405b6a33fcdedc3
 cases:
 - cmd: transpose dependency lift-to-workspace parity-scale-codec
   stderr: |+
     [WARN] Unstable feature - do not rely on this!
 
-    Found 6 different versions of 'parity-scale-codec' in the workspace:
+    Found 7 different versions of 'parity-scale-codec' in the workspace:
 
-      ^3.6.1: 244 times (frame-support, sp-api, sp-core, …)
-      ^3.0.0:  51 times (pallet-broker, cumulus-client-cli, cumulus-client-collator, …)
-      ^3.1.5:  19 times (bridge-runtime-common, bp-header-chain, bp-runtime, …)
-      ^3.2.2:   5 times (pallet-asset-conversion-tx-payment, pallet-safe-mode, pallet-tx-pause, …)
+      ^3.6.1: 260 times (frame-support, sp-api, sp-core, …)
+      ^3.0.0:  58 times (pallet-broker, bridge-hub-common, cumulus-primitives-core, …)
+      ^3.1.5:  20 times (bridge-runtime-common, bp-header-chain, bp-runtime, …)
+      ^3.4.0:   6 times (emulated-integration-tests-common, asset-hub-rococo-integration-tests, asset-hub-westend-integration-tests, …)
+      ^3.2.2:   6 times (pallet-asset-conversion-tx-payment, pallet-safe-mode, pallet-tx-pause, …)
       ^3.6.4:   4 times (cumulus-relay-chain-interface, polkadot-node-core-prospective-parachains, cumulus-relay-chain-rpc-interface, …)
-      ^3.4.0:   4 times (asset-hub-rococo-integration-tests, integration-tests-common, asset-hub-westend-integration-tests, …)
+      ^3.6.5:   1 time  (polkadot-sdk-docs)
 
-    Hint: cargo upgrade -p parity-scale-codec@3.6.4
+    Hint: cargo upgrade -p parity-scale-codec@3.6.5
 
   code: 1
 - cmd: transpose dependency lift-to-workspace log
@@ -24,10 +25,10 @@ cases:
 
     Found 8 different versions of 'log' in the workspace:
 
-      ^0.4.17: 135 times (frame-support, sp-api, sp-core, …)
-      ^0.4.20:  28 times (bridge-runtime-common, pallet-bridge-grandpa, pallet-bridge-messages, …)
-      ^0.4   :   7 times (sc-utils, pallet-contracts, substrate-rpc-client, …)
-      ^0.4.16:   4 times (sc-network-light, pallet-core-fellowship, pallet-ranked-collective, …)
+      ^0.4.17: 142 times (frame-support, sp-api, sp-core, …)
+      ^0.4.20:  37 times (bridge-runtime-common, pallet-bridge-grandpa, pallet-bridge-messages, …)
+      ^0.4   :   7 times (sc-utils, binary-merkle-tree, pallet-contracts, …)
+      ^0.4.16:   4 times (sc-network-light, pallet-salary, pallet-ranked-collective, …)
       ^0.4.14:   4 times (pallet-alliance, pallet-elections-phragmen, pallet-glutton, …)
       ^0.4.19:   2 times (bp-runtime, parachains-common)
       ^0.4.0 :   2 times (pallet-nomination-pools, pallet-nomination-pools-test-staking)
@@ -36,48 +37,1488 @@ cases:
     Hint: cargo upgrade -p log@0.4.20
 
   code: 1
+- cmd: transpose dependency lift-to-workspace log --version-resolver Unambiguous
+  stderr: |
+    error: invalid value 'Unambiguous' for '--version-resolver <VERSION_RESOLVER>'
+      [possible values: unambiguous, exact, latest]
+
+      tip: a similar value exists: 'unambiguous'
+
+    For more information, try '--help'.
+  code: 2
+- cmd: transpose dependency lift-to-workspace log --version-resolver latest
+  stderr: |
+    [WARN] Unstable feature - do not rely on this!
+    Held back modifications to 200 files; re-run with --fix to apply.
+  code: 1
+- cmd: transpose dependency lift-to-workspace log --version-resolver exact
+  stderr: |
+    error: the following required arguments were not provided:
+      --exact-version <EXACT_VERSION>
+
+    Usage: zepter transpose dependency lift-to-workspace --exact-version <EXACT_VERSION> --version-resolver <VERSION_RESOLVER> --manifest-path <MANIFEST_PATH> --log <LEVEL> --offline <DEPENDENCY>
+
+    For more information, try '--help'.
+  code: 2
+- cmd: transpose dependency lift-to-workspace log --exact-version 0.4.20
+  stderr: |
+    [WARN] Unstable feature - do not rely on this!
+    Cannot use --exact-version without --version-resolver=exact
+  code: 1
+- cmd: transpose dependency lift-to-workspace log --version-resolver exact --exact-version 0.4.20
+  stderr: |
+    [WARN] Unstable feature - do not rely on this!
+    Held back modifications to 200 files; re-run with --fix to apply.
+  code: 1
 - cmd: zepter transpose dependency lift-to-workspace macro_magic
   stderr: |
     [WARN] Unstable feature - do not rely on this!
-  diff: |
-    diff --git Cargo.toml Cargo.toml
-    index c98fe6d1a3..229870c266 100644
-    --- Cargo.toml
-    +++ Cargo.toml
-    @@ -6,0 +7,3 @@ license = "GPL-3.0-only"
-    +[workspace.dependencies]
-    +macro_magic = { version = "^0.5.0", default-features = false }
-    +
-    diff --git substrate/frame/support/Cargo.toml substrate/frame/support/Cargo.toml
-    index 5caf993bb3..71d14e587d 100644
-    --- substrate/frame/support/Cargo.toml
-    +++ substrate/frame/support/Cargo.toml
-    @@ -33 +33 @@ tt-call = "1.0.8"
-    -macro_magic = "0.5.0"
-    +macro_magic = { workspace = true }
-    diff --git substrate/frame/support/procedural/Cargo.toml substrate/frame/support/procedural/Cargo.toml
-    index 45ed1750a5..9b84497581 100644
-    --- substrate/frame/support/procedural/Cargo.toml
-    +++ substrate/frame/support/procedural/Cargo.toml
-    @@ -26 +26 @@ frame-support-procedural-tools = { path = "tools" }
-    -macro_magic = { version = "0.5.0", features = ["proc_support"] }
-    +macro_magic = { features = ["proc_support"] , workspace = true }
-- cmd: zepter transpose dependency lift-to-workspace tt-call
+    Held back modifications to 3 files; re-run with --fix to apply.
+  code: 1
+- cmd: zepter transpose dependency lift-to-workspace tt-call --version-resolver latest --fix
   stderr: |
     [WARN] Unstable feature - do not rely on this!
+  code: 0
   diff: |
     diff --git Cargo.toml Cargo.toml
-    index c98fe6d1a3..42db4817d6 100644
+    index e807171b24..9bf53ed414 100644
     --- Cargo.toml
     +++ Cargo.toml
-    @@ -6,0 +7,3 @@ license = "GPL-3.0-only"
-    +[workspace.dependencies]
-    +tt-call = { version = "^1.0.8", default-features = false }
-    +
+    @@ -537,0 +538 @@ polkavm-derive = "0.8.0"
+    +tt-call = { version = "1.0.8", default-features = false }
     diff --git substrate/frame/support/Cargo.toml substrate/frame/support/Cargo.toml
-    index 5caf993bb3..d98bcf54a7 100644
+    index ad97ad5146..d7b4a66ebd 100644
     --- substrate/frame/support/Cargo.toml
     +++ substrate/frame/support/Cargo.toml
-    @@ -32 +32 @@ sp-metadata-ir = { path = "../../primitives/metadata-ir", default-features = fal
+    @@ -36 +36 @@ sp-metadata-ir = { path = "../../primitives/metadata-ir", default-features = fal
     -tt-call = "1.0.8"
-    +tt-call = { workspace = true }
+    +tt-call = { workspace = true, default-features = true }
+- cmd: zepter transpose dependency lift-to-workspace macro_magic --version-resolver latest --fix
+  stderr: |
+    [WARN] Unstable feature - do not rely on this!
+  code: 0
+  diff: |
+    diff --git Cargo.toml Cargo.toml
+    index e807171b24..de52367e86 100644
+    --- Cargo.toml
+    +++ Cargo.toml
+    @@ -537,0 +538 @@ polkavm-derive = "0.8.0"
+    +macro_magic = { version = "0.5.0", default-features = false }
+    diff --git substrate/frame/support/Cargo.toml substrate/frame/support/Cargo.toml
+    index ad97ad5146..c4ebb255f2 100644
+    --- substrate/frame/support/Cargo.toml
+    +++ substrate/frame/support/Cargo.toml
+    @@ -37 +37 @@ tt-call = "1.0.8"
+    -macro_magic = "0.5.0"
+    +macro_magic = { workspace = true, default-features = true }
+    diff --git substrate/frame/support/procedural/Cargo.toml substrate/frame/support/procedural/Cargo.toml
+    index d77f6595db..6a58a6e136 100644
+    --- substrate/frame/support/procedural/Cargo.toml
+    +++ substrate/frame/support/procedural/Cargo.toml
+    @@ -29 +29 @@ frame-support-procedural-tools = { path = "tools" }
+    -macro_magic = { version = "0.5.0", features = ["proc_support"] }
+    +macro_magic = { features = ["proc_support"] , workspace = true, default-features = true }
+- cmd: transpose dependency lift-to-workspace log --version-resolver latest --fix
+  stderr: |
+    [WARN] Unstable feature - do not rely on this!
+  code: 0
+  diff: |
+    diff --git Cargo.toml Cargo.toml
+    index e807171b24..6bb50da1b6 100644
+    --- Cargo.toml
+    +++ Cargo.toml
+    @@ -537,0 +538 @@ polkavm-derive = "0.8.0"
+    +log = { version = "0.4.20", default-features = false }
+    diff --git bridges/bin/runtime-common/Cargo.toml bridges/bin/runtime-common/Cargo.toml
+    index c007206450..fac88b20ca 100644
+    --- bridges/bin/runtime-common/Cargo.toml
+    +++ bridges/bin/runtime-common/Cargo.toml
+    @@ -16 +16 @@ hash-db = { version = "0.16.0", default-features = false }
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git bridges/modules/grandpa/Cargo.toml bridges/modules/grandpa/Cargo.toml
+    index 562a6e43e0..dccd7b3bdc 100644
+    --- bridges/modules/grandpa/Cargo.toml
+    +++ bridges/modules/grandpa/Cargo.toml
+    @@ -17 +17 @@ finality-grandpa = { version = "0.16.2", default-features = false }
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git bridges/modules/messages/Cargo.toml bridges/modules/messages/Cargo.toml
+    index 224aad7b36..173d6f1c16 100644
+    --- bridges/modules/messages/Cargo.toml
+    +++ bridges/modules/messages/Cargo.toml
+    @@ -14 +14 @@ codec = { package = "parity-scale-codec", version = "3.1.5", default-features =
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git bridges/modules/parachains/Cargo.toml bridges/modules/parachains/Cargo.toml
+    index 41aeca4b3b..e454a6f288 100644
+    --- bridges/modules/parachains/Cargo.toml
+    +++ bridges/modules/parachains/Cargo.toml
+    @@ -14 +14 @@ codec = { package = "parity-scale-codec", version = "3.1.5", default-features =
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git bridges/modules/relayers/Cargo.toml bridges/modules/relayers/Cargo.toml
+    index 35017ebbd3..b78da5cbee 100644
+    --- bridges/modules/relayers/Cargo.toml
+    +++ bridges/modules/relayers/Cargo.toml
+    @@ -14 +14 @@ codec = { package = "parity-scale-codec", version = "3.1.5", default-features =
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git bridges/modules/xcm-bridge-hub-router/Cargo.toml bridges/modules/xcm-bridge-hub-router/Cargo.toml
+    index ff33b19a58..20f8ff4407 100644
+    --- bridges/modules/xcm-bridge-hub-router/Cargo.toml
+    +++ bridges/modules/xcm-bridge-hub-router/Cargo.toml
+    @@ -14 +14 @@ codec = { package = "parity-scale-codec", version = "3.1.5", default-features =
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git bridges/modules/xcm-bridge-hub/Cargo.toml bridges/modules/xcm-bridge-hub/Cargo.toml
+    index 89e261dc6d..e10119e864 100644
+    --- bridges/modules/xcm-bridge-hub/Cargo.toml
+    +++ bridges/modules/xcm-bridge-hub/Cargo.toml
+    @@ -14 +14 @@ codec = { package = "parity-scale-codec", version = "3.1.5", default-features =
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git bridges/primitives/runtime/Cargo.toml bridges/primitives/runtime/Cargo.toml
+    index 6786bf8f21..2ea31c26d6 100644
+    --- bridges/primitives/runtime/Cargo.toml
+    +++ bridges/primitives/runtime/Cargo.toml
+    @@ -16 +16 @@ impl-trait-for-tuples = "0.2.2"
+    -log = { version = "0.4.19", default-features = false }
+    +log = { workspace = true }
+    diff --git bridges/snowbridge/pallets/ethereum-client/Cargo.toml bridges/snowbridge/pallets/ethereum-client/Cargo.toml
+    index 2f76d5b835..dd7051fe3f 100644
+    --- bridges/snowbridge/pallets/ethereum-client/Cargo.toml
+    +++ bridges/snowbridge/pallets/ethereum-client/Cargo.toml
+    @@ -27 +27 @@ hex-literal = { version = "0.4.1", optional = true }
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git bridges/snowbridge/pallets/inbound-queue/Cargo.toml bridges/snowbridge/pallets/inbound-queue/Cargo.toml
+    index 1081b162dd..8756982ed7 100644
+    --- bridges/snowbridge/pallets/inbound-queue/Cargo.toml
+    +++ bridges/snowbridge/pallets/inbound-queue/Cargo.toml
+    @@ -22 +22 @@ hex-literal = { version = "0.4.1", optional = true }
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git bridges/snowbridge/pallets/system/Cargo.toml bridges/snowbridge/pallets/system/Cargo.toml
+    index aa60051163..f6c642e737 100644
+    --- bridges/snowbridge/pallets/system/Cargo.toml
+    +++ bridges/snowbridge/pallets/system/Cargo.toml
+    @@ -25 +25 @@ frame-system = { path = "../../../../substrate/frame/system", default-features =
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git bridges/snowbridge/primitives/router/Cargo.toml bridges/snowbridge/primitives/router/Cargo.toml
+    index 712c60c214..3dbf5483e1 100644
+    --- bridges/snowbridge/primitives/router/Cargo.toml
+    +++ bridges/snowbridge/primitives/router/Cargo.toml
+    @@ -18 +18 @@ scale-info = { version = "2.9.0", default-features = false, features = ["derive"
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git bridges/snowbridge/runtime/runtime-common/Cargo.toml bridges/snowbridge/runtime/runtime-common/Cargo.toml
+    index f5b44b2558..d4c86f8aa7 100644
+    --- bridges/snowbridge/runtime/runtime-common/Cargo.toml
+    +++ bridges/snowbridge/runtime/runtime-common/Cargo.toml
+    @@ -15 +15 @@ workspace = true
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git bridges/snowbridge/runtime/test-common/Cargo.toml bridges/snowbridge/runtime/test-common/Cargo.toml
+    index a2994e6189..ecf0a6fcc6 100644
+    --- bridges/snowbridge/runtime/test-common/Cargo.toml
+    +++ bridges/snowbridge/runtime/test-common/Cargo.toml
+    @@ -16 +16 @@ hex-literal = { version = "0.4.1" }
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git cumulus/client/consensus/common/Cargo.toml cumulus/client/consensus/common/Cargo.toml
+    index 7fee51310d..5a014b10e3 100644
+    --- cumulus/client/consensus/common/Cargo.toml
+    +++ cumulus/client/consensus/common/Cargo.toml
+    @@ -17 +17 @@ futures = "0.3.28"
+    -log = "0.4.20"
+    +log = { workspace = true, default-features = true }
+    diff --git cumulus/pallets/collator-selection/Cargo.toml cumulus/pallets/collator-selection/Cargo.toml
+    index 4216776fe8..20f048b97d 100644
+    --- cumulus/pallets/collator-selection/Cargo.toml
+    +++ cumulus/pallets/collator-selection/Cargo.toml
+    @@ -19 +19 @@ targets = ["x86_64-unknown-linux-gnu"]
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git cumulus/pallets/dmp-queue/Cargo.toml cumulus/pallets/dmp-queue/Cargo.toml
+    index 301a77003c..83ed994d04 100644
+    --- cumulus/pallets/dmp-queue/Cargo.toml
+    +++ cumulus/pallets/dmp-queue/Cargo.toml
+    @@ -18 +18 @@ codec = { package = "parity-scale-codec", version = "3.0.0", default-features =
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git cumulus/pallets/parachain-system/Cargo.toml cumulus/pallets/parachain-system/Cargo.toml
+    index 848efd3eab..8664729056 100644
+    --- cumulus/pallets/parachain-system/Cargo.toml
+    +++ cumulus/pallets/parachain-system/Cargo.toml
+    @@ -17 +17 @@ impl-trait-for-tuples = "0.2.1"
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git cumulus/pallets/xcmp-queue/Cargo.toml cumulus/pallets/xcmp-queue/Cargo.toml
+    index 8dde44ca0f..9078d5eda9 100644
+    --- cumulus/pallets/xcmp-queue/Cargo.toml
+    +++ cumulus/pallets/xcmp-queue/Cargo.toml
+    @@ -14 +14 @@ codec = { package = "parity-scale-codec", version = "3.0.0", features = ["derive
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git cumulus/parachain-template/node/Cargo.toml cumulus/parachain-template/node/Cargo.toml
+    index c66c96056b..0ad07ac7aa 100644
+    --- cumulus/parachain-template/node/Cargo.toml
+    +++ cumulus/parachain-template/node/Cargo.toml
+    @@ -18 +18 @@ clap = { version = "4.4.18", features = ["derive"] }
+    -log = "0.4.20"
+    +log = { workspace = true, default-features = true }
+    diff --git cumulus/parachain-template/runtime/Cargo.toml cumulus/parachain-template/runtime/Cargo.toml
+    index e4575d196c..44d96ffc4e 100644
+    --- cumulus/parachain-template/runtime/Cargo.toml
+    +++ cumulus/parachain-template/runtime/Cargo.toml
+    @@ -23 +23 @@ hex-literal = { version = "0.4.1", optional = true }
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git cumulus/parachains/common/Cargo.toml cumulus/parachains/common/Cargo.toml
+    index fe5e24ee60..ebc9f822be 100644
+    --- cumulus/parachains/common/Cargo.toml
+    +++ cumulus/parachains/common/Cargo.toml
+    @@ -17 +17 @@ codec = { package = "parity-scale-codec", version = "3.0.0", features = ["derive
+    -log = { version = "0.4.19", default-features = false }
+    +log = { workspace = true }
+    diff --git cumulus/parachains/runtimes/assets/asset-hub-rococo/Cargo.toml cumulus/parachains/runtimes/assets/asset-hub-rococo/Cargo.toml
+    index d1b302dc6d..05936e9399 100644
+    --- cumulus/parachains/runtimes/assets/asset-hub-rococo/Cargo.toml
+    +++ cumulus/parachains/runtimes/assets/asset-hub-rococo/Cargo.toml
+    @@ -15 +15 @@ hex-literal = { version = "0.4.1" }
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml
+    index 415c8c1cb0..78c48507a7 100644
+    --- cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml
+    +++ cumulus/parachains/runtimes/assets/asset-hub-westend/Cargo.toml
+    @@ -15 +15 @@ hex-literal = { version = "0.4.1", optional = true }
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git cumulus/parachains/runtimes/assets/common/Cargo.toml cumulus/parachains/runtimes/assets/common/Cargo.toml
+    index 74e5e44ce1..c9252375cf 100644
+    --- cumulus/parachains/runtimes/assets/common/Cargo.toml
+    +++ cumulus/parachains/runtimes/assets/common/Cargo.toml
+    @@ -15 +15 @@ scale-info = { version = "2.10.0", default-features = false, features = ["derive
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml
+    index 920e7b1571..88fb56a2f0 100644
+    --- cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml
+    +++ cumulus/parachains/runtimes/bridge-hubs/bridge-hub-rococo/Cargo.toml
+    @@ -20 +20 @@ hex-literal = { version = "0.4.1" }
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git cumulus/parachains/runtimes/bridge-hubs/bridge-hub-westend/Cargo.toml cumulus/parachains/runtimes/bridge-hubs/bridge-hub-westend/Cargo.toml
+    index 4cbfde91d0..4ce77f8060 100644
+    --- cumulus/parachains/runtimes/bridge-hubs/bridge-hub-westend/Cargo.toml
+    +++ cumulus/parachains/runtimes/bridge-hubs/bridge-hub-westend/Cargo.toml
+    @@ -18 +18 @@ hex-literal = { version = "0.4.1" }
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git cumulus/parachains/runtimes/bridge-hubs/test-utils/Cargo.toml cumulus/parachains/runtimes/bridge-hubs/test-utils/Cargo.toml
+    index f2cf60354a..d34b5cd0ee 100644
+    --- cumulus/parachains/runtimes/bridge-hubs/test-utils/Cargo.toml
+    +++ cumulus/parachains/runtimes/bridge-hubs/test-utils/Cargo.toml
+    @@ -15 +15 @@ impl-trait-for-tuples = "0.2"
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git cumulus/parachains/runtimes/collectives/collectives-westend/Cargo.toml cumulus/parachains/runtimes/collectives/collectives-westend/Cargo.toml
+    index c16cee4fed..ed264f28c2 100644
+    --- cumulus/parachains/runtimes/collectives/collectives-westend/Cargo.toml
+    +++ cumulus/parachains/runtimes/collectives/collectives-westend/Cargo.toml
+    @@ -15 +15 @@ hex-literal = { version = "0.4.1" }
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml
+    index 9f719421b9..dcc6c4e853 100644
+    --- cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml
+    +++ cumulus/parachains/runtimes/contracts/contracts-rococo/Cargo.toml
+    @@ -21 +21 @@ hex-literal = { version = "0.4.1", optional = true }
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git cumulus/parachains/runtimes/coretime/coretime-rococo/Cargo.toml cumulus/parachains/runtimes/coretime/coretime-rococo/Cargo.toml
+    index ae604da87a..ef9869d727 100644
+    --- cumulus/parachains/runtimes/coretime/coretime-rococo/Cargo.toml
+    +++ cumulus/parachains/runtimes/coretime/coretime-rococo/Cargo.toml
+    @@ -18 +18 @@ hex-literal = "0.4.1"
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git cumulus/parachains/runtimes/coretime/coretime-westend/Cargo.toml cumulus/parachains/runtimes/coretime/coretime-westend/Cargo.toml
+    index f85f6896cb..aae194f9ad 100644
+    --- cumulus/parachains/runtimes/coretime/coretime-westend/Cargo.toml
+    +++ cumulus/parachains/runtimes/coretime/coretime-westend/Cargo.toml
+    @@ -18 +18 @@ hex-literal = "0.4.1"
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git cumulus/parachains/runtimes/people/people-rococo/Cargo.toml cumulus/parachains/runtimes/people/people-rococo/Cargo.toml
+    index 5e5e1e0160..b44d40c701 100644
+    --- cumulus/parachains/runtimes/people/people-rococo/Cargo.toml
+    +++ cumulus/parachains/runtimes/people/people-rococo/Cargo.toml
+    @@ -16 +16 @@ hex-literal = { version = "0.4.1" }
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git cumulus/parachains/runtimes/people/people-westend/Cargo.toml cumulus/parachains/runtimes/people/people-westend/Cargo.toml
+    index c4c76074d7..7295b22f5a 100644
+    --- cumulus/parachains/runtimes/people/people-westend/Cargo.toml
+    +++ cumulus/parachains/runtimes/people/people-westend/Cargo.toml
+    @@ -16 +16 @@ hex-literal = { version = "0.4.1" }
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git cumulus/parachains/runtimes/testing/penpal/Cargo.toml cumulus/parachains/runtimes/testing/penpal/Cargo.toml
+    index dab687c527..08e5987d43 100644
+    --- cumulus/parachains/runtimes/testing/penpal/Cargo.toml
+    +++ cumulus/parachains/runtimes/testing/penpal/Cargo.toml
+    @@ -23 +23 @@ hex-literal = { version = "0.4.1", optional = true }
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git cumulus/polkadot-parachain/Cargo.toml cumulus/polkadot-parachain/Cargo.toml
+    index cc0bd47cc7..646efe3c5f 100644
+    --- cumulus/polkadot-parachain/Cargo.toml
+    +++ cumulus/polkadot-parachain/Cargo.toml
+    @@ -23 +23 @@ hex-literal = "0.4.1"
+    -log = "0.4.20"
+    +log = { workspace = true, default-features = true }
+    diff --git cumulus/primitives/utility/Cargo.toml cumulus/primitives/utility/Cargo.toml
+    index 27e9fbe3c7..45c0e66709 100644
+    --- cumulus/primitives/utility/Cargo.toml
+    +++ cumulus/primitives/utility/Cargo.toml
+    @@ -14 +14 @@ codec = { package = "parity-scale-codec", version = "3.0.0", default-features =
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git cumulus/xcm/xcm-emulator/Cargo.toml cumulus/xcm/xcm-emulator/Cargo.toml
+    index fb37fd0176..6b45770a8e 100644
+    --- cumulus/xcm/xcm-emulator/Cargo.toml
+    +++ cumulus/xcm/xcm-emulator/Cargo.toml
+    @@ -15 +15 @@ paste = "1.0.14"
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git polkadot/cli/Cargo.toml polkadot/cli/Cargo.toml
+    index 3186e31f39..33bea510eb 100644
+    --- polkadot/cli/Cargo.toml
+    +++ polkadot/cli/Cargo.toml
+    @@ -23 +23 @@ clap = { version = "4.4.18", features = ["derive"], optional = true }
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git polkadot/node/core/approval-voting/Cargo.toml polkadot/node/core/approval-voting/Cargo.toml
+    index 5ab823f489..1010779a1b 100644
+    --- polkadot/node/core/approval-voting/Cargo.toml
+    +++ polkadot/node/core/approval-voting/Cargo.toml
+    @@ -54 +54 @@ test-helpers = { package = "polkadot-primitives-test-helpers", path = "../../../
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git polkadot/node/core/av-store/Cargo.toml polkadot/node/core/av-store/Cargo.toml
+    index 68769fb8cc..4f5c18a68d 100644
+    --- polkadot/node/core/av-store/Cargo.toml
+    +++ polkadot/node/core/av-store/Cargo.toml
+    @@ -31 +31 @@ polkadot-node-jaeger = { path = "../../jaeger" }
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git polkadot/node/jaeger/Cargo.toml polkadot/node/jaeger/Cargo.toml
+    index 892292c714..c8fd3d4628 100644
+    --- polkadot/node/jaeger/Cargo.toml
+    +++ polkadot/node/jaeger/Cargo.toml
+    @@ -22 +22 @@ tokio = "1.24.2"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git polkadot/node/metrics/Cargo.toml polkadot/node/metrics/Cargo.toml
+    index 7d67c0a58d..c567278f70 100644
+    --- polkadot/node/metrics/Cargo.toml
+    +++ polkadot/node/metrics/Cargo.toml
+    @@ -27 +27 @@ bs58 = { version = "0.5.0", features = ["alloc"] }
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git polkadot/node/network/approval-distribution/Cargo.toml polkadot/node/network/approval-distribution/Cargo.toml
+    index a1fa803abc..2bc09c5f42 100644
+    --- polkadot/node/network/approval-distribution/Cargo.toml
+    +++ polkadot/node/network/approval-distribution/Cargo.toml
+    @@ -41 +41 @@ env_logger = "0.9.0"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git polkadot/node/network/availability-recovery/Cargo.toml polkadot/node/network/availability-recovery/Cargo.toml
+    index 9f1d905231..e86445730f 100644
+    --- polkadot/node/network/availability-recovery/Cargo.toml
+    +++ polkadot/node/network/availability-recovery/Cargo.toml
+    @@ -35 +35 @@ futures-timer = "3.0.2"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git polkadot/node/network/bitfield-distribution/Cargo.toml polkadot/node/network/bitfield-distribution/Cargo.toml
+    index 8a05bcbd49..0ddb5f643b 100644
+    --- polkadot/node/network/bitfield-distribution/Cargo.toml
+    +++ polkadot/node/network/bitfield-distribution/Cargo.toml
+    @@ -32 +32 @@ maplit = "1.0.2"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git polkadot/node/network/collator-protocol/Cargo.toml polkadot/node/network/collator-protocol/Cargo.toml
+    index 9a9ce6fce6..f88e8182ec 100644
+    --- polkadot/node/network/collator-protocol/Cargo.toml
+    +++ polkadot/node/network/collator-protocol/Cargo.toml
+    @@ -32 +32 @@ tokio-util = "0.7.1"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git polkadot/node/service/Cargo.toml polkadot/node/service/Cargo.toml
+    index 007e3dc595..5b73d420e3 100644
+    --- polkadot/node/service/Cargo.toml
+    +++ polkadot/node/service/Cargo.toml
+    @@ -86 +86 @@ gum = { package = "tracing-gum", path = "../gum" }
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git polkadot/node/subsystem-bench/Cargo.toml polkadot/node/subsystem-bench/Cargo.toml
+    index 136eccbf68..bc038abd64 100644
+    --- polkadot/node/subsystem-bench/Cargo.toml
+    +++ polkadot/node/subsystem-bench/Cargo.toml
+    @@ -46 +46 @@ polkadot-erasure-coding = { package = "polkadot-erasure-coding", path = "../../e
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git polkadot/node/subsystem-util/Cargo.toml polkadot/node/subsystem-util/Cargo.toml
+    index 5f615e05ab..b2a643d92f 100644
+    --- polkadot/node/subsystem-util/Cargo.toml
+    +++ polkadot/node/subsystem-util/Cargo.toml
+    @@ -49 +49 @@ futures = { version = "0.3.21", features = ["thread-pool"] }
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git polkadot/parachain/test-parachains/adder/collator/Cargo.toml polkadot/parachain/test-parachains/adder/collator/Cargo.toml
+    index 7dd0d9a563..c2b11aadb5 100644
+    --- polkadot/parachain/test-parachains/adder/collator/Cargo.toml
+    +++ polkadot/parachain/test-parachains/adder/collator/Cargo.toml
+    @@ -22 +22 @@ futures-timer = "3.0.2"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git polkadot/parachain/test-parachains/undying/Cargo.toml polkadot/parachain/test-parachains/undying/Cargo.toml
+    index 19e1261db1..82ceebcf4e 100644
+    --- polkadot/parachain/test-parachains/undying/Cargo.toml
+    +++ polkadot/parachain/test-parachains/undying/Cargo.toml
+    @@ -20 +20 @@ dlmalloc = { version = "0.2.4", features = ["global"] }
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git polkadot/parachain/test-parachains/undying/collator/Cargo.toml polkadot/parachain/test-parachains/undying/collator/Cargo.toml
+    index 001c48476b..c74b01be08 100644
+    --- polkadot/parachain/test-parachains/undying/collator/Cargo.toml
+    +++ polkadot/parachain/test-parachains/undying/collator/Cargo.toml
+    @@ -22 +22 @@ futures-timer = "3.0.2"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git polkadot/runtime/common/Cargo.toml polkadot/runtime/common/Cargo.toml
+    index acbc845c41..7257ca1d6d 100644
+    --- polkadot/runtime/common/Cargo.toml
+    +++ polkadot/runtime/common/Cargo.toml
+    @@ -16 +16 @@ parity-scale-codec = { version = "3.6.1", default-features = false, features = [
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git polkadot/runtime/parachains/Cargo.toml polkadot/runtime/parachains/Cargo.toml
+    index 507df01ac4..12cebe8e79 100644
+    --- polkadot/runtime/parachains/Cargo.toml
+    +++ polkadot/runtime/parachains/Cargo.toml
+    @@ -16 +16 @@ parity-scale-codec = { version = "3.6.1", default-features = false, features = [
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git polkadot/runtime/rococo/Cargo.toml polkadot/runtime/rococo/Cargo.toml
+    index 11be7a9ffc..6b718e824b 100644
+    --- polkadot/runtime/rococo/Cargo.toml
+    +++ polkadot/runtime/rococo/Cargo.toml
+    @@ -16 +16 @@ scale-info = { version = "2.10.0", default-features = false, features = ["derive
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git polkadot/runtime/test-runtime/Cargo.toml polkadot/runtime/test-runtime/Cargo.toml
+    index 9778ff8243..3eca55a73d 100644
+    --- polkadot/runtime/test-runtime/Cargo.toml
+    +++ polkadot/runtime/test-runtime/Cargo.toml
+    @@ -16 +16 @@ parity-scale-codec = { version = "3.6.1", default-features = false, features = [
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git polkadot/runtime/westend/Cargo.toml polkadot/runtime/westend/Cargo.toml
+    index 0ea2436b68..77acb1b856 100644
+    --- polkadot/runtime/westend/Cargo.toml
+    +++ polkadot/runtime/westend/Cargo.toml
+    @@ -17 +17 @@ scale-info = { version = "2.10.0", default-features = false, features = ["derive
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git polkadot/utils/remote-ext-tests/bags-list/Cargo.toml polkadot/utils/remote-ext-tests/bags-list/Cargo.toml
+    index f8190e6aef..a300f0fca1 100644
+    --- polkadot/utils/remote-ext-tests/bags-list/Cargo.toml
+    +++ polkadot/utils/remote-ext-tests/bags-list/Cargo.toml
+    @@ -22 +22 @@ clap = { version = "4.4.18", features = ["derive"] }
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git polkadot/xcm/Cargo.toml polkadot/xcm/Cargo.toml
+    index 41b79051bb..b89a5c5c87 100644
+    --- polkadot/xcm/Cargo.toml
+    +++ polkadot/xcm/Cargo.toml
+    @@ -17 +17 @@ impl-trait-for-tuples = "0.2.2"
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git polkadot/xcm/pallet-xcm-benchmarks/Cargo.toml polkadot/xcm/pallet-xcm-benchmarks/Cargo.toml
+    index adeacddf90..80f2d1deed 100644
+    --- polkadot/xcm/pallet-xcm-benchmarks/Cargo.toml
+    +++ polkadot/xcm/pallet-xcm-benchmarks/Cargo.toml
+    @@ -27 +27 @@ xcm-builder = { package = "staging-xcm-builder", path = "../xcm-builder", defaul
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git polkadot/xcm/pallet-xcm/Cargo.toml polkadot/xcm/pallet-xcm/Cargo.toml
+    index dc9b3c0e20..aa15d5edc8 100644
+    --- polkadot/xcm/pallet-xcm/Cargo.toml
+    +++ polkadot/xcm/pallet-xcm/Cargo.toml
+    @@ -17 +17 @@ serde = { version = "1.0.195", optional = true, features = ["derive"] }
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git polkadot/xcm/xcm-builder/Cargo.toml polkadot/xcm/xcm-builder/Cargo.toml
+    index 30010fc210..10726b0f51 100644
+    --- polkadot/xcm/xcm-builder/Cargo.toml
+    +++ polkadot/xcm/xcm-builder/Cargo.toml
+    @@ -26 +26 @@ pallet-transaction-payment = { path = "../../../substrate/frame/transaction-paym
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git polkadot/xcm/xcm-executor/Cargo.toml polkadot/xcm/xcm-executor/Cargo.toml
+    index 7ce4a1cc17..71bd58073d 100644
+    --- polkadot/xcm/xcm-executor/Cargo.toml
+    +++ polkadot/xcm/xcm-executor/Cargo.toml
+    @@ -25 +25 @@ frame-support = { path = "../../../substrate/frame/support", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git polkadot/xcm/xcm-simulator/example/Cargo.toml polkadot/xcm/xcm-simulator/example/Cargo.toml
+    index 9cb5b6b7ee..af471df60a 100644
+    --- polkadot/xcm/xcm-simulator/example/Cargo.toml
+    +++ polkadot/xcm/xcm-simulator/example/Cargo.toml
+    @@ -15 +15 @@ scale-info = { version = "2.10.0", features = ["derive"] }
+    -log = { version = "0.4.14", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/bin/node/bench/Cargo.toml substrate/bin/node/bench/Cargo.toml
+    index 42af802d71..78cdaeb0ce 100644
+    --- substrate/bin/node/bench/Cargo.toml
+    +++ substrate/bin/node/bench/Cargo.toml
+    @@ -20 +20 @@ clap = { version = "4.4.18", features = ["derive"] }
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/bin/node/cli/Cargo.toml substrate/bin/node/cli/Cargo.toml
+    index 5dfe915b78..efdbd0f5b2 100644
+    --- substrate/bin/node/cli/Cargo.toml
+    +++ substrate/bin/node/cli/Cargo.toml
+    @@ -49 +49 @@ futures = "0.3.21"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/bin/node/runtime/Cargo.toml substrate/bin/node/runtime/Cargo.toml
+    index 4bb5fed2b0..6745a34e88 100644
+    --- substrate/bin/node/runtime/Cargo.toml
+    +++ substrate/bin/node/runtime/Cargo.toml
+    @@ -28 +28 @@ static_assertions = "1.1.0"
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/bin/node/testing/Cargo.toml substrate/bin/node/testing/Cargo.toml
+    index 9ca8b8ef72..31f8689d46 100644
+    --- substrate/bin/node/testing/Cargo.toml
+    +++ substrate/bin/node/testing/Cargo.toml
+    @@ -22 +22 @@ futures = "0.3.21"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/bin/utils/chain-spec-builder/Cargo.toml substrate/bin/utils/chain-spec-builder/Cargo.toml
+    index e39c989838..df4ddf3331 100644
+    --- substrate/bin/utils/chain-spec-builder/Cargo.toml
+    +++ substrate/bin/utils/chain-spec-builder/Cargo.toml
+    @@ -27 +27 @@ clap = { version = "4.4.18", features = ["derive"] }
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/allocator/Cargo.toml substrate/client/allocator/Cargo.toml
+    index f882cda908..662125814f 100644
+    --- substrate/client/allocator/Cargo.toml
+    +++ substrate/client/allocator/Cargo.toml
+    @@ -20 +20 @@ targets = ["x86_64-unknown-linux-gnu"]
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/api/Cargo.toml substrate/client/api/Cargo.toml
+    index 14aca6d9a2..09f60a4767 100644
+    --- substrate/client/api/Cargo.toml
+    +++ substrate/client/api/Cargo.toml
+    @@ -25 +25 @@ futures = "0.3.21"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/authority-discovery/Cargo.toml substrate/client/authority-discovery/Cargo.toml
+    index 4c8370233e..78f7144f43 100644
+    --- substrate/client/authority-discovery/Cargo.toml
+    +++ substrate/client/authority-discovery/Cargo.toml
+    @@ -32 +32 @@ multihash = { version = "0.18.1", default-features = false, features = [
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/basic-authorship/Cargo.toml substrate/client/basic-authorship/Cargo.toml
+    index 370f4a4adf..51a06464d0 100644
+    --- substrate/client/basic-authorship/Cargo.toml
+    +++ substrate/client/basic-authorship/Cargo.toml
+    @@ -22 +22 @@ futures-timer = "3.0.1"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/chain-spec/Cargo.toml substrate/client/chain-spec/Cargo.toml
+    index 9ab12dc2ad..e8ad9e3509 100644
+    --- substrate/client/chain-spec/Cargo.toml
+    +++ substrate/client/chain-spec/Cargo.toml
+    @@ -35 +35 @@ sp-state-machine = { path = "../../primitives/state-machine" }
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/client/cli/Cargo.toml substrate/client/cli/Cargo.toml
+    index 2d9c2fa5ff..50fb57bf1f 100644
+    --- substrate/client/cli/Cargo.toml
+    +++ substrate/client/cli/Cargo.toml
+    @@ -26 +26 @@ libp2p-identity = { version = "0.1.3", features = ["ed25519", "peerid"] }
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/consensus/aura/Cargo.toml substrate/client/consensus/aura/Cargo.toml
+    index 33f7d160d8..d1076da35f 100644
+    --- substrate/client/consensus/aura/Cargo.toml
+    +++ substrate/client/consensus/aura/Cargo.toml
+    @@ -22 +22 @@ futures = "0.3.21"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/consensus/babe/Cargo.toml substrate/client/consensus/babe/Cargo.toml
+    index 01c5d062d6..9bfed7e541 100644
+    --- substrate/client/consensus/babe/Cargo.toml
+    +++ substrate/client/consensus/babe/Cargo.toml
+    @@ -23 +23 @@ futures = "0.3.21"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/consensus/beefy/Cargo.toml substrate/client/consensus/beefy/Cargo.toml
+    index 3522697427..fe90503cae 100644
+    --- substrate/client/consensus/beefy/Cargo.toml
+    +++ substrate/client/consensus/beefy/Cargo.toml
+    @@ -21 +21 @@ futures = "0.3"
+    -log = "0.4"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/consensus/beefy/rpc/Cargo.toml substrate/client/consensus/beefy/rpc/Cargo.toml
+    index 496aefac11..810959dad3 100644
+    --- substrate/client/consensus/beefy/rpc/Cargo.toml
+    +++ substrate/client/consensus/beefy/rpc/Cargo.toml
+    @@ -18 +18 @@ jsonrpsee = { version = "0.20.3", features = ["client-core", "macros", "server"]
+    -log = "0.4"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/consensus/common/Cargo.toml substrate/client/consensus/common/Cargo.toml
+    index 16d3a4a144..496e6c8274 100644
+    --- substrate/client/consensus/common/Cargo.toml
+    +++ substrate/client/consensus/common/Cargo.toml
+    @@ -23 +23 @@ libp2p-identity = { version = "0.1.3", features = ["ed25519", "peerid"] }
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/consensus/grandpa/Cargo.toml substrate/client/consensus/grandpa/Cargo.toml
+    index 3f7b48d9f2..1d02fbb2c8 100644
+    --- substrate/client/consensus/grandpa/Cargo.toml
+    +++ substrate/client/consensus/grandpa/Cargo.toml
+    @@ -27 +27 @@ futures-timer = "3.0.1"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/consensus/grandpa/rpc/Cargo.toml substrate/client/consensus/grandpa/rpc/Cargo.toml
+    index ae9ab5d9d0..e6f884336b 100644
+    --- substrate/client/consensus/grandpa/rpc/Cargo.toml
+    +++ substrate/client/consensus/grandpa/rpc/Cargo.toml
+    @@ -19 +19 @@ jsonrpsee = { version = "0.20.3", features = ["client-core", "macros", "server"]
+    -log = "0.4.8"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/consensus/manual-seal/Cargo.toml substrate/client/consensus/manual-seal/Cargo.toml
+    index 0094fb8780..80eeac4dd1 100644
+    --- substrate/client/consensus/manual-seal/Cargo.toml
+    +++ substrate/client/consensus/manual-seal/Cargo.toml
+    @@ -25 +25 @@ futures-timer = "3.0.1"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/consensus/pow/Cargo.toml substrate/client/consensus/pow/Cargo.toml
+    index c59a6a2711..6caccb9879 100644
+    --- substrate/client/consensus/pow/Cargo.toml
+    +++ substrate/client/consensus/pow/Cargo.toml
+    @@ -23 +23 @@ futures-timer = "3.0.1"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/consensus/slots/Cargo.toml substrate/client/consensus/slots/Cargo.toml
+    index 8eed24532c..75f8b29a2f 100644
+    --- substrate/client/consensus/slots/Cargo.toml
+    +++ substrate/client/consensus/slots/Cargo.toml
+    @@ -24 +24 @@ futures-timer = "3.0.1"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/db/Cargo.toml substrate/client/db/Cargo.toml
+    index ed7b4178f2..57ee1a8ad3 100644
+    --- substrate/client/db/Cargo.toml
+    +++ substrate/client/db/Cargo.toml
+    @@ -27 +27 @@ linked-hash-map = "0.5.4"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/executor/wasmtime/Cargo.toml substrate/client/executor/wasmtime/Cargo.toml
+    index 12e6647c69..75cc76a235 100644
+    --- substrate/client/executor/wasmtime/Cargo.toml
+    +++ substrate/client/executor/wasmtime/Cargo.toml
+    @@ -19 +19 @@ targets = ["x86_64-unknown-linux-gnu"]
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/informant/Cargo.toml substrate/client/informant/Cargo.toml
+    index 0252e9a115..bd15e94eba 100644
+    --- substrate/client/informant/Cargo.toml
+    +++ substrate/client/informant/Cargo.toml
+    @@ -22 +22 @@ futures-timer = "3.0.1"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/merkle-mountain-range/Cargo.toml substrate/client/merkle-mountain-range/Cargo.toml
+    index 201c179f30..60232bccb0 100644
+    --- substrate/client/merkle-mountain-range/Cargo.toml
+    +++ substrate/client/merkle-mountain-range/Cargo.toml
+    @@ -19 +19 @@ futures = "0.3"
+    -log = "0.4"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/mixnet/Cargo.toml substrate/client/mixnet/Cargo.toml
+    index 280af81b86..8bcd963bd5 100644
+    --- substrate/client/mixnet/Cargo.toml
+    +++ substrate/client/mixnet/Cargo.toml
+    @@ -27 +27 @@ libp2p-identity = { version = "0.1.3", features = ["peerid"] }
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/network-gossip/Cargo.toml substrate/client/network-gossip/Cargo.toml
+    index baf4def0b8..a14761c0d6 100644
+    --- substrate/client/network-gossip/Cargo.toml
+    +++ substrate/client/network-gossip/Cargo.toml
+    @@ -24 +24 @@ libp2p = "0.51.4"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/network/Cargo.toml substrate/client/network/Cargo.toml
+    index 167f112705..79f5a6b4fa 100644
+    --- substrate/client/network/Cargo.toml
+    +++ substrate/client/network/Cargo.toml
+    @@ -33 +33 @@ linked_hash_set = "0.1.3"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/network/bitswap/Cargo.toml substrate/client/network/bitswap/Cargo.toml
+    index 9982ef80cf..63544b069e 100644
+    --- substrate/client/network/bitswap/Cargo.toml
+    +++ substrate/client/network/bitswap/Cargo.toml
+    @@ -26 +26 @@ libp2p-identity = { version = "0.1.3", features = ["peerid"] }
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/network/light/Cargo.toml substrate/client/network/light/Cargo.toml
+    index efefc6f18b..a83be7538b 100644
+    --- substrate/client/network/light/Cargo.toml
+    +++ substrate/client/network/light/Cargo.toml
+    @@ -29 +29 @@ libp2p-identity = { version = "0.1.3", features = ["peerid"] }
+    -log = "0.4.16"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/network/statement/Cargo.toml substrate/client/network/statement/Cargo.toml
+    index 0a0ce61527..b6efee5d9d 100644
+    --- substrate/client/network/statement/Cargo.toml
+    +++ substrate/client/network/statement/Cargo.toml
+    @@ -24 +24 @@ libp2p = "0.51.4"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/network/sync/Cargo.toml substrate/client/network/sync/Cargo.toml
+    index f81b4ee77b..19f86e87ac 100644
+    --- substrate/client/network/sync/Cargo.toml
+    +++ substrate/client/network/sync/Cargo.toml
+    @@ -29 +29 @@ libp2p = "0.51.4"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/network/test/Cargo.toml substrate/client/network/test/Cargo.toml
+    index dced6ed673..4f57287a39 100644
+    --- substrate/client/network/test/Cargo.toml
+    +++ substrate/client/network/test/Cargo.toml
+    @@ -24 +24 @@ libp2p = "0.51.4"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/network/transactions/Cargo.toml substrate/client/network/transactions/Cargo.toml
+    index 9e021059eb..01c8ac8814 100644
+    --- substrate/client/network/transactions/Cargo.toml
+    +++ substrate/client/network/transactions/Cargo.toml
+    @@ -23 +23 @@ libp2p = "0.51.4"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/offchain/Cargo.toml substrate/client/offchain/Cargo.toml
+    index 5205237128..eef385a6dd 100644
+    --- substrate/client/offchain/Cargo.toml
+    +++ substrate/client/offchain/Cargo.toml
+    @@ -45 +45 @@ sp-externalities = { path = "../../primitives/externalities" }
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/proposer-metrics/Cargo.toml substrate/client/proposer-metrics/Cargo.toml
+    index 40fcc72201..f560ce2d65 100644
+    --- substrate/client/proposer-metrics/Cargo.toml
+    +++ substrate/client/proposer-metrics/Cargo.toml
+    @@ -19 +19 @@ targets = ["x86_64-unknown-linux-gnu"]
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/rpc-servers/Cargo.toml substrate/client/rpc-servers/Cargo.toml
+    index b624a14e26..8a0b8f80f4 100644
+    --- substrate/client/rpc-servers/Cargo.toml
+    +++ substrate/client/rpc-servers/Cargo.toml
+    @@ -20 +20 @@ jsonrpsee = { version = "0.20.3", features = ["server"] }
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/rpc-spec-v2/Cargo.toml substrate/client/rpc-spec-v2/Cargo.toml
+    index 6d0e7e0784..12a02e0b45 100644
+    --- substrate/client/rpc-spec-v2/Cargo.toml
+    +++ substrate/client/rpc-spec-v2/Cargo.toml
+    @@ -42 +42 @@ array-bytes = "6.1"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/rpc/Cargo.toml substrate/client/rpc/Cargo.toml
+    index 6917eb0b55..a39d9226b6 100644
+    --- substrate/client/rpc/Cargo.toml
+    +++ substrate/client/rpc/Cargo.toml
+    @@ -22 +22 @@ jsonrpsee = { version = "0.20.3", features = ["server"] }
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/service/Cargo.toml substrate/client/service/Cargo.toml
+    index 1c95112aa6..41ec22a97c 100644
+    --- substrate/client/service/Cargo.toml
+    +++ substrate/client/service/Cargo.toml
+    @@ -36 +36 @@ parking_lot = "0.12.1"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/service/test/Cargo.toml substrate/client/service/test/Cargo.toml
+    index 625d828639..ee7e60f601 100644
+    --- substrate/client/service/test/Cargo.toml
+    +++ substrate/client/service/test/Cargo.toml
+    @@ -22 +22 @@ futures = "0.3.21"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/state-db/Cargo.toml substrate/client/state-db/Cargo.toml
+    index 3f86a0da88..400dda20c2 100644
+    --- substrate/client/state-db/Cargo.toml
+    +++ substrate/client/state-db/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.6.1", features = ["derive
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/statement-store/Cargo.toml substrate/client/statement-store/Cargo.toml
+    index ed22925937..676f6cb36f 100644
+    --- substrate/client/statement-store/Cargo.toml
+    +++ substrate/client/statement-store/Cargo.toml
+    @@ -19 +19 @@ targets = ["x86_64-unknown-linux-gnu"]
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/storage-monitor/Cargo.toml substrate/client/storage-monitor/Cargo.toml
+    index f4db58d6bb..6cea3f3894 100644
+    --- substrate/client/storage-monitor/Cargo.toml
+    +++ substrate/client/storage-monitor/Cargo.toml
+    @@ -16 +16 @@ clap = { version = "4.4.18", features = ["derive", "string"] }
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/sysinfo/Cargo.toml substrate/client/sysinfo/Cargo.toml
+    index c09fa41d4d..4c2b0eae16 100644
+    --- substrate/client/sysinfo/Cargo.toml
+    +++ substrate/client/sysinfo/Cargo.toml
+    @@ -22 +22 @@ libc = "0.2"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/telemetry/Cargo.toml substrate/client/telemetry/Cargo.toml
+    index 3270a2e148..e0563c44bc 100644
+    --- substrate/client/telemetry/Cargo.toml
+    +++ substrate/client/telemetry/Cargo.toml
+    @@ -23 +23 @@ libp2p = { version = "0.51.4", features = ["dns", "tcp", "tokio", "wasm-ext", "w
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/tracing/Cargo.toml substrate/client/tracing/Cargo.toml
+    index 9f0f5fb693..1331071d3b 100644
+    --- substrate/client/tracing/Cargo.toml
+    +++ substrate/client/tracing/Cargo.toml
+    @@ -25 +25 @@ libc = "0.2.152"
+    -log = { version = "0.4.17" }
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/transaction-pool/Cargo.toml substrate/client/transaction-pool/Cargo.toml
+    index b491f7bcaf..23ffebec67 100644
+    --- substrate/client/transaction-pool/Cargo.toml
+    +++ substrate/client/transaction-pool/Cargo.toml
+    @@ -24 +24 @@ linked-hash-map = "0.5.4"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/transaction-pool/api/Cargo.toml substrate/client/transaction-pool/api/Cargo.toml
+    index f5fba65a06..9cf732cb87 100644
+    --- substrate/client/transaction-pool/api/Cargo.toml
+    +++ substrate/client/transaction-pool/api/Cargo.toml
+    @@ -18 +18 @@ futures = "0.3.21"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/client/utils/Cargo.toml substrate/client/utils/Cargo.toml
+    index ec7b3d0eb0..7f604219bc 100644
+    --- substrate/client/utils/Cargo.toml
+    +++ substrate/client/utils/Cargo.toml
+    @@ -20 +20 @@ lazy_static = "1.4.0"
+    -log = "0.4"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/frame/Cargo.toml substrate/frame/Cargo.toml
+    index 9419eb1597..01c1358ecb 100644
+    --- substrate/frame/Cargo.toml
+    +++ substrate/frame/Cargo.toml
+    @@ -52 +52 @@ simple-mermaid = { git = "https://github.com/kianenigma/simple-mermaid.git", rev
+    -log = { version = "0.4.20", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/alliance/Cargo.toml substrate/frame/alliance/Cargo.toml
+    index 955f9e268c..bc873ad69c 100644
+    --- substrate/frame/alliance/Cargo.toml
+    +++ substrate/frame/alliance/Cargo.toml
+    @@ -20 +20 @@ array-bytes = { version = "6.1", optional = true }
+    -log = { version = "0.4.14", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/assets/Cargo.toml substrate/frame/assets/Cargo.toml
+    index 6fe3a27236..2efc96348c 100644
+    --- substrate/frame/assets/Cargo.toml
+    +++ substrate/frame/assets/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/aura/Cargo.toml substrate/frame/aura/Cargo.toml
+    index 7620d172ff..de698487ef 100644
+    --- substrate/frame/aura/Cargo.toml
+    +++ substrate/frame/aura/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/babe/Cargo.toml substrate/frame/babe/Cargo.toml
+    index 8f49faaa2d..fc7385efa1 100644
+    --- substrate/frame/babe/Cargo.toml
+    +++ substrate/frame/babe/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/bags-list/Cargo.toml substrate/frame/bags-list/Cargo.toml
+    index b8ab099a06..f9ae462e16 100644
+    --- substrate/frame/bags-list/Cargo.toml
+    +++ substrate/frame/bags-list/Cargo.toml
+    @@ -36 +36 @@ frame-election-provider-support = { path = "../election-provider-support", defau
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/bags-list/remote-tests/Cargo.toml substrate/frame/bags-list/remote-tests/Cargo.toml
+    index fb61a98677..266355f5ca 100644
+    --- substrate/frame/bags-list/remote-tests/Cargo.toml
+    +++ substrate/frame/bags-list/remote-tests/Cargo.toml
+    @@ -37 +37 @@ remote-externalities = { package = "frame-remote-externalities", path = "../../.
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/frame/balances/Cargo.toml substrate/frame/balances/Cargo.toml
+    index e47e916a27..64ae90c675 100644
+    --- substrate/frame/balances/Cargo.toml
+    +++ substrate/frame/balances/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/beefy-mmr/Cargo.toml substrate/frame/beefy-mmr/Cargo.toml
+    index 250a6fb450..b2ede900f2 100644
+    --- substrate/frame/beefy-mmr/Cargo.toml
+    +++ substrate/frame/beefy-mmr/Cargo.toml
+    @@ -17 +17 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/beefy/Cargo.toml substrate/frame/beefy/Cargo.toml
+    index ba02cf1460..54b57b4474 100644
+    --- substrate/frame/beefy/Cargo.toml
+    +++ substrate/frame/beefy/Cargo.toml
+    @@ -16 +16 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/benchmarking/Cargo.toml substrate/frame/benchmarking/Cargo.toml
+    index 38c7bc2b90..cde1aea188 100644
+    --- substrate/frame/benchmarking/Cargo.toml
+    +++ substrate/frame/benchmarking/Cargo.toml
+    @@ -21 +21 @@ linregress = { version = "0.5.1", optional = true }
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/bounties/Cargo.toml substrate/frame/bounties/Cargo.toml
+    index df7c3c0cbe..191a38d20b 100644
+    --- substrate/frame/bounties/Cargo.toml
+    +++ substrate/frame/bounties/Cargo.toml
+    @@ -22 +22 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/child-bounties/Cargo.toml substrate/frame/child-bounties/Cargo.toml
+    index bcd8426c31..589ca95a75 100644
+    --- substrate/frame/child-bounties/Cargo.toml
+    +++ substrate/frame/child-bounties/Cargo.toml
+    @@ -22 +22 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/collective/Cargo.toml substrate/frame/collective/Cargo.toml
+    index 91bb36bb89..e19e1496e7 100644
+    --- substrate/frame/collective/Cargo.toml
+    +++ substrate/frame/collective/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/contracts/Cargo.toml substrate/frame/contracts/Cargo.toml
+    index de49983a4b..0b127a5a45 100644
+    --- substrate/frame/contracts/Cargo.toml
+    +++ substrate/frame/contracts/Cargo.toml
+    @@ -27 +27 @@ scale-info = { version = "2.10.0", default-features = false, features = ["derive
+    -log = { version = "0.4", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/core-fellowship/Cargo.toml substrate/frame/core-fellowship/Cargo.toml
+    index 8e59725d31..3e678d3274 100644
+    --- substrate/frame/core-fellowship/Cargo.toml
+    +++ substrate/frame/core-fellowship/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.16", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/democracy/Cargo.toml substrate/frame/democracy/Cargo.toml
+    index 0ade0d58a6..1e824eac2d 100644
+    --- substrate/frame/democracy/Cargo.toml
+    +++ substrate/frame/democracy/Cargo.toml
+    @@ -31 +31 @@ sp-core = { path = "../../primitives/core", default-features = false }
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/election-provider-multi-phase/Cargo.toml substrate/frame/election-provider-multi-phase/Cargo.toml
+    index 91bdb3c027..eadce8c1ff 100644
+    --- substrate/frame/election-provider-multi-phase/Cargo.toml
+    +++ substrate/frame/election-provider-multi-phase/Cargo.toml
+    @@ -24 +24 @@ scale-info = { version = "2.10.0", default-features = false, features = [
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/election-provider-multi-phase/test-staking-e2e/Cargo.toml substrate/frame/election-provider-multi-phase/test-staking-e2e/Cargo.toml
+    index 05c6a6d404..540f4c4423 100644
+    --- substrate/frame/election-provider-multi-phase/test-staking-e2e/Cargo.toml
+    +++ substrate/frame/election-provider-multi-phase/test-staking-e2e/Cargo.toml
+    @@ -22 +22 @@ scale-info = { version = "2.10.0", features = ["derive"] }
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/elections-phragmen/Cargo.toml substrate/frame/elections-phragmen/Cargo.toml
+    index 4f8c5638d4..4dc4a3454a 100644
+    --- substrate/frame/elections-phragmen/Cargo.toml
+    +++ substrate/frame/elections-phragmen/Cargo.toml
+    @@ -22 +22 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.14", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/examples/basic/Cargo.toml substrate/frame/examples/basic/Cargo.toml
+    index 2be5aecb96..e4ab511220 100644
+    --- substrate/frame/examples/basic/Cargo.toml
+    +++ substrate/frame/examples/basic/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/examples/default-config/Cargo.toml substrate/frame/examples/default-config/Cargo.toml
+    index 83d9ae7951..e40845a425 100644
+    --- substrate/frame/examples/default-config/Cargo.toml
+    +++ substrate/frame/examples/default-config/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/examples/dev-mode/Cargo.toml substrate/frame/examples/dev-mode/Cargo.toml
+    index f150f44644..a9c4e3f3b1 100644
+    --- substrate/frame/examples/dev-mode/Cargo.toml
+    +++ substrate/frame/examples/dev-mode/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/examples/kitchensink/Cargo.toml substrate/frame/examples/kitchensink/Cargo.toml
+    index 4255ebb66b..0aa14cc502 100644
+    --- substrate/frame/examples/kitchensink/Cargo.toml
+    +++ substrate/frame/examples/kitchensink/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/examples/offchain-worker/Cargo.toml substrate/frame/examples/offchain-worker/Cargo.toml
+    index cc337707a2..fc5151ff29 100644
+    --- substrate/frame/examples/offchain-worker/Cargo.toml
+    +++ substrate/frame/examples/offchain-worker/Cargo.toml
+    @@ -21 +21 @@ lite-json = { version = "0.2.0", default-features = false }
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/examples/split/Cargo.toml substrate/frame/examples/split/Cargo.toml
+    index 733ca92b82..d140fc3eef 100644
+    --- substrate/frame/examples/split/Cargo.toml
+    +++ substrate/frame/examples/split/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.2.2", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/examples/tasks/Cargo.toml substrate/frame/examples/tasks/Cargo.toml
+    index f6850b53c0..4152111436 100644
+    --- substrate/frame/examples/tasks/Cargo.toml
+    +++ substrate/frame/examples/tasks/Cargo.toml
+    @@ -18 +18 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/executive/Cargo.toml substrate/frame/executive/Cargo.toml
+    index 7c72fc77be..a4ca265f61 100644
+    --- substrate/frame/executive/Cargo.toml
+    +++ substrate/frame/executive/Cargo.toml
+    @@ -22 +22 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/fast-unstake/Cargo.toml substrate/frame/fast-unstake/Cargo.toml
+    index 5d0a5410f8..eca8247845 100644
+    --- substrate/frame/fast-unstake/Cargo.toml
+    +++ substrate/frame/fast-unstake/Cargo.toml
+    @@ -19 +19 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/glutton/Cargo.toml substrate/frame/glutton/Cargo.toml
+    index b9543e7f47..7de18080b8 100644
+    --- substrate/frame/glutton/Cargo.toml
+    +++ substrate/frame/glutton/Cargo.toml
+    @@ -22 +22 @@ scale-info = { version = "2.10.0", default-features = false, features = ["derive
+    -log = { version = "0.4.14", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/grandpa/Cargo.toml substrate/frame/grandpa/Cargo.toml
+    index 3775ccdac1..db540564fb 100644
+    --- substrate/frame/grandpa/Cargo.toml
+    +++ substrate/frame/grandpa/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/identity/Cargo.toml substrate/frame/identity/Cargo.toml
+    index ba1fd500f7..912444bf60 100644
+    --- substrate/frame/identity/Cargo.toml
+    +++ substrate/frame/identity/Cargo.toml
+    @@ -21 +21 @@ enumflags2 = { version = "0.7.7" }
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/im-online/Cargo.toml substrate/frame/im-online/Cargo.toml
+    index 04c35908c5..038cbbcd67 100644
+    --- substrate/frame/im-online/Cargo.toml
+    +++ substrate/frame/im-online/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/membership/Cargo.toml substrate/frame/membership/Cargo.toml
+    index 658bf67f12..6421467029 100644
+    --- substrate/frame/membership/Cargo.toml
+    +++ substrate/frame/membership/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/merkle-mountain-range/Cargo.toml substrate/frame/merkle-mountain-range/Cargo.toml
+    index 607fa340e9..d623e25cec 100644
+    --- substrate/frame/merkle-mountain-range/Cargo.toml
+    +++ substrate/frame/merkle-mountain-range/Cargo.toml
+    @@ -19 +19 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/message-queue/Cargo.toml substrate/frame/message-queue/Cargo.toml
+    index c2ecf44526..8f3e913ee3 100644
+    --- substrate/frame/message-queue/Cargo.toml
+    +++ substrate/frame/message-queue/Cargo.toml
+    @@ -18 +18 @@ serde = { version = "1.0.195", optional = true, features = ["derive"] }
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/mixnet/Cargo.toml substrate/frame/mixnet/Cargo.toml
+    index cb00b38890..de4c2074e7 100644
+    --- substrate/frame/mixnet/Cargo.toml
+    +++ substrate/frame/mixnet/Cargo.toml
+    @@ -23 +23 @@ frame-system = { default-features = false, path = "../system" }
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/multisig/Cargo.toml substrate/frame/multisig/Cargo.toml
+    index aefdbe855a..1d2a79bdc5 100644
+    --- substrate/frame/multisig/Cargo.toml
+    +++ substrate/frame/multisig/Cargo.toml
+    @@ -29 +29 @@ sp-std = { path = "../../primitives/std", default-features = false }
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/nft-fractionalization/Cargo.toml substrate/frame/nft-fractionalization/Cargo.toml
+    index a55bcab533..8002b7e116 100644
+    --- substrate/frame/nft-fractionalization/Cargo.toml
+    +++ substrate/frame/nft-fractionalization/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/nfts/Cargo.toml substrate/frame/nfts/Cargo.toml
+    index d92a9c0b44..69e9ea170b 100644
+    --- substrate/frame/nfts/Cargo.toml
+    +++ substrate/frame/nfts/Cargo.toml
+    @@ -21 +21 @@ enumflags2 = { version = "0.7.7" }
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/node-authorization/Cargo.toml substrate/frame/node-authorization/Cargo.toml
+    index ac139853cd..a39b0ec4ef 100644
+    --- substrate/frame/node-authorization/Cargo.toml
+    +++ substrate/frame/node-authorization/Cargo.toml
+    @@ -19 +19 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/nomination-pools/Cargo.toml substrate/frame/nomination-pools/Cargo.toml
+    index cac092c98d..9830f31d5f 100644
+    --- substrate/frame/nomination-pools/Cargo.toml
+    +++ substrate/frame/nomination-pools/Cargo.toml
+    @@ -34 +34 @@ sp-io = { path = "../../primitives/io", default-features = false }
+    -log = { version = "0.4.0", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/nomination-pools/fuzzer/Cargo.toml substrate/frame/nomination-pools/fuzzer/Cargo.toml
+    index 52f49b2845..c0d63a2685 100644
+    --- substrate/frame/nomination-pools/fuzzer/Cargo.toml
+    +++ substrate/frame/nomination-pools/fuzzer/Cargo.toml
+    @@ -32 +32 @@ rand = { version = "0.8.5", features = ["small_rng"] }
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/frame/nomination-pools/test-staking/Cargo.toml substrate/frame/nomination-pools/test-staking/Cargo.toml
+    index 845535ae04..9c7b12e4c6 100644
+    --- substrate/frame/nomination-pools/test-staking/Cargo.toml
+    +++ substrate/frame/nomination-pools/test-staking/Cargo.toml
+    @@ -40 +40 @@ sp-tracing = { path = "../../../primitives/tracing" }
+    -log = { version = "0.4.0" }
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/frame/offences/Cargo.toml substrate/frame/offences/Cargo.toml
+    index 73842c696a..e7f559086a 100644
+    --- substrate/frame/offences/Cargo.toml
+    +++ substrate/frame/offences/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/offences/benchmarking/Cargo.toml substrate/frame/offences/benchmarking/Cargo.toml
+    index fc3fb076f1..8dcce84d25 100644
+    --- substrate/frame/offences/benchmarking/Cargo.toml
+    +++ substrate/frame/offences/benchmarking/Cargo.toml
+    @@ -35 +35 @@ sp-std = { path = "../../../primitives/std", default-features = false }
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/preimage/Cargo.toml substrate/frame/preimage/Cargo.toml
+    index 5951663d29..10a15f97bd 100644
+    --- substrate/frame/preimage/Cargo.toml
+    +++ substrate/frame/preimage/Cargo.toml
+    @@ -24 +24 @@ sp-std = { path = "../../primitives/std", default-features = false }
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/ranked-collective/Cargo.toml substrate/frame/ranked-collective/Cargo.toml
+    index 62e01df372..54e84c0b55 100644
+    --- substrate/frame/ranked-collective/Cargo.toml
+    +++ substrate/frame/ranked-collective/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.16", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/referenda/Cargo.toml substrate/frame/referenda/Cargo.toml
+    index 0f8a92ff72..ad0e5993fc 100644
+    --- substrate/frame/referenda/Cargo.toml
+    +++ substrate/frame/referenda/Cargo.toml
+    @@ -32 +32 @@ sp-std = { path = "../../primitives/std", default-features = false }
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/salary/Cargo.toml substrate/frame/salary/Cargo.toml
+    index 90a44da1a1..ba57fd46ee 100644
+    --- substrate/frame/salary/Cargo.toml
+    +++ substrate/frame/salary/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.16", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/sassafras/Cargo.toml substrate/frame/sassafras/Cargo.toml
+    index 5f4900b5a2..325a39bf59 100644
+    --- substrate/frame/sassafras/Cargo.toml
+    +++ substrate/frame/sassafras/Cargo.toml
+    @@ -25 +25 @@ frame-system = { path = "../system", default-features = false }
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/scheduler/Cargo.toml substrate/frame/scheduler/Cargo.toml
+    index bca17242d2..f50f6afdc0 100644
+    --- substrate/frame/scheduler/Cargo.toml
+    +++ substrate/frame/scheduler/Cargo.toml
+    @@ -17 +17 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/session/Cargo.toml substrate/frame/session/Cargo.toml
+    index 91ffecbf71..de041307f7 100644
+    --- substrate/frame/session/Cargo.toml
+    +++ substrate/frame/session/Cargo.toml
+    @@ -21 +21 @@ impl-trait-for-tuples = "0.2.2"
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/society/Cargo.toml substrate/frame/society/Cargo.toml
+    index 8b24f637f4..3dab082b39 100644
+    --- substrate/frame/society/Cargo.toml
+    +++ substrate/frame/society/Cargo.toml
+    @@ -19 +19 @@ targets = ["x86_64-unknown-linux-gnu"]
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/staking/Cargo.toml substrate/frame/staking/Cargo.toml
+    index 2c3f50beae..5f82a32614 100644
+    --- substrate/frame/staking/Cargo.toml
+    +++ substrate/frame/staking/Cargo.toml
+    @@ -36 +36 @@ frame-election-provider-support = { path = "../election-provider-support", defau
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/staking/reward-fn/Cargo.toml substrate/frame/staking/reward-fn/Cargo.toml
+    index 0b8903f287..5169db5072 100644
+    --- substrate/frame/staking/reward-fn/Cargo.toml
+    +++ substrate/frame/staking/reward-fn/Cargo.toml
+    @@ -20 +20 @@ targets = ["x86_64-unknown-linux-gnu"]
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/state-trie-migration/Cargo.toml substrate/frame/state-trie-migration/Cargo.toml
+    index 1fb49e6256..83abf3615f 100644
+    --- substrate/frame/state-trie-migration/Cargo.toml
+    +++ substrate/frame/state-trie-migration/Cargo.toml
+    @@ -19 +19 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/statement/Cargo.toml substrate/frame/statement/Cargo.toml
+    index 58f8b40dc2..6827dbda96 100644
+    --- substrate/frame/statement/Cargo.toml
+    +++ substrate/frame/statement/Cargo.toml
+    @@ -28 +28 @@ sp-core = { path = "../../primitives/core", default-features = false }
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/support/Cargo.toml substrate/frame/support/Cargo.toml
+    index ad97ad5146..fd39e8397d 100644
+    --- substrate/frame/support/Cargo.toml
+    +++ substrate/frame/support/Cargo.toml
+    @@ -44 +44 @@ smallvec = "1.11.0"
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/system/Cargo.toml substrate/frame/system/Cargo.toml
+    index d409460131..d25746dcde 100644
+    --- substrate/frame/system/Cargo.toml
+    +++ substrate/frame/system/Cargo.toml
+    @@ -21 +21 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/timestamp/Cargo.toml substrate/frame/timestamp/Cargo.toml
+    index cd0737c6bb..28e57fcab0 100644
+    --- substrate/frame/timestamp/Cargo.toml
+    +++ substrate/frame/timestamp/Cargo.toml
+    @@ -21 +21 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/tips/Cargo.toml substrate/frame/tips/Cargo.toml
+    index 900cd47e0d..65931bf2d5 100644
+    --- substrate/frame/tips/Cargo.toml
+    +++ substrate/frame/tips/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/transaction-storage/Cargo.toml substrate/frame/transaction-storage/Cargo.toml
+    index c96aa91d54..8ae77cae79 100644
+    --- substrate/frame/transaction-storage/Cargo.toml
+    +++ substrate/frame/transaction-storage/Cargo.toml
+    @@ -32 +32 @@ sp-transaction-storage-proof = { path = "../../primitives/transaction-storage-pr
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/uniques/Cargo.toml substrate/frame/uniques/Cargo.toml
+    index 8a5a180d75..4e5f21b3d8 100644
+    --- substrate/frame/uniques/Cargo.toml
+    +++ substrate/frame/uniques/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/frame/vesting/Cargo.toml substrate/frame/vesting/Cargo.toml
+    index f81b7a122c..96938b95a2 100644
+    --- substrate/frame/vesting/Cargo.toml
+    +++ substrate/frame/vesting/Cargo.toml
+    @@ -22 +22 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/primitives/api/Cargo.toml substrate/primitives/api/Cargo.toml
+    index cd882c7a05..3330d2a88d 100644
+    --- substrate/primitives/api/Cargo.toml
+    +++ substrate/primitives/api/Cargo.toml
+    @@ -35 +35 @@ sp-metadata-ir = { path = "../metadata-ir", default-features = false, optional =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/primitives/api/test/Cargo.toml substrate/primitives/api/test/Cargo.toml
+    index b0975082c4..3a90553bbf 100644
+    --- substrate/primitives/api/test/Cargo.toml
+    +++ substrate/primitives/api/test/Cargo.toml
+    @@ -34 +34 @@ futures = "0.3.21"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/primitives/blockchain/Cargo.toml substrate/primitives/blockchain/Cargo.toml
+    index 176e9ed6dd..26ba41645e 100644
+    --- substrate/primitives/blockchain/Cargo.toml
+    +++ substrate/primitives/blockchain/Cargo.toml
+    @@ -22 +22 @@ futures = "0.3.21"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/primitives/consensus/common/Cargo.toml substrate/primitives/consensus/common/Cargo.toml
+    index 00c2fca5e2..cbca0d94d3 100644
+    --- substrate/primitives/consensus/common/Cargo.toml
+    +++ substrate/primitives/consensus/common/Cargo.toml
+    @@ -22 +22 @@ futures = { version = "0.3.21", features = ["thread-pool"] }
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/primitives/consensus/grandpa/Cargo.toml substrate/primitives/consensus/grandpa/Cargo.toml
+    index de02b18907..1398cb9356 100644
+    --- substrate/primitives/consensus/grandpa/Cargo.toml
+    +++ substrate/primitives/consensus/grandpa/Cargo.toml
+    @@ -22 +22 @@ grandpa = { package = "finality-grandpa", version = "0.16.2", default-features =
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/primitives/core/Cargo.toml substrate/primitives/core/Cargo.toml
+    index f5914049f4..25c6925335 100644
+    --- substrate/primitives/core/Cargo.toml
+    +++ substrate/primitives/core/Cargo.toml
+    @@ -21 +21 @@ scale-info = { version = "2.5.0", default-features = false, features = ["derive"
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/primitives/io/Cargo.toml substrate/primitives/io/Cargo.toml
+    index d2d56b8315..ab326c0925 100644
+    --- substrate/primitives/io/Cargo.toml
+    +++ substrate/primitives/io/Cargo.toml
+    @@ -33 +33 @@ sp-tracing = { path = "../tracing", default-features = false }
+    -log = { version = "0.4.17", optional = true }
+    +log = { optional = true , workspace = true, default-features = true }
+    diff --git substrate/primitives/merkle-mountain-range/Cargo.toml substrate/primitives/merkle-mountain-range/Cargo.toml
+    index 59b48b1b83..b82fb61ef4 100644
+    --- substrate/primitives/merkle-mountain-range/Cargo.toml
+    +++ substrate/primitives/merkle-mountain-range/Cargo.toml
+    @@ -20 +20 @@ scale-info = { version = "2.10.0", default-features = false, features = ["derive
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/primitives/runtime/Cargo.toml substrate/primitives/runtime/Cargo.toml
+    index f4b1158242..940fca54ab 100644
+    --- substrate/primitives/runtime/Cargo.toml
+    +++ substrate/primitives/runtime/Cargo.toml
+    @@ -24 +24 @@ impl-trait-for-tuples = "0.2.2"
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/primitives/state-machine/Cargo.toml substrate/primitives/state-machine/Cargo.toml
+    index b63d5685a3..489209ecc3 100644
+    --- substrate/primitives/state-machine/Cargo.toml
+    +++ substrate/primitives/state-machine/Cargo.toml
+    @@ -22 +22 @@ hash-db = { version = "0.16.0", default-features = false }
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/primitives/wasm-interface/Cargo.toml substrate/primitives/wasm-interface/Cargo.toml
+    index ccd2a3043c..bb5afaf9a0 100644
+    --- substrate/primitives/wasm-interface/Cargo.toml
+    +++ substrate/primitives/wasm-interface/Cargo.toml
+    @@ -22 +22 @@ impl-trait-for-tuples = "0.2.2"
+    -log = { version = "0.4.17", optional = true }
+    +log = { optional = true , workspace = true, default-features = true }
+    diff --git substrate/test-utils/runtime/Cargo.toml substrate/test-utils/runtime/Cargo.toml
+    index 589686c122..cdc94782ec 100644
+    --- substrate/test-utils/runtime/Cargo.toml
+    +++ substrate/test-utils/runtime/Cargo.toml
+    @@ -54 +54 @@ array-bytes = { version = "6.1", optional = true }
+    -log = { version = "0.4.17", default-features = false }
+    +log = { workspace = true }
+    diff --git substrate/utils/binary-merkle-tree/Cargo.toml substrate/utils/binary-merkle-tree/Cargo.toml
+    index b0b870823f..6b8c78fedf 100644
+    --- substrate/utils/binary-merkle-tree/Cargo.toml
+    +++ substrate/utils/binary-merkle-tree/Cargo.toml
+    @@ -16 +16 @@ array-bytes = { version = "6.1", optional = true }
+    -log = { version = "0.4", default-features = false, optional = true }
+    +log = { optional = true , workspace = true }
+    diff --git substrate/utils/frame/benchmarking-cli/Cargo.toml substrate/utils/frame/benchmarking-cli/Cargo.toml
+    index 0314e3035c..2af8e055cf 100644
+    --- substrate/utils/frame/benchmarking-cli/Cargo.toml
+    +++ substrate/utils/frame/benchmarking-cli/Cargo.toml
+    @@ -29 +29 @@ linked-hash-map = "0.5.4"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/utils/frame/remote-externalities/Cargo.toml substrate/utils/frame/remote-externalities/Cargo.toml
+    index ff0b7572d3..0fee718d83 100644
+    --- substrate/utils/frame/remote-externalities/Cargo.toml
+    +++ substrate/utils/frame/remote-externalities/Cargo.toml
+    @@ -20 +20 @@ codec = { package = "parity-scale-codec", version = "3.6.1" }
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/utils/frame/rpc/client/Cargo.toml substrate/utils/frame/rpc/client/Cargo.toml
+    index a97bc77b00..d1959fe945 100644
+    --- substrate/utils/frame/rpc/client/Cargo.toml
+    +++ substrate/utils/frame/rpc/client/Cargo.toml
+    @@ -23 +23 @@ sp-runtime = { path = "../../../../primitives/runtime" }
+    -log = "0.4"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/utils/frame/rpc/system/Cargo.toml substrate/utils/frame/rpc/system/Cargo.toml
+    index 3f06ffe2bc..8097a4bf3d 100644
+    --- substrate/utils/frame/rpc/system/Cargo.toml
+    +++ substrate/utils/frame/rpc/system/Cargo.toml
+    @@ -22 +22 @@ futures = "0.3.21"
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/utils/frame/try-runtime/cli/Cargo.toml substrate/utils/frame/try-runtime/cli/Cargo.toml
+    index 1550a2cec4..1c8484f9a8 100644
+    --- substrate/utils/frame/try-runtime/cli/Cargo.toml
+    +++ substrate/utils/frame/try-runtime/cli/Cargo.toml
+    @@ -43 +43 @@ hex = { version = "0.4.3", default-features = false }
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }
+    diff --git substrate/utils/prometheus/Cargo.toml substrate/utils/prometheus/Cargo.toml
+    index 5ce943fbc5..2a09cb2bb5 100644
+    --- substrate/utils/prometheus/Cargo.toml
+    +++ substrate/utils/prometheus/Cargo.toml
+    @@ -20 +20 @@ hyper = { version = "0.14.16", default-features = false, features = ["http1", "s
+    -log = "0.4.17"
+    +log = { workspace = true, default-features = true }

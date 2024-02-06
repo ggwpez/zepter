@@ -84,17 +84,36 @@ pub enum FixHint {
 }
 
 impl Command {
-	pub fn run(&self) {
+	pub fn run(&self) -> Result<(), String> {
 		self.global.setup_logging();
 
 		match self.subcommand.as_ref() {
-			Some(SubCommand::Trace(cmd)) => cmd.run(&self.global),
-			Some(SubCommand::Lint(cmd)) => cmd.run(&self.global),
-			Some(SubCommand::Format(cmd)) => cmd.run(&self.global),
-			Some(SubCommand::Run(cmd)) => cmd.run(&self.global),
 			Some(SubCommand::Transpose(cmd)) => cmd.run(&self.global),
-			Some(SubCommand::Debug(cmd)) => cmd.run(&self.global),
-			None => run::RunCmd::default().run(&self.global),
+
+			Some(SubCommand::Trace(cmd)) => {
+				cmd.run(&self.global);
+				Ok(())
+			},
+			Some(SubCommand::Lint(cmd)) => {
+				cmd.run(&self.global);
+				Ok(())
+			},
+			Some(SubCommand::Format(cmd)) => {
+				cmd.run(&self.global);
+				Ok(())
+			},
+			Some(SubCommand::Run(cmd)) => {
+				cmd.run(&self.global);
+				Ok(())
+			},
+			Some(SubCommand::Debug(cmd)) => {
+				cmd.run(&self.global);
+				Ok(())
+			},
+			None => {
+				run::RunCmd::default().run(&self.global);
+				Ok(())
+			},
 		}
 	}
 }

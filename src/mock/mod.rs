@@ -264,12 +264,12 @@ impl Context {
 			&format!("new --vcs=none --offline --lib --name {} {}", module.name, module.path()),
 			None,
 		)?;
-		let toml_path = self.root.path().join(&module.path()).join("Cargo.toml");
+		let toml_path = self.root.path().join(module.path()).join("Cargo.toml");
 		assert!(toml_path.exists(), "Crate must exist");
 		// Add the deps
 		let mut out_deps = HashMap::<cargo_metadata::DependencyKind, String>::new();
 		for dep in module.deps.iter().flatten() {
-			out_deps.entry(dep.kind()).or_insert_with(String::new).push_str(&dep.def());
+			out_deps.entry(dep.kind()).or_default().push_str(&dep.def());
 		}
 
 		let mut txt = String::from("[features]\n");

@@ -331,7 +331,7 @@ impl Ord for RenamedPackage {
 		// Yikes... dafuq is this?!
 		//bincode::serialize(self).unwrap().cmp(&bincode::serialize(other).unwrap())
 
-		self.pkg.id.cmp(&other.pkg.id)
+		(&self.pkg.name, &self.pkg.id).cmp(&(&other.pkg.name, &other.pkg.id))
 	}
 }
 

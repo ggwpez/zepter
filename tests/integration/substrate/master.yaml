@@ -44,8 +44,8 @@ cases:
     crate 'frame-support-test-compile-pass'
       feature 'runtime-benchmarks'
         is required by 3 dependencies:
-          renamed-frame-support (renamed from frame-support)
           frame-system
+          renamed-frame-support (renamed from frame-support)
           sp-runtime
     crate 'frame-support-test-pallet'
       feature 'runtime-benchmarks'
@@ -733,8 +733,8 @@ cases:
     crate 'frame-support-test-compile-pass'
       feature 'runtime-benchmarks'
         is required by 3 dependencies:
-          renamed-frame-support (renamed from frame-support)
           frame-system
+          renamed-frame-support (renamed from frame-support)
           sp-runtime
     crate 'frame-support-test-pallet'
       feature 'runtime-benchmarks'
@@ -2018,11 +2018,11 @@ cases:
         is required by 22 dependencies:
           chrono
           clap
+          codec (renamed from parity-scale-codec)
           frame-benchmarking
           frame-support
           frame-system
           log
-          codec (renamed from parity-scale-codec)
           rand
           sc-executor
           serde
@@ -2050,9 +2050,9 @@ cases:
       feature 'std'
         is required by 9 dependencies:
           clap
+          codec (renamed from parity-scale-codec)
           frame-election-provider-support
           frame-support
-          codec (renamed from parity-scale-codec)
           rand
           scale-info
           sp-arithmetic
@@ -2061,9 +2061,9 @@ cases:
     crate 'frame-remote-externalities'
       feature 'std'
         is required by 9 dependencies:
+          codec (renamed from parity-scale-codec)
           futures
           log
-          codec (renamed from parity-scale-codec)
           serde
           sp-core
           sp-io
@@ -2597,9 +2597,9 @@ cases:
     crate 'mmr-gadget'
       feature 'std'
         is required by 9 dependencies:
+          codec (renamed from parity-scale-codec)
           futures
           log
-          codec (renamed from parity-scale-codec)
           sp-api
           sp-consensus-beefy
           sp-core
@@ -2725,9 +2725,11 @@ cases:
       feature 'std'
         is required by 33 dependencies:
           clap
+          codec (renamed from parity-scale-codec)
           frame-system
           frame-system-rpc-runtime-api
           futures
+          grandpa-primitives (renamed from sp-consensus-grandpa)
           kitchensink-runtime
           log
           node-primitives
@@ -2737,7 +2739,6 @@ cases:
           pallet-balances
           pallet-im-online
           pallet-timestamp
-          codec (renamed from parity-scale-codec)
           platforms
           rand
           regex
@@ -2747,7 +2748,6 @@ cases:
           sp-api
           sp-authority-discovery
           sp-consensus-babe
-          grandpa-primitives (renamed from sp-consensus-grandpa)
           sp-core
           sp-inherents
           sp-io
@@ -2760,6 +2760,7 @@ cases:
     crate 'node-executor'
       feature 'std'
         is required by 28 dependencies:
+          codec (renamed from parity-scale-codec)
           frame-benchmarking
           frame-support
           frame-system
@@ -2775,7 +2776,6 @@ cases:
           pallet-timestamp
           pallet-transaction-payment
           pallet-treasury
-          codec (renamed from parity-scale-codec)
           sc-executor
           scale-info
           sp-application-crypto
@@ -2836,6 +2836,7 @@ cases:
     crate 'node-testing'
       feature 'std'
         is required by 18 dependencies:
+          codec (renamed from parity-scale-codec)
           frame-system
           futures
           kitchensink-runtime
@@ -2845,7 +2846,6 @@ cases:
           pallet-asset-conversion-tx-payment
           pallet-asset-tx-payment
           pallet-assets
-          codec (renamed from parity-scale-codec)
           sc-executor
           sp-api
           sp-block-builder
@@ -2922,6 +2922,7 @@ cases:
     crate 'pallet-election-provider-e2e-test'
       feature 'std'
         is required by 19 dependencies:
+          codec (renamed from parity-scale-codec)
           frame-election-provider-support
           frame-support
           frame-system
@@ -2932,7 +2933,6 @@ cases:
           pallet-session
           pallet-staking
           pallet-timestamp
-          codec (renamed from parity-scale-codec)
           scale-info
           sp-core
           sp-io
@@ -2980,6 +2980,7 @@ cases:
     crate 'pallet-nomination-pools-test-staking'
       feature 'std'
         is required by 17 dependencies:
+          codec (renamed from parity-scale-codec)
           frame-election-provider-support
           frame-support
           frame-system
@@ -2989,7 +2990,6 @@ cases:
           pallet-nomination-pools
           pallet-staking
           pallet-timestamp
-          codec (renamed from parity-scale-codec)
           scale-info
           sp-core
           sp-io
@@ -3022,8 +3022,8 @@ cases:
     crate 'pallet-transaction-payment-rpc'
       feature 'std'
         is required by 6 dependencies:
-          pallet-transaction-payment-rpc-runtime-api
           codec (renamed from parity-scale-codec)
+          pallet-transaction-payment-rpc-runtime-api
           sp-api
           sp-core
           sp-runtime
@@ -3316,10 +3316,10 @@ cases:
     crate 'sc-authority-discovery'
       feature 'std'
         is required by 12 dependencies:
+          codec (renamed from parity-scale-codec)
           futures
           log
           multihash
-          codec (renamed from parity-scale-codec)
           prost
           rand
           sp-api
@@ -3331,9 +3331,9 @@ cases:
     crate 'sc-basic-authorship'
       feature 'std'
         is required by 7 dependencies:
+          codec (renamed from parity-scale-codec)
           futures
           log
-          codec (renamed from parity-scale-codec)
           sp-api
           sp-core
           sp-inherents
@@ -3377,10 +3377,10 @@ cases:
     crate 'sc-client-api'
       feature 'std'
         is required by 14 dependencies:
+          codec (renamed from parity-scale-codec)
           fnv
           futures
           log
-          codec (renamed from parity-scale-codec)
           sc-executor
           sp-api
           sp-core
@@ -3394,10 +3394,10 @@ cases:
     crate 'sc-client-db'
       feature 'std'
         is required by 11 dependencies:
+          codec (renamed from parity-scale-codec)
           hash-db
           kitchensink-runtime
           log
-          codec (renamed from parity-scale-codec)
           rand
           sp-arithmetic
           sp-core
@@ -3419,9 +3419,9 @@ cases:
     crate 'sc-consensus-aura'
       feature 'std'
         is required by 14 dependencies:
+          codec (renamed from parity-scale-codec)
           futures
           log
-          codec (renamed from parity-scale-codec)
           sp-api
           sp-application-crypto
           sp-block-builder
@@ -3436,12 +3436,12 @@ cases:
     crate 'sc-consensus-babe'
       feature 'std'
         is required by 19 dependencies:
+          codec (renamed from parity-scale-codec)
           futures
           log
           num-bigint
           num-rational
           num-traits
-          codec (renamed from parity-scale-codec)
           rand_chacha
           scale-info
           sp-api
@@ -3470,10 +3470,10 @@ cases:
     crate 'sc-consensus-beefy'
       feature 'std'
         is required by 15 dependencies:
+          codec (renamed from parity-scale-codec)
           fnv
           futures
           log
-          codec (renamed from parity-scale-codec)
           serde
           sp-api
           sp-application-crypto
@@ -3488,9 +3488,9 @@ cases:
     crate 'sc-consensus-beefy-rpc'
       feature 'std'
         is required by 8 dependencies:
+          codec (renamed from parity-scale-codec)
           futures
           log
-          codec (renamed from parity-scale-codec)
           serde
           serde_json
           sp-consensus-beefy
@@ -3534,9 +3534,9 @@ cases:
     crate 'sc-consensus-manual-seal'
       feature 'std'
         is required by 13 dependencies:
+          codec (renamed from parity-scale-codec)
           futures
           log
-          codec (renamed from parity-scale-codec)
           serde
           sp-api
           sp-consensus-aura
@@ -3550,9 +3550,9 @@ cases:
     crate 'sc-consensus-pow'
       feature 'std'
         is required by 9 dependencies:
+          codec (renamed from parity-scale-codec)
           futures
           log
-          codec (renamed from parity-scale-codec)
           sp-api
           sp-block-builder
           sp-consensus-pow
@@ -3562,9 +3562,9 @@ cases:
     crate 'sc-consensus-slots'
       feature 'std'
         is required by 9 dependencies:
+          codec (renamed from parity-scale-codec)
           futures
           log
-          codec (renamed from parity-scale-codec)
           sp-arithmetic
           sp-consensus-slots
           sp-core
@@ -3580,9 +3580,9 @@ cases:
       feature 'std'
         is required by 9 dependencies:
           anyhow
+          codec (renamed from parity-scale-codec)
           libc
           log
-          codec (renamed from parity-scale-codec)
           rustix
           sc-runtime-test
           sp-io
@@ -3605,10 +3605,10 @@ cases:
       feature 'std'
         is required by 16 dependencies:
           bytes
+          codec (renamed from parity-scale-codec)
           fnv
           futures
           log
-          codec (renamed from parity-scale-codec)
           rand
           serde
           serde_json
@@ -3634,8 +3634,8 @@ cases:
     crate 'sc-network-common'
       feature 'std'
         is required by 4 dependencies:
-          futures
           codec (renamed from parity-scale-codec)
+          futures
           sp-consensus-grandpa
           sp-runtime
     crate 'sc-network-gossip'
@@ -3649,25 +3649,25 @@ cases:
     crate 'sc-network-light'
       feature 'std'
         is required by 6 dependencies:
+          codec (renamed from parity-scale-codec)
           futures
           log
-          codec (renamed from parity-scale-codec)
           prost
           sp-core
           sp-runtime
     crate 'sc-network-statement'
       feature 'std'
         is required by 4 dependencies:
+          codec (renamed from parity-scale-codec)
           futures
           log
-          codec (renamed from parity-scale-codec)
           sp-statement-store
     crate 'sc-network-sync'
       feature 'std'
         is required by 10 dependencies:
+          codec (renamed from parity-scale-codec)
           futures
           log
-          codec (renamed from parity-scale-codec)
           prost
           sp-arithmetic
           sp-consensus-grandpa
@@ -3688,19 +3688,19 @@ cases:
     crate 'sc-network-transactions'
       feature 'std'
         is required by 4 dependencies:
+          codec (renamed from parity-scale-codec)
           futures
           log
-          codec (renamed from parity-scale-codec)
           sp-runtime
     crate 'sc-offchain'
       feature 'std'
         is required by 15 dependencies:
           bytes
+          codec (renamed from parity-scale-codec)
           fnv
           futures
           log
           once_cell
-          codec (renamed from parity-scale-codec)
           rand
           sp-api
           sp-core
@@ -3717,9 +3717,9 @@ cases:
     crate 'sc-rpc'
       feature 'std'
         is required by 14 dependencies:
+          codec (renamed from parity-scale-codec)
           futures
           log
-          codec (renamed from parity-scale-codec)
           pretty_assertions
           serde_json
           sp-api
@@ -3749,11 +3749,11 @@ cases:
     crate 'sc-rpc-spec-v2'
       feature 'std'
         is required by 13 dependencies:
+          codec (renamed from parity-scale-codec)
           futures
           futures-util
           hex
           log
-          codec (renamed from parity-scale-codec)
           pretty_assertions
           serde
           serde_json
@@ -3765,9 +3765,9 @@ cases:
     crate 'sc-service'
       feature 'std'
         is required by 22 dependencies:
+          codec (renamed from parity-scale-codec)
           futures
           log
-          codec (renamed from parity-scale-codec)
           rand
           sc-executor
           serde
@@ -3806,8 +3806,8 @@ cases:
     crate 'sc-state-db'
       feature 'std'
         is required by 3 dependencies:
-          log
           codec (renamed from parity-scale-codec)
+          log
           sp-core
     crate 'sc-statement-store'
       feature 'std'
@@ -3871,9 +3871,9 @@ cases:
     crate 'sc-transaction-pool'
       feature 'std'
         is required by 10 dependencies:
+          codec (renamed from parity-scale-codec)
           futures
           log
-          codec (renamed from parity-scale-codec)
           serde
           sp-api
           sp-core
@@ -3884,9 +3884,9 @@ cases:
     crate 'sc-transaction-pool-api'
       feature 'std'
         is required by 7 dependencies:
+          codec (renamed from parity-scale-codec)
           futures
           log
-          codec (renamed from parity-scale-codec)
           serde
           serde_json
           sp-core
@@ -4011,9 +4011,9 @@ cases:
     crate 'sp-api-test'
       feature 'std'
         is required by 10 dependencies:
+          codec (renamed from parity-scale-codec)
           futures
           log
-          codec (renamed from parity-scale-codec)
           scale-info
           sp-api
           sp-core
@@ -4040,9 +4040,9 @@ cases:
     crate 'sp-blockchain'
       feature 'std'
         is required by 6 dependencies:
+          codec (renamed from parity-scale-codec)
           futures
           log
-          codec (renamed from parity-scale-codec)
           sp-api
           sp-runtime
           sp-state-machine
@@ -4204,9 +4204,9 @@ cases:
     crate 'substrate-frame-rpc-support'
       feature 'std'
         is required by 8 dependencies:
+          codec (renamed from parity-scale-codec)
           frame-support
           frame-system
-          codec (renamed from parity-scale-codec)
           scale-info
           serde
           sp-core
@@ -4215,10 +4215,10 @@ cases:
     crate 'substrate-frame-rpc-system'
       feature 'std'
         is required by 9 dependencies:
+          codec (renamed from parity-scale-codec)
           frame-system-rpc-runtime-api
           futures
           log
-          codec (renamed from parity-scale-codec)
           sp-api
           sp-block-builder
           sp-core
@@ -4249,8 +4249,8 @@ cases:
     crate 'substrate-test-client'
       feature 'std'
         is required by 9 dependencies:
-          futures
           codec (renamed from parity-scale-codec)
+          futures
           sc-executor
           serde
           serde_json
@@ -4274,8 +4274,8 @@ cases:
     crate 'substrate-test-runtime-transaction-pool'
       feature 'std'
         is required by 3 dependencies:
-          futures
           codec (renamed from parity-scale-codec)
+          futures
           sp-runtime
     crate 'substrate-test-utils'
       feature 'std'
@@ -4926,6 +4926,7 @@ cases:
         is required by 24 dependencies:
           frame-system
           frame-system-rpc-runtime-api
+          grandpa-primitives (renamed from sp-consensus-grandpa)
           kitchensink-runtime
           node-primitives
           pallet-asset-conversion-tx-payment
@@ -4938,7 +4939,6 @@ cases:
           sp-api
           sp-authority-discovery
           sp-consensus-babe
-          grandpa-primitives (renamed from sp-consensus-grandpa)
           sp-core
           sp-inherents
           sp-io
@@ -5678,8 +5678,8 @@ cases:
     crate 'frame-support-test-compile-pass'
       feature 'try-runtime'
         is required by 3 dependencies:
-          renamed-frame-support (renamed from frame-support)
           frame-system
+          renamed-frame-support (renamed from frame-support)
           sp-runtime
     crate 'frame-support-test-pallet'
       feature 'try-runtime'
@@ -6255,8 +6255,8 @@ cases:
     crate 'frame-support-test-compile-pass'
       feature 'try-runtime'
         is required by 3 dependencies:
-          renamed-frame-support (renamed from frame-support)
           frame-system
+          renamed-frame-support (renamed from frame-support)
           sp-runtime
     crate 'frame-support-test-pallet'
       feature 'try-runtime'

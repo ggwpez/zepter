@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
+#![cfg(feature = "debugging")]
+
 use super::{lint::CrateAndFeature, GlobalArgs};
 use crate::{cmd::lint::build_feature_dag, prelude::Dag};
 

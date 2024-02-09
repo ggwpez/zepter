@@ -70,6 +70,7 @@ enum SubCommand {
 	Run(run::RunCmd),
 	#[clap(hide = true)]
 	Transpose(transpose::TransposeCmd),
+	#[cfg(feature = "debugging")]
 	Debug(debug::DebugCmd),
 }
 
@@ -106,6 +107,7 @@ impl Command {
 				cmd.run(&self.global);
 				Ok(())
 			},
+			#[cfg(feature = "debugging")]
 			Some(SubCommand::Debug(cmd)) => {
 				cmd.run(&self.global);
 				Ok(())
@@ -205,9 +207,6 @@ pub struct CargoArgs {
 
 	#[clap(long, global = true)]
 	pub all_features: bool,
-
-	#[clap(long = "debug-keep-meta")]
-	pub keep_meta: Option<std::path::PathBuf>,
 }
 
 impl CargoArgs {
@@ -240,14 +239,7 @@ impl CargoArgs {
 			cmd.other_options(vec!["--locked".to_string()]);
 		}
 
-		let meta = cmd.exec().map_err(|e| format!("Failed to load metadata: {e}"))?;
-
-		if let Some(path) = &self.keep_meta {
-			std::fs::write(path, serde_json::to_string_pretty(&meta).unwrap()).unwrap();
-			log::info!("Wrote metadata to {}", path.display());
-		}
-
-		Ok(meta)
+		cmd.exec().map_err(|e| format!("Failed to load metadata: {e}"))
 	}
 }
 

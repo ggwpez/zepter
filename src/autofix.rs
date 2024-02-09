@@ -466,7 +466,6 @@ impl AutoFixer {
 
 			let dep = deps.get_mut(dname).unwrap();
 			Self::lift_some_dependency(dep, default_feats)?;
-			//deps.key_decor_mut(dname).unwrap().set_suffix("");
 		}
 		Ok(())
 	}

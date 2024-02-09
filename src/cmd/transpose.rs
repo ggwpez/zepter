@@ -240,7 +240,7 @@ impl LiftToWorkspaceCmd {
 		fixer.add_workspace_dep(&dep, false)?;
 
 		let mut modified = 0;
-		for (pkg, fixer) in fixers.values_mut() {
+		for (_pkg, fixer) in fixers.values_mut() {
 			if !fixer.modified() {
 				continue
 			}
@@ -249,7 +249,7 @@ impl LiftToWorkspaceCmd {
 			if self.fix {
 				fixer.save()?;
 			} else {
-				log::debug!("Would modify {:?}", pkg.name);
+				log::debug!("Would modify {:?}", _pkg.name);
 			}
 		}
 		if fixer.modified() {

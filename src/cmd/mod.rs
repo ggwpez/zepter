@@ -95,10 +95,7 @@ impl Command {
 				cmd.run(&self.global);
 				Ok(())
 			},
-			Some(SubCommand::Lint(cmd)) => {
-				cmd.run(&self.global);
-				Ok(())
-			},
+			Some(SubCommand::Lint(cmd)) => cmd.run(&self.global),
 			Some(SubCommand::Format(cmd)) => {
 				cmd.run(&self.global);
 				Ok(())
@@ -210,9 +207,23 @@ pub struct CargoArgs {
 }
 
 impl CargoArgs {
+	pub fn with_workspace(mut self, workspace: bool) -> Self {
+		self.workspace = workspace;
+		self
+	}
+
 	/// Load the metadata of the rust project.
 	pub fn load_metadata(&self) -> Result<Metadata, String> {
-		self.load_metadata_unsorted()
+		let err = match self.load_metadata_unsorted() {
+			Ok(meta) => return Ok(meta),
+			Err(err) => err,
+		};
+
+		if check_for_locked_error(&err) {
+			Err("\nThe Cargo.lock file needs to be updated first since --locked is present.\n".to_string())
+		} else {
+			Err(err)
+		}
 	}
 
 	pub fn load_metadata_unsorted(&self) -> Result<Metadata, String> {
@@ -241,6 +252,10 @@ impl CargoArgs {
 
 		cmd.exec().map_err(|e| format!("Failed to load metadata: {e}"))
 	}
+}
+
+fn check_for_locked_error(err: &str) -> bool {
+	err.contains("needs to be updated but --locked was passed to prevent this")
 }
 
 /// Resolve the dependency `dep` of `pkg` within the metadata.

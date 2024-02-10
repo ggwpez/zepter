@@ -35,7 +35,7 @@ impl DebugCmd {
 
 		#[cfg(feature = "debugging")]
 		self.connectivity_buckets(&dag);
-		
+
 		if !self.no_benchmark {
 			let (took, points) = Self::measure(&meta);
 			println!("DAG setup time: {:.2?} (avg from {} runs)", took, points);

@@ -111,14 +111,19 @@ impl ConfigArgs {
 
 	fn locate_workspace(&self) -> Result<PathBuf, String> {
 		let mut cmd = std::process::Command::new("cargo");
-		cmd.arg("locate-project").args(["--message-format", "plain", "--workspace", "--offline", "--locked"]);
+		cmd.arg("locate-project").args([
+			"--message-format",
+			"plain",
+			"--workspace",
+			"--offline",
+			"--locked",
+		]);
 		if let Some(path) = &self.manifest_path {
 			cmd.arg("--manifest-path").arg(path);
 		}
 		let output = cmd.output().err_to_str()?;
 		let path = output.stdout;
-		let path =
-			String::from_utf8(path).err_to_str()?;
+		let path = String::from_utf8(path).err_to_str()?;
 		let path = PathBuf::from(path);
 		let root = path.parent().ok_or("Failed to find workspace root")?;
 

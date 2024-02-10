@@ -209,7 +209,7 @@ impl CargoArgs {
 		self.workspace = workspace;
 		self
 	}
-	
+
 	/// Load the metadata of the rust project.
 	pub fn load_metadata(&self) -> Result<Metadata, String> {
 		let err = match self.load_metadata_unsorted() {
@@ -218,7 +218,8 @@ impl CargoArgs {
 		};
 
 		if check_for_locked_error(&err) {
-			Err("\nThe Cargo.lock file needs to be updated first since --locked is present.\n".to_string())
+			Err("\nThe Cargo.lock file needs to be updated first since --locked is present.\n"
+				.to_string())
 		} else {
 			Err(err)
 		}

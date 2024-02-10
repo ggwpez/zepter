@@ -256,10 +256,22 @@ impl LintCmd {
 	pub(crate) fn run(&self, global: &GlobalArgs) -> Result<(), String> {
 		match &self.subcommand {
 			SubCommand::PropagateFeature(cmd) => cmd.run(global),
-			SubCommand::NeverEnables(cmd) => Ok(cmd.run(global)),
-			SubCommand::NeverImplies(cmd) => Ok(cmd.run(global)),
-			SubCommand::WhyEnabled(cmd) => Ok(cmd.run(global)),
-			SubCommand::OnlyEnables(cmd) => Ok(cmd.run(global)),
+			SubCommand::NeverEnables(cmd) => {
+				cmd.run(global);
+				Ok(())
+			},
+			SubCommand::NeverImplies(cmd) => {
+				cmd.run(global);
+				Ok(())
+			},
+			SubCommand::WhyEnabled(cmd) => {
+				cmd.run(global);
+				Ok(())
+			},
+			SubCommand::OnlyEnables(cmd) => {
+				cmd.run(global);
+				Ok(())
+			},
 		}
 	}
 }
@@ -518,15 +530,10 @@ impl PropagateFeatureCmd {
 				propagate_missing.entry(pkg.id.to_string()).or_default().insert(dep);
 			}
 		}
-		let faulty_crates: BTreeSet<CrateId> = propagate_missing
-			.keys()
-			.chain(feature_missing.keys())
-			.cloned()
-			.collect();
-		let mut faulty_crates = faulty_crates
-			.into_iter()
-			.map(|id| (lookup(&id), id))
-			.collect::<Vec<_>>();
+		let faulty_crates: BTreeSet<CrateId> =
+			propagate_missing.keys().chain(feature_missing.keys()).cloned().collect();
+		let mut faulty_crates =
+			faulty_crates.into_iter().map(|id| (lookup(&id), id)).collect::<Vec<_>>();
 		faulty_crates.sort_by(|(a, _), (b, _)| a.name.cmp(&b.name));
 
 		let (mut errors, mut fixes) = (0, 0);
@@ -560,7 +567,7 @@ impl PropagateFeatureCmd {
 			println!("crate {krate_str}\n  feature '{}'", feature);
 
 			if let Some(deps) = feature_missing.get(&krate.id.to_string()) {
-				let mut named =	deps.iter().map(RenamedPackage::display_name).collect::<Vec<_>>();
+				let mut named = deps.iter().map(RenamedPackage::display_name).collect::<Vec<_>>();
 				named.sort();
 				println!(
 					"    is required by {} dependenc{}:\n      {}",

@@ -37,7 +37,7 @@ fn setup_logging() {
 			let level_style = buf.default_level_style(record.level()).bold();
 			let begin = level_style.render();
 			let reset = level_style.render_reset();
-			
+
 			writeln!(buf, "[{begin}{}{reset}] {}", record.level(), record.args())
 		})
 		.init();

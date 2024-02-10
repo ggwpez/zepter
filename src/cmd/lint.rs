@@ -253,13 +253,13 @@ impl core::str::FromStr for IgnoreSetting {
 }
 
 impl LintCmd {
-	pub(crate) fn run(&self, global: &GlobalArgs) {
+	pub(crate) fn run(&self, global: &GlobalArgs) -> Result<(), String> {
 		match &self.subcommand {
 			SubCommand::PropagateFeature(cmd) => cmd.run(global),
-			SubCommand::NeverEnables(cmd) => cmd.run(global),
-			SubCommand::NeverImplies(cmd) => cmd.run(global),
-			SubCommand::WhyEnabled(cmd) => cmd.run(global),
-			SubCommand::OnlyEnables(cmd) => cmd.run(global),
+			SubCommand::NeverEnables(cmd) => Ok(cmd.run(global)),
+			SubCommand::NeverImplies(cmd) => Ok(cmd.run(global)),
+			SubCommand::WhyEnabled(cmd) => Ok(cmd.run(global)),
+			SubCommand::OnlyEnables(cmd) => Ok(cmd.run(global)),
 		}
 	}
 }
@@ -402,13 +402,15 @@ impl NeverEnablesCmd {
 }
 
 impl PropagateFeatureCmd {
-	pub fn run(&self, global: &GlobalArgs) {
-		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
+	pub fn run(&self, global: &GlobalArgs) -> Result<(), String> {
+		let meta = self.cargo_args.load_metadata()?;
 		let dag = build_feature_dag(&meta, &meta.packages);
 
 		for feature in self.features.iter() {
 			self.run_feature(&meta, &dag, feature.clone(), global);
 		}
+
+		Ok(())
 	}
 
 	fn run_feature(

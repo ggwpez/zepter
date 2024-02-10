@@ -135,9 +135,7 @@ impl LiftToWorkspaceCmd {
 			return Err("Cannot use --exact-version without --version-resolver=exact".to_string())
 		}
 
-		let mut args = self.cargo_args.clone();
-		args.workspace = true;
-		let meta = args.load_metadata()?;
+		let meta = self.cargo_args.clone().with_workspace(true).load_metadata()?;
 		log::debug!("Scanning workspace for '{}'", self.dependency);
 		// version -> crate
 		let mut by_version = HashMap::<semver::VersionReq, Vec<(Package, Dep)>>::new();
@@ -304,10 +302,8 @@ fn try_find_latest<'a, I: Iterator<Item = &'a VersionReq>>(reqs: I) -> Result<Ve
 impl StripDevDepsCmd {
 	pub fn run(&self, g: &GlobalArgs) {
 		g.warn_unstable();
-
-		let mut args = self.cargo_args.clone();
-		args.workspace = true;
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
+
 		let kind = DependencyKind::Development;
 		// Allowed dir that we can write to.
 		let allowed_dir = canonicalize(meta.workspace_root.as_std_path()).unwrap();

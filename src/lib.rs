@@ -79,3 +79,14 @@ macro_rules! trace {
 		}
 	};
 }
+
+/// Convert the error or a `Result` into a `String` error.
+pub(crate) trait ErrToStr<R> {
+	fn err_to_str(self) -> Result<R, String>;
+}
+
+impl<R, E: std::fmt::Display> ErrToStr<R> for Result<R, E> {
+	fn err_to_str(self) -> Result<R, String> {
+		self.map_err(|e| format!("{}", e))
+	}
+}

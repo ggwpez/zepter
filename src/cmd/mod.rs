@@ -94,10 +94,7 @@ impl Command {
 				cmd.run(&self.global);
 				Ok(())
 			},
-			Some(SubCommand::Lint(cmd)) => {
-				cmd.run(&self.global);
-				Ok(())
-			},
+			Some(SubCommand::Lint(cmd)) => cmd.run(&self.global),
 			Some(SubCommand::Format(cmd)) => {
 				cmd.run(&self.global);
 				Ok(())
@@ -181,7 +178,7 @@ impl GlobalArgs {
 }
 
 /// Arguments for how to load cargo metadata from a workspace.
-#[derive(Debug, Clone, clap::Parser)]
+#[derive(Debug, Clone, clap::Parser, PartialEq)]
 pub struct CargoArgs {
 	/// Cargo manifest path or directory.
 	///
@@ -205,18 +202,30 @@ pub struct CargoArgs {
 
 	#[clap(long, global = true)]
 	pub all_features: bool,
-
-	#[clap(long = "debug-keep-meta")]
-	pub keep_meta: Option<std::path::PathBuf>,
 }
 
 impl CargoArgs {
-	/// Load the metadata of the rust project.
-	pub fn load_metadata(&self) -> Result<Metadata, String> {
-		self.load_metadata_unsorted()
+	pub fn with_workspace(mut self, workspace: bool) -> Self {
+		self.workspace = workspace;
+		self
 	}
 
-	pub fn load_metadata_unsorted(&self) -> Result<Metadata, String> {
+	/// Load the metadata of the rust project.
+	pub fn load_metadata(&self) -> Result<Metadata, String> {
+		let err = match self.load_metadata_unsorted() {
+			Ok(meta) => return Ok(meta),
+			Err(err) => err,
+		};
+
+		if check_for_locked_error(&err) {
+			Err("\nThe Cargo.lock file needs to be updated first since --locked is present.\n"
+				.to_string())
+		} else {
+			Err(err)
+		}
+	}
+
+	fn load_metadata_unsorted(&self) -> Result<Metadata, String> {
 		let mut cmd = MetadataCommand::new();
 
 		if let Some(ref manifest_path) = self.manifest_path {
@@ -240,15 +249,12 @@ impl CargoArgs {
 			cmd.other_options(vec!["--locked".to_string()]);
 		}
 
-		let meta = cmd.exec().map_err(|e| format!("Failed to load metadata: {e}"))?;
-
-		if let Some(path) = &self.keep_meta {
-			std::fs::write(path, serde_json::to_string_pretty(&meta).unwrap()).unwrap();
-			log::info!("Wrote metadata to {}", path.display());
-		}
-
-		Ok(meta)
+		cmd.exec().map_err(|e| format!("Failed to load metadata: {e}"))
 	}
+}
+
+fn check_for_locked_error(err: &str) -> bool {
+	err.contains("needs to be updated but --locked was passed to prevent this")
 }
 
 /// Resolve the dependency `dep` of `pkg` within the metadata.
@@ -331,7 +337,7 @@ impl Ord for RenamedPackage {
 		// Yikes... dafuq is this?!
 		//bincode::serialize(self).unwrap().cmp(&bincode::serialize(other).unwrap())
 
-		self.pkg.id.cmp(&other.pkg.id)
+		(&self.pkg.name, &self.pkg.id).cmp(&(&other.pkg.name, &other.pkg.id))
 	}
 }
 

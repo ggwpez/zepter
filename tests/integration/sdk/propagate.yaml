@@ -750,8 +750,8 @@ cases:
     crate 'polkadot-node-metrics'
       feature 'runtime-benchmarks'
         must propagate to:
-          primitives (renamed from polkadot-primitives)
           polkadot-test-service
+          primitives (renamed from polkadot-primitives)
           sc-service
     crate 'polkadot-parachain'
       feature 'runtime-benchmarks'
@@ -846,9 +846,9 @@ cases:
           pallet-timestamp
           pallet-vesting
           polkadot-parachain
+          polkadot-runtime-parachains
           primitives (renamed from polkadot-primitives)
           runtime-common (renamed from polkadot-runtime-common)
-          polkadot-runtime-parachains
           sp-runtime
           sp-staking
           xcm-executor
@@ -905,9 +905,9 @@ cases:
           pallet-salary
           pallet-xcm
           polkadot-parachain
-          primitives (renamed from polkadot-primitives)
           polkadot-runtime-parachains
           polkadot-test-runtime
+          primitives (renamed from polkadot-primitives)
           sp-runtime
     crate 'xcm-executor'
       feature 'runtime-benchmarks'

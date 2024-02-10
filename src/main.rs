@@ -6,7 +6,7 @@
 use clap::Parser;
 use zepter::cmd::Command;
 
-fn main() -> Result<(), String> {
+fn main() -> Result<(), ()> {
 	setup_logging();
 
 	// Need to remove this in case `cargo-zepter` is used:
@@ -17,7 +17,7 @@ fn main() -> Result<(), String> {
 
 	if let Err(err) = Command::parse_from(args).run() {
 		eprintln!("{}", err);
-		Err("see log".into())
+		Err(())
 	} else {
 		Ok(())
 	}
@@ -28,35 +28,17 @@ fn setup_logging() {}
 
 #[cfg(feature = "logging")]
 fn setup_logging() {
-	use env_logger::fmt::Color;
 	use std::io::Write;
 
 	env_logger::builder()
 		.parse_env(env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "debug"))
 		.format_timestamp(None)
 		.format(|buf, record| {
-			let mut level_style = buf.style();
-			level_style.set_bold(true);
+			let level_style = buf.default_level_style(record.level()).bold();
+			let begin = level_style.render();
+			let reset = level_style.render_reset();
 
-			match record.level() {
-				log::Level::Error => {
-					level_style.set_color(Color::Red);
-				},
-				log::Level::Warn => {
-					level_style.set_color(Color::Yellow);
-				},
-				log::Level::Info => {
-					level_style.set_color(Color::White);
-				},
-				log::Level::Debug => {
-					level_style.set_color(Color::Blue);
-				},
-				log::Level::Trace => {
-					level_style.set_color(Color::Magenta);
-				},
-			};
-
-			writeln!(buf, "[{}] {}", level_style.value(record.level()), record.args())
+			writeln!(buf, "[{begin}{}{reset}] {}", record.level(), record.args())
 		})
 		.init();
 }

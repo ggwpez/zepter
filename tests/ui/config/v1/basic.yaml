@@ -3,47 +3,43 @@ crates:
 cases:
 - cmd: run default
   stdout: |
-    zepter 1.1.0
+    zepter 1.1.1
   stderr: |
     [INFO] Running workflow 'default'
     [INFO] 1/1 --version
 - cmd: run
   stdout: |
-    zepter 1.1.0
+    zepter 1.1.1
   stderr: |
     [INFO] Running workflow 'default'
     [INFO] 1/1 --version
 - cmd: ''
   stdout: |
-    zepter 1.1.0
+    zepter 1.1.1
   stderr: |
     [INFO] Running workflow 'default'
     [INFO] 1/1 --version
 - cmd: run my_version
   stdout: |
-    zepter 1.1.0
+    zepter 1.1.1
   stderr: |
     [INFO] Running workflow 'my_version'
     [INFO] 1/1 --version
 - cmd: run my_debug
-  stdout: |+
+  stdout: |
     Num workspace members: 1
     Num dependencies: 1
     DAG nodes: 0, links: 0
-    # Number of samples = 0
-
   stderr: |
     [INFO] Running workflow 'my_debug'
     [WARN] Unstable feature - do not rely on this!
     [INFO] 1/1 debug --no-benchmark
 - cmd: run both
-  stdout: |+
-    zepter 1.1.0
+  stdout: |
+    zepter 1.1.1
     Num workspace members: 1
     Num dependencies: 1
     DAG nodes: 0, links: 0
-    # Number of samples = 0
-
   stderr: |
     [INFO] Running workflow 'both'
     [INFO] 1/2 --version

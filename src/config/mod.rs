@@ -4,7 +4,7 @@
 pub mod semver;
 pub mod workflow;
 
-use crate::{config::workflow::WorkflowFile, log};
+use crate::{config::workflow::WorkflowFile, log, ErrToStr};
 
 use std::{
 	fs::canonicalize,
@@ -86,7 +86,7 @@ impl ConfigArgs {
 
 	fn locate_config(&self) -> Result<PathBuf, String> {
 		if let Some(path) = &self.config {
-			let path = canonicalize(path).expect("Must canonicalize path");
+			let path = canonicalize(path).err_to_str()?;
 
 			if path.exists() {
 				Ok(path)
@@ -111,23 +111,21 @@ impl ConfigArgs {
 
 	fn locate_workspace(&self) -> Result<PathBuf, String> {
 		let mut cmd = std::process::Command::new("cargo");
-		cmd.arg("locate-project").args(["--workspace", "--offline", "--locked"]);
+		cmd.arg("locate-project").args([
+			"--message-format",
+			"plain",
+			"--workspace",
+			"--offline",
+			"--locked",
+		]);
 		if let Some(path) = &self.manifest_path {
 			cmd.arg("--manifest-path").arg(path);
 		}
-		let output = cmd.output().expect("Failed to run `cargo locate-project`");
+		let output = cmd.output().err_to_str()?;
 		let path = output.stdout;
-		let path =
-			String::from_utf8(path).expect("Failed to parse output of `cargo locate-project`");
-		let path: serde_json::Value = serde_json::from_str(&path).unwrap_or_else(|_| {
-			panic!(
-				"Failed to parse output of `cargo locate-project`: '{}'",
-				String::from_utf8_lossy(&output.stderr)
-			)
-		});
-		let path = path["root"].as_str().expect("Failed to parse output of `cargo locate-project`");
+		let path = String::from_utf8(path).err_to_str()?;
 		let path = PathBuf::from(path);
-		let root = path.parent().expect("Failed to get parent of workspace root");
+		let root = path.parent().ok_or("Failed to find workspace root")?;
 
 		Ok(root.into())
 	}

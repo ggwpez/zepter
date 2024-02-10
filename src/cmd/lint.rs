@@ -253,13 +253,25 @@ impl core::str::FromStr for IgnoreSetting {
 }
 
 impl LintCmd {
-	pub(crate) fn run(&self, global: &GlobalArgs) {
+	pub(crate) fn run(&self, global: &GlobalArgs) -> Result<(), String> {
 		match &self.subcommand {
 			SubCommand::PropagateFeature(cmd) => cmd.run(global),
-			SubCommand::NeverEnables(cmd) => cmd.run(global),
-			SubCommand::NeverImplies(cmd) => cmd.run(global),
-			SubCommand::WhyEnabled(cmd) => cmd.run(global),
-			SubCommand::OnlyEnables(cmd) => cmd.run(global),
+			SubCommand::NeverEnables(cmd) => {
+				cmd.run(global);
+				Ok(())
+			},
+			SubCommand::NeverImplies(cmd) => {
+				cmd.run(global);
+				Ok(())
+			},
+			SubCommand::WhyEnabled(cmd) => {
+				cmd.run(global);
+				Ok(())
+			},
+			SubCommand::OnlyEnables(cmd) => {
+				cmd.run(global);
+				Ok(())
+			},
 		}
 	}
 }
@@ -402,13 +414,15 @@ impl NeverEnablesCmd {
 }
 
 impl PropagateFeatureCmd {
-	pub fn run(&self, global: &GlobalArgs) {
-		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
+	pub fn run(&self, global: &GlobalArgs) -> Result<(), String> {
+		let meta = self.cargo_args.load_metadata()?;
 		let dag = build_feature_dag(&meta, &meta.packages);
 
 		for feature in self.features.iter() {
 			self.run_feature(&meta, &dag, feature.clone(), global);
 		}
+
+		Ok(())
 	}
 
 	fn run_feature(
@@ -516,17 +530,14 @@ impl PropagateFeatureCmd {
 				propagate_missing.entry(pkg.id.to_string()).or_default().insert(dep);
 			}
 		}
-		let faulty_crates: BTreeSet<CrateId> = propagate_missing
-			.keys()
-			.chain(feature_missing.keys())
-			//.chain(feature_maybe_unused.iter())
-			.cloned()
-			.collect();
+		let faulty_crates: BTreeSet<CrateId> =
+			propagate_missing.keys().chain(feature_missing.keys()).cloned().collect();
+		let mut faulty_crates =
+			faulty_crates.into_iter().map(|id| (lookup(&id), id)).collect::<Vec<_>>();
+		faulty_crates.sort_by(|(a, _), (b, _)| a.name.cmp(&b.name));
 
-		let (mut errors, warnings) = (0, 0);
-		let mut fixes = 0;
-		for krate in faulty_crates {
-			let krate = lookup(&krate);
+		let (mut errors, mut fixes) = (0, 0);
+		for (krate, _) in faulty_crates {
 			let in_workspace = meta.workspace_members.iter().any(|m| m == &krate.id);
 			// check if we can modify in allowed_dir
 			let krate_path = canonicalize(krate.manifest_path.clone().into_std_path_buf()).unwrap();
@@ -556,13 +567,13 @@ impl PropagateFeatureCmd {
 			println!("crate {krate_str}\n  feature '{}'", feature);
 
 			if let Some(deps) = feature_missing.get(&krate.id.to_string()) {
-				let joined =
-					deps.iter().map(|dep| dep.display_name()).collect::<Vec<_>>().join("\n      ");
+				let mut named = deps.iter().map(RenamedPackage::display_name).collect::<Vec<_>>();
+				named.sort();
 				println!(
 					"    is required by {} dependenc{}:\n      {}",
 					deps.len(),
 					if deps.len() == 1 { "y" } else { "ies" },
-					joined
+					named.join("\n      "),
 				);
 
 				if self.fixer_args.enable &&
@@ -581,14 +592,14 @@ impl PropagateFeatureCmd {
 			}
 
 			if let Some(deps) = propagate_missing.get(&krate.id.to_string()) {
-				let joined =
-					deps.iter().map(|dep| dep.display_name()).collect::<Vec<_>>().join("\n      ");
-				println!("    must propagate to:\n      {joined}");
+				let mut named = deps.iter().map(RenamedPackage::display_name).collect::<Vec<_>>();
+				named.sort();
+				println!("    must propagate to:\n      {}", named.join("\n      "));
 
 				if self.fixer_args.enable &&
 					self.fix_package.as_ref().map_or(true, |p| p == &krate.name)
 				{
-					for dep in deps {
+					for dep in deps.iter() {
 						let dep_name = dep.name();
 						if !self.fix_dependency.as_ref().map_or(true, |d| d == &dep_name) {
 							continue
@@ -618,7 +629,7 @@ impl PropagateFeatureCmd {
 				}
 			}
 		}
-		if let Some(e) = error_stats(errors, warnings, fixes, self.fixer_args.enable, global) {
+		if let Some(e) = error_stats(errors, 0, fixes, self.fixer_args.enable, global) {
 			println!("{}", e);
 		}
 

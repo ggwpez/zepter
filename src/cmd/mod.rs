@@ -70,7 +70,6 @@ enum SubCommand {
 	Run(run::RunCmd),
 	#[clap(hide = true)]
 	Transpose(transpose::TransposeCmd),
-	#[cfg(feature = "debugging")]
 	Debug(debug::DebugCmd),
 }
 
@@ -104,7 +103,6 @@ impl Command {
 				cmd.run(&self.global);
 				Ok(())
 			},
-			#[cfg(feature = "debugging")]
 			Some(SubCommand::Debug(cmd)) => {
 				cmd.run(&self.global);
 				Ok(())

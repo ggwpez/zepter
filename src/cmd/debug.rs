@@ -1,13 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
-#![cfg(feature = "debugging")]
-
 use super::{lint::CrateAndFeature, GlobalArgs};
 use crate::{cmd::lint::build_feature_dag, prelude::Dag};
 
 use cargo_metadata::Metadata;
-use histo::Histogram;
 use std::time::{Duration, Instant};
 
 #[derive(Debug, clap::Parser)]
@@ -35,15 +32,19 @@ impl DebugCmd {
 		println!("Num workspace members: {}", meta.workspace_members.len());
 		println!("Num dependencies: {}", meta.packages.len());
 		println!("DAG nodes: {}, links: {}", dag.num_nodes(), dag.num_edges());
+
+		#[cfg(feature = "debugging")]
 		self.connectivity_buckets(&dag);
+		
 		if !self.no_benchmark {
 			let (took, points) = Self::measure(&meta);
 			println!("DAG setup time: {:.2?} (avg from {} runs)", took, points);
 		}
 	}
 
+	#[cfg(feature = "debugging")]
 	pub fn connectivity_buckets(&self, dag: &Dag<CrateAndFeature>) {
-		let mut histogram = Histogram::with_buckets(10);
+		let mut histogram = histo::Histogram::with_buckets(10);
 
 		for node in dag.lhs_nodes() {
 			histogram.add(dag.degree(node) as u64);

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
-use super::{lint::CrateAndFeature, GlobalArgs};
-use crate::{cmd::lint::build_feature_dag, prelude::Dag};
+use super::GlobalArgs;
+use crate::cmd::lint::build_feature_dag;
 
 use cargo_metadata::Metadata;
 use std::time::{Duration, Instant};

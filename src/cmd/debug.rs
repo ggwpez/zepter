@@ -3,6 +3,8 @@
 
 use super::GlobalArgs;
 use crate::cmd::lint::build_feature_dag;
+#[cfg(feature = "debugging")]
+use crate::{cmd::lint::CrateAndFeature, prelude::Dag};
 
 use cargo_metadata::Metadata;
 use std::time::{Duration, Instant};

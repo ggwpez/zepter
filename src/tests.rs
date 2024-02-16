@@ -1158,7 +1158,7 @@ fn deduplicate_feature_works(#[case] input: &str, #[case] modify: Result<Option<
 		r#"[workspace]
 
 [workspace.dependencies]
-log = { version = "0.4.20", default-features = true }
+log = { version = "0.4.20" }
 "#
 	))
 )]
@@ -1178,14 +1178,14 @@ log = { version = "0.4.20", default-features = false }
 	r#"[workspace]
 
 [workspace.dependencies]
-log = { version = "0.4.20", default-features = true }
+log = { version = "0.4.20" }
 "#,
 	true,
 	Ok(Some(
 		r#"[workspace]
 
 [workspace.dependencies]
-log = { version = "0.4.20", default-features = true }
+log = { version = "0.4.20" }
 "#
 	))
 )]
@@ -1200,7 +1200,7 @@ log = { default-features = true }
 		r#"[workspace]
 
 [workspace.dependencies]
-log = { default-features = true, version = "0.4.20" }
+log = { default-features = true , version = "0.4.20" }
 "#
 	))
 )]
@@ -1215,7 +1215,7 @@ log = { version = "0.4.20" }
 		r#"[workspace]
 
 [workspace.dependencies]
-log = { version = "0.4.20", default-features = true }
+log = { version = "0.4.20" }
 "#
 	))
 )]
@@ -1246,7 +1246,7 @@ log = { random = "321", version = "0.4.20", hey = true, git = "123" }
 		r#"[workspace]
 
 [workspace.dependencies]
-log = { random = "321", version = "0.4.20", hey = true, git = "123" , default-features = true }
+log = { random = "321", version = "0.4.20", hey = true, git = "123" }
 "#
 	))
 )]
@@ -1261,7 +1261,7 @@ log = { random = "321", hey = true, git = "123" }
 		r#"[workspace]
 
 [workspace.dependencies]
-log = { random = "321", hey = true, git = "123" , version = "0.4.20", default-features = true }
+log = { random = "321", hey = true, git = "123" , version = "0.4.20" }
 "#
 	))
 )]
@@ -1291,7 +1291,7 @@ fn inject_workspace_dep_works(
 	match output {
 		Ok(modify) => {
 			res.unwrap();
-			pretty_assertions::assert_str_eq!(fixer.to_string(), modify.unwrap_or(input));
+			pretty_assertions::assert_str_eq!(modify.unwrap_or(input), fixer.to_string());
 		},
 		Err(modify) => {
 			assert_eq!(res, Err(modify.into()));

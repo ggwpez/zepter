@@ -26,11 +26,11 @@ pub struct AutoFixer {
 }
 
 impl AutoFixer {
-	pub fn from_manifest(manifest: &Path) -> Result<Self, String> {
-		let raw = std::fs::read_to_string(manifest)
+	pub fn from_manifest<P: AsRef<Path>>(manifest: P) -> Result<Self, String> {
+		let raw = std::fs::read_to_string(&manifest)
 			.map_err(|e| format!("Failed to read manifest: {e}"))?;
 		let doc = raw.parse::<Document>().map_err(|e| format!("Failed to parse manifest: {e}"))?;
-		Ok(Self { raw, manifest: Some(manifest.to_path_buf()), doc: Some(doc) })
+		Ok(Self { raw, manifest: Some(manifest.as_ref().to_path_buf()), doc: Some(doc) })
 	}
 
 	pub fn from_raw(raw: &str) -> Result<Self, String> {
@@ -567,7 +567,9 @@ impl AutoFixer {
 		}
 
 		t.insert("version", Value::String(Formatted::new(version_str)));
-		t.insert("default-features", Value::Boolean(Formatted::new(default_feats)));
+		if !default_feats {
+			t.insert("default-features", Value::Boolean(Formatted::new(default_feats)));
+		}
 
 		deps.insert(dep_name, Item::Value(Value::InlineTable(t)));
 

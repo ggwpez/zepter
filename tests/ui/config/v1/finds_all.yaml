@@ -3,7 +3,7 @@ crates:
 cases:
 - cmd: ''
   stdout: |
-    zepter 1.2.0
+    zepter 1.3.0
   stderr: |
     [INFO] Running workflow 'default'
     [INFO] 1/1 --version
@@ -19,7 +19,7 @@ cases:
           - [ '--version' ]
 - cmd: ''
   stdout: |
-    zepter 1.2.0
+    zepter 1.3.0
   stderr: |
     [INFO] Running workflow 'default'
     [INFO] 1/1 --version
@@ -35,7 +35,7 @@ cases:
           - [ '--version' ]
 - cmd: ''
   stdout: |
-    zepter 1.2.0
+    zepter 1.3.0
   stderr: |
     [INFO] Running workflow 'default'
     [INFO] 1/1 --version
@@ -51,7 +51,7 @@ cases:
           - [ '--version' ]
 - cmd: run default
   stdout: |
-    zepter 1.2.0
+    zepter 1.3.0
   stderr: |
     [INFO] Running workflow 'default'
     [INFO] 1/1 --version
@@ -67,7 +67,7 @@ cases:
           - [ '--version' ]
 - cmd: run default
   stdout: |
-    zepter 1.2.0
+    zepter 1.3.0
   stderr: |
     [INFO] Running workflow 'default'
     [INFO] 1/1 --version
@@ -83,7 +83,7 @@ cases:
           - [ '--version' ]
 - cmd: run default
   stdout: |
-    zepter 1.2.0
+    zepter 1.3.0
   stderr: |
     [INFO] Running workflow 'default'
     [INFO] 1/1 --version
@@ -99,7 +99,7 @@ cases:
           - [ '--version' ]
 - cmd: run default --config .cargo/polkadot.yaml
   stdout: |
-    zepter 1.2.0
+    zepter 1.3.0
   stderr: |
     [INFO] Running workflow 'default'
     [INFO] 1/1 --version
@@ -115,7 +115,7 @@ cases:
           - [ '--version' ]
 - cmd: run default -c .cargo/polkadot.yaml
   stdout: |
-    zepter 1.2.0
+    zepter 1.3.0
   stderr: |
     [INFO] Running workflow 'default'
     [INFO] 1/1 --version

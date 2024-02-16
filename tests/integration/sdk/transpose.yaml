@@ -81,6 +81,132 @@ cases:
     Held back modifications to 3 files. Re-run with --fix to apply.
     Error: ()
   code: 1
+- cmd: zepter transpose dependency lift-to-workspace --version-resolver latest --fix docify tt-call
+  stderr: |
+    [WARN] Unstable feature - do not rely on this!
+  diff: |
+    diff --git Cargo.toml Cargo.toml
+    index e807171b24..9520d7ded5 100644
+    --- Cargo.toml
+    +++ Cargo.toml
+    @@ -537,0 +538,2 @@ polkavm-derive = "0.8.0"
+    +docify = { version = "0.2.7", default-features = false }
+    +tt-call = { version = "1.0.8", default-features = false }
+    diff --git docs/sdk/Cargo.toml docs/sdk/Cargo.toml
+    index c998a60148..69001efd3f 100644
+    --- docs/sdk/Cargo.toml
+    +++ docs/sdk/Cargo.toml
+    @@ -26 +26 @@ simple-mermaid = { git = "https://github.com/kianenigma/simple-mermaid.git", rev
+    -docify = "0.2.7"
+    +docify = { workspace = true, default-features = true }
+    diff --git substrate/client/chain-spec/Cargo.toml substrate/client/chain-spec/Cargo.toml
+    index 9ab12dc2ad..1142993886 100644
+    --- substrate/client/chain-spec/Cargo.toml
+    +++ substrate/client/chain-spec/Cargo.toml
+    @@ -37 +37 @@ array-bytes = { version = "6.1" }
+    -docify = "0.2.7"
+    +docify = { workspace = true, default-features = true }
+    diff --git substrate/frame/Cargo.toml substrate/frame/Cargo.toml
+    index 9419eb1597..c9fad44fd9 100644
+    --- substrate/frame/Cargo.toml
+    +++ substrate/frame/Cargo.toml
+    @@ -50 +50 @@ frame-system-rpc-runtime-api = { default-features = false, path = "../frame/syst
+    -docify = "0.2.7"
+    +docify = { workspace = true, default-features = true }
+    diff --git substrate/frame/bags-list/Cargo.toml substrate/frame/bags-list/Cargo.toml
+    index b8ab099a06..312fd9dabd 100644
+    --- substrate/frame/bags-list/Cargo.toml
+    +++ substrate/frame/bags-list/Cargo.toml
+    @@ -37 +37 @@ log = { version = "0.4.17", default-features = false }
+    -docify = "0.2.7"
+    +docify = { workspace = true, default-features = true }
+    diff --git substrate/frame/balances/Cargo.toml substrate/frame/balances/Cargo.toml
+    index e47e916a27..d6913feda6 100644
+    --- substrate/frame/balances/Cargo.toml
+    +++ substrate/frame/balances/Cargo.toml
+    @@ -27 +27 @@ sp-std = { path = "../../primitives/std", default-features = false }
+    -docify = "0.2.6"
+    +docify = { workspace = true, default-features = true }
+    diff --git substrate/frame/fast-unstake/Cargo.toml substrate/frame/fast-unstake/Cargo.toml
+    index 5d0a5410f8..ff876efc70 100644
+    --- substrate/frame/fast-unstake/Cargo.toml
+    +++ substrate/frame/fast-unstake/Cargo.toml
+    @@ -33 +33 @@ frame-benchmarking = { path = "../benchmarking", default-features = false, optio
+    -docify = "0.2.7"
+    +docify = { workspace = true, default-features = true }
+    diff --git substrate/frame/paged-list/Cargo.toml substrate/frame/paged-list/Cargo.toml
+    index 6a2af120f3..81c1fc7b71 100644
+    --- substrate/frame/paged-list/Cargo.toml
+    +++ substrate/frame/paged-list/Cargo.toml
+    @@ -19 +19 @@ codec = { package = "parity-scale-codec", version = "3.0.0", default-features =
+    -docify = "0.2.7"
+    +docify = { workspace = true, default-features = true }
+    diff --git substrate/frame/safe-mode/Cargo.toml substrate/frame/safe-mode/Cargo.toml
+    index 0c59740bef..0f92b88f6a 100644
+    --- substrate/frame/safe-mode/Cargo.toml
+    +++ substrate/frame/safe-mode/Cargo.toml
+    @@ -19 +19 @@ codec = { package = "parity-scale-codec", version = "3.2.2", default-features =
+    -docify = "0.2.7"
+    +docify = { workspace = true, default-features = true }
+    diff --git substrate/frame/scheduler/Cargo.toml substrate/frame/scheduler/Cargo.toml
+    index bca17242d2..f56f20a4d3 100644
+    --- substrate/frame/scheduler/Cargo.toml
+    +++ substrate/frame/scheduler/Cargo.toml
+    @@ -26 +26 @@ sp-weights = { path = "../../primitives/weights", default-features = false }
+    -docify = "0.2.7"
+    +docify = { workspace = true, default-features = true }
+    diff --git substrate/frame/sudo/Cargo.toml substrate/frame/sudo/Cargo.toml
+    index 409104aeca..427d2c532b 100644
+    --- substrate/frame/sudo/Cargo.toml
+    +++ substrate/frame/sudo/Cargo.toml
+    @@ -28 +28 @@ sp-std = { path = "../../primitives/std", default-features = false }
+    -docify = "0.2.7"
+    +docify = { workspace = true, default-features = true }
+    diff --git substrate/frame/support/Cargo.toml substrate/frame/support/Cargo.toml
+    index ad97ad5146..7947bfdab5 100644
+    --- substrate/frame/support/Cargo.toml
+    +++ substrate/frame/support/Cargo.toml
+    @@ -36 +36 @@ sp-metadata-ir = { path = "../../primitives/metadata-ir", default-features = fal
+    -tt-call = "1.0.8"
+    +tt-call = { workspace = true, default-features = true }
+    @@ -50 +50 @@ serde_json = { version = "1.0.111", default-features = false, features = ["alloc
+    -docify = "0.2.7"
+    +docify = { workspace = true, default-features = true }
+    diff --git substrate/frame/system/Cargo.toml substrate/frame/system/Cargo.toml
+    index d409460131..af67af608c 100644
+    --- substrate/frame/system/Cargo.toml
+    +++ substrate/frame/system/Cargo.toml
+    @@ -31 +31 @@ sp-weights = { path = "../../primitives/weights", default-features = false, feat
+    -docify = "0.2.7"
+    +docify = { workspace = true, default-features = true }
+    diff --git substrate/frame/timestamp/Cargo.toml substrate/frame/timestamp/Cargo.toml
+    index cd0737c6bb..8e1d4cc709 100644
+    --- substrate/frame/timestamp/Cargo.toml
+    +++ substrate/frame/timestamp/Cargo.toml
+    @@ -33 +33 @@ sp-timestamp = { path = "../../primitives/timestamp", default-features = false }
+    -docify = "0.2.7"
+    +docify = { workspace = true, default-features = true }
+    diff --git substrate/frame/treasury/Cargo.toml substrate/frame/treasury/Cargo.toml
+    index 2dc603e9f9..21656344d1 100644
+    --- substrate/frame/treasury/Cargo.toml
+    +++ substrate/frame/treasury/Cargo.toml
+    @@ -23 +23 @@ codec = { package = "parity-scale-codec", version = "3.6.1", default-features =
+    -docify = "0.2.7"
+    +docify = { workspace = true, default-features = true }
+    diff --git substrate/frame/tx-pause/Cargo.toml substrate/frame/tx-pause/Cargo.toml
+    index ace2172454..1e7939774d 100644
+    --- substrate/frame/tx-pause/Cargo.toml
+    +++ substrate/frame/tx-pause/Cargo.toml
+    @@ -19 +19 @@ codec = { package = "parity-scale-codec", version = "3.2.2", default-features =
+    -docify = "0.2.7"
+    +docify = { workspace = true, default-features = true }
+    diff --git substrate/primitives/runtime/Cargo.toml substrate/primitives/runtime/Cargo.toml
+    index f4b1158242..7ee6da716d 100644
+    --- substrate/primitives/runtime/Cargo.toml
+    +++ substrate/primitives/runtime/Cargo.toml
+    @@ -35 +35 @@ sp-weights = { path = "../weights", default-features = false }
+    -docify = { version = "0.2.7" }
+    +docify = { workspace = true, default-features = true }
 - cmd: zepter transpose dependency lift-to-workspace tt-call --version-resolver latest --fix
   stderr: |
     [WARN] Unstable feature - do not rely on this!

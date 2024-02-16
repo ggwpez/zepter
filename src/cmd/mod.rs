@@ -11,7 +11,10 @@ pub mod trace;
 pub mod transpose;
 
 use crate::log;
+use crate::ErrToStr;
 
+use std::path::Path;
+use std::fs::canonicalize;
 use cargo_metadata::{Dependency, Metadata, MetadataCommand, Package, Resolve};
 
 /// See out how Rust dependencies and features are enabled.
@@ -362,4 +365,20 @@ where
 	let s = s.trim_matches('"');
 	let pos = s.find(':').ok_or_else(|| format!("invalid KEY=value: no `:` found in `{s}`"))?;
 	Ok((s[..pos].parse()?, s[pos + 1..].parse()?))
+}
+
+pub(crate) fn check_can_modify<P: AsRef<Path>>(root: P, modify: P) -> Result<bool, String> {
+	let root = canonicalize(root).err_to_str()?;
+	let modify = canonicalize(modify).err_to_str()?;
+
+	if !modify.starts_with(&root) {
+		format!(
+			"Path is outside of the workspace: {:?} (not in {:?})",
+			modify.display(),
+			root.display()
+		);
+		Ok(false)
+	} else {
+		Ok(true)
+	}
 }

@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
-use crate::log;
 use crate::{
 	cmd::{
-		transpose::{canonicalize, AutoFixer, Dep, Op, Version, VersionReq},
+		transpose::{AutoFixer, Dep, Op, Version, VersionReq},
 		CargoArgs, GlobalArgs,
 	},
 	grammar::{plural, plural_or},
+	log,
 };
+use crate::cmd::check_can_modify;
+
 use cargo_metadata::Package;
 use itertools::Itertools;
 use std::collections::{BTreeMap as Map, HashMap};
@@ -111,27 +113,24 @@ impl LiftToWorkspaceCmd {
 		let versions = by_version.keys().collect::<Vec<_>>();
 		let best_version = self.find_best_version(g, dep, &versions, &by_version)?;
 
+		let _total_changes = by_version.values().map(|v| v.len()).sum::<usize>();
 		log::info!(
-			"Selected '{} {}'", //: N={}, D={}, B={})",
-			dep,
-			&best_version,
+			"Selected {} v{} from {} version{} for lift up in {} crate{}.",
+			g.bold(dep),
+			g.bold(&best_version),
+			versions.len(),
+			plural(versions.len()),
+			_total_changes,
+			plural(_total_changes)
 		);
 
 		for (pkg, dep) in by_version.values().flatten() {
-			let krate_path = canonicalize(pkg.manifest_path.clone().into_std_path_buf()).unwrap();
-			let allowed_dir = canonicalize(meta.workspace_root.as_std_path()).unwrap();
-
-			if !krate_path.starts_with(&allowed_dir) {
-				log::info!(
-					"Skipping path outside of the workspace: {:?} (not in {:?})",
-					krate_path.display(),
-					allowed_dir.display()
-				);
+			if !check_can_modify(&meta.workspace_root, &pkg.manifest_path)? {
 				continue
 			}
-
+			
 			fixers.entry(pkg.name.clone()).or_insert_with(|| {
-				(Some(pkg.clone()), AutoFixer::from_manifest(&krate_path).unwrap())
+				(Some(pkg.clone()), AutoFixer::from_manifest(&pkg.manifest_path).unwrap())
 			});
 			let (_, fixer) = fixers.get_mut(&pkg.name).unwrap();
 

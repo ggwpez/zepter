@@ -51,7 +51,7 @@ cases:
 - cmd: transpose dependency lift-to-workspace log --version-resolver latest
   stderr: |
     [WARN] Unstable feature - do not rely on this!
-    Held back modifications to 200 files; re-run with --fix to apply.
+    Held back modifications to 200 files. Re-run with --fix to apply.
     Error: ()
   code: 1
 - cmd: transpose dependency lift-to-workspace log --version-resolver exact
@@ -72,13 +72,13 @@ cases:
 - cmd: transpose dependency lift-to-workspace log --version-resolver exact --exact-version 0.4.20
   stderr: |
     [WARN] Unstable feature - do not rely on this!
-    Held back modifications to 200 files; re-run with --fix to apply.
+    Held back modifications to 200 files. Re-run with --fix to apply.
     Error: ()
   code: 1
 - cmd: zepter transpose dependency lift-to-workspace macro_magic
   stderr: |
     [WARN] Unstable feature - do not rely on this!
-    Held back modifications to 3 files; re-run with --fix to apply.
+    Held back modifications to 3 files. Re-run with --fix to apply.
     Error: ()
   code: 1
 - cmd: zepter transpose dependency lift-to-workspace tt-call --version-resolver latest --fix

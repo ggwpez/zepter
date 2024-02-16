@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
+use crate::log;
 use crate::{
 	cmd::{
 		transpose::{canonicalize, AutoFixer, Dep, Op, Version, VersionReq},

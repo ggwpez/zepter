@@ -74,7 +74,7 @@ impl LiftToWorkspaceCmd {
 
 		for pkg in meta.packages.iter() {
 			for dep in pkg.dependencies.iter() {
-				if regex_lookup.values().find(|r| r.is_match(&dep.name)).is_some() ||
+				if regex_lookup.values().any(|r| r.is_match(&dep.name)) ||
 					self.dependencies.contains(&dep.name)
 				{
 					dependencies.insert(&dep.name);
@@ -87,7 +87,7 @@ impl LiftToWorkspaceCmd {
 			match self.run_for_dependency(g, &meta, dep, &mut fixers) {
 				Ok(()) => (),
 				Err(e) if self.ignore_errors => {
-					log::error!("Failed to lift up '{}': {}", dep, e)
+					log::error!("Failed to lift up '{}': {}", dep, e);
 				},
 				Err(e) => return Err(format!("Failed to lift up '{}': {}", dep, e)),
 			}
@@ -176,9 +176,9 @@ impl LiftToWorkspaceCmd {
 
 		// Now create fixer for the root package
 		let root_manifest_path = meta.workspace_root.join("Cargo.toml");
-		fixers.entry("magic:workspace".to_string()).or_insert_with(|| {
-			(None, AutoFixer::from_manifest(&root_manifest_path.into_std_path_buf()).unwrap())
-		});
+		fixers
+			.entry("magic:workspace".to_string())
+			.or_insert_with(|| (None, AutoFixer::from_manifest(&root_manifest_path).unwrap()));
 		let (_, workspace_fixer) = fixers.get_mut("magic:workspace").unwrap();
 
 		let mut dep = by_version.values().next().unwrap().first().unwrap().1.clone();

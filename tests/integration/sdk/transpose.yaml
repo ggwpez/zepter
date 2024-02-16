@@ -3,52 +3,21 @@ repo:
   ref: 7df1ae3b8111d534cce108b2b405b6a33fcdedc3
 cases:
 - cmd: transpose dependency lift-to-workspace parity-scale-codec
-  stderr: |
-    [WARN] Unstable feature - do not rely on this!
-
-    Found 7 different versions of 'parity-scale-codec' in the workspace:
-
-      ^3.6.1: 260 times (frame-support, sp-api, sp-core, …)
-      ^3.0.0:  58 times (pallet-broker, bridge-hub-common, cumulus-primitives-core, …)
-      ^3.1.5:  20 times (bridge-runtime-common, bp-header-chain, bp-runtime, …)
-      ^3.4.0:   6 times (emulated-integration-tests-common, asset-hub-rococo-integration-tests, asset-hub-westend-integration-tests, …)
-      ^3.2.2:   6 times (pallet-asset-conversion-tx-payment, pallet-safe-mode, pallet-tx-pause, …)
-      ^3.6.4:   4 times (cumulus-relay-chain-interface, polkadot-node-core-prospective-parachains, cumulus-relay-chain-rpc-interface, …)
-      ^3.6.5:   1 time  (polkadot-sdk-docs)
-
-    Hint: cargo upgrade -p parity-scale-codec@3.6.5
-
-    Error: ()
+  stderr: "[WARN] Unstable feature - do not rely on this!\nFailed to lift up 'parity-scale-codec': \nFound 7 different versions of 'parity-scale-codec' in the workspace:\n\n  ^3.6.1: 260 times (frame-support, sp-api, sp-core, …)\n  ^3.0.0:  58 times (pallet-broker, bridge-hub-common, cumulus-primitives-core, …)\n  ^3.1.5:  20 times (bridge-runtime-common, bp-header-chain, bp-runtime, …)\n  ^3.4.0:   6 times (emulated-integration-tests-common, asset-hub-rococo-integration-tests, asset-hub-westend-integration-tests, …)\n  ^3.2.2:   6 times (pallet-asset-conversion-tx-payment, pallet-safe-mode, pallet-tx-pause, …)\n  ^3.6.4:   4 times (cumulus-relay-chain-interface, polkadot-node-core-prospective-parachains, cumulus-relay-chain-rpc-interface, …)\n  ^3.6.5:   1 time  (polkadot-sdk-docs)\n\nHint: cargo upgrade -p parity-scale-codec@3.6.5\n\nError: ()\n"
   code: 1
 - cmd: transpose dependency lift-to-workspace log
-  stderr: |
-    [WARN] Unstable feature - do not rely on this!
-
-    Found 8 different versions of 'log' in the workspace:
-
-      ^0.4.17: 142 times (frame-support, sp-api, sp-core, …)
-      ^0.4.20:  37 times (bridge-runtime-common, pallet-bridge-grandpa, pallet-bridge-messages, …)
-      ^0.4   :   7 times (sc-utils, binary-merkle-tree, pallet-contracts, …)
-      ^0.4.16:   4 times (sc-network-light, pallet-salary, pallet-ranked-collective, …)
-      ^0.4.14:   4 times (pallet-alliance, pallet-elections-phragmen, pallet-glutton, …)
-      ^0.4.19:   2 times (bp-runtime, parachains-common)
-      ^0.4.0 :   2 times (pallet-nomination-pools, pallet-nomination-pools-test-staking)
-      ^0.4.8 :   1 time  (sc-consensus-grandpa-rpc)
-
-    Hint: cargo upgrade -p log@0.4.20
-
-    Error: ()
+  stderr: "[WARN] Unstable feature - do not rely on this!\nFailed to lift up 'log': \nFound 8 different versions of 'log' in the workspace:\n\n  ^0.4.17: 142 times (frame-support, sp-api, sp-core, …)\n  ^0.4.20:  37 times (bridge-runtime-common, pallet-bridge-grandpa, pallet-bridge-messages, …)\n  ^0.4   :   7 times (sc-utils, binary-merkle-tree, pallet-contracts, …)\n  ^0.4.16:   4 times (sc-network-light, pallet-salary, pallet-ranked-collective, …)\n  ^0.4.14:   4 times (pallet-alliance, pallet-elections-phragmen, pallet-glutton, …)\n  ^0.4.19:   2 times (bp-runtime, parachains-common)\n  ^0.4.0 :   2 times (pallet-nomination-pools, pallet-nomination-pools-test-staking)\n  ^0.4.8 :   1 time  (sc-consensus-grandpa-rpc)\n\nHint: cargo upgrade -p log@0.4.20\n\nError: ()\n"
   code: 1
 - cmd: transpose dependency lift-to-workspace log --version-resolver Unambiguous
   stderr: |
     error: invalid value 'Unambiguous' for '--version-resolver <VERSION_RESOLVER>'
-      [possible values: unambiguous, exact, latest]
+      [possible values: unambiguous, exact, highest]
 
       tip: a similar value exists: 'unambiguous'
 
     For more information, try '--help'.
   code: 2
-- cmd: transpose dependency lift-to-workspace log --version-resolver latest
+- cmd: transpose dependency lift-to-workspace log --version-resolver highest
   stderr: |
     [WARN] Unstable feature - do not rely on this!
     Held back modifications to 200 files. Re-run with --fix to apply.
@@ -81,17 +50,17 @@ cases:
     Held back modifications to 3 files. Re-run with --fix to apply.
     Error: ()
   code: 1
-- cmd: zepter transpose dependency lift-to-workspace --version-resolver latest --fix docify tt-call
+- cmd: zepter transpose dependency lift-to-workspace --version-resolver highest --fix docify tt-call
   stderr: |
     [WARN] Unstable feature - do not rely on this!
   diff: |
     diff --git Cargo.toml Cargo.toml
-    index e807171b24..d4154bac43 100644
+    index e807171b24..b881f00e95 100644
     --- Cargo.toml
     +++ Cargo.toml
     @@ -537,0 +538,2 @@ polkavm-derive = "0.8.0"
-    +docify = { version = "0.2.7", default-features = true }
-    +tt-call = { version = "1.0.8", default-features = true }
+    +docify = { version = "0.2.7" }
+    +tt-call = { version = "1.0.8" }
     diff --git docs/sdk/Cargo.toml docs/sdk/Cargo.toml
     index c998a60148..d17eb1af01 100644
     --- docs/sdk/Cargo.toml
@@ -207,17 +176,17 @@ cases:
     @@ -35 +35 @@ sp-weights = { path = "../weights", default-features = false }
     -docify = { version = "0.2.7" }
     +docify = { workspace = true }
-- cmd: zepter transpose dependency lift-to-workspace tt-call --version-resolver latest --fix
+- cmd: zepter transpose dependency lift-to-workspace tt-call --version-resolver highest --fix
   stderr: |
     [WARN] Unstable feature - do not rely on this!
   code: 0
   diff: |
     diff --git Cargo.toml Cargo.toml
-    index e807171b24..56996aedf3 100644
+    index e807171b24..997e43ec6c 100644
     --- Cargo.toml
     +++ Cargo.toml
     @@ -537,0 +538 @@ polkavm-derive = "0.8.0"
-    +tt-call = { version = "1.0.8", default-features = true }
+    +tt-call = { version = "1.0.8" }
     diff --git substrate/frame/support/Cargo.toml substrate/frame/support/Cargo.toml
     index ad97ad5146..035c83ce17 100644
     --- substrate/frame/support/Cargo.toml
@@ -225,17 +194,17 @@ cases:
     @@ -36 +36 @@ sp-metadata-ir = { path = "../../primitives/metadata-ir", default-features = fal
     -tt-call = "1.0.8"
     +tt-call = { workspace = true }
-- cmd: zepter transpose dependency lift-to-workspace macro_magic --version-resolver latest --fix
+- cmd: zepter transpose dependency lift-to-workspace macro_magic --version-resolver highest --fix
   stderr: |
     [WARN] Unstable feature - do not rely on this!
   code: 0
   diff: |
     diff --git Cargo.toml Cargo.toml
-    index e807171b24..29ebf215f7 100644
+    index e807171b24..5adc76a484 100644
     --- Cargo.toml
     +++ Cargo.toml
     @@ -537,0 +538 @@ polkavm-derive = "0.8.0"
-    +macro_magic = { version = "0.5.0", default-features = true }
+    +macro_magic = { version = "0.5.0" }
     diff --git substrate/frame/support/Cargo.toml substrate/frame/support/Cargo.toml
     index ad97ad5146..0434db31d4 100644
     --- substrate/frame/support/Cargo.toml
@@ -250,7 +219,7 @@ cases:
     @@ -29 +29 @@ frame-support-procedural-tools = { path = "tools" }
     -macro_magic = { version = "0.5.0", features = ["proc_support"] }
     +macro_magic = { features = ["proc_support"] , workspace = true }
-- cmd: transpose dependency lift-to-workspace log --version-resolver latest --fix
+- cmd: transpose dependency lift-to-workspace log --version-resolver highest --fix
   stderr: |
     [WARN] Unstable feature - do not rely on this!
   code: 0

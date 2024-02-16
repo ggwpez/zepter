@@ -59,7 +59,7 @@ cases:
     error: the following required arguments were not provided:
       --exact-version <EXACT_VERSION>
 
-    Usage: zepter transpose dependency lift-to-workspace --exact-version <EXACT_VERSION> --version-resolver <VERSION_RESOLVER> --manifest-path <MANIFEST_PATH> --log <LEVEL> --offline <DEPENDENCY>
+    Usage: zepter transpose dependency lift-to-workspace --exact-version <EXACT_VERSION> --version-resolver <VERSION_RESOLVER> --manifest-path <MANIFEST_PATH> --log <LEVEL> --offline <DEPENDENCIES>...
 
     For more information, try '--help'.
   code: 2

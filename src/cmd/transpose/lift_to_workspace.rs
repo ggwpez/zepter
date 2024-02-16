@@ -106,7 +106,7 @@ impl LiftToWorkspaceCmd {
 		dep: &str,
 		fixers: &mut Map<String, (Option<Package>, AutoFixer)>,
 	) -> Result<(), String> {
-		let by_version = self.build_version_index(&meta, dep);
+		let by_version = Self::build_version_index(meta, dep);
 		let versions = by_version.keys().collect::<Vec<_>>();
 		let best_version = self.find_best_version(g, dep, &versions, &by_version)?;
 
@@ -149,14 +149,12 @@ impl LiftToWorkspaceCmd {
 		dep.req = best_version.parse().unwrap();
 		// We always add `default-features = false` into the workspace:
 		workspace_fixer.add_workspace_dep(&dep, false)?;
-		
 
 		Ok(())
 	}
 
 	/// Index what versions of a crate are used in the workspace.
 	fn build_version_index(
-		&self,
 		meta: &cargo_metadata::Metadata,
 		name: &str,
 	) -> HashMap<VersionReq, Vec<(Package, Dep)>> {
@@ -177,7 +175,7 @@ impl LiftToWorkspaceCmd {
 		&self,
 		g: &GlobalArgs,
 		name: &str,
-		versions: &Vec<&VersionReq>,
+		versions: &[&VersionReq],
 		by_version: &HashMap<VersionReq, Vec<(Package, Dep)>>,
 	) -> Result<String, String> {
 		let found = match self.version_resolver {

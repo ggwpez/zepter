@@ -10,12 +10,10 @@ pub mod run;
 pub mod trace;
 pub mod transpose;
 
-use crate::log;
-use crate::ErrToStr;
+use crate::{log, ErrToStr};
 
-use std::path::Path;
-use std::fs::canonicalize;
 use cargo_metadata::{Dependency, Metadata, MetadataCommand, Package, Resolve};
+use std::{fs::canonicalize, path::Path};
 
 /// See out how Rust dependencies and features are enabled.
 #[derive(Debug, clap::Parser)]

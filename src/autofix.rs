@@ -567,7 +567,9 @@ impl AutoFixer {
 		}
 
 		t.insert("version", Value::String(Formatted::new(version_str)));
-		t.insert("default-features", Value::Boolean(Formatted::new(default_feats)));
+		if !default_feats {
+			t.insert("default-features", Value::Boolean(Formatted::new(default_feats)));
+		}
 
 		deps.insert(dep_name, Item::Value(Value::InlineTable(t)));
 

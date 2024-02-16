@@ -28,6 +28,7 @@ env_logger = { version = "0.11.1", features = [ "auto-color", "humantime" ], opt
 histo = { version = "1.0.0", optional = true }
 itertools = "0.12.1"
 log = { version = "0.4.20", optional = true }
+regex = "1.10.3"
 semver = "1"
 serde = "1.0.196"
 serde_json = { version = "1.0.113", optional = true }

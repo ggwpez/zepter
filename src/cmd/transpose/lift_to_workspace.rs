@@ -3,17 +3,17 @@
 
 use crate::{
 	cmd::{
+		check_can_modify,
 		transpose::{AutoFixer, Dep, Op, Version, VersionReq},
 		CargoArgs, GlobalArgs,
 	},
 	grammar::{plural, plural_or},
-	log,
+	log, ErrToStr,
 };
-use crate::cmd::check_can_modify;
 
 use cargo_metadata::Package;
 use itertools::Itertools;
-use std::collections::{BTreeMap as Map, HashMap};
+use std::collections::{BTreeMap as Map, BTreeSet, HashMap};
 
 /// Lift up a dependency to the workspace and reference it from all packages.
 #[derive(Debug, clap::Parser)]
@@ -36,6 +36,10 @@ pub struct LiftToWorkspaceCmd {
 	/// The exact version to use for the whole workspace.
 	#[clap(long)]
 	exact_version: Option<String>,
+
+	/// Ignore errors and continue with the next dependency.
+	#[clap(long)]
+	ignore_errors: bool,
 }
 
 /// How to determine which version to use for the whole workspace.
@@ -47,8 +51,8 @@ pub enum VersionResolveMode {
 	Exact,
 	/// The latest version that was seen in the workspace.
 	///
-	/// This is *not* the latest version from crates-io.
-	Latest,
+	/// The highest version number that it found.
+	Highest,
 }
 
 impl LiftToWorkspaceCmd {
@@ -59,8 +63,34 @@ impl LiftToWorkspaceCmd {
 		let meta = self.cargo_args.clone().with_workspace(true).load_metadata()?;
 		let mut fixers = Map::new();
 
-		for dep in &self.dependencies {
-			self.run_for_dependency(g, &meta, dep, &mut fixers)?;
+		// TODO optimize to not be O^3
+		let mut dependencies = BTreeSet::<&str>::new();
+		let mut regex_lookup = Map::new();
+		for filter in self.dependencies.iter() {
+			if let Some(regex) = filter.strip_prefix("regex:") {
+				regex_lookup.insert(regex, regex::Regex::new(regex).err_to_str()?);
+			}
+		}
+
+		for pkg in meta.packages.iter() {
+			for dep in pkg.dependencies.iter() {
+				if regex_lookup.values().find(|r| r.is_match(&dep.name)).is_some() ||
+					self.dependencies.contains(&dep.name)
+				{
+					dependencies.insert(&dep.name);
+				}
+			}
+		}
+
+		log::info!("Scanning for {} dependencies in the workspace.", dependencies.len());
+		for dep in &dependencies {
+			match self.run_for_dependency(g, &meta, dep, &mut fixers) {
+				Ok(()) => (),
+				Err(e) if self.ignore_errors => {
+					log::error!("Failed to lift up '{}': {}", dep, e)
+				},
+				Err(e) => return Err(format!("Failed to lift up '{}': {}", dep, e)),
+			}
 		}
 
 		self.try_apply_changes(&mut fixers)
@@ -98,6 +128,7 @@ impl LiftToWorkspaceCmd {
 				"Held back modifications to {modified} file{s}. Re-run with --fix to apply."
 			))
 		} else {
+			log::info!("Modified {} manifest{}.", modified, plural(modified));
 			Ok(())
 		}
 	}
@@ -106,49 +137,66 @@ impl LiftToWorkspaceCmd {
 		&self,
 		g: &GlobalArgs,
 		meta: &cargo_metadata::Metadata,
-		dep: &str,
+		name: &str,
 		fixers: &mut Map<String, (Option<Package>, AutoFixer)>,
 	) -> Result<(), String> {
-		let by_version = Self::build_version_index(meta, dep);
+		let by_version = Self::build_version_index(meta, name);
 		let versions = by_version.keys().collect::<Vec<_>>();
-		let best_version = self.find_best_version(g, dep, &versions, &by_version)?;
+		let best_version = self.find_best_version(g, name, &versions, &by_version)?;
 
-		let _total_changes = by_version.values().map(|v| v.len()).sum::<usize>();
-		log::info!(
-			"Selected {} v{} from {} version{} for lift up in {} crate{}.",
-			g.bold(dep),
-			g.bold(&best_version),
-			versions.len(),
-			plural(versions.len()),
-			_total_changes,
-			plural(_total_changes)
-		);
+		let mut all_use_default_features = true;
+		for (pkg, dep) in by_version.values().flatten() {
+			if !check_can_modify(&meta.workspace_root, &pkg.manifest_path)? {
+				continue
+			}
+
+			all_use_default_features &= dep.uses_default_features;
+		}
+
+		// We default in the workspace to enabling them if all packages use them but otherwise turn
+		// them off.
+		let workspace_default_features_enabled = all_use_default_features;
 
 		for (pkg, dep) in by_version.values().flatten() {
 			if !check_can_modify(&meta.workspace_root, &pkg.manifest_path)? {
 				continue
 			}
-			
+
 			fixers.entry(pkg.name.clone()).or_insert_with(|| {
 				(Some(pkg.clone()), AutoFixer::from_manifest(&pkg.manifest_path).unwrap())
 			});
 			let (_, fixer) = fixers.get_mut(&pkg.name).unwrap();
 
-			let default_feats = dep.uses_default_features.then_some(true);
-			fixer.lift_dependency(&dep.name, default_feats)?;
+			if dep.uses_default_features != workspace_default_features_enabled {
+				fixer.lift_dependency(&dep.name, Some(dep.uses_default_features))?;
+			} else {
+				fixer.lift_dependency(&dep.name, None)?;
+			}
 		}
 
 		// Now create fixer for the root package
 		let root_manifest_path = meta.workspace_root.join("Cargo.toml");
-		fixers.entry("workspace".to_string()).or_insert_with(|| {
+		fixers.entry("magic:workspace".to_string()).or_insert_with(|| {
 			(None, AutoFixer::from_manifest(&root_manifest_path.into_std_path_buf()).unwrap())
 		});
-		let (_, workspace_fixer) = fixers.get_mut("workspace").unwrap();
+		let (_, workspace_fixer) = fixers.get_mut("magic:workspace").unwrap();
 
 		let mut dep = by_version.values().next().unwrap().first().unwrap().1.clone();
 		dep.req = best_version.parse().unwrap();
-		// We always add `default-features = false` into the workspace:
-		workspace_fixer.add_workspace_dep(&dep, false)?;
+
+		workspace_fixer.add_workspace_dep(&dep, workspace_default_features_enabled)?;
+
+		#[cfg(feature = "logging")]
+		{
+			let total_changes = by_version.values().map(|v| v.len()).sum::<usize>();
+			let v = format!("{} {}", name, &best_version);
+			log::info!(
+				"Selected {} for lift up in {} crate{}.",
+				g.bold(&v),
+				total_changes,
+				plural(total_changes)
+			);
+		}
 
 		Ok(())
 	}
@@ -180,7 +228,7 @@ impl LiftToWorkspaceCmd {
 	) -> Result<String, String> {
 		let found = match self.version_resolver {
 			VersionResolveMode::Exact => self.exact_version.clone().expect("Checked by clippy"),
-			VersionResolveMode::Latest => try_find_latest(by_version.keys())?.to_string(),
+			VersionResolveMode::Highest => try_find_latest(by_version.keys())?,
 			VersionResolveMode::Unambiguous => {
 				if versions.len() > 1 {
 					let str_width = versions.iter().map(|v| v.to_string().len()).max().unwrap();
@@ -207,7 +255,7 @@ impl LiftToWorkspaceCmd {
 					}
 
 					let version_hint = match try_find_latest(by_version.keys()) {
-						Ok(latest) => latest.to_string(),
+						Ok(latest) => latest,
 						Err(_e) => {
 							log::warn!("Could not find determine latest common version: {}", _e);
 							"version".to_string()
@@ -230,7 +278,16 @@ impl LiftToWorkspaceCmd {
 	}
 }
 
-fn try_find_latest<'a, I: Iterator<Item = &'a VersionReq>>(reqs: I) -> Result<Version, String> {
+fn try_find_latest<'a, I: Iterator<Item = &'a VersionReq>>(reqs: I) -> Result<String, String> {
+	let reqs = reqs.collect::<Vec<_>>();
+
+	if reqs.is_empty() {
+		return Err("No versions found".to_string())
+	}
+	if reqs.iter().all(|r| r == &reqs[0]) {
+		return Ok(reqs[0].to_string())
+	}
+
 	let mut versions = Vec::<Version>::new();
 
 	// Try to convert each to a version. This is done as best-effort:
@@ -256,5 +313,5 @@ fn try_find_latest<'a, I: Iterator<Item = &'a VersionReq>>(reqs: I) -> Result<Ve
 	}
 
 	let latest = versions.iter().max().ok_or_else(|| "No versions found".to_string())?;
-	Ok(latest.clone())
+	Ok(latest.clone().to_string())
 }

@@ -140,14 +140,16 @@ impl LiftToWorkspaceCmd {
 
 		// Now create fixer for the root package
 		let root_manifest_path = meta.workspace_root.join("Cargo.toml");
-		let mut workspace_fixer =
-			AutoFixer::from_manifest(&root_manifest_path.into_std_path_buf())?;
+		fixers.entry("workspace".to_string()).or_insert_with(|| {
+			(None, AutoFixer::from_manifest(&root_manifest_path.into_std_path_buf()).unwrap())
+		});
+		let (_, workspace_fixer) = fixers.get_mut("workspace").unwrap();
 
 		let mut dep = by_version.values().next().unwrap().first().unwrap().1.clone();
 		dep.req = best_version.parse().unwrap();
 		// We always add `default-features = false` into the workspace:
 		workspace_fixer.add_workspace_dep(&dep, false)?;
-		fixers.insert("workspace".to_string(), (None, workspace_fixer));
+		
 
 		Ok(())
 	}

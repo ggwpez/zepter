@@ -19,7 +19,7 @@ required-features = [ "benchmarking" ]
 
 [dependencies]
 anyhow = { version = "1.0.80", optional = true }
-assert_cmd = { version = "2.0.13", optional = true }
+assert_cmd = { version = "2.0.14", optional = true }
 cargo_metadata = "0.18.1"
 clap = { version = "4.5.1", features = ["derive", "cargo"] }
 colour = { version = "0.7.0", optional = true }
@@ -30,8 +30,8 @@ itertools = "0.12.1"
 log = { version = "0.4.20", optional = true }
 regex = "1.10.3"
 semver = "1"
-serde = "1.0.196"
-serde_json = { version = "1.0.113", optional = true }
+serde = "1.0.197"
+serde_json = { version = "1.0.114", optional = true }
 serde_yaml = "0.9.32"
 tempfile = { version = "3.10.0", optional = true }
 toml_edit = "0.22.6"
@@ -43,7 +43,7 @@ lazy_static = "1.4.0"
 pretty_assertions = "1.4.0"
 rand = "0.8.5"
 rstest = "0.18.2"
-serde = "1.0.196"
+serde = "1.0.197"
 zepter = { path = ".", features = ["testing"] }
 
 [features]

@@ -30,8 +30,12 @@ pub struct LiftToWorkspaceCmd {
 	fix: bool,
 
 	/// How to determine which version to use for the whole workspace.
-	#[clap(long, value_enum, default_value_t = VersionResolveMode::Unambiguous, requires_if("exact", "exact_version"))]
-	version_resolver: VersionResolveMode,
+	#[clap(long, alias = "version-resolver", value_enum, default_value_t = VersionSelectorMode::Unambiguous, requires_if("exact", "exact_version"))]
+	version_selector: VersionSelectorMode,
+
+	/// Optionally only check dependencies with this source location.
+	#[clap(long, value_enum)]
+	source_location: Option<SourceLocationSelector>,
 
 	/// The exact version to use for the whole workspace.
 	#[clap(long)]
@@ -44,7 +48,7 @@ pub struct LiftToWorkspaceCmd {
 
 /// How to determine which version to use for the whole workspace.
 #[derive(Debug, Clone, PartialEq, clap::ValueEnum)]
-pub enum VersionResolveMode {
+pub enum VersionSelectorMode {
 	/// The version must be unambiguous - eg. there is only one version in the workspace.
 	Unambiguous,
 	/// A specific version.
@@ -53,6 +57,14 @@ pub enum VersionResolveMode {
 	///
 	/// The highest version number that it found.
 	Highest,
+}
+
+#[derive(Debug, Clone, PartialEq, clap::ValueEnum)]
+pub enum SourceLocationSelector {
+	/// The dependency is referenced via a `path`.
+	Local,
+	/// Either git or a registry.
+	Remote,
 }
 
 impl LiftToWorkspaceCmd {
@@ -74,11 +86,22 @@ impl LiftToWorkspaceCmd {
 
 		for pkg in meta.packages.iter() {
 			for dep in pkg.dependencies.iter() {
-				if regex_lookup.values().any(|r| r.is_match(&dep.name)) ||
-					self.dependencies.contains(&dep.name)
+				if !regex_lookup.values().any(|r| r.is_match(&dep.name)) &&
+					!self.dependencies.contains(&dep.name)
 				{
-					dependencies.insert(&dep.name);
+					continue;
 				}
+
+				if let Some(location_filter) = &self.source_location {
+					let is_local = dep.path.is_some();
+					match location_filter {
+						SourceLocationSelector::Local if !is_local => continue,
+						SourceLocationSelector::Remote if is_local => continue,
+						_ => (),
+					}
+				}
+
+				dependencies.insert(&dep.name);
 			}
 		}
 
@@ -97,8 +120,8 @@ impl LiftToWorkspaceCmd {
 	}
 
 	fn validate_args(&self) -> Result<(), String> {
-		if self.exact_version.is_some() && self.version_resolver != VersionResolveMode::Exact {
-			return Err("Cannot use --exact-version without --version-resolver=exact".to_string())
+		if self.exact_version.is_some() && self.version_selector != VersionSelectorMode::Exact {
+			return Err("Cannot use --exact-version without --version-selector=exact".to_string())
 		}
 		Ok(())
 	}
@@ -226,10 +249,10 @@ impl LiftToWorkspaceCmd {
 		versions: &[&VersionReq],
 		by_version: &HashMap<VersionReq, Vec<(Package, Dep)>>,
 	) -> Result<String, String> {
-		let found = match self.version_resolver {
-			VersionResolveMode::Exact => self.exact_version.clone().expect("Checked by clippy"),
-			VersionResolveMode::Highest => try_find_latest(by_version.keys())?,
-			VersionResolveMode::Unambiguous => {
+		let found = match self.version_selector {
+			VersionSelectorMode::Exact => self.exact_version.clone().expect("Checked by clippy"),
+			VersionSelectorMode::Highest => try_find_latest(by_version.keys())?,
+			VersionSelectorMode::Unambiguous => {
 				if versions.len() > 1 {
 					let str_width = versions.iter().map(|v| v.to_string().len()).max().unwrap();
 					let mut err = String::new();

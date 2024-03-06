@@ -5,11 +5,10 @@
 
 use crate::{
 	autofix::AutoFixer,
-	cmd::fmt::{
-		Mode,
-		Mode::{Canonicalize, Dedub, Sort},
-	},
+	cmd::fmt::Mode::{self, Canonicalize, Dedub, Sort},
+	kind_to_str,
 };
+use cargo_metadata::DependencyKind::*;
 use rstest::*;
 use std::{collections::BTreeMap as Map, vec};
 
@@ -1363,10 +1362,11 @@ fn lift_to_workspace_works(
 	#[case] default: Option<bool>,
 	#[case] output: Result<Option<&str>, &str>,
 ) {
-	for table in ["dependencies", "dev-dependencies", "build-dependencies"] {
+	for kind in [Normal, Build, Development] {
+		let table = kind_to_str(&kind);
 		let input = &input.replace("dependencies", table);
 		let mut fixer = AutoFixer::from_raw(input).unwrap();
-		let res = fixer.lift_dependency("log", default);
+		let res = fixer.lift_dependency("log", &kind, default);
 
 		match output {
 			Ok(modify) => {

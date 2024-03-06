@@ -191,9 +191,9 @@ impl LiftToWorkspaceCmd {
 			let (_, fixer) = fixers.get_mut(&pkg.name).unwrap();
 
 			if dep.uses_default_features != workspace_default_features_enabled {
-				fixer.lift_dependency(&dep.name, Some(dep.uses_default_features))?;
+				fixer.lift_dependency(&dep.name, &dep.kind, Some(dep.uses_default_features))?;
 			} else {
-				fixer.lift_dependency(&dep.name, None)?;
+				fixer.lift_dependency(&dep.name, &dep.kind, None)?;
 			}
 		}
 

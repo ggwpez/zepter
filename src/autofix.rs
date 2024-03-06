@@ -4,7 +4,7 @@
 //! Automatically fix problems by modifying `Cargo.toml` files.
 
 use crate::{cmd::fmt::Mode, log};
-use cargo_metadata::Dependency;
+use cargo_metadata::{Dependency, DependencyKind};
 use std::{
 	collections::BTreeMap as Map,
 	path::{Path, PathBuf},
@@ -450,23 +450,24 @@ impl AutoFixer {
 	pub fn lift_dependency(
 		&mut self,
 		dname: &str,
+		kind: &DependencyKind,
 		default_feats: Option<bool>,
 	) -> Result<(), String> {
+		let kind = crate::kind_to_str(kind);
 		let doc: &mut Document = self.doc.as_mut().unwrap();
 
-		for kind in &["dependencies", "dev-dependencies", "build-dependencies"] {
-			if !doc.contains_table(kind) {
-				continue
-			}
-			let deps: &mut Table = doc[kind].as_table_mut().unwrap();
-
-			if !deps.contains_key(dname) {
-				continue
-			}
-
-			let dep = deps.get_mut(dname).unwrap();
-			Self::lift_some_dependency(dep, default_feats)?;
+		if !doc.contains_table(kind) {
+			return Ok(())
 		}
+		let deps: &mut Table = doc[&kind].as_table_mut().unwrap();
+
+		if !deps.contains_key(dname) {
+			return Ok(())
+		}
+
+		let dep = deps.get_mut(dname).unwrap();
+		Self::lift_some_dependency(dep, default_feats)?;
+
 		Ok(())
 	}
 

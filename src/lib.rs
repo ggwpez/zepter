@@ -90,3 +90,14 @@ impl<R, E: std::fmt::Display> ErrToStr<R> for Result<R, E> {
 		self.map_err(|e| format!("{}", e))
 	}
 }
+
+use cargo_metadata::DependencyKind;
+
+pub(crate) fn kind_to_str(kind: &DependencyKind) -> &'static str {
+	match kind {
+		DependencyKind::Development => "dev-dependencies",
+		DependencyKind::Build => "build-dependencies",
+		DependencyKind::Normal => "dependencies",
+		_ => unreachable!(),
+	}
+}

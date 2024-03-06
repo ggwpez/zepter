@@ -1,0 +1,7 @@
+repo:
+  name: polkadot-fellows/runtimes
+  ref: 71ddd5fb0d3bebb90731f921e793b007697d1a6c
+cases:
+- cmd: transpose dependency lift-to-workspace "regex:bridge-runtime-common"  --version-resolver unambiguous
+  stderr: |
+    [WARN] Unstable feature - do not rely on this!

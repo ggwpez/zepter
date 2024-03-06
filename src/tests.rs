@@ -5,11 +5,12 @@
 
 use crate::{
 	autofix::AutoFixer,
-	cmd::fmt::Mode::{self, Canonicalize, Dedub, Sort}, kind_to_str,
+	cmd::fmt::Mode::{self, Canonicalize, Dedub, Sort},
+	kind_to_str,
 };
+use cargo_metadata::DependencyKind::*;
 use rstest::*;
 use std::{collections::BTreeMap as Map, vec};
-use cargo_metadata::DependencyKind::*;
 
 #[rstest]
 // Keeps comments

@@ -95,9 +95,9 @@ use cargo_metadata::DependencyKind;
 
 pub(crate) fn kind_to_str(kind: &DependencyKind) -> &'static str {
 	match kind {
-		&DependencyKind::Development => "dev-dependencies",
-		&DependencyKind::Build => "build-dependencies",
-		&DependencyKind::Normal => "dependencies",
+		DependencyKind::Development => "dev-dependencies",
+		DependencyKind::Build => "build-dependencies",
+		DependencyKind::Normal => "dependencies",
 		_ => unreachable!(),
 	}
 }

@@ -3,6 +3,9 @@
 
 //! Lint your feature usage by analyzing crate metadata.
 
+pub mod nostd;
+pub use nostd::*;
+
 use crate::{
 	autofix::*,
 	cmd::{parse_key_val, resolve_dep, RenamedPackage},
@@ -43,6 +46,8 @@ pub enum SubCommand {
 	/// A specific feature is only implied by a specific set of other features.
 	OnlyEnables(OnlyEnablesCmd),
 	WhyEnabled(WhyEnabledCmd),
+	/// Check the crates for sane no-std feature configuration.
+	NoStd(NoStdCmd),
 }
 
 #[derive(Debug, clap::Parser)]
@@ -272,6 +277,7 @@ impl LintCmd {
 				cmd.run(global);
 				Ok(())
 			},
+			SubCommand::NoStd(cmd) => cmd.run(global),
 		}
 	}
 }

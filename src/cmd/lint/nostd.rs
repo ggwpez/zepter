@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
+
 use std::collections::BTreeMap;
 use crate::cmd::{lint::AutoFixer, CargoArgs};
 use crate::cmd::GlobalArgs;
@@ -6,6 +9,7 @@ use crate::cmd::resolve_dep;
 use crate::grammar::plural;
 use std::collections::btree_map::Entry;
 use std::fs::canonicalize;
+use crate::log;
 
 #[derive(Debug, clap::Parser)]
 pub struct NoStdCmd {
@@ -98,11 +102,11 @@ impl DefaultFeaturesDisabledCmd {
 				fixer.save()?;
 			}
 			println!("and fixed all of them.");
+			Ok(())
 		} else {
 			println!("and fixed none. Re-run with --fix to apply fixes.");
+			Err(format!("Several issues were not fixed."))
 		}
-
-		Ok(())
 	}
 
 	fn supports_nostd(krate: &Package, cache: &mut BTreeMap<String, bool>) -> Result<bool, String> {

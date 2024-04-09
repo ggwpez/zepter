@@ -1,0 +1,144 @@
+repo:
+  name: paritytech/polkadot-sdk
+  ref: 70ab64bd1593dc15e6813de71f8ba280f2fb56f1
+cases:
+- cmd: lint no-std default-features-of-nostd-dependencies-disabled
+  stdout: |
+    Default features not disabled for dependency: sp-core -> sp-externalities
+    Default features not disabled for dependency: sp-session -> sp-runtime
+    Default features not disabled for dependency: sp-consensus-babe -> sp-timestamp
+    Default features not disabled for dependency: pallet-contracts -> pallet-contracts-proc-macro
+    Default features not disabled for dependency: pallet-nomination-pools -> pallet-balances
+    Default features not disabled for dependency: pallet-nomination-pools -> sp-tracing
+    Default features not disabled for dependency: sp-transaction-storage-proof -> sp-core
+    Default features not disabled for dependency: sp-transaction-storage-proof -> sp-trie
+    Default features not disabled for dependency: cumulus-primitives-parachain-inherent -> sp-api
+    Default features not disabled for dependency: cumulus-primitives-parachain-inherent -> sp-runtime
+    Default features not disabled for dependency: cumulus-primitives-parachain-inherent -> sp-state-machine
+    Default features not disabled for dependency: cumulus-primitives-parachain-inherent -> sp-storage
+    Default features not disabled for dependency: xcm-executor-integration-tests -> frame-system
+    Default features not disabled for dependency: xcm-executor-integration-tests -> pallet-xcm
+    Default features not disabled for dependency: xcm-executor-integration-tests -> polkadot-test-runtime
+    Default features not disabled for dependency: xcm-executor-integration-tests -> sp-state-machine
+    Default features not disabled for dependency: xcm-executor-integration-tests -> sp-tracing
+    Default features not disabled for dependency: xcm-executor-integration-tests -> xcm-executor
+    Default features not disabled for dependency: pallet-root-offences -> sp-runtime
+    Found 19 issues in 9 crates and fixed none. Re-run with --fix to apply fixes.
+  stderr: |
+    Several issues were not fixed.
+    Error: ()
+  code: 1
+- cmd: lint no-std default-features-of-nostd-dependencies-disabled --fix
+  stdout: |
+    Default features not disabled for dependency: sp-core -> sp-externalities
+    Default features not disabled for dependency: sp-session -> sp-runtime
+    Default features not disabled for dependency: sp-consensus-babe -> sp-timestamp
+    Default features not disabled for dependency: pallet-contracts -> pallet-contracts-proc-macro
+    Default features not disabled for dependency: pallet-nomination-pools -> pallet-balances
+    Default features not disabled for dependency: pallet-nomination-pools -> sp-tracing
+    Default features not disabled for dependency: sp-transaction-storage-proof -> sp-core
+    Default features not disabled for dependency: sp-transaction-storage-proof -> sp-trie
+    Default features not disabled for dependency: cumulus-primitives-parachain-inherent -> sp-api
+    Default features not disabled for dependency: cumulus-primitives-parachain-inherent -> sp-runtime
+    Default features not disabled for dependency: cumulus-primitives-parachain-inherent -> sp-state-machine
+    Default features not disabled for dependency: cumulus-primitives-parachain-inherent -> sp-storage
+    Default features not disabled for dependency: xcm-executor-integration-tests -> frame-system
+    Default features not disabled for dependency: xcm-executor-integration-tests -> pallet-xcm
+    Default features not disabled for dependency: xcm-executor-integration-tests -> polkadot-test-runtime
+    Default features not disabled for dependency: xcm-executor-integration-tests -> sp-state-machine
+    Default features not disabled for dependency: xcm-executor-integration-tests -> sp-tracing
+    Default features not disabled for dependency: xcm-executor-integration-tests -> xcm-executor
+    Default features not disabled for dependency: pallet-root-offences -> sp-runtime
+    Found 19 issues in 9 crates and fixed all of them.
+  code: 0
+  diff: |
+    diff --git cumulus/primitives/parachain-inherent/Cargo.toml cumulus/primitives/parachain-inherent/Cargo.toml
+    index ffcc0a47cc..1cfc9e3feb 100644
+    --- cumulus/primitives/parachain-inherent/Cargo.toml
+    +++ cumulus/primitives/parachain-inherent/Cargo.toml
+    @@ -15 +15 @@ sc-client-api = { path = "../../../substrate/client/api", optional = true}
+    -sp-api = { path = "../../../substrate/primitives/api", optional = true}
+    +sp-api = { path = "../../../substrate/primitives/api", optional = true, default-features = false }
+    @@ -18,2 +18,2 @@ sp-inherents = { path = "../../../substrate/primitives/inherents", default-featu
+    -sp-runtime = { path = "../../../substrate/primitives/runtime", optional = true}
+    -sp-state-machine = { path = "../../../substrate/primitives/state-machine", optional = true}
+    +sp-runtime = { path = "../../../substrate/primitives/runtime", optional = true, default-features = false }
+    +sp-state-machine = { path = "../../../substrate/primitives/state-machine", optional = true, default-features = false }
+    @@ -21 +21 @@ sp-std = { path = "../../../substrate/primitives/std", default-features = false}
+    -sp-storage = { path = "../../../substrate/primitives/storage", optional = true}
+    +sp-storage = { path = "../../../substrate/primitives/storage", optional = true, default-features = false }
+    diff --git polkadot/xcm/xcm-executor/integration-tests/Cargo.toml polkadot/xcm/xcm-executor/integration-tests/Cargo.toml
+    index ecd7096c58..0f49bf3df0 100644
+    --- polkadot/xcm/xcm-executor/integration-tests/Cargo.toml
+    +++ polkadot/xcm/xcm-executor/integration-tests/Cargo.toml
+    @@ -13 +13 @@ frame-support = { path = "../../../../substrate/frame/support", default-features
+    -frame-system = { path = "../../../../substrate/frame/system" }
+    +frame-system = { path = "../../../../substrate/frame/system" , default-features = false }
+    @@ -15 +15 @@ futures = "0.3.21"
+    -pallet-xcm = { path = "../../pallet-xcm" }
+    +pallet-xcm = { path = "../../pallet-xcm" , default-features = false }
+    @@ -17 +17 @@ polkadot-test-client = { path = "../../../node/test/client" }
+    -polkadot-test-runtime = { path = "../../../runtime/test-runtime" }
+    +polkadot-test-runtime = { path = "../../../runtime/test-runtime" , default-features = false }
+    @@ -22 +22 @@ sp-runtime = { path = "../../../../substrate/primitives/runtime", default-featur
+    -sp-state-machine = { path = "../../../../substrate/primitives/state-machine" }
+    +sp-state-machine = { path = "../../../../substrate/primitives/state-machine" , default-features = false }
+    @@ -24,2 +24,2 @@ xcm = { path = "../..", default-features = false }
+    -xcm-executor = { path = ".." }
+    -sp-tracing = { path = "../../../../substrate/primitives/tracing" }
+    +xcm-executor = { path = ".." , default-features = false }
+    +sp-tracing = { path = "../../../../substrate/primitives/tracing" , default-features = false }
+    diff --git substrate/frame/contracts/Cargo.toml substrate/frame/contracts/Cargo.toml
+    index f1bbe38a87..319fde8486 100644
+    --- substrate/frame/contracts/Cargo.toml
+    +++ substrate/frame/contracts/Cargo.toml
+    @@ -44 +44 @@ pallet-contracts-primitives = { path = "primitives", default-features = false}
+    -pallet-contracts-proc-macro = { path = "proc-macro" }
+    +pallet-contracts-proc-macro = { path = "proc-macro" , default-features = false }
+    diff --git substrate/frame/nomination-pools/Cargo.toml substrate/frame/nomination-pools/Cargo.toml
+    index 01e998a521..c074ea3452 100644
+    --- substrate/frame/nomination-pools/Cargo.toml
+    +++ substrate/frame/nomination-pools/Cargo.toml
+    @@ -30,2 +30,2 @@ log = { version = "0.4.0", default-features = false }
+    -pallet-balances = { path = "../balances", optional = true }
+    -sp-tracing = { path = "../../primitives/tracing", optional = true }
+    +pallet-balances = { path = "../balances", optional = true , default-features = false }
+    +sp-tracing = { path = "../../primitives/tracing", optional = true , default-features = false }
+    diff --git substrate/frame/root-offences/Cargo.toml substrate/frame/root-offences/Cargo.toml
+    index c2df0a79e6..d68fe6ffb9 100644
+    --- substrate/frame/root-offences/Cargo.toml
+    +++ substrate/frame/root-offences/Cargo.toml
+    @@ -24 +24 @@ frame-system = { path = "../system", default-features = false}
+    -sp-runtime = { path = "../../primitives/runtime" }
+    +sp-runtime = { path = "../../primitives/runtime" , default-features = false }
+    diff --git substrate/primitives/consensus/babe/Cargo.toml substrate/primitives/consensus/babe/Cargo.toml
+    index efa455b8df..426838503c 100644
+    --- substrate/primitives/consensus/babe/Cargo.toml
+    +++ substrate/primitives/consensus/babe/Cargo.toml
+    @@ -27 +27 @@ sp-std = { path = "../../std", default-features = false}
+    -sp-timestamp = { path = "../../timestamp", optional = true}
+    +sp-timestamp = { path = "../../timestamp", optional = true, default-features = false }
+    diff --git substrate/primitives/core/Cargo.toml substrate/primitives/core/Cargo.toml
+    index 12360472a4..343f00e524 100644
+    --- substrate/primitives/core/Cargo.toml
+    +++ substrate/primitives/core/Cargo.toml
+    @@ -39 +39 @@ sp-storage = { path = "../storage", default-features = false}
+    -sp-externalities = { path = "../externalities", optional = true}
+    +sp-externalities = { path = "../externalities", optional = true, default-features = false }
+    diff --git substrate/primitives/session/Cargo.toml substrate/primitives/session/Cargo.toml
+    index a4326dab7b..d9442f5dba 100644
+    --- substrate/primitives/session/Cargo.toml
+    +++ substrate/primitives/session/Cargo.toml
+    @@ -20 +20 @@ sp-core = { path = "../core", default-features = false}
+    -sp-runtime = { path = "../runtime", optional = true}
+    +sp-runtime = { path = "../runtime", optional = true, default-features = false }
+    diff --git substrate/primitives/transaction-storage-proof/Cargo.toml substrate/primitives/transaction-storage-proof/Cargo.toml
+    index 1683fea254..48c45ebbe3 100644
+    --- substrate/primitives/transaction-storage-proof/Cargo.toml
+    +++ substrate/primitives/transaction-storage-proof/Cargo.toml
+    @@ -19 +19 @@ scale-info = { version = "2.5.0", default-features = false, features = ["derive"
+    -sp-core = { path = "../core", optional = true}
+    +sp-core = { path = "../core", optional = true, default-features = false }
+    @@ -23 +23 @@ sp-std = { path = "../std", default-features = false}
+    -sp-trie = { path = "../trie", optional = true}
+    +sp-trie = { path = "../trie", optional = true, default-features = false }

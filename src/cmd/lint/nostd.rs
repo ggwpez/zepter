@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
-use std::collections::BTreeMap;
-use crate::cmd::{lint::AutoFixer, CargoArgs};
-use crate::cmd::GlobalArgs;
+use crate::{
+	cmd::{lint::AutoFixer, resolve_dep, CargoArgs, GlobalArgs},
+	grammar::plural,
+	log,
+};
 use cargo_metadata::{DependencyKind, Package};
-use crate::cmd::resolve_dep;
-use crate::grammar::plural;
-use std::collections::btree_map::Entry;
-use std::fs::canonicalize;
-use crate::log;
+use std::{
+	collections::{btree_map::Entry, BTreeMap},
+	fs::canonicalize,
+};
 
 #[derive(Debug, clap::Parser)]
 pub struct NoStdCmd {
@@ -64,9 +65,7 @@ impl DefaultFeaturesDisabledCmd {
 					continue;
 				}
 
-				let Some(rhs) = resolve_dep(lhs, dep, &meta) else {
-					continue
-				};
+				let Some(rhs) = resolve_dep(lhs, dep, &meta) else { continue };
 
 				if !Self::supports_nostd(&rhs.pkg, &mut cache)? {
 					continue;
@@ -76,12 +75,16 @@ impl DefaultFeaturesDisabledCmd {
 					continue;
 				}
 
-				println!("Default features not disabled for dependency: {} -> {}", lhs.name, rhs.pkg.name);
-				
+				println!(
+					"Default features not disabled for dependency: {} -> {}",
+					lhs.name, rhs.pkg.name
+				);
+
 				let fixer = match autofixer.entry(lhs.manifest_path.clone()) {
 					Entry::Occupied(e) => e.into_mut(),
 					Entry::Vacant(e) => {
-						let krate_path = canonicalize(lhs.manifest_path.clone().into_std_path_buf()).unwrap();
+						let krate_path =
+							canonicalize(lhs.manifest_path.clone().into_std_path_buf()).unwrap();
 
 						if !krate_path.starts_with(&allowed_dir) {
 							return Err(format!("Cannot write to path: {}", krate_path.display()))
@@ -96,7 +99,7 @@ impl DefaultFeaturesDisabledCmd {
 		}
 
 		let s = plural(autofixer.len());
-		print!("Found {} issue{} in {} crate{s} ", issues, plural(issues),  autofixer.len());
+		print!("Found {} issue{} in {} crate{s} ", issues, plural(issues), autofixer.len());
 		if self.fix {
 			for (_, fixer) in autofixer.iter_mut() {
 				fixer.save()?;
@@ -116,15 +119,21 @@ impl DefaultFeaturesDisabledCmd {
 		}
 
 		// try to find the lib.rs
-		let krate_root = krate.manifest_path.parent().ok_or_else(|| format!("Could not find parent of manifest: {}", krate.manifest_path))?;
+		let krate_root = krate
+			.manifest_path
+			.parent()
+			.ok_or_else(|| format!("Could not find parent of manifest: {}", krate.manifest_path))?;
 		let lib_rs = krate_root.join("src/lib.rs");
 
 		if !lib_rs.exists() {
 			return Ok(false)
 		}
-		let content = std::fs::read_to_string(&lib_rs).map_err(|e| format!("Could not read lib.rs: {}", e))?;
+		let content = std::fs::read_to_string(&lib_rs)
+			.map_err(|e| format!("Could not read lib.rs: {}", e))?;
 
-		let ret = if content.contains("#![cfg_attr(not(feature = \"std\"), no_std)]") || content.contains("#![no_std]") {
+		let ret = if content.contains("#![cfg_attr(not(feature = \"std\"), no_std)]") ||
+			content.contains("#![no_std]")
+		{
 			log::debug!("Crate supports no-std: {} (path={})", krate.name, krate.manifest_path);
 			true
 		} else {

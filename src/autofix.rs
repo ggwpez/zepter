@@ -29,12 +29,16 @@ impl AutoFixer {
 	pub fn from_manifest<P: AsRef<Path>>(manifest: P) -> Result<Self, String> {
 		let raw = std::fs::read_to_string(&manifest)
 			.map_err(|e| format!("Failed to read manifest: {e}"))?;
-		let doc = raw.parse::<DocumentMut>().map_err(|e| format!("Failed to parse manifest: {e}"))?;
+		let doc = raw
+			.parse::<DocumentMut>()
+			.map_err(|e| format!("Failed to parse manifest: {e}"))?;
 		Ok(Self { raw, manifest: Some(manifest.as_ref().to_path_buf()), doc: Some(doc) })
 	}
 
 	pub fn from_raw(raw: &str) -> Result<Self, String> {
-		let doc = raw.parse::<DocumentMut>().map_err(|e| format!("Failed to parse manifest: {e}"))?;
+		let doc = raw
+			.parse::<DocumentMut>()
+			.map_err(|e| format!("Failed to parse manifest: {e}"))?;
 		Ok(Self { raw: raw.into(), manifest: None, doc: Some(doc) })
 	}
 

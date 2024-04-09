@@ -112,7 +112,11 @@ impl DefaultFeaturesDisabledCmd {
 		}
 	}
 
-	fn supports_nostd(g: &GlobalArgs, krate: &Package, cache: &mut BTreeMap<String, bool>) -> Result<bool, String> {
+	fn supports_nostd(
+		g: &GlobalArgs,
+		krate: &Package,
+		cache: &mut BTreeMap<String, bool>,
+	) -> Result<bool, String> {
 		log::debug!("Checking if crate supports no-std: {}", krate.name);
 		if let Some(res) = cache.get(krate.manifest_path.as_str()) {
 			return Ok(*res)
@@ -135,7 +139,11 @@ impl DefaultFeaturesDisabledCmd {
 			content.contains("#![no_std]")
 		{
 			if content.contains("#![cfg(") {
-				println!("{}: Crate may unexpectedly pull in libstd: {}", g.yellow("WARN"), krate.name);
+				println!(
+					"{}: Crate may unexpectedly pull in libstd: {}",
+					g.yellow("WARN"),
+					krate.name
+				);
 			}
 			log::debug!("Crate supports no-std: {} (path={})", krate.name, krate.manifest_path);
 			true

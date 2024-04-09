@@ -42,7 +42,7 @@ glob = "0.3.1"
 lazy_static = "1.4.0"
 pretty_assertions = "1.4.0"
 rand = "0.8.5"
-rstest = "0.18.2"
+rstest = "0.19.0"
 serde = "1.0.197"
 zepter = { path = ".", features = ["testing"] }
 

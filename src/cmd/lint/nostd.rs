@@ -1,8 +1,11 @@
 use std::collections::BTreeMap;
-use crate::cmd::CargoArgs;
+use crate::cmd::{lint::AutoFixer, CargoArgs};
 use crate::cmd::GlobalArgs;
 use cargo_metadata::{DependencyKind, Package};
 use crate::cmd::resolve_dep;
+use crate::grammar::plural;
+use std::collections::btree_map::Entry;
+use std::fs::canonicalize;
 
 #[derive(Debug, clap::Parser)]
 pub struct NoStdCmd {
@@ -22,6 +25,10 @@ pub struct DefaultFeaturesDisabledCmd {
 	#[allow(missing_docs)]
 	#[clap(flatten)]
 	cargo_args: CargoArgs,
+
+	/// Whether to fix the issues.
+	#[clap(long, short)]
+	fix: bool,
 }
 
 impl NoStdCmd {
@@ -35,9 +42,12 @@ impl NoStdCmd {
 impl DefaultFeaturesDisabledCmd {
 	pub(crate) fn run(&self, _: &GlobalArgs) -> Result<(), String> {
 		let meta = self.cargo_args.clone().with_workspace(true).load_metadata()?;
-		//let dag = build_feature_dag(&meta, &meta.packages);
 		let pkgs = &meta.packages;
 		let mut cache = BTreeMap::new();
+		let mut autofixer = BTreeMap::new();
+		let mut issues = 0;
+		// Dir that we are allowed to write to.
+		let allowed_dir = canonicalize(meta.workspace_root.as_std_path()).unwrap();
 
 		for lhs in pkgs.iter() {
 			// check if lhs supports no-std builds
@@ -58,10 +68,38 @@ impl DefaultFeaturesDisabledCmd {
 					continue;
 				}
 
-				if dep.uses_default_features {
-					log::warn!("{} depends on {} with default features", lhs.name, rhs.pkg.name);
+				if !dep.uses_default_features {
+					continue;
 				}
+
+				println!("Default features not disabled for dependency: {} -> {}", lhs.name, rhs.pkg.name);
+				
+				let fixer = match autofixer.entry(lhs.manifest_path.clone()) {
+					Entry::Occupied(e) => e.into_mut(),
+					Entry::Vacant(e) => {
+						let krate_path = canonicalize(lhs.manifest_path.clone().into_std_path_buf()).unwrap();
+
+						if !krate_path.starts_with(&allowed_dir) {
+							return Err(format!("Cannot write to path: {}", krate_path.display()))
+						}
+						e.insert(AutoFixer::from_manifest(&lhs.manifest_path)?)
+					},
+				};
+
+				fixer.disable_default_features(&rhs.name())?;
+				issues += 1;
 			}
+		}
+
+		let s = plural(autofixer.len());
+		print!("Found {} issue{} in {} crate{s} ", issues, plural(issues),  autofixer.len());
+		if self.fix {
+			for (_, fixer) in autofixer.iter_mut() {
+				fixer.save()?;
+			}
+			println!("and fixed all of them.");
+		} else {
+			println!("and fixed none. Re-run with --fix to apply fixes.");
 		}
 
 		Ok(())

@@ -9,7 +9,7 @@ use std::{
 	collections::BTreeMap as Map,
 	path::{Path, PathBuf},
 };
-use toml_edit::{table, value, Array, Document, Formatted, InlineTable, Item, Table, Value};
+use toml_edit::{table, value, Array, DocumentMut, Formatted, InlineTable, Item, Table, Value};
 
 #[derive(Debug, clap::Parser)]
 #[cfg_attr(feature = "testing", derive(Default))]
@@ -21,7 +21,7 @@ pub struct AutoFixerArgs {
 
 pub struct AutoFixer {
 	pub manifest: Option<PathBuf>,
-	doc: Option<Document>,
+	doc: Option<DocumentMut>,
 	raw: String,
 }
 
@@ -29,12 +29,12 @@ impl AutoFixer {
 	pub fn from_manifest<P: AsRef<Path>>(manifest: P) -> Result<Self, String> {
 		let raw = std::fs::read_to_string(&manifest)
 			.map_err(|e| format!("Failed to read manifest: {e}"))?;
-		let doc = raw.parse::<Document>().map_err(|e| format!("Failed to parse manifest: {e}"))?;
+		let doc = raw.parse::<DocumentMut>().map_err(|e| format!("Failed to parse manifest: {e}"))?;
 		Ok(Self { raw, manifest: Some(manifest.as_ref().to_path_buf()), doc: Some(doc) })
 	}
 
 	pub fn from_raw(raw: &str) -> Result<Self, String> {
-		let doc = raw.parse::<Document>().map_err(|e| format!("Failed to parse manifest: {e}"))?;
+		let doc = raw.parse::<DocumentMut>().map_err(|e| format!("Failed to parse manifest: {e}"))?;
 		Ok(Self { raw: raw.into(), manifest: None, doc: Some(doc) })
 	}
 
@@ -237,7 +237,7 @@ impl AutoFixer {
 	fn get_all_features(&self) -> Vec<String> {
 		let mut found = Vec::new();
 
-		let doc: &Document = self.doc.as_ref().unwrap();
+		let doc: &DocumentMut = self.doc.as_ref().unwrap();
 		if !doc.contains_table("features") {
 			return found
 		}
@@ -251,7 +251,7 @@ impl AutoFixer {
 	}
 
 	fn get_feature(&self, name: &str) -> Option<&Array> {
-		let doc: &Document = self.doc.as_ref().unwrap();
+		let doc: &DocumentMut = self.doc.as_ref().unwrap();
 		if !doc.contains_table("features") {
 			return None
 		}
@@ -265,7 +265,7 @@ impl AutoFixer {
 	}
 
 	pub(crate) fn get_feature_mut(&mut self, name: &str) -> Result<&mut Array, ()> {
-		let doc: &mut Document = self.doc.as_mut().unwrap();
+		let doc: &mut DocumentMut = self.doc.as_mut().unwrap();
 		if !doc.contains_table("features") {
 			return Err(())
 		}
@@ -358,7 +358,7 @@ impl AutoFixer {
 	}
 
 	pub fn add_feature(&mut self, feature: &str) -> Result<(), String> {
-		let doc: &mut Document = self.doc.as_mut().unwrap();
+		let doc: &mut DocumentMut = self.doc.as_mut().unwrap();
 
 		if !doc.contains_table("features") {
 			doc.as_table_mut().insert("features", table());
@@ -375,7 +375,7 @@ impl AutoFixer {
 
 	/// Add something to a feature. Creates that feature if it does not exist.
 	pub fn add_to_feature(&mut self, feature: &str, v: &str) -> Result<(), String> {
-		let doc: &mut Document = self.doc.as_mut().unwrap();
+		let doc: &mut DocumentMut = self.doc.as_mut().unwrap();
 
 		if !doc.contains_table("features") {
 			doc.as_table_mut().insert("features", table());
@@ -454,7 +454,7 @@ impl AutoFixer {
 		default_feats: Option<bool>,
 	) -> Result<(), String> {
 		let kind = crate::kind_to_str(kind);
-		let doc: &mut Document = self.doc.as_mut().unwrap();
+		let doc: &mut DocumentMut = self.doc.as_mut().unwrap();
 
 		if !doc.contains_table(kind) {
 			return Ok(())
@@ -520,7 +520,7 @@ impl AutoFixer {
 	) -> Result<(), String> {
 		// The carrot is implicit in cargo.
 		let version_str = dep_version.to_string().trim_start_matches('^').to_string();
-		let doc: &mut Document = self.doc.as_mut().unwrap();
+		let doc: &mut DocumentMut = self.doc.as_mut().unwrap();
 
 		if !doc.contains_table("workspace") {
 			return Err("No workspace entry found".into())
@@ -578,7 +578,7 @@ impl AutoFixer {
 	}
 
 	pub fn remove_feature(&mut self, name: &str) {
-		let doc: &mut Document = self.doc.as_mut().unwrap();
+		let doc: &mut DocumentMut = self.doc.as_mut().unwrap();
 
 		if !doc.contains_table("features") {
 			return
@@ -598,6 +598,26 @@ impl AutoFixer {
 					i += 1;
 				}
 			}
+		}
+	}
+
+	pub fn disable_default_features(&mut self, dep: &str) -> Result<(), String> {
+		let doc: &mut DocumentMut = self.doc.as_mut().unwrap();
+
+		if !doc.contains_table("dependencies") {
+			return Err("No dependencies entry found".into())
+		}
+
+		let deps = doc["dependencies"].as_table_mut().unwrap();
+		let Some(dep) = deps.get_mut(dep) else {
+			return Err(format!("Dependency '{}' not found", dep))
+		};
+
+		if let Some(dep) = dep.as_inline_table_mut() {
+			dep.insert("default-features", Value::Boolean(Formatted::new(false)));
+			Ok(())
+		} else {
+			Err(format!("Dependency '{}' is not an inline table", dep))
 		}
 	}
 

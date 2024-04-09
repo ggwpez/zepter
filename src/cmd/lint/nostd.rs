@@ -45,7 +45,7 @@ impl NoStdCmd {
 }
 
 impl DefaultFeaturesDisabledCmd {
-	pub(crate) fn run(&self, _: &GlobalArgs) -> Result<(), String> {
+	pub(crate) fn run(&self, g: &GlobalArgs) -> Result<(), String> {
 		let meta = self.cargo_args.clone().with_workspace(true).load_metadata()?;
 		let pkgs = &meta.packages;
 		let mut cache = BTreeMap::new();
@@ -56,7 +56,7 @@ impl DefaultFeaturesDisabledCmd {
 
 		for lhs in pkgs.iter() {
 			// check if lhs supports no-std builds
-			if !Self::supports_nostd(lhs, &mut cache)? {
+			if !Self::supports_nostd(g, lhs, &mut cache)? {
 				continue;
 			}
 
@@ -67,7 +67,7 @@ impl DefaultFeaturesDisabledCmd {
 
 				let Some(rhs) = resolve_dep(lhs, dep, &meta) else { continue };
 
-				if !Self::supports_nostd(&rhs.pkg, &mut cache)? {
+				if !Self::supports_nostd(g, &rhs.pkg, &mut cache)? {
 					continue;
 				}
 
@@ -112,7 +112,7 @@ impl DefaultFeaturesDisabledCmd {
 		}
 	}
 
-	fn supports_nostd(krate: &Package, cache: &mut BTreeMap<String, bool>) -> Result<bool, String> {
+	fn supports_nostd(g: &GlobalArgs, krate: &Package, cache: &mut BTreeMap<String, bool>) -> Result<bool, String> {
 		log::debug!("Checking if crate supports no-std: {}", krate.name);
 		if let Some(res) = cache.get(krate.manifest_path.as_str()) {
 			return Ok(*res)
@@ -134,6 +134,9 @@ impl DefaultFeaturesDisabledCmd {
 		let ret = if content.contains("#![cfg_attr(not(feature = \"std\"), no_std)]") ||
 			content.contains("#![no_std]")
 		{
+			if content.contains("#![cfg(") {
+				println!("{}: Crate may unexpectedly pull in libstd: {}", g.yellow("WARN"), krate.name);
+			}
 			log::debug!("Crate supports no-std: {} (path={})", krate.name, krate.manifest_path);
 			true
 		} else {

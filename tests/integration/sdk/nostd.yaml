@@ -5,8 +5,15 @@ cases:
 - cmd: lint no-std default-features-of-nostd-dependencies-disabled
   stdout: |
     Default features not disabled for dependency: sp-core -> sp-externalities
+    WARN: Crate may unexpectedly pull in libstd: frame-try-runtime
+    WARN: Crate may unexpectedly pull in libstd: frame-benchmarking
     Default features not disabled for dependency: sp-session -> sp-runtime
     Default features not disabled for dependency: sp-consensus-babe -> sp-timestamp
+    WARN: Crate may unexpectedly pull in libstd: frame-system-benchmarking
+    WARN: Crate may unexpectedly pull in libstd: pallet-election-provider-support-benchmarking
+    WARN: Crate may unexpectedly pull in libstd: pallet-nomination-pools-benchmarking
+    WARN: Crate may unexpectedly pull in libstd: pallet-offences-benchmarking
+    WARN: Crate may unexpectedly pull in libstd: pallet-session-benchmarking
     Default features not disabled for dependency: pallet-contracts -> pallet-contracts-proc-macro
     Default features not disabled for dependency: pallet-nomination-pools -> pallet-balances
     Default features not disabled for dependency: pallet-nomination-pools -> sp-tracing
@@ -16,6 +23,8 @@ cases:
     Default features not disabled for dependency: cumulus-primitives-parachain-inherent -> sp-runtime
     Default features not disabled for dependency: cumulus-primitives-parachain-inherent -> sp-state-machine
     Default features not disabled for dependency: cumulus-primitives-parachain-inherent -> sp-storage
+    WARN: Crate may unexpectedly pull in libstd: cumulus-pallet-session-benchmarking
+    WARN: Crate may unexpectedly pull in libstd: xcm-executor-integration-tests
     Default features not disabled for dependency: xcm-executor-integration-tests -> frame-system
     Default features not disabled for dependency: xcm-executor-integration-tests -> pallet-xcm
     Default features not disabled for dependency: xcm-executor-integration-tests -> polkadot-test-runtime
@@ -31,8 +40,15 @@ cases:
 - cmd: lint no-std default-features-of-nostd-dependencies-disabled --fix
   stdout: |
     Default features not disabled for dependency: sp-core -> sp-externalities
+    WARN: Crate may unexpectedly pull in libstd: frame-try-runtime
+    WARN: Crate may unexpectedly pull in libstd: frame-benchmarking
     Default features not disabled for dependency: sp-session -> sp-runtime
     Default features not disabled for dependency: sp-consensus-babe -> sp-timestamp
+    WARN: Crate may unexpectedly pull in libstd: frame-system-benchmarking
+    WARN: Crate may unexpectedly pull in libstd: pallet-election-provider-support-benchmarking
+    WARN: Crate may unexpectedly pull in libstd: pallet-nomination-pools-benchmarking
+    WARN: Crate may unexpectedly pull in libstd: pallet-offences-benchmarking
+    WARN: Crate may unexpectedly pull in libstd: pallet-session-benchmarking
     Default features not disabled for dependency: pallet-contracts -> pallet-contracts-proc-macro
     Default features not disabled for dependency: pallet-nomination-pools -> pallet-balances
     Default features not disabled for dependency: pallet-nomination-pools -> sp-tracing
@@ -42,6 +58,8 @@ cases:
     Default features not disabled for dependency: cumulus-primitives-parachain-inherent -> sp-runtime
     Default features not disabled for dependency: cumulus-primitives-parachain-inherent -> sp-state-machine
     Default features not disabled for dependency: cumulus-primitives-parachain-inherent -> sp-storage
+    WARN: Crate may unexpectedly pull in libstd: cumulus-pallet-session-benchmarking
+    WARN: Crate may unexpectedly pull in libstd: xcm-executor-integration-tests
     Default features not disabled for dependency: xcm-executor-integration-tests -> frame-system
     Default features not disabled for dependency: xcm-executor-integration-tests -> pallet-xcm
     Default features not disabled for dependency: xcm-executor-integration-tests -> polkadot-test-runtime

@@ -6,7 +6,6 @@ cases:
   stdout: |
     Default features not disabled for dependency: sp-core -> sp-externalities
     WARN: Crate may unexpectedly pull in libstd: frame-try-runtime
-    WARN: Crate may unexpectedly pull in libstd: frame-benchmarking
     Default features not disabled for dependency: sp-session -> sp-runtime
     Default features not disabled for dependency: sp-consensus-babe -> sp-timestamp
     WARN: Crate may unexpectedly pull in libstd: frame-system-benchmarking
@@ -41,7 +40,6 @@ cases:
   stdout: |
     Default features not disabled for dependency: sp-core -> sp-externalities
     WARN: Crate may unexpectedly pull in libstd: frame-try-runtime
-    WARN: Crate may unexpectedly pull in libstd: frame-benchmarking
     Default features not disabled for dependency: sp-session -> sp-runtime
     Default features not disabled for dependency: sp-consensus-babe -> sp-timestamp
     WARN: Crate may unexpectedly pull in libstd: frame-system-benchmarking

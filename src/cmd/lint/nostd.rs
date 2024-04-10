@@ -138,7 +138,7 @@ impl DefaultFeaturesDisabledCmd {
 		let ret = if content.contains("#![cfg_attr(not(feature = \"std\"), no_std)]") ||
 			content.contains("#![no_std]")
 		{
-			if content.contains("#![cfg(") {
+			if content.contains("\n#![cfg(") {
 				println!(
 					"{}: Crate may unexpectedly pull in libstd: {}",
 					g.yellow("WARN"),

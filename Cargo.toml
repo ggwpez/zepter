@@ -18,7 +18,7 @@ harness = false
 required-features = [ "benchmarking" ]
 
 [dependencies]
-anyhow = { version = "1.0.81", optional = true }
+anyhow = { version = "1.0.82", optional = true }
 assert_cmd = { version = "2.0.14", optional = true }
 cargo_metadata = "0.18.1"
 clap = { version = "4.5.4", features = ["derive", "cargo"] }

@@ -30,11 +30,11 @@ itertools = "0.12.1"
 log = { version = "0.4.21", optional = true }
 regex = "1.10.4"
 semver = "1"
-serde = "1.0.197"
-serde_json = { version = "1.0.115", optional = true }
+serde = "1.0.198"
+serde_json = { version = "1.0.116", optional = true }
 serde_yaml = "0.9.34"
 tempfile = { version = "3.10.1", optional = true }
-toml_edit = "0.22.9"
+toml_edit = "0.22.12"
 tracing = { version = "0.1.40", optional = true }
 
 [dev-dependencies]
@@ -43,7 +43,7 @@ lazy_static = "1.4.0"
 pretty_assertions = "1.4.0"
 rand = "0.8.5"
 rstest = "0.19.0"
-serde = "1.0.197"
+serde = "1.0.198"
 zepter = { path = ".", features = ["testing"] }
 
 [features]

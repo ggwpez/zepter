@@ -32,6 +32,27 @@ zepter
   - dependency
     - lift-to-workspace: Lifts crate dependencies to the workspace.
 
+## Example - Using Workspace dependencies
+
+Currently this only works for external dependencies and has some cases where it does not work. However, all the changes
+that it *does* do, should be correct.
+
+You can see this in action for example [here](https://github.com/paritytech/polkadot-sdk/pull/3366) or try it out yourself.
+For example, pulling up all `serde*` crates to the workspace can look like this:
+
+```bash
+zepter transpose dependency lift-to-workspace "regex:^serde.*" --ignore-errors
+```
+
+It will probably print that some versions are not aligned. Zepter has the default behaviour to be cautious to not accidentally
+update some dependencies by pulling them up. To get around this and actually do the changes, you can do:
+
+```bash
+zepter transpose dependency lift-to-workspace "regex:^serde.*" --ignore-errors --fix --version-resolver=highest
+```
+
+This will try to select the "highest" SemVer version of each crate.
+
 ## Example - Feature Formatting
 
 To ensure that your features are in canonical formatting, just run:

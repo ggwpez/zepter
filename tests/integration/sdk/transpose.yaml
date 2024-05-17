@@ -3,7 +3,17 @@ repo:
   ref: 7df1ae3b8111d534cce108b2b405b6a33fcdedc3
 cases:
 - cmd: transpose dependency lift-to-workspace parity-scale-codec
-  stderr: "[WARN] Unstable feature - do not rely on this!\nFailed to lift up 'parity-scale-codec': \nFound 7 different versions of 'parity-scale-codec' in the workspace:\n\n  ^3.6.1: 260 times (frame-support, sp-api, sp-core, …)\n  ^3.0.0:  58 times (pallet-broker, bridge-hub-common, cumulus-primitives-core, …)\n  ^3.1.5:  20 times (bridge-runtime-common, bp-header-chain, bp-runtime, …)\n  ^3.4.0:   6 times (emulated-integration-tests-common, asset-hub-rococo-integration-tests, asset-hub-westend-integration-tests, …)\n  ^3.2.2:   6 times (pallet-asset-conversion-tx-payment, pallet-safe-mode, pallet-tx-pause, …)\n  ^3.6.4:   4 times (cumulus-relay-chain-interface, polkadot-node-core-prospective-parachains, cumulus-relay-chain-rpc-interface, …)\n  ^3.6.5:   1 time  (polkadot-sdk-docs)\n\nHint: cargo upgrade -p parity-scale-codec@3.6.5\n\nError: ()\n"
+  stderr: |
+    [WARN] Unstable feature - do not rely on this!
+    Failed to lift up 'parity-scale-codec': Dependency 'parity-scale-codec' is used 297 times with and 57 times without an alias:
+
+    294 times: codec from bridge-runtime-common, bp-header-chain, bp-runtime, … (291 more)
+     1 time : scale from pallet-contracts-uapi
+     2 times: scale-codec from pallet-sassafras, sp-consensus-sassafras
+    57 times: no alias from cumulus-pallet-session-benchmarking, cumulus-relay-chain-interface, cumulus-relay-chain-rpc-interface, … (54 more)
+
+    This cannot be fixed automatically since it would break your code and configs.
+    Error: ()
   code: 1
 - cmd: transpose dependency lift-to-workspace log
   stderr: "[WARN] Unstable feature - do not rely on this!\nFailed to lift up 'log': \nFound 8 different versions of 'log' in the workspace:\n\n  ^0.4.17: 142 times (frame-support, sp-api, sp-core, …)\n  ^0.4.20:  37 times (bridge-runtime-common, pallet-bridge-grandpa, pallet-bridge-messages, …)\n  ^0.4   :   7 times (sc-utils, binary-merkle-tree, pallet-contracts, …)\n  ^0.4.16:   4 times (sc-network-light, pallet-salary, pallet-ranked-collective, …)\n  ^0.4.14:   4 times (pallet-alliance, pallet-elections-phragmen, pallet-glutton, …)\n  ^0.4.19:   2 times (bp-runtime, parachains-common)\n  ^0.4.0 :   2 times (pallet-nomination-pools, pallet-nomination-pools-test-staking)\n  ^0.4.8 :   1 time  (sc-consensus-grandpa-rpc)\n\nHint: cargo upgrade -p log@0.4.20\n\nError: ()\n"

@@ -13,6 +13,14 @@ use cargo_metadata::{Dependency as Dep, DependencyKind};
 use semver::{Op, Version, VersionReq};
 use std::{collections::BTreeMap as Map, fs::canonicalize};
 
+#[derive(Debug, Clone, PartialEq, clap::ValueEnum)]
+pub enum SourceLocationSelector {
+	/// The dependency is referenced via a `path`.
+	Local,
+	/// Either git or a registry.
+	Remote,
+}
+
 /// Transpose dependencies in the workspace.
 #[derive(Debug, clap::Parser)]
 pub struct TransposeCmd {

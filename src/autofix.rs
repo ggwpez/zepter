@@ -3,7 +3,10 @@
 
 //! Automatically fix problems by modifying `Cargo.toml` files.
 
-use crate::{cmd::fmt::Mode, log};
+use crate::{
+	cmd::{fmt::Mode, transpose::SourceLocationSelector},
+	log,
+};
 use cargo_metadata::{Dependency, DependencyKind};
 use std::{
 	collections::BTreeMap as Map,
@@ -456,11 +459,13 @@ impl AutoFixer {
 		dname: &str,
 		kind: &DependencyKind,
 		default_feats: Option<bool>,
+		location: &SourceLocationSelector,
 	) -> Result<(), String> {
 		let kind = crate::kind_to_str(kind);
 		let doc: &mut DocumentMut = self.doc.as_mut().unwrap();
 
 		if !doc.contains_table(kind) {
+			log::warn!("No '{}' entry found", kind);
 			return Ok(())
 		}
 		let deps: &mut Table = doc[&kind].as_table_mut().unwrap();
@@ -470,12 +475,16 @@ impl AutoFixer {
 		}
 
 		let dep = deps.get_mut(dname).unwrap();
-		Self::lift_some_dependency(dep, default_feats)?;
+		Self::lift_some_dependency(dep, default_feats, location)?;
 
 		Ok(())
 	}
 
-	pub fn lift_some_dependency(dep: &mut Item, default_feats: Option<bool>) -> Result<(), String> {
+	pub fn lift_some_dependency(
+		dep: &mut Item,
+		default_feats: Option<bool>,
+		location: &SourceLocationSelector,
+	) -> Result<(), String> {
 		if let Some(as_str) = dep.as_str() {
 			cargo_metadata::semver::VersionReq::parse(as_str).expect("Is semver");
 			let mut table = InlineTable::new();
@@ -487,14 +496,30 @@ impl AutoFixer {
 				table.remove("default-features");
 			}
 
+			// Workspace dependencies ignore aliases as they need to be set in the workspace.
+			table.remove("package");
 			table.set_dotted(false);
 
 			*dep = Item::Value(Value::InlineTable(table));
 		} else if let Some(as_table) = dep.as_inline_table_mut() {
-			if as_table.contains_key("git") || as_table.contains_key("path") {
-				return Err("'git' or 'path' dependency are currently not supported".into())
+			if as_table.contains_key("git") {
+				return Err("Cannot lift git dependencies".into())
 			}
+
+			match location {
+				SourceLocationSelector::Remote =>
+					if as_table.contains_key("path") {
+						return Err("Lifting dependency would change it from a path dependency to a crates-io dependency".into())
+					},
+				SourceLocationSelector::Local =>
+					if as_table.contains_key("version") {
+						return Err("Lifting dependency would change it from a crates-io dependency to a local dependency".into())
+					},
+			}
+
+			as_table.remove("path");
 			as_table.remove("version");
+			as_table.remove("package");
 
 			as_table.insert("workspace", Value::Boolean(Formatted::new(true)));
 			if let Some(default_feats) = default_feats {
@@ -511,16 +536,26 @@ impl AutoFixer {
 	pub fn add_workspace_dep(
 		&mut self,
 		dep: &Dependency,
+		maybe_rename: Option<&str>,
 		default_feats: bool,
+		local: Option<&str>,
 	) -> Result<(), String> {
-		self.add_workspace_dep_inner(&dep.name, &dep.req.to_string(), default_feats)
+		self.add_workspace_dep_inner(
+			&dep.name,
+			maybe_rename,
+			&dep.req.to_string(),
+			default_feats,
+			local,
+		)
 	}
 
 	pub(crate) fn add_workspace_dep_inner(
 		&mut self,
 		dep_name: &str,
+		maybe_rename: Option<&str>,
 		dep_version: &str,
 		default_feats: bool,
+		local: Option<&str>,
 	) -> Result<(), String> {
 		// The carrot is implicit in cargo.
 		let version_str = dep_version.to_string().trim_start_matches('^').to_string();
@@ -538,7 +573,39 @@ impl AutoFixer {
 		let deps = workspace["dependencies"].as_table_mut().unwrap();
 		let mut t = InlineTable::new();
 
-		if let Some(found) = deps.get(dep_name) {
+		let found_orig = deps.get(dep_name);
+		let found_rename = maybe_rename.and_then(|r| deps.get(r));
+
+		if found_orig.is_some() && found_rename.is_some() {
+			log::warn!(
+				"Dependency '{}' exists twice in the workspace: once as '{}' and once as '{}'. Using the alias.",
+				dep_name,
+				dep_name,
+				maybe_rename.unwrap()
+			);
+		}
+
+		if let Some(rename) = found_rename {
+			if let Some(rename) = rename.as_table_like() {
+				if let Some(pkg) = rename.get("package") {
+					if pkg.as_str().unwrap() != dep_name {
+						return Err(format!(
+							"Dependency '{}' already exists in the workspace with a different alias: '{}' vs '{}'",
+							dep_name,
+							pkg.as_str().unwrap(),
+							dep_name
+						))
+					}
+				} else {
+					return Err(format!(
+						"Dependency '{}' already exists in the workspace, but an existing alias in one of the packages has the same name as an un-aliased workspace dependency. This would silently use a different package than expected.",
+						dep_name
+					))
+				}
+			}
+		}
+
+		if let Some(found) = found_rename.or(found_orig) {
 			if let Some(found) = found.as_inline_table() {
 				if let Some(version) = found.get("version") {
 					if remove_carrot(version.as_str().unwrap()) != version_str {
@@ -548,6 +615,19 @@ impl AutoFixer {
 							version.as_str().unwrap(),
 							dep_version
 						))
+					}
+				}
+
+				if let Some(local) = local {
+					if let Some(path) = found.get("path") {
+						if path.as_str().unwrap() != local {
+							return Err(format!(
+								"Dependency '{}' already exists in the workspace with a different 'path' field: '{}' vs '{}'",
+								dep_name,
+								path.as_str().unwrap(),
+								local
+							))
+						}
 					}
 				}
 
@@ -572,11 +652,32 @@ impl AutoFixer {
 		}
 
 		t.insert("version", Value::String(Formatted::new(version_str)));
+		if let Some(local) = local {
+			t.insert("path", Value::String(Formatted::new(local.into())));
+			// Local deps dont need a version.
+			t.remove("version");
+		}
 		if !default_feats {
 			t.insert("default-features", Value::Boolean(Formatted::new(default_feats)));
 		}
 
-		deps.insert(dep_name, Item::Value(Value::InlineTable(t)));
+		let name = if maybe_rename.is_some() {
+			log::info!(
+				"Renaming workspace dependency '{}' to '{}'",
+				dep_name,
+				maybe_rename.unwrap()
+			);
+			t.insert("package", Value::String(Formatted::new(dep_name.to_string())));
+			maybe_rename.unwrap()
+		} else {
+			dep_name
+		};
+
+		let new_name = maybe_rename.unwrap_or(name);
+		if dep_name != new_name {
+			deps.remove(dep_name);
+		}
+		deps.insert(new_name, Item::Value(Value::InlineTable(t)));
 
 		Ok(())
 	}

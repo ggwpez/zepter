@@ -176,5 +176,5 @@ fn integration() {
 	if failed == 0 && good == 0 {
 		panic!("No tests found");
 	}
-	println!("");
+	println!();
 }

@@ -233,13 +233,11 @@ Environment overwrites exist for the UI tests to:
 - `UI_FILTER`: Regex to selectively run UI test.
 - `KEEP_GOING`: Print `FAILED` but don't abort on the first failed UI test.
 
-## Planned Features
+## Development Principles
 
-- [x] Add feature information to the enabled deps
-- [x] Optimize `shortest_path` function
-- [x] Add support for config files
-- [x] Feature sorting and deduplication
-- [ ] 
+- Compile time is human time. Compile time should *always* be substantially below 1 minute.
+- Minimal external dependencies. Reduces source of errors and compile time.
+- Tests. So far, the tool is used since a year extensively in CI and never got a bug report. It should stay like this.
 
 <!-- LINKS -->
 [Cumulus]: https://github.com/paritytech/cumulus

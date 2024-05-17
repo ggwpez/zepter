@@ -4,16 +4,15 @@
 use crate::{
 	cmd::{
 		check_can_modify,
-		transpose::{AutoFixer, Dep, Op, Version, VersionReq},
+		transpose::{AutoFixer, Dep, Op, SourceLocationSelector, Version, VersionReq},
 		CargoArgs, GlobalArgs,
 	},
 	grammar::{plural, plural_or},
 	log, ErrToStr,
 };
-
 use cargo_metadata::Package;
 use itertools::Itertools;
-use std::collections::{BTreeMap as Map, BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeMap as Map, BTreeSet, HashMap};
 
 /// Lift up a dependency to the workspace and reference it from all packages.
 #[derive(Debug, clap::Parser)]
@@ -57,14 +56,6 @@ pub enum VersionSelectorMode {
 	///
 	/// The highest version number that it found.
 	Highest,
-}
-
-#[derive(Debug, Clone, PartialEq, clap::ValueEnum)]
-pub enum SourceLocationSelector {
-	/// The dependency is referenced via a `path`.
-	Local,
-	/// Either git or a registry.
-	Remote,
 }
 
 impl LiftToWorkspaceCmd {
@@ -163,6 +154,8 @@ impl LiftToWorkspaceCmd {
 		name: &str,
 		fixers: &mut Map<String, (Option<Package>, AutoFixer)>,
 	) -> Result<(), String> {
+		let maybe_rename = self.detect_rename(g, name, meta)?;
+		let source_location = self.detect_source_location(meta, name)?;
 		let by_version = Self::build_version_index(meta, name);
 		let versions = by_version.keys().collect::<Vec<_>>();
 		let best_version = self.find_best_version(g, name, &versions, &by_version)?;
@@ -189,11 +182,24 @@ impl LiftToWorkspaceCmd {
 				(Some(pkg.clone()), AutoFixer::from_manifest(&pkg.manifest_path).unwrap())
 			});
 			let (_, fixer) = fixers.get_mut(&pkg.name).unwrap();
+			// We can safely use the rename here, since we found it with `detect_rename`.
+			let dep_name = dep.rename.as_ref().unwrap_or(&dep.name);
+			if let Some(rename) = &maybe_rename {
+				assert_eq!(rename, dep_name);
+			}
+			let Some(ref location) = source_location else {
+				return Err("Could not determine source location".to_string());
+			};
 
 			if dep.uses_default_features != workspace_default_features_enabled {
-				fixer.lift_dependency(&dep.name, &dep.kind, Some(dep.uses_default_features))?;
+				fixer.lift_dependency(
+					dep_name,
+					&dep.kind,
+					Some(dep.uses_default_features),
+					location,
+				)?;
 			} else {
-				fixer.lift_dependency(&dep.name, &dep.kind, None)?;
+				fixer.lift_dependency(dep_name, &dep.kind, None, location)?;
 			}
 		}
 
@@ -207,7 +213,25 @@ impl LiftToWorkspaceCmd {
 		let mut dep = by_version.values().next().unwrap().first().unwrap().1.clone();
 		dep.req = best_version.parse().unwrap();
 
-		workspace_fixer.add_workspace_dep(&dep, workspace_default_features_enabled)?;
+		let location = if source_location == Some(SourceLocationSelector::Local) {
+			let Some(ref path) = dep.path else {
+				unreachable!("Could not detect local source location for '{}'", name);
+			};
+			let relative = path.strip_prefix(&meta.workspace_root).unwrap_or_else(|_| {
+				log::warn!("Dependency '{}' is not in the workspace root", name);
+				path
+			});
+			Some(relative.to_string())
+		} else {
+			None
+		};
+
+		workspace_fixer.add_workspace_dep(
+			&dep,
+			maybe_rename.as_deref(),
+			workspace_default_features_enabled,
+			location.as_deref(),
+		)?;
 
 		#[cfg(feature = "logging")]
 		{
@@ -240,6 +264,139 @@ impl LiftToWorkspaceCmd {
 			}
 		}
 		by_version
+	}
+
+	fn detect_source_location(
+		&self,
+		meta: &cargo_metadata::Metadata,
+		name: &str,
+	) -> Result<Option<SourceLocationSelector>, String> {
+		let mut local = false;
+		let mut remote = false;
+
+		// TODO check that they all point to the same folder
+
+		for pkg in meta.packages.iter() {
+			for dep in pkg.dependencies.iter() {
+				if dep.name == name {
+					if dep.path.is_some() {
+						local = true;
+					} else {
+						remote = true;
+					}
+				}
+			}
+		}
+
+		if local && remote {
+			Err(format!(
+				"Dependency '{}' is used both locally and remotely. This cannot be fixed automatically.",
+				name
+			))
+		} else if local {
+			Ok(Some(SourceLocationSelector::Local))
+		} else if remote {
+			Ok(Some(SourceLocationSelector::Remote))
+		} else {
+			Ok(None)
+		}
+	}
+
+	fn detect_rename(
+		&self,
+		g: &GlobalArgs,
+		name: &str,
+		meta: &cargo_metadata::Metadata,
+	) -> Result<Option<String>, String> {
+		let mut renames = BTreeMap::<String, Vec<String>>::new();
+		let mut unnrenamed = BTreeSet::<String>::new();
+
+		for pkg in meta.packages.iter() {
+			for dep in pkg.dependencies.iter() {
+				if dep.name == name {
+					if let Some(rename) = &dep.rename {
+						if name == rename {
+							log::warn!(
+								"Dependency '{}' is renamed to itself in '{}'",
+								name,
+								pkg.name
+							);
+							unnrenamed.insert(pkg.name.clone());
+						} else {
+							renames
+								.entry(dep.rename.clone().unwrap())
+								.or_default()
+								.push(pkg.name.clone());
+						}
+					} else {
+						unnrenamed.insert(pkg.name.clone());
+					}
+				}
+			}
+		}
+
+		if !renames.is_empty() && !unnrenamed.is_empty() {
+			let mut err = String::new();
+			for (rename, pkgs) in renames.iter() {
+				let s = plural_or(pkgs.len(), " ");
+				err += &format!(
+					"{: >2} time{s}: {} from {}",
+					pkgs.len(),
+					g.bold(rename),
+					pkgs.iter().take(3).cloned().collect::<Vec<_>>().join(", ")
+				);
+				if pkgs.len() > 3 {
+					err += &format!(", … ({} more)", pkgs.len() - 3);
+				}
+				err += "\n";
+			}
+			let s = plural_or(unnrenamed.len(), " ");
+			err += &format!(
+				"{: >2} time{s}: {} from {}",
+				unnrenamed.len(),
+				g.bold("no alias"),
+				unnrenamed.iter().take(3).cloned().collect::<Vec<_>>().join(", ")
+			);
+			if unnrenamed.len() > 3 {
+				err += &format!(", … ({} more)", unnrenamed.len() - 3);
+			}
+
+			let renames_count = renames.values().map(|pkgs| pkgs.len()).sum::<usize>();
+			Err(format!(
+				"Dependency '{}' is used {} time{} with and {} time{} without an alias:\n\n{err}\n\nThis cannot be fixed automatically since it would break your code and configs.",
+				g.bold(name),
+				renames_count,
+				plural(renames_count),
+				unnrenamed.len(),
+				plural(unnrenamed.len()),
+			))
+		} else if renames.is_empty() {
+			return Ok(None)
+		} else if renames.len() == 1 {
+			Ok(Some(renames.keys().next().unwrap().clone()))
+		} else {
+			let mut err = String::new();
+			for (rename, pkgs) in renames.iter() {
+				let s = plural_or(pkgs.len(), " ");
+				err += &format!(
+					"{: >2} time{s}: {} from {}",
+					pkgs.len(),
+					g.bold(rename),
+					pkgs.iter().take(3).cloned().collect::<Vec<_>>().join(", ")
+				);
+				if pkgs.len() > 3 {
+					err += &format!(", … ({} more)", pkgs.len() - 3);
+				}
+				err += "\n";
+			}
+
+			return Err(format!(
+				"Dependency '{}' is used with {} conflicting aliases:\n\n{}\nThis cannot be fixed automatically since it would break your code and configs.",
+				g.bold(name),
+				renames.len(),
+				err
+			))
+		}
 	}
 
 	fn find_best_version(

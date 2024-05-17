@@ -1,6 +1,6 @@
 [package]
 name = "zepter"
-version = "1.4.1"
+version = "1.5.0"
 edition = "2021"
 authors = [ "Oliver Tale-Yazdi" ]
 description = "Analyze, Fix and Format features in your Rust workspace."
@@ -20,6 +20,7 @@ required-features = [ "benchmarking" ]
 [dependencies]
 anyhow = { version = "1.0.83", optional = true }
 assert_cmd = { version = "2.0.14", optional = true }
+camino = "1.1.7"
 cargo_metadata = "0.18.1"
 clap = { version = "4.5.4", features = ["derive", "cargo"] }
 colour = { version = "2.0.0", optional = true }

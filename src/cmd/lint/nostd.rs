@@ -108,7 +108,7 @@ impl DefaultFeaturesDisabledCmd {
 			Ok(())
 		} else {
 			println!("and fixed none. Re-run with --fix to apply fixes.");
-			Err(format!("Several issues were not fixed."))
+			Err("Several issues were not fixed.".to_string())
 		}
 	}
 

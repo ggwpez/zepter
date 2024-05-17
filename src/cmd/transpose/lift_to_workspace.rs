@@ -193,13 +193,13 @@ impl LiftToWorkspaceCmd {
 
 			if dep.uses_default_features != workspace_default_features_enabled {
 				fixer.lift_dependency(
-					&dep_name,
+					dep_name,
 					&dep.kind,
 					Some(dep.uses_default_features),
 					location,
 				)?;
 			} else {
-				fixer.lift_dependency(&dep_name, &dep.kind, None, location)?;
+				fixer.lift_dependency(dep_name, &dep.kind, None, location)?;
 			}
 		}
 
@@ -361,8 +361,8 @@ impl LiftToWorkspaceCmd {
 				err += &format!(", … ({} more)", unnrenamed.len() - 3);
 			}
 
-			let renames_count = renames.iter().map(|(_, pkgs)| pkgs.len()).sum::<usize>();
-			return Err(format!(
+			let renames_count = renames.values().map(|pkgs| pkgs.len()).sum::<usize>();
+			Err(format!(
 				"Dependency '{}' is used {} time{} with and {} time{} without an alias:\n\n{err}\n\nThis cannot be fixed automatically since it would break your code and configs.",
 				g.bold(name),
 				renames_count,

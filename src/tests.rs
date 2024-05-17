@@ -1304,14 +1304,14 @@ fn inject_workspace_dep_works(
 log = { random = "321", default-features = true, hey = true, git = "123" }
 "#,
 	Some(true),
-	Err("'git' or 'path' dependency are currently not supported")
+	Err("Cannot lift git dependencies")
 )]
 #[case(
 	r#"[dependencies]
 log = { random = "321", default-features = true, hey = true, path = "123" }
 "#,
 	Some(true),
-	Err("'git' or 'path' dependency are currently not supported")
+	Err("Lifting dependency would change it from a path dependency to a crates-io dependency")
 )]
 #[case(
 	r#"[dependencies]
@@ -1366,7 +1366,12 @@ fn lift_to_workspace_works(
 		let table = kind_to_str(&kind);
 		let input = &input.replace("dependencies", table);
 		let mut fixer = AutoFixer::from_raw(input).unwrap();
-		let res = fixer.lift_dependency("log", &kind, default, &crate::cmd::transpose::SourceLocationSelector::Remote);
+		let res = fixer.lift_dependency(
+			"log",
+			&kind,
+			default,
+			&crate::cmd::transpose::SourceLocationSelector::Remote,
+		);
 
 		match output {
 			Ok(modify) => {

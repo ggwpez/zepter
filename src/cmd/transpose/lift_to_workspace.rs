@@ -4,17 +4,15 @@
 use crate::{
 	cmd::{
 		check_can_modify,
-		transpose::{AutoFixer, Dep, Op, Version, VersionReq},
+		transpose::{AutoFixer, Dep, Op, SourceLocationSelector, Version, VersionReq},
 		CargoArgs, GlobalArgs,
 	},
 	grammar::{plural, plural_or},
 	log, ErrToStr,
 };
-use std::collections::BTreeMap;
-use crate::cmd::transpose::SourceLocationSelector;
 use cargo_metadata::Package;
 use itertools::Itertools;
-use std::collections::{BTreeMap as Map, BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeMap as Map, BTreeSet, HashMap};
 
 /// Lift up a dependency to the workspace and reference it from all packages.
 #[derive(Debug, clap::Parser)]
@@ -194,7 +192,12 @@ impl LiftToWorkspaceCmd {
 			};
 
 			if dep.uses_default_features != workspace_default_features_enabled {
-				fixer.lift_dependency(&dep_name, &dep.kind, Some(dep.uses_default_features), location)?;
+				fixer.lift_dependency(
+					&dep_name,
+					&dep.kind,
+					Some(dep.uses_default_features),
+					location,
+				)?;
 			} else {
 				fixer.lift_dependency(&dep_name, &dep.kind, None, location)?;
 			}
@@ -223,7 +226,12 @@ impl LiftToWorkspaceCmd {
 			None
 		};
 
-		workspace_fixer.add_workspace_dep(&dep, maybe_rename.as_deref(), workspace_default_features_enabled, location.as_deref())?;
+		workspace_fixer.add_workspace_dep(
+			&dep,
+			maybe_rename.as_deref(),
+			workspace_default_features_enabled,
+			location.as_deref(),
+		)?;
 
 		#[cfg(feature = "logging")]
 		{
@@ -267,7 +275,7 @@ impl LiftToWorkspaceCmd {
 		let mut remote = false;
 
 		// TODO check that they all point to the same folder
-		
+
 		for pkg in meta.packages.iter() {
 			for dep in pkg.dependencies.iter() {
 				if dep.name == name {
@@ -308,7 +316,11 @@ impl LiftToWorkspaceCmd {
 				if dep.name == name {
 					if let Some(rename) = &dep.rename {
 						if name == rename {
-							log::warn!("Dependency '{}' is renamed to itself in '{}'", name, pkg.name);
+							log::warn!(
+								"Dependency '{}' is renamed to itself in '{}'",
+								name,
+								pkg.name
+							);
 							unnrenamed.insert(pkg.name.clone());
 						} else {
 							renames
@@ -327,14 +339,24 @@ impl LiftToWorkspaceCmd {
 			let mut err = String::new();
 			for (rename, pkgs) in renames.iter() {
 				let s = plural_or(pkgs.len(), " ");
-				err += &format!("{: >2} time{s}: {} from {}", pkgs.len(), g.bold(rename), pkgs.iter().take(3).cloned().collect::<Vec<_>>().join(", "));
+				err += &format!(
+					"{: >2} time{s}: {} from {}",
+					pkgs.len(),
+					g.bold(rename),
+					pkgs.iter().take(3).cloned().collect::<Vec<_>>().join(", ")
+				);
 				if pkgs.len() > 3 {
 					err += &format!(", … ({} more)", pkgs.len() - 3);
 				}
 				err += "\n";
 			}
 			let s = plural_or(unnrenamed.len(), " ");
-			err += &format!("{: >2} time{s}: {} from {}", unnrenamed.len(), g.bold("no alias"), unnrenamed.iter().take(3).cloned().collect::<Vec<_>>().join(", "));
+			err += &format!(
+				"{: >2} time{s}: {} from {}",
+				unnrenamed.len(),
+				g.bold("no alias"),
+				unnrenamed.iter().take(3).cloned().collect::<Vec<_>>().join(", ")
+			);
 			if unnrenamed.len() > 3 {
 				err += &format!(", … ({} more)", unnrenamed.len() - 3);
 			}
@@ -356,7 +378,12 @@ impl LiftToWorkspaceCmd {
 			let mut err = String::new();
 			for (rename, pkgs) in renames.iter() {
 				let s = plural_or(pkgs.len(), " ");
-				err += &format!("{: >2} time{s}: {} from {}", pkgs.len(), g.bold(rename), pkgs.iter().take(3).cloned().collect::<Vec<_>>().join(", "));
+				err += &format!(
+					"{: >2} time{s}: {} from {}",
+					pkgs.len(),
+					g.bold(rename),
+					pkgs.iter().take(3).cloned().collect::<Vec<_>>().join(", ")
+				);
 				if pkgs.len() > 3 {
 					err += &format!(", … ({} more)", pkgs.len() - 3);
 				}

@@ -3,13 +3,15 @@
 
 //! Automatically fix problems by modifying `Cargo.toml` files.
 
-use crate::{cmd::fmt::Mode, log};
+use crate::{
+	cmd::{fmt::Mode, transpose::SourceLocationSelector},
+	log,
+};
 use cargo_metadata::{Dependency, DependencyKind};
 use std::{
 	collections::BTreeMap as Map,
 	path::{Path, PathBuf},
 };
-use crate::cmd::transpose::SourceLocationSelector;
 use toml_edit::{table, value, Array, DocumentMut, Formatted, InlineTable, Item, Table, Value};
 
 #[derive(Debug, clap::Parser)]
@@ -478,7 +480,11 @@ impl AutoFixer {
 		Ok(())
 	}
 
-	pub fn lift_some_dependency(dep: &mut Item, default_feats: Option<bool>, location: &SourceLocationSelector) -> Result<(), String> {
+	pub fn lift_some_dependency(
+		dep: &mut Item,
+		default_feats: Option<bool>,
+		location: &SourceLocationSelector,
+	) -> Result<(), String> {
 		if let Some(as_str) = dep.as_str() {
 			cargo_metadata::semver::VersionReq::parse(as_str).expect("Is semver");
 			let mut table = InlineTable::new();
@@ -501,16 +507,14 @@ impl AutoFixer {
 			}
 
 			match location {
-				SourceLocationSelector::Remote => {
+				SourceLocationSelector::Remote =>
 					if as_table.contains_key("path") {
 						return Err("Lifting dependency would change it from a path dependency to a crates-io dependency".into())
-					}
-				},
-				SourceLocationSelector::Local => {
+					},
+				SourceLocationSelector::Local =>
 					if as_table.contains_key("version") {
 						return Err("Lifting dependency would change it from a crates-io dependency to a local dependency".into())
-					}
-				},
+					},
 			}
 
 			as_table.remove("path");
@@ -536,7 +540,13 @@ impl AutoFixer {
 		default_feats: bool,
 		local: Option<&str>,
 	) -> Result<(), String> {
-		self.add_workspace_dep_inner(&dep.name, maybe_rename, &dep.req.to_string(), default_feats, local)
+		self.add_workspace_dep_inner(
+			&dep.name,
+			maybe_rename,
+			&dep.req.to_string(),
+			default_feats,
+			local,
+		)
 	}
 
 	pub(crate) fn add_workspace_dep_inner(
@@ -646,7 +656,7 @@ impl AutoFixer {
 			t.insert("path", Value::String(Formatted::new(local.into())));
 			// Local deps dont need a version.
 			t.remove("version");
-		}		
+		}
 		if !default_feats {
 			t.insert("default-features", Value::Boolean(Formatted::new(default_feats)));
 		}
@@ -662,7 +672,7 @@ impl AutoFixer {
 		} else {
 			dep_name
 		};
-		
+
 		let new_name = maybe_rename.unwrap_or(name);
 		if dep_name != new_name {
 			deps.remove(dep_name);

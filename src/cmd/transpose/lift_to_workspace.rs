@@ -335,6 +335,7 @@ impl LiftToWorkspaceCmd {
 			}
 		}
 
+		// TODO write formatting function to also sort them
 		if !renames.is_empty() && !unnrenamed.is_empty() {
 			let mut err = String::new();
 			for (rename, pkgs) in renames.iter() {

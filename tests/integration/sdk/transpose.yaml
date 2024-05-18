@@ -8,9 +8,9 @@ cases:
     Failed to lift up 'parity-scale-codec': Dependency 'parity-scale-codec' is used 297 times with and 57 times without an alias:
 
     294 times: codec from bridge-runtime-common, bp-header-chain, bp-runtime, … (291 more)
-     1 time : scale from pallet-contracts-uapi
-     2 times: scale-codec from pallet-sassafras, sp-consensus-sassafras
-    57 times: no alias from cumulus-pallet-session-benchmarking, cumulus-relay-chain-interface, cumulus-relay-chain-rpc-interface, … (54 more)
+      1 time : scale from pallet-contracts-uapi
+      2 times: scale-codec from pallet-sassafras, sp-consensus-sassafras
+     57 times: no alias from cumulus-pallet-session-benchmarking, cumulus-relay-chain-interface, cumulus-relay-chain-rpc-interface, … (54 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     Error: ()

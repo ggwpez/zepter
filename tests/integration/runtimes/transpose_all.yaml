@@ -8,8 +8,8 @@ cases:
     [WARN] Dependency 'kusama-runtime-constants' is renamed to itself in 'staging-kusama-runtime'
     Failed to lift up 'parity-scale-codec': Dependency 'parity-scale-codec' is used 17 times with and 2 times without an alias:
 
-    17 times: codec from asset-hub-kusama-runtime, bp-asset-hub-kusama, bp-asset-hub-polkadot, … (14 more)
-     2 times: no alias from polkadot-runtime, staging-kusama-runtime
+     17 times: codec from asset-hub-kusama-runtime, bp-asset-hub-kusama, bp-asset-hub-polkadot, … (14 more)
+      2 times: no alias from polkadot-runtime, staging-kusama-runtime
 
     This cannot be fixed automatically since it would break your code and configs.
     Error: ()
@@ -20,8 +20,8 @@ cases:
     [WARN] Dependency 'kusama-runtime-constants' is renamed to itself in 'staging-kusama-runtime'
     Failed to lift up 'parity-scale-codec': Dependency 'parity-scale-codec' is used 17 times with and 2 times without an alias:
 
-    17 times: codec from asset-hub-kusama-runtime, bp-asset-hub-kusama, bp-asset-hub-polkadot, … (14 more)
-     2 times: no alias from polkadot-runtime, staging-kusama-runtime
+     17 times: codec from asset-hub-kusama-runtime, bp-asset-hub-kusama, bp-asset-hub-polkadot, … (14 more)
+      2 times: no alias from polkadot-runtime, staging-kusama-runtime
 
     This cannot be fixed automatically since it would break your code and configs.
     Error: ()
@@ -32,81 +32,81 @@ cases:
     [WARN] Dependency 'kusama-runtime-constants' is renamed to itself in 'staging-kusama-runtime'
     [ERROR] Failed to lift up 'parity-scale-codec': Dependency 'parity-scale-codec' is used 17 times with and 2 times without an alias:
 
-    17 times: codec from asset-hub-kusama-runtime, bp-asset-hub-kusama, bp-asset-hub-polkadot, … (14 more)
-     2 times: no alias from polkadot-runtime, staging-kusama-runtime
+     17 times: codec from asset-hub-kusama-runtime, bp-asset-hub-kusama, bp-asset-hub-polkadot, … (14 more)
+      2 times: no alias from polkadot-runtime, staging-kusama-runtime
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'polkadot-primitives': Dependency 'polkadot-primitives' is used 4 times with and 5 times without an alias:
 
-     4 times: primitives from kusama-runtime-constants, polkadot-runtime-constants, staging-kusama-runtime, … (1 more)
-     5 times: no alias from chain-spec-generator, encointer-kusama-runtime, kusama-emulated-chain, … (2 more)
+      4 times: primitives from kusama-runtime-constants, polkadot-runtime-constants, staging-kusama-runtime, … (1 more)
+      5 times: no alias from chain-spec-generator, encointer-kusama-runtime, kusama-emulated-chain, … (2 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'polkadot-runtime-common': Dependency 'polkadot-runtime-common' is used 5 times with and 11 times without an alias:
 
-     5 times: runtime-common from kusama-runtime-constants, polkadot-runtime-constants, staging-kusama-runtime, … (2 more)
-    11 times: no alias from asset-hub-kusama-runtime, asset-hub-polkadot-integration-tests, asset-hub-polkadot-runtime, … (8 more)
+      5 times: runtime-common from kusama-runtime-constants, polkadot-runtime-constants, staging-kusama-runtime, … (2 more)
+     11 times: no alias from asset-hub-kusama-runtime, asset-hub-polkadot-integration-tests, asset-hub-polkadot-runtime, … (8 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [WARN] Dependency 'polkadot-runtime-constants' is renamed to itself in 'polkadot-runtime'
     [ERROR] Failed to lift up 'polkadot-runtime-parachains': Dependency 'polkadot-runtime-parachains' is used 2 times with and 1 time without an alias:
 
-     2 times: runtime-parachains from staging-kusama-runtime, polkadot-runtime
-     1 time : no alias from chain-spec-generator
+      2 times: runtime-parachains from staging-kusama-runtime, polkadot-runtime
+      1 time : no alias from chain-spec-generator
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sc-consensus-grandpa': Dependency 'sc-consensus-grandpa' is used 2 times with and 1 time without an alias:
 
-     2 times: grandpa from kusama-emulated-chain, polkadot-emulated-chain
-     1 time : no alias from chain-spec-generator
+      2 times: grandpa from kusama-emulated-chain, polkadot-emulated-chain
+      1 time : no alias from chain-spec-generator
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sp-authority-discovery': Dependency 'sp-authority-discovery' is used 4 times with and 1 time without an alias:
 
-     4 times: authority-discovery-primitives from staging-kusama-runtime, polkadot-runtime, kusama-emulated-chain, … (1 more)
-     1 time : no alias from chain-spec-generator
+      4 times: authority-discovery-primitives from staging-kusama-runtime, polkadot-runtime, kusama-emulated-chain, … (1 more)
+      1 time : no alias from chain-spec-generator
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sp-block-builder': Dependency 'sp-block-builder' is used 2 times with and 9 times without an alias:
 
-     2 times: block-builder-api from staging-kusama-runtime, polkadot-runtime
-     9 times: no alias from asset-hub-kusama-runtime, asset-hub-polkadot-runtime, bridge-hub-kusama-runtime, … (6 more)
+      2 times: block-builder-api from staging-kusama-runtime, polkadot-runtime
+      9 times: no alias from asset-hub-kusama-runtime, asset-hub-polkadot-runtime, bridge-hub-kusama-runtime, … (6 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sp-consensus-babe': Dependency 'sp-consensus-babe' is used 4 times with and 1 time without an alias:
 
-     4 times: babe-primitives from staging-kusama-runtime, polkadot-runtime, kusama-emulated-chain, … (1 more)
-     1 time : no alias from chain-spec-generator
+      4 times: babe-primitives from staging-kusama-runtime, polkadot-runtime, kusama-emulated-chain, … (1 more)
+      1 time : no alias from chain-spec-generator
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sp-consensus-beefy': Dependency 'sp-consensus-beefy' is used 4 times with and 1 time without an alias:
 
-     4 times: beefy-primitives from staging-kusama-runtime, polkadot-runtime, kusama-emulated-chain, … (1 more)
-     1 time : no alias from chain-spec-generator
+      4 times: beefy-primitives from staging-kusama-runtime, polkadot-runtime, kusama-emulated-chain, … (1 more)
+      1 time : no alias from chain-spec-generator
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sp-inherents': Dependency 'sp-inherents' is used 2 times with and 9 times without an alias:
 
-     2 times: inherents from staging-kusama-runtime, polkadot-runtime
-     9 times: no alias from asset-hub-kusama-runtime, asset-hub-polkadot-runtime, bridge-hub-kusama-runtime, … (6 more)
+      2 times: inherents from staging-kusama-runtime, polkadot-runtime
+      9 times: no alias from asset-hub-kusama-runtime, asset-hub-polkadot-runtime, bridge-hub-kusama-runtime, … (6 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sp-keyring': Dependency 'sp-keyring' is used 2 times with and 2 times without an alias:
 
-     2 times: keyring from staging-kusama-runtime, polkadot-runtime
-     2 times: no alias from bridge-hub-kusama-runtime, bridge-hub-polkadot-runtime
+      2 times: keyring from staging-kusama-runtime, polkadot-runtime
+      2 times: no alias from bridge-hub-kusama-runtime, bridge-hub-polkadot-runtime
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sp-offchain': Dependency 'sp-offchain' is used 2 times with and 9 times without an alias:
 
-     2 times: offchain-primitives from staging-kusama-runtime, polkadot-runtime
-     9 times: no alias from asset-hub-kusama-runtime, asset-hub-polkadot-runtime, bridge-hub-kusama-runtime, … (6 more)
+      2 times: offchain-primitives from staging-kusama-runtime, polkadot-runtime
+      9 times: no alias from asset-hub-kusama-runtime, asset-hub-polkadot-runtime, bridge-hub-kusama-runtime, … (6 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sp-transaction-pool': Dependency 'sp-transaction-pool' is used 2 times with and 9 times without an alias:
 
-     2 times: tx-pool-api from staging-kusama-runtime, polkadot-runtime
-     9 times: no alias from asset-hub-kusama-runtime, asset-hub-polkadot-runtime, bridge-hub-kusama-runtime, … (6 more)
+      2 times: tx-pool-api from staging-kusama-runtime, polkadot-runtime
+      9 times: no alias from asset-hub-kusama-runtime, asset-hub-polkadot-runtime, bridge-hub-kusama-runtime, … (6 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'staging-xcm-executor': Dependency 'staging-xcm-executor' already exists in the workspace with a different 'version' field: '8.0.2' vs '^8.0.1'

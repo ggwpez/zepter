@@ -8,19 +8,19 @@ cases:
     [ERROR] Failed to lift up 'bandersnatch_vrfs': Cannot lift git dependencies
     [ERROR] Failed to lift up 'finality-grandpa': Dependency 'finality-grandpa' is used 2 times with and 5 times without an alias:
 
-     2 times: grandpa from sp-consensus-grandpa, pallet-grandpa
-     5 times: no alias from bp-header-chain, bp-test-utils, pallet-bridge-grandpa, … (2 more)
+      2 times: grandpa from sp-consensus-grandpa, pallet-grandpa
+      5 times: no alias from bp-header-chain, bp-test-utils, pallet-bridge-grandpa, … (2 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'frame-support': Dependency 'frame-support' is used 1 time with and 222 times without an alias:
 
-     1 time : renamed-frame-support from frame-support-test-compile-pass
+      1 time : renamed-frame-support from frame-support-test-compile-pass
     222 times: no alias from asset-hub-rococo-emulated-chain, asset-hub-rococo-integration-tests, asset-hub-rococo-runtime, … (219 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'frame-system': Dependency 'frame-system' is used 1 time with and 185 times without an alias:
 
-     1 time : renamed-frame-system from frame-support-test-compile-pass
+      1 time : renamed-frame-system from frame-support-test-compile-pass
     185 times: no alias from asset-hub-rococo-runtime, asset-hub-westend-runtime, asset-test-utils, … (182 more)
 
     This cannot be fixed automatically since it would break your code and configs.
@@ -29,210 +29,210 @@ cases:
     [ERROR] Failed to lift up 'parity-scale-codec': Dependency 'parity-scale-codec' is used 298 times with and 57 times without an alias:
 
     295 times: codec from bridge-runtime-common, bp-header-chain, bp-runtime, … (292 more)
-     1 time : scale from pallet-contracts-uapi
-     2 times: scale-codec from pallet-sassafras, sp-consensus-sassafras
-    57 times: no alias from cumulus-pallet-session-benchmarking, cumulus-relay-chain-interface, cumulus-relay-chain-rpc-interface, … (54 more)
+      1 time : scale from pallet-contracts-uapi
+      2 times: scale-codec from pallet-sassafras, sp-consensus-sassafras
+     57 times: no alias from cumulus-pallet-session-benchmarking, cumulus-relay-chain-interface, cumulus-relay-chain-rpc-interface, … (54 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [WARN] Dependency 'polkadot-erasure-coding' is renamed to itself in 'polkadot-subsystem-bench'
     [ERROR] Failed to lift up 'polkadot-erasure-coding': Dependency 'polkadot-erasure-coding' is used 3 times with and 8 times without an alias:
 
-     2 times: erasure from polkadot-node-core-av-store, polkadot-test-malus
-     1 time : erasure-coding from polkadot-node-core-backing
-     8 times: no alias from erasure_coding_fuzzer, polkadot-availability-distribution, polkadot-availability-recovery, … (5 more)
+      2 times: erasure from polkadot-node-core-av-store, polkadot-test-malus
+      1 time : erasure-coding from polkadot-node-core-backing
+      8 times: no alias from erasure_coding_fuzzer, polkadot-availability-distribution, polkadot-availability-recovery, … (5 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [WARN] Dependency 'polkadot-node-primitives' is renamed to itself in 'polkadot-erasure-coding'
     [ERROR] Failed to lift up 'polkadot-node-primitives': Dependency 'polkadot-node-primitives' is used 1 time with and 37 times without an alias:
 
-     1 time : primitives from erasure_coding_fuzzer
-    37 times: no alias from cumulus-client-collator, cumulus-client-consensus-aura, cumulus-client-network, … (34 more)
+      1 time : primitives from erasure_coding_fuzzer
+     37 times: no alias from cumulus-client-collator, cumulus-client-consensus-aura, cumulus-client-network, … (34 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'polkadot-node-subsystem-test-helpers': Dependency 'polkadot-node-subsystem-test-helpers' is used 1 time with and 27 times without an alias:
 
-     1 time : node-test-helpers from polkadot-overseer
-    27 times: no alias from cumulus-client-collator, polkadot-approval-distribution, polkadot-availability-bitfield-distribution, … (24 more)
+      1 time : node-test-helpers from polkadot-overseer
+     27 times: no alias from cumulus-client-collator, polkadot-approval-distribution, polkadot-availability-bitfield-distribution, … (24 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'polkadot-parachain-primitives': Dependency 'polkadot-parachain-primitives' is used 2 times with and 41 times without an alias:
 
-     2 times: parachain from test-parachain-adder, test-parachain-undying
-    41 times: no alias from asset-hub-rococo-runtime, asset-hub-westend-runtime, bridge-hub-rococo-runtime, … (38 more)
+      2 times: parachain from test-parachain-adder, test-parachain-undying
+     41 times: no alias from asset-hub-rococo-runtime, asset-hub-westend-runtime, bridge-hub-rococo-runtime, … (38 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'polkadot-primitives': Dependency 'polkadot-primitives' is used 12 times with and 72 times without an alias:
 
-    12 times: primitives from staging-xcm-builder, polkadot-runtime-parachains, polkadot-runtime-metrics, … (9 more)
-    72 times: no alias from bp-bridge-hub-cumulus, cumulus-client-collator, cumulus-client-consensus-aura, … (69 more)
+     12 times: primitives from staging-xcm-builder, polkadot-runtime-parachains, polkadot-runtime-metrics, … (9 more)
+     72 times: no alias from bp-bridge-hub-cumulus, cumulus-client-collator, cumulus-client-consensus-aura, … (69 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'polkadot-primitives-test-helpers': Dependency 'polkadot-primitives-test-helpers' is used 14 times with and 10 times without an alias:
 
-    14 times: test-helpers from polkadot-runtime-parachains, polkadot-runtime-common, polkadot-overseer, … (11 more)
-    10 times: no alias from polkadot-approval-distribution, polkadot-availability-distribution, polkadot-availability-recovery, … (7 more)
+     14 times: test-helpers from polkadot-runtime-parachains, polkadot-runtime-common, polkadot-overseer, … (11 more)
+     10 times: no alias from polkadot-approval-distribution, polkadot-availability-distribution, polkadot-availability-recovery, … (7 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'polkadot-runtime-common': Dependency 'polkadot-runtime-common' is used 6 times with and 21 times without an alias:
 
-     6 times: runtime-common from polkadot-test-runtime, test-runtime-constants, rococo-runtime, … (3 more)
-    21 times: no alias from asset-hub-rococo-runtime, asset-hub-westend-integration-tests, asset-hub-westend-runtime, … (18 more)
+      6 times: runtime-common from polkadot-test-runtime, test-runtime-constants, rococo-runtime, … (3 more)
+     21 times: no alias from asset-hub-rococo-runtime, asset-hub-westend-integration-tests, asset-hub-westend-runtime, … (18 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'polkadot-runtime-parachains': Dependency 'polkadot-runtime-parachains' is used 3 times with and 14 times without an alias:
 
-     3 times: runtime-parachains from polkadot-runtime-common, rococo-runtime, westend-runtime
-    14 times: no alias from cumulus-pallet-parachain-system, cumulus-pallet-xcmp-queue, cumulus-primitives-utility, … (11 more)
+      3 times: runtime-parachains from polkadot-runtime-common, rococo-runtime, westend-runtime
+     14 times: no alias from cumulus-pallet-parachain-system, cumulus-pallet-xcmp-queue, cumulus-primitives-utility, … (11 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'polkadot-service': Dependency 'polkadot-service' is used 1 time with and 6 times without an alias:
 
-     1 time : service from polkadot-cli
-     6 times: no alias from cumulus-relay-chain-inprocess-interface, cumulus-test-service, polkadot-parachain-bin, … (3 more)
+      1 time : service from polkadot-cli
+      6 times: no alias from cumulus-relay-chain-inprocess-interface, cumulus-test-service, polkadot-parachain-bin, … (3 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'polkadot-statement-table': Dependency 'polkadot-statement-table' is used 1 time with and 1 time without an alias:
 
-     1 time : statement-table from polkadot-node-core-backing
-     1 time : no alias from polkadot-node-subsystem-types
+      1 time : statement-table from polkadot-node-core-backing
+      1 time : no alias from polkadot-node-subsystem-types
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'polkavm-derive': Dependency 'polkavm-derive' already exists in the workspace but could not validate its compatibility
     [ERROR] Failed to lift up 'polkavm-linker': Dependency 'polkavm-linker' already exists in the workspace but could not validate its compatibility
     [ERROR] Failed to lift up 'pyroscope': Dependency 'pyroscope' is used 1 time with and 1 time without an alias:
 
-     1 time : pyro from polkadot-cli
-     1 time : no alias from polkadot-subsystem-bench
+      1 time : pyro from polkadot-cli
+      1 time : no alias from polkadot-subsystem-bench
 
     This cannot be fixed automatically since it would break your code and configs.
     [WARN] Dependency 'rococo-runtime-constants' is renamed to itself in 'rococo-runtime'
     [ERROR] Failed to lift up 'rustc-hex': Dependency 'rustc-hex' is used 2 times with and 4 times without an alias:
 
-     2 times: hex from snowbridge-ethereum, snowbridge-router-primitives
-     4 times: no alias from polkadot-runtime-common, polkadot-runtime-parachains, polkadot-test-runtime, … (1 more)
+      2 times: hex from snowbridge-ethereum, snowbridge-router-primitives
+      4 times: no alias from polkadot-runtime-common, polkadot-runtime-parachains, polkadot-test-runtime, … (1 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sc-client-api': Dependency 'sc-client-api' is used 1 time with and 66 times without an alias:
 
-     1 time : client from polkadot-overseer
-    66 times: no alias from cumulus-client-cli, cumulus-client-collator, cumulus-client-consensus-aura, … (63 more)
+      1 time : client from polkadot-overseer
+     66 times: no alias from cumulus-client-cli, cumulus-client-collator, cumulus-client-consensus-aura, … (63 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sc-consensus-babe': Dependency 'sc-consensus-babe' is used 2 times with and 10 times without an alias:
 
-     2 times: babe from polkadot-test-service, polkadot-service
-    10 times: no alias from cumulus-client-consensus-aura, cumulus-client-consensus-common, node-rpc, … (7 more)
+      2 times: babe from polkadot-test-service, polkadot-service
+     10 times: no alias from cumulus-client-consensus-aura, cumulus-client-consensus-common, node-rpc, … (7 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sc-consensus-beefy': Dependency 'sc-consensus-beefy' is used 2 times with and 4 times without an alias:
 
-     2 times: beefy from polkadot-service, staging-node-cli
-     4 times: no alias from node-rpc, polkadot-rpc, polkadot-sdk-docs, … (1 more)
+      2 times: beefy from polkadot-service, staging-node-cli
+      4 times: no alias from node-rpc, polkadot-rpc, polkadot-sdk-docs, … (1 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sc-consensus-grandpa': Dependency 'sc-consensus-grandpa' is used 6 times with and 6 times without an alias:
 
-     6 times: grandpa from polkadot-test-service, polkadot-service, staging-node-cli, … (3 more)
-     6 times: no alias from node-rpc, node-template, polkadot-rpc, … (3 more)
+      6 times: grandpa from polkadot-test-service, polkadot-service, staging-node-cli, … (3 more)
+      6 times: no alias from node-rpc, node-template, polkadot-rpc, … (3 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sc-service': Dependency 'sc-service' is used 1 time with and 29 times without an alias:
 
-     1 time : service from polkadot-service
-    29 times: no alias from cumulus-client-cli, cumulus-client-service, cumulus-relay-chain-minimal-node, … (26 more)
+      1 time : service from polkadot-service
+     29 times: no alias from cumulus-client-cli, cumulus-client-service, cumulus-relay-chain-minimal-node, … (26 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sc-telemetry': Dependency 'sc-telemetry' is used 1 time with and 18 times without an alias:
 
-     1 time : telemetry from polkadot-service
-    18 times: no alias from cumulus-client-consensus-aura, cumulus-client-service, cumulus-relay-chain-inprocess-interface, … (15 more)
+      1 time : telemetry from polkadot-service
+     18 times: no alias from cumulus-client-consensus-aura, cumulus-client-service, cumulus-relay-chain-inprocess-interface, … (15 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sc-transaction-pool-api': Dependency 'sc-transaction-pool-api' is used 1 time with and 26 times without an alias:
 
-     1 time : txpool-api from polkadot-rpc
-    26 times: no alias from cumulus-test-service, minimal-node, node-bench, … (23 more)
+      1 time : txpool-api from polkadot-rpc
+     26 times: no alias from cumulus-test-service, minimal-node, node-bench, … (23 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'snowbridge-beacon-primitives': Dependency 'snowbridge-beacon-primitives' is used 1 time with and 6 times without an alias:
 
-     1 time : primitives from snowbridge-pallet-ethereum-client
-     6 times: no alias from bridge-hub-rococo-runtime, snowbridge-core, snowbridge-pallet-ethereum-client-fixtures, … (3 more)
+      1 time : primitives from snowbridge-pallet-ethereum-client
+      6 times: no alias from bridge-hub-rococo-runtime, snowbridge-core, snowbridge-pallet-ethereum-client-fixtures, … (3 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [WARN] Dependency 'sp-application-crypto' is renamed to itself in 'polkadot-primitives-test-helpers'
     [ERROR] Failed to lift up 'sp-application-crypto': Dependency 'sp-application-crypto' is used 1 time with and 49 times without an alias:
 
-     1 time : application-crypto from polkadot-primitives
-    49 times: no alias from bp-test-utils, cumulus-client-consensus-aura, cumulus-pallet-aura-ext, … (46 more)
+      1 time : application-crypto from polkadot-primitives
+     49 times: no alias from bp-test-utils, cumulus-client-consensus-aura, cumulus-pallet-aura-ext, … (46 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sp-authority-discovery': Dependency 'sp-authority-discovery' is used 3 times with and 17 times without an alias:
 
-     3 times: authority-discovery-primitives from polkadot-test-runtime, rococo-runtime, westend-runtime
-    17 times: no alias from cumulus-relay-chain-rpc-interface, cumulus-test-service, emulated-integration-tests-common, … (14 more)
+      3 times: authority-discovery-primitives from polkadot-test-runtime, rococo-runtime, westend-runtime
+     17 times: no alias from cumulus-relay-chain-rpc-interface, cumulus-test-service, emulated-integration-tests-common, … (14 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sp-block-builder': Dependency 'sp-block-builder' is used 3 times with and 37 times without an alias:
 
-     3 times: block-builder-api from polkadot-test-runtime, rococo-runtime, westend-runtime
-    37 times: no alias from asset-hub-rococo-runtime, asset-hub-westend-runtime, bridge-hub-rococo-runtime, … (34 more)
+      3 times: block-builder-api from polkadot-test-runtime, rococo-runtime, westend-runtime
+     37 times: no alias from asset-hub-rococo-runtime, asset-hub-westend-runtime, bridge-hub-rococo-runtime, … (34 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sp-consensus': Dependency 'sp-consensus' is used 2 times with and 52 times without an alias:
 
-     2 times: consensus_common from polkadot-test-service, polkadot-service
-    52 times: no alias from cumulus-client-collator, cumulus-client-consensus-aura, cumulus-client-consensus-common, … (49 more)
+      2 times: consensus_common from polkadot-test-service, polkadot-service
+     52 times: no alias from cumulus-client-collator, cumulus-client-consensus-aura, cumulus-client-consensus-common, … (49 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sp-consensus-babe': Dependency 'sp-consensus-babe' is used 4 times with and 24 times without an alias:
 
-     4 times: babe-primitives from polkadot-test-runtime, polkadot-test-service, rococo-runtime, … (1 more)
-    24 times: no alias from cumulus-relay-chain-minimal-node, cumulus-relay-chain-rpc-interface, emulated-integration-tests-common, … (21 more)
+      4 times: babe-primitives from polkadot-test-runtime, polkadot-test-service, rococo-runtime, … (1 more)
+     24 times: no alias from cumulus-relay-chain-minimal-node, cumulus-relay-chain-rpc-interface, emulated-integration-tests-common, … (21 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sp-consensus-beefy': Dependency 'sp-consensus-beefy' is used 8 times with and 6 times without an alias:
 
-     8 times: beefy-primitives from polkadot-test-runtime, polkadot-service, rococo-runtime, … (5 more)
-     6 times: no alias from kitchensink-runtime, mmr-gadget, pallet-beefy, … (3 more)
+      8 times: beefy-primitives from polkadot-test-runtime, polkadot-service, rococo-runtime, … (5 more)
+      6 times: no alias from kitchensink-runtime, mmr-gadget, pallet-beefy, … (3 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sp-consensus-grandpa': Dependency 'sp-consensus-grandpa' is used 3 times with and 15 times without an alias:
 
-     1 time : grandpa-primitives from staging-node-cli
-     2 times: grandpa_primitives from polkadot-test-service, polkadot-service
-    15 times: no alias from bp-header-chain, bp-test-utils, cumulus-test-service, … (12 more)
+      1 time : grandpa-primitives from staging-node-cli
+      2 times: grandpa_primitives from polkadot-test-service, polkadot-service
+     15 times: no alias from bp-header-chain, bp-test-utils, cumulus-test-service, … (12 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sp-core': Dependency 'sp-core' is used 1 time with and 324 times without an alias:
 
-     1 time : primitives from polkadot-primitives
+      1 time : primitives from polkadot-primitives
     324 times: no alias from asset-hub-rococo-emulated-chain, asset-hub-rococo-runtime, asset-hub-westend-emulated-chain, … (321 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sp-inherents': Dependency 'sp-inherents' is used 7 times with and 57 times without an alias:
 
-     7 times: inherents from polkadot-runtime-parachains, polkadot-primitives, polkadot-test-runtime, … (4 more)
-    57 times: no alias from asset-hub-rococo-runtime, asset-hub-westend-runtime, bridge-hub-rococo-runtime, … (54 more)
+      7 times: inherents from polkadot-runtime-parachains, polkadot-primitives, polkadot-test-runtime, … (4 more)
+     57 times: no alias from asset-hub-rococo-runtime, asset-hub-westend-runtime, bridge-hub-rococo-runtime, … (54 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sp-keyring': Dependency 'sp-keyring' is used 4 times with and 59 times without an alias:
 
-     4 times: keyring from polkadot-runtime-parachains, polkadot-test-runtime, rococo-runtime, … (1 more)
-    59 times: no alias from bridge-hub-rococo-runtime, bridge-hub-test-utils, bridge-hub-westend-runtime, … (56 more)
+      4 times: keyring from polkadot-runtime-parachains, polkadot-test-runtime, rococo-runtime, … (1 more)
+     59 times: no alias from bridge-hub-rococo-runtime, bridge-hub-test-utils, bridge-hub-westend-runtime, … (56 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [WARN] Dependency 'sp-maybe-compressed-blob' is renamed to itself in 'polkadot-node-core-candidate-validation'
     [WARN] Dependency 'sp-offchain' is renamed to itself in 'polkadot-service'
     [ERROR] Failed to lift up 'sp-offchain': Dependency 'sp-offchain' is used 3 times with and 26 times without an alias:
 
-     3 times: offchain-primitives from polkadot-test-runtime, rococo-runtime, westend-runtime
-    26 times: no alias from asset-hub-rococo-runtime, asset-hub-westend-runtime, bridge-hub-rococo-runtime, … (23 more)
+      3 times: offchain-primitives from polkadot-test-runtime, rococo-runtime, westend-runtime
+     26 times: no alias from asset-hub-rococo-runtime, asset-hub-westend-runtime, bridge-hub-rococo-runtime, … (23 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'sp-runtime': Dependency 'sp-runtime' is used 1 time with and 334 times without an alias:
 
-     1 time : runtime_primitives from polkadot-primitives
+      1 time : runtime_primitives from polkadot-primitives
     334 times: no alias from asset-hub-rococo-integration-tests, asset-hub-rococo-runtime, asset-hub-westend-integration-tests, … (331 more)
 
     This cannot be fixed automatically since it would break your code and configs.
@@ -245,28 +245,28 @@ cases:
     [WARN] Dependency 'sp-std' is renamed to itself in 'westend-runtime'
     [ERROR] Failed to lift up 'sp-transaction-pool': Dependency 'sp-transaction-pool' is used 3 times with and 27 times without an alias:
 
-     3 times: tx-pool-api from polkadot-test-runtime, rococo-runtime, westend-runtime
-    27 times: no alias from asset-hub-rococo-runtime, asset-hub-westend-runtime, bridge-hub-rococo-runtime, … (24 more)
+      3 times: tx-pool-api from polkadot-test-runtime, rococo-runtime, westend-runtime
+     27 times: no alias from asset-hub-rococo-runtime, asset-hub-westend-runtime, bridge-hub-rococo-runtime, … (24 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'substrate-frame-rpc-system': Dependency 'substrate-frame-rpc-system' is used 2 times with and 4 times without an alias:
 
-     2 times: frame-rpc-system from polkadot-rpc, polkadot-parachain-bin
-     4 times: no alias from minimal-node, node-rpc, node-template, … (1 more)
+      2 times: frame-rpc-system from polkadot-rpc, polkadot-parachain-bin
+      4 times: no alias from minimal-node, node-rpc, node-template, … (1 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'substrate-prometheus-endpoint': Dependency 'substrate-prometheus-endpoint' is used 22 times with and 8 times without an alias:
 
-     1 time : prometheus from sc-consensus-beefy
-    20 times: prometheus-endpoint from sc-client-api, sc-service, sc-network, … (17 more)
-     1 time : prometheus_endpoint from polkadot-subsystem-bench
-     8 times: no alias from cumulus-client-consensus-aura, cumulus-client-consensus-common, cumulus-client-consensus-relay-chain, … (5 more)
+      1 time : prometheus from sc-consensus-beefy
+     20 times: prometheus-endpoint from sc-client-api, sc-service, sc-network, … (17 more)
+      1 time : prometheus_endpoint from polkadot-subsystem-bench
+      8 times: no alias from cumulus-client-consensus-aura, cumulus-client-consensus-common, cumulus-client-consensus-relay-chain, … (5 more)
 
     This cannot be fixed automatically since it would break your code and configs.
     [ERROR] Failed to lift up 'test-parachain-adder': Dependency 'test-parachain-adder' is used 2 times with and 1 time without an alias:
 
-     2 times: adder from polkadot-node-core-pvf, test-parachains
-     1 time : no alias from test-parachain-adder-collator
+      2 times: adder from polkadot-node-core-pvf, test-parachains
+      1 time : no alias from test-parachain-adder-collator
 
     This cannot be fixed automatically since it would break your code and configs.
     [WARN] Dependency 'test-runtime-constants' is renamed to itself in 'polkadot-test-runtime'

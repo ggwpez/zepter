@@ -340,7 +340,7 @@ impl LiftToWorkspaceCmd {
 			for (rename, pkgs) in renames.iter() {
 				let s = plural_or(pkgs.len(), " ");
 				err += &format!(
-					"{: >2} time{s}: {} from {}",
+					"{: >3} time{s}: {} from {}",
 					pkgs.len(),
 					g.bold(rename),
 					pkgs.iter().take(3).cloned().collect::<Vec<_>>().join(", ")
@@ -352,7 +352,7 @@ impl LiftToWorkspaceCmd {
 			}
 			let s = plural_or(unnrenamed.len(), " ");
 			err += &format!(
-				"{: >2} time{s}: {} from {}",
+				"{: >3} time{s}: {} from {}",
 				unnrenamed.len(),
 				g.bold("no alias"),
 				unnrenamed.iter().take(3).cloned().collect::<Vec<_>>().join(", ")
@@ -379,7 +379,7 @@ impl LiftToWorkspaceCmd {
 			for (rename, pkgs) in renames.iter() {
 				let s = plural_or(pkgs.len(), " ");
 				err += &format!(
-					"{: >2} time{s}: {} from {}",
+					"{: >3} time{s}: {} from {}",
 					pkgs.len(),
 					g.bold(rename),
 					pkgs.iter().take(3).cloned().collect::<Vec<_>>().join(", ")

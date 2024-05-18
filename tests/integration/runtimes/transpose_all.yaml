@@ -1,0 +1,791 @@
+repo:
+  name: polkadot-fellows/runtimes
+  ref: c08d8caf4f89c47a80779c903e54176bbe339d30
+cases:
+- cmd: transpose dependency lift-to-workspace regex:.*
+  stderr: |
+    [WARN] Unstable feature - do not rely on this!
+    [WARN] Dependency 'kusama-runtime-constants' is renamed to itself in 'staging-kusama-runtime'
+    Failed to lift up 'parity-scale-codec': Dependency 'parity-scale-codec' is used 17 times with and 2 times without an alias:
+
+    17 times: codec from asset-hub-kusama-runtime, bp-asset-hub-kusama, bp-asset-hub-polkadot, … (14 more)
+     2 times: no alias from polkadot-runtime, staging-kusama-runtime
+
+    This cannot be fixed automatically since it would break your code and configs.
+    Error: ()
+  code: 1
+- cmd: transpose dependency lift-to-workspace regex:.* --fix
+  stderr: |
+    [WARN] Unstable feature - do not rely on this!
+    [WARN] Dependency 'kusama-runtime-constants' is renamed to itself in 'staging-kusama-runtime'
+    Failed to lift up 'parity-scale-codec': Dependency 'parity-scale-codec' is used 17 times with and 2 times without an alias:
+
+    17 times: codec from asset-hub-kusama-runtime, bp-asset-hub-kusama, bp-asset-hub-polkadot, … (14 more)
+     2 times: no alias from polkadot-runtime, staging-kusama-runtime
+
+    This cannot be fixed automatically since it would break your code and configs.
+    Error: ()
+  code: 1
+- cmd: transpose dependency lift-to-workspace regex:.* --ignore-errors --fix
+  stderr: |
+    [WARN] Unstable feature - do not rely on this!
+    [WARN] Dependency 'kusama-runtime-constants' is renamed to itself in 'staging-kusama-runtime'
+    [ERROR] Failed to lift up 'parity-scale-codec': Dependency 'parity-scale-codec' is used 17 times with and 2 times without an alias:
+
+    17 times: codec from asset-hub-kusama-runtime, bp-asset-hub-kusama, bp-asset-hub-polkadot, … (14 more)
+     2 times: no alias from polkadot-runtime, staging-kusama-runtime
+
+    This cannot be fixed automatically since it would break your code and configs.
+    [ERROR] Failed to lift up 'polkadot-primitives': Dependency 'polkadot-primitives' is used 4 times with and 5 times without an alias:
+
+     4 times: primitives from kusama-runtime-constants, polkadot-runtime-constants, staging-kusama-runtime, … (1 more)
+     5 times: no alias from chain-spec-generator, encointer-kusama-runtime, kusama-emulated-chain, … (2 more)
+
+    This cannot be fixed automatically since it would break your code and configs.
+    [ERROR] Failed to lift up 'polkadot-runtime-common': Dependency 'polkadot-runtime-common' is used 5 times with and 11 times without an alias:
+
+     5 times: runtime-common from kusama-runtime-constants, polkadot-runtime-constants, staging-kusama-runtime, … (2 more)
+    11 times: no alias from asset-hub-kusama-runtime, asset-hub-polkadot-integration-tests, asset-hub-polkadot-runtime, … (8 more)
+
+    This cannot be fixed automatically since it would break your code and configs.
+    [WARN] Dependency 'polkadot-runtime-constants' is renamed to itself in 'polkadot-runtime'
+    [ERROR] Failed to lift up 'polkadot-runtime-parachains': Dependency 'polkadot-runtime-parachains' is used 2 times with and 1 time without an alias:
+
+     2 times: runtime-parachains from staging-kusama-runtime, polkadot-runtime
+     1 time : no alias from chain-spec-generator
+
+    This cannot be fixed automatically since it would break your code and configs.
+    [ERROR] Failed to lift up 'sc-consensus-grandpa': Dependency 'sc-consensus-grandpa' is used 2 times with and 1 time without an alias:
+
+     2 times: grandpa from kusama-emulated-chain, polkadot-emulated-chain
+     1 time : no alias from chain-spec-generator
+
+    This cannot be fixed automatically since it would break your code and configs.
+    [ERROR] Failed to lift up 'sp-authority-discovery': Dependency 'sp-authority-discovery' is used 4 times with and 1 time without an alias:
+
+     4 times: authority-discovery-primitives from staging-kusama-runtime, polkadot-runtime, kusama-emulated-chain, … (1 more)
+     1 time : no alias from chain-spec-generator
+
+    This cannot be fixed automatically since it would break your code and configs.
+    [ERROR] Failed to lift up 'sp-block-builder': Dependency 'sp-block-builder' is used 2 times with and 9 times without an alias:
+
+     2 times: block-builder-api from staging-kusama-runtime, polkadot-runtime
+     9 times: no alias from asset-hub-kusama-runtime, asset-hub-polkadot-runtime, bridge-hub-kusama-runtime, … (6 more)
+
+    This cannot be fixed automatically since it would break your code and configs.
+    [ERROR] Failed to lift up 'sp-consensus-babe': Dependency 'sp-consensus-babe' is used 4 times with and 1 time without an alias:
+
+     4 times: babe-primitives from staging-kusama-runtime, polkadot-runtime, kusama-emulated-chain, … (1 more)
+     1 time : no alias from chain-spec-generator
+
+    This cannot be fixed automatically since it would break your code and configs.
+    [ERROR] Failed to lift up 'sp-consensus-beefy': Dependency 'sp-consensus-beefy' is used 4 times with and 1 time without an alias:
+
+     4 times: beefy-primitives from staging-kusama-runtime, polkadot-runtime, kusama-emulated-chain, … (1 more)
+     1 time : no alias from chain-spec-generator
+
+    This cannot be fixed automatically since it would break your code and configs.
+    [ERROR] Failed to lift up 'sp-inherents': Dependency 'sp-inherents' is used 2 times with and 9 times without an alias:
+
+     2 times: inherents from staging-kusama-runtime, polkadot-runtime
+     9 times: no alias from asset-hub-kusama-runtime, asset-hub-polkadot-runtime, bridge-hub-kusama-runtime, … (6 more)
+
+    This cannot be fixed automatically since it would break your code and configs.
+    [ERROR] Failed to lift up 'sp-keyring': Dependency 'sp-keyring' is used 2 times with and 2 times without an alias:
+
+     2 times: keyring from staging-kusama-runtime, polkadot-runtime
+     2 times: no alias from bridge-hub-kusama-runtime, bridge-hub-polkadot-runtime
+
+    This cannot be fixed automatically since it would break your code and configs.
+    [ERROR] Failed to lift up 'sp-offchain': Dependency 'sp-offchain' is used 2 times with and 9 times without an alias:
+
+     2 times: offchain-primitives from staging-kusama-runtime, polkadot-runtime
+     9 times: no alias from asset-hub-kusama-runtime, asset-hub-polkadot-runtime, bridge-hub-kusama-runtime, … (6 more)
+
+    This cannot be fixed automatically since it would break your code and configs.
+    [ERROR] Failed to lift up 'sp-transaction-pool': Dependency 'sp-transaction-pool' is used 2 times with and 9 times without an alias:
+
+     2 times: tx-pool-api from staging-kusama-runtime, polkadot-runtime
+     9 times: no alias from asset-hub-kusama-runtime, asset-hub-polkadot-runtime, bridge-hub-kusama-runtime, … (6 more)
+
+    This cannot be fixed automatically since it would break your code and configs.
+    [ERROR] Failed to lift up 'staging-xcm-executor': Dependency 'staging-xcm-executor' already exists in the workspace with a different 'version' field: '8.0.2' vs '^8.0.1'
+  code: 0
+  diff: |
+    diff --git Cargo.toml Cargo.toml
+    index e8b5a48b0f..a6fc147cf3 100644
+    --- Cargo.toml
+    +++ Cargo.toml
+    @@ -44 +43,0 @@ frame-executive = { version = "29.0.0", default-features = false }
+    -frame-remote-externalities = { version = "0.36.0" }
+    @@ -192,3 +190,0 @@ sp-weights = { version = "28.0.0", default-features = false }
+    -staging-parachain-info = { version = "0.8.0", default-features = false }
+    -staging-xcm = { version = "8.0.1", default-features = false }
+    -staging-xcm-builder = { version = "8.0.1", default-features = false }
+    @@ -199,0 +196,36 @@ xcm-emulator = { version = "0.6.0" }
+    +asset-hub-kusama-emulated-chain = { path = "integration-tests/emulated/chains/parachains/assets/asset-hub-kusama" }
+    +asset-hub-kusama-runtime = { path = "system-parachains/asset-hubs/asset-hub-kusama" }
+    +asset-hub-polkadot-emulated-chain = { path = "integration-tests/emulated/chains/parachains/assets/asset-hub-polkadot" }
+    +asset-hub-polkadot-runtime = { path = "system-parachains/asset-hubs/asset-hub-polkadot" }
+    +bp-asset-hub-kusama = { path = "system-parachains/asset-hubs/asset-hub-kusama/primitives", default-features = false }
+    +bp-asset-hub-polkadot = { path = "system-parachains/asset-hubs/asset-hub-polkadot/primitives", default-features = false }
+    +bp-bridge-hub-kusama = { path = "system-parachains/bridge-hubs/bridge-hub-kusama/primitives", default-features = false }
+    +bp-bridge-hub-polkadot = { path = "system-parachains/bridge-hubs/bridge-hub-polkadot/primitives", default-features = false }
+    +bridge-hub-kusama-emulated-chain = { path = "integration-tests/emulated/chains/parachains/bridges/bridge-hub-kusama" }
+    +bridge-hub-kusama-runtime = { path = "system-parachains/bridge-hubs/bridge-hub-kusama" }
+    +bridge-hub-polkadot-emulated-chain = { path = "integration-tests/emulated/chains/parachains/bridges/bridge-hub-polkadot" }
+    +bridge-hub-polkadot-runtime = { path = "system-parachains/bridge-hubs/bridge-hub-polkadot" }
+    +collectives-polkadot-emulated-chain = { path = "integration-tests/emulated/chains/parachains/collectives/collectives-polkadot" }
+    +collectives-polkadot-runtime = { path = "system-parachains/collectives/collectives-polkadot" }
+    +collectives-polkadot-runtime-constants = { path = "system-parachains/collectives/collectives-polkadot/constants" }
+    +coretime-kusama-runtime = { path = "system-parachains/coretime/coretime-kusama" }
+    +encointer-kusama-runtime = { path = "system-parachains/encointer" }
+    +remote-externalities = { version = "0.36.0", package = "frame-remote-externalities" }
+    +glutton-kusama-runtime = { path = "system-parachains/gluttons/glutton-kusama" }
+    +integration-tests-helpers = { path = "integration-tests/emulated/helpers" }
+    +kusama-emulated-chain = { path = "integration-tests/emulated/chains/relays/kusama" }
+    +kusama-polkadot-system-emulated-network = { path = "integration-tests/emulated/networks/kusama-polkadot-system" }
+    +kusama-runtime-constants = { path = "relay/kusama/constants", default-features = false }
+    +kusama-system-emulated-network = { path = "integration-tests/emulated/networks/kusama-system" }
+    +penpal-emulated-chain = { path = "integration-tests/emulated/chains/parachains/testing/penpal" }
+    +people-kusama-emulated-chain = { path = "integration-tests/emulated/chains/parachains/people/people-kusama" }
+    +people-kusama-runtime = { path = "system-parachains/people/people-kusama" }
+    +polkadot-emulated-chain = { path = "integration-tests/emulated/chains/relays/polkadot" }
+    +polkadot-runtime = { path = "relay/polkadot" }
+    +polkadot-runtime-constants = { path = "relay/polkadot/constants", default-features = false }
+    +polkadot-system-emulated-network = { path = "integration-tests/emulated/networks/polkadot-system" }
+    +kusama-runtime = { path = "relay/kusama", package = "staging-kusama-runtime" }
+    +parachain-info = { version = "0.8.0", default-features = false, package = "staging-parachain-info" }
+    +xcm = { version = "8.0.1", default-features = false, package = "staging-xcm" }
+    +xcm-builder = { version = "8.0.1", default-features = false, package = "staging-xcm-builder" }
+    +system-parachains-constants = { path = "system-parachains/constants", default-features = false }
+    diff --git chain-spec-generator/Cargo.toml chain-spec-generator/Cargo.toml
+    index 11981fec88..7dfa61f576 100644
+    --- chain-spec-generator/Cargo.toml
+    +++ chain-spec-generator/Cargo.toml
+    @@ -14,4 +14,4 @@ serde = { features = ["derive"] , workspace = true }
+    -polkadot-runtime = { path = "../relay/polkadot" }
+    -polkadot-runtime-constants = { path = "../relay/polkadot/constants" }
+    -kusama-runtime = { package = "staging-kusama-runtime", path = "../relay/kusama" }
+    -kusama-runtime-constants = { path = "../relay/kusama/constants" }
+    +polkadot-runtime = { workspace = true }
+    +polkadot-runtime-constants = { workspace = true, default-features = true }
+    +kusama-runtime = { workspace = true }
+    +kusama-runtime-constants = { workspace = true, default-features = true }
+    @@ -29 +29 @@ sp-consensus-beefy = { workspace = true, default-features = true }
+    -xcm = { package = "staging-xcm", version = "8.0.1" }
+    +xcm = { workspace = true, default-features = true }
+    @@ -33,9 +33,9 @@ cumulus-primitives-core = { workspace = true, default-features = true }
+    -asset-hub-polkadot-runtime = { path = "../system-parachains/asset-hubs/asset-hub-polkadot" }
+    -asset-hub-kusama-runtime = { path = "../system-parachains/asset-hubs/asset-hub-kusama" }
+    -collectives-polkadot-runtime = { path = "../system-parachains/collectives/collectives-polkadot" }
+    -bridge-hub-polkadot-runtime = { path = "../system-parachains/bridge-hubs/bridge-hub-polkadot" }
+    -bridge-hub-kusama-runtime = { path = "../system-parachains/bridge-hubs/bridge-hub-kusama" }
+    -encointer-kusama-runtime = { path = "../system-parachains/encointer" }
+    -glutton-kusama-runtime = { path = "../system-parachains/gluttons/glutton-kusama" }
+    -coretime-kusama-runtime = { path = "../system-parachains/coretime/coretime-kusama" }
+    -people-kusama-runtime = { path = "../system-parachains/people/people-kusama" }
+    +asset-hub-polkadot-runtime = { workspace = true }
+    +asset-hub-kusama-runtime = { workspace = true }
+    +collectives-polkadot-runtime = { workspace = true }
+    +bridge-hub-polkadot-runtime = { workspace = true }
+    +bridge-hub-kusama-runtime = { workspace = true }
+    +encointer-kusama-runtime = { workspace = true }
+    +glutton-kusama-runtime = { workspace = true }
+    +coretime-kusama-runtime = { workspace = true }
+    +people-kusama-runtime = { workspace = true }
+    diff --git integration-tests/emulated/chains/parachains/assets/asset-hub-kusama/Cargo.toml integration-tests/emulated/chains/parachains/assets/asset-hub-kusama/Cargo.toml
+    index 5f103dc034..3401d3b653 100644
+    --- integration-tests/emulated/chains/parachains/assets/asset-hub-kusama/Cargo.toml
+    +++ integration-tests/emulated/chains/parachains/assets/asset-hub-kusama/Cargo.toml
+    @@ -22,2 +22,2 @@ emulated-integration-tests-common = { workspace = true }
+    -asset-hub-kusama-runtime = { path = "../../../../../../system-parachains/asset-hubs/asset-hub-kusama" }
+    -kusama-emulated-chain = { path = "../../../relays/kusama" }
+    +asset-hub-kusama-runtime = { workspace = true }
+    +kusama-emulated-chain = { workspace = true }
+    diff --git integration-tests/emulated/chains/parachains/assets/asset-hub-polkadot/Cargo.toml integration-tests/emulated/chains/parachains/assets/asset-hub-polkadot/Cargo.toml
+    index 77be0ca4ab..3bb7ebde64 100644
+    --- integration-tests/emulated/chains/parachains/assets/asset-hub-polkadot/Cargo.toml
+    +++ integration-tests/emulated/chains/parachains/assets/asset-hub-polkadot/Cargo.toml
+    @@ -22,2 +22,2 @@ emulated-integration-tests-common = { workspace = true }
+    -asset-hub-polkadot-runtime = { path = "../../../../../../system-parachains/asset-hubs/asset-hub-polkadot" }
+    -polkadot-emulated-chain = { path = "../../../relays/polkadot" }
+    +asset-hub-polkadot-runtime = { workspace = true }
+    +polkadot-emulated-chain = { workspace = true }
+    diff --git integration-tests/emulated/chains/parachains/bridges/bridge-hub-kusama/Cargo.toml integration-tests/emulated/chains/parachains/bridges/bridge-hub-kusama/Cargo.toml
+    index 3b01d73bff..e79ba4f465 100644
+    --- integration-tests/emulated/chains/parachains/bridges/bridge-hub-kusama/Cargo.toml
+    +++ integration-tests/emulated/chains/parachains/bridges/bridge-hub-kusama/Cargo.toml
+    @@ -22 +22 @@ emulated-integration-tests-common = { workspace = true }
+    -bridge-hub-kusama-runtime = { path = "../../../../../../system-parachains/bridge-hubs/bridge-hub-kusama" }
+    +bridge-hub-kusama-runtime = { workspace = true }
+    diff --git integration-tests/emulated/chains/parachains/bridges/bridge-hub-polkadot/Cargo.toml integration-tests/emulated/chains/parachains/bridges/bridge-hub-polkadot/Cargo.toml
+    index 9e9adab023..026efeb91a 100644
+    --- integration-tests/emulated/chains/parachains/bridges/bridge-hub-polkadot/Cargo.toml
+    +++ integration-tests/emulated/chains/parachains/bridges/bridge-hub-polkadot/Cargo.toml
+    @@ -22 +22 @@ emulated-integration-tests-common = { workspace = true }
+    -bridge-hub-polkadot-runtime = { path = "../../../../../../system-parachains/bridge-hubs/bridge-hub-polkadot" }
+    +bridge-hub-polkadot-runtime = { workspace = true }
+    diff --git integration-tests/emulated/chains/parachains/collectives/collectives-polkadot/Cargo.toml integration-tests/emulated/chains/parachains/collectives/collectives-polkadot/Cargo.toml
+    index 4cad7b3eee..ffd5689c64 100644
+    --- integration-tests/emulated/chains/parachains/collectives/collectives-polkadot/Cargo.toml
+    +++ integration-tests/emulated/chains/parachains/collectives/collectives-polkadot/Cargo.toml
+    @@ -22 +22 @@ emulated-integration-tests-common = { workspace = true }
+    -collectives-polkadot-runtime = { path = "../../../../../../system-parachains/collectives/collectives-polkadot" }
+    +collectives-polkadot-runtime = { workspace = true }
+    diff --git integration-tests/emulated/chains/parachains/people/people-kusama/Cargo.toml integration-tests/emulated/chains/parachains/people/people-kusama/Cargo.toml
+    index 4564a4de38..a72f24e626 100644
+    --- integration-tests/emulated/chains/parachains/people/people-kusama/Cargo.toml
+    +++ integration-tests/emulated/chains/parachains/people/people-kusama/Cargo.toml
+    @@ -22,2 +22,2 @@ emulated-integration-tests-common = { workspace = true }
+    -people-kusama-runtime = { path = "../../../../../../system-parachains/people/people-kusama" }
+    -kusama-emulated-chain = { path = "../../../relays/kusama" }
+    +people-kusama-runtime = { workspace = true }
+    +kusama-emulated-chain = { workspace = true }
+    diff --git integration-tests/emulated/chains/parachains/testing/penpal/Cargo.toml integration-tests/emulated/chains/parachains/testing/penpal/Cargo.toml
+    index 8a224f7f83..5834db134a 100644
+    --- integration-tests/emulated/chains/parachains/testing/penpal/Cargo.toml
+    +++ integration-tests/emulated/chains/parachains/testing/penpal/Cargo.toml
+    @@ -23,2 +23,2 @@ penpal-runtime = { features = ["experimental"] , workspace = true }
+    -kusama-emulated-chain = { path = "../../../relays/kusama" }
+    -polkadot-emulated-chain = { path = "../../../relays/polkadot" }
+    +kusama-emulated-chain = { workspace = true }
+    +polkadot-emulated-chain = { workspace = true }
+    diff --git integration-tests/emulated/chains/relays/kusama/Cargo.toml integration-tests/emulated/chains/relays/kusama/Cargo.toml
+    index 91b03372c2..182de9dd13 100644
+    --- integration-tests/emulated/chains/relays/kusama/Cargo.toml
+    +++ integration-tests/emulated/chains/relays/kusama/Cargo.toml
+    @@ -27,2 +27,2 @@ emulated-integration-tests-common = { workspace = true }
+    -kusama-runtime-constants = { path = "../../../../../relay/kusama/constants" }
+    -kusama-runtime = {  package = "staging-kusama-runtime", path = "../../../../../relay/kusama" }
+    +kusama-runtime-constants = { workspace = true, default-features = true }
+    +kusama-runtime = { workspace = true }
+    diff --git integration-tests/emulated/chains/relays/polkadot/Cargo.toml integration-tests/emulated/chains/relays/polkadot/Cargo.toml
+    index 3297be59dd..c6cbe12b31 100644
+    --- integration-tests/emulated/chains/relays/polkadot/Cargo.toml
+    +++ integration-tests/emulated/chains/relays/polkadot/Cargo.toml
+    @@ -29,2 +29,2 @@ emulated-integration-tests-common = { workspace = true }
+    -polkadot-runtime-constants = { path = "../../../../../relay/polkadot/constants" }
+    -polkadot-runtime = { path = "../../../../../relay/polkadot" }
+    +polkadot-runtime-constants = { workspace = true, default-features = true }
+    +polkadot-runtime = { workspace = true }
+    diff --git integration-tests/emulated/helpers/Cargo.toml integration-tests/emulated/helpers/Cargo.toml
+    index 2d041aaee9..b5c6401bf9 100644
+    --- integration-tests/emulated/helpers/Cargo.toml
+    +++ integration-tests/emulated/helpers/Cargo.toml
+    @@ -18 +18 @@ pallet-message-queue = { workspace = true, default-features = true }
+    -xcm = { package = "staging-xcm", version = "8.0.1" }
+    +xcm = { workspace = true, default-features = true }
+    diff --git integration-tests/emulated/networks/kusama-polkadot-system/Cargo.toml integration-tests/emulated/networks/kusama-polkadot-system/Cargo.toml
+    index f5eea2f49b..04781b34cd 100644
+    --- integration-tests/emulated/networks/kusama-polkadot-system/Cargo.toml
+    +++ integration-tests/emulated/networks/kusama-polkadot-system/Cargo.toml
+    @@ -16,7 +16,7 @@ emulated-integration-tests-common = { workspace = true }
+    -asset-hub-kusama-emulated-chain = { path = "../../chains/parachains/assets/asset-hub-kusama" }
+    -asset-hub-polkadot-emulated-chain = { path = "../../chains/parachains/assets/asset-hub-polkadot" }
+    -bridge-hub-kusama-emulated-chain = { path = "../../chains/parachains/bridges/bridge-hub-kusama" }
+    -bridge-hub-polkadot-emulated-chain = { path = "../../chains/parachains/bridges/bridge-hub-polkadot" }
+    -kusama-emulated-chain = { path = "../../chains/relays/kusama" }
+    -penpal-emulated-chain = { path = "../../chains/parachains/testing/penpal" }
+    -polkadot-emulated-chain = { path = "../../chains/relays/polkadot" }
+    +asset-hub-kusama-emulated-chain = { workspace = true }
+    +asset-hub-polkadot-emulated-chain = { workspace = true }
+    +bridge-hub-kusama-emulated-chain = { workspace = true }
+    +bridge-hub-polkadot-emulated-chain = { workspace = true }
+    +kusama-emulated-chain = { workspace = true }
+    +penpal-emulated-chain = { workspace = true }
+    +polkadot-emulated-chain = { workspace = true }
+    diff --git integration-tests/emulated/networks/kusama-system/Cargo.toml integration-tests/emulated/networks/kusama-system/Cargo.toml
+    index 036047335f..50f09c6512 100644
+    --- integration-tests/emulated/networks/kusama-system/Cargo.toml
+    +++ integration-tests/emulated/networks/kusama-system/Cargo.toml
+    @@ -16,5 +16,5 @@ emulated-integration-tests-common = { workspace = true }
+    -asset-hub-kusama-emulated-chain = { path = "../../chains/parachains/assets/asset-hub-kusama" }
+    -bridge-hub-kusama-emulated-chain = { path = "../../chains/parachains/bridges/bridge-hub-kusama" }
+    -kusama-emulated-chain = { path = "../../chains/relays/kusama" }
+    -penpal-emulated-chain = { path = "../../chains/parachains/testing/penpal" }
+    -people-kusama-emulated-chain = { path = "../../chains/parachains/people/people-kusama" }
+    +asset-hub-kusama-emulated-chain = { workspace = true }
+    +bridge-hub-kusama-emulated-chain = { workspace = true }
+    +kusama-emulated-chain = { workspace = true }
+    +penpal-emulated-chain = { workspace = true }
+    +people-kusama-emulated-chain = { workspace = true }
+    diff --git integration-tests/emulated/networks/polkadot-system/Cargo.toml integration-tests/emulated/networks/polkadot-system/Cargo.toml
+    index 520fc6b92b..9e7c757374 100644
+    --- integration-tests/emulated/networks/polkadot-system/Cargo.toml
+    +++ integration-tests/emulated/networks/polkadot-system/Cargo.toml
+    @@ -16,5 +16,5 @@ emulated-integration-tests-common = { workspace = true }
+    -asset-hub-polkadot-emulated-chain = { path = "../../chains/parachains/assets/asset-hub-polkadot" }
+    -bridge-hub-polkadot-emulated-chain = { path = "../../chains/parachains/bridges/bridge-hub-polkadot" }
+    -collectives-polkadot-emulated-chain = { path = "../../chains/parachains/collectives/collectives-polkadot" }
+    -penpal-emulated-chain = { path = "../../chains/parachains/testing/penpal" }
+    -polkadot-emulated-chain = { path = "../../chains/relays/polkadot" }
+    +asset-hub-polkadot-emulated-chain = { workspace = true }
+    +bridge-hub-polkadot-emulated-chain = { workspace = true }
+    +collectives-polkadot-emulated-chain = { workspace = true }
+    +penpal-emulated-chain = { workspace = true }
+    +polkadot-emulated-chain = { workspace = true }
+    diff --git integration-tests/emulated/tests/assets/asset-hub-kusama/Cargo.toml integration-tests/emulated/tests/assets/asset-hub-kusama/Cargo.toml
+    index 8c0f87f053..1c8a9222b4 100644
+    --- integration-tests/emulated/tests/assets/asset-hub-kusama/Cargo.toml
+    +++ integration-tests/emulated/tests/assets/asset-hub-kusama/Cargo.toml
+    @@ -25,2 +25,2 @@ pallet-utility = { workspace = true, default-features = true }
+    -xcm = { package = "staging-xcm", version = "8.0.1" }
+    -xcm-executor = { package = "staging-xcm-executor", default-features = false, version = "8.0.1" }
+    +xcm = { workspace = true, default-features = true }
+    +xcm-executor = { workspace = true }
+    @@ -37,6 +37,6 @@ cumulus-pallet-parachain-system = { features = ["parameterized-consensus-hook"],
+    -asset-hub-kusama-runtime = { path = "../../../../../system-parachains/asset-hubs/asset-hub-kusama" }
+    -integration-tests-helpers = { path = "../../../helpers" }
+    -kusama-runtime = { package = "staging-kusama-runtime", path = "../../../../../relay/kusama" }
+    -kusama-system-emulated-network = { path = "../../../networks/kusama-system" }
+    -system-parachains-constants = { path = "../../../../../system-parachains/constants" }
+    -kusama-runtime-constants = { path = "../../../../../relay/kusama/constants" }
+    +asset-hub-kusama-runtime = { workspace = true }
+    +integration-tests-helpers = { workspace = true }
+    +kusama-runtime = { workspace = true }
+    +kusama-system-emulated-network = { workspace = true }
+    +system-parachains-constants = { workspace = true, default-features = true }
+    +kusama-runtime-constants = { workspace = true, default-features = true }
+    diff --git integration-tests/emulated/tests/assets/asset-hub-polkadot/Cargo.toml integration-tests/emulated/tests/assets/asset-hub-polkadot/Cargo.toml
+    index 96ccde7c26..a4cadad89d 100644
+    --- integration-tests/emulated/tests/assets/asset-hub-polkadot/Cargo.toml
+    +++ integration-tests/emulated/tests/assets/asset-hub-polkadot/Cargo.toml
+    @@ -25 +25 @@ polkadot-runtime-common = { workspace = true, default-features = true }
+    -xcm = { package = "staging-xcm", version = "8.0.1" }
+    +xcm = { workspace = true, default-features = true }
+    @@ -27 +27 @@ pallet-xcm = { workspace = true, default-features = true }
+    -xcm-executor = { package = "staging-xcm-executor", version = "8.0.1" }
+    +xcm-executor = { workspace = true, default-features = true }
+    @@ -37,6 +37,6 @@ cumulus-pallet-parachain-system = { features = ["parameterized-consensus-hook"],
+    -asset-hub-polkadot-runtime = { path = "../../../../../system-parachains/asset-hubs/asset-hub-polkadot" }
+    -collectives-polkadot-runtime-constants = { path = "../../../../../system-parachains/collectives/collectives-polkadot/constants" }
+    -integration-tests-helpers = { path = "../../../helpers" }
+    -polkadot-runtime = { path = "../../../../../relay/polkadot" }
+    -polkadot-system-emulated-network = { path = "../../../networks/polkadot-system" }
+    -system-parachains-constants = { path = "../../../../../system-parachains/constants" }
+    +asset-hub-polkadot-runtime = { workspace = true }
+    +collectives-polkadot-runtime-constants = { workspace = true }
+    +integration-tests-helpers = { workspace = true }
+    +polkadot-runtime = { workspace = true }
+    +polkadot-system-emulated-network = { workspace = true }
+    +system-parachains-constants = { workspace = true, default-features = true }
+    diff --git integration-tests/emulated/tests/bridges/bridge-hub-kusama/Cargo.toml integration-tests/emulated/tests/bridges/bridge-hub-kusama/Cargo.toml
+    index 994d0349e9..7b6698f1c2 100644
+    --- integration-tests/emulated/tests/bridges/bridge-hub-kusama/Cargo.toml
+    +++ integration-tests/emulated/tests/bridges/bridge-hub-kusama/Cargo.toml
+    @@ -25 +25 @@ pallet-message-queue = { workspace = true, default-features = true }
+    -xcm = { package = "staging-xcm", version = "8.0.1" }
+    +xcm = { workspace = true, default-features = true }
+    @@ -27 +27 @@ pallet-xcm = { workspace = true, default-features = true }
+    -xcm-executor = { package = "staging-xcm-executor", version = "8.0.1" }
+    +xcm-executor = { workspace = true, default-features = true }
+    @@ -39,7 +39,7 @@ pallet-bridge-messages = { workspace = true, default-features = true }
+    -bp-bridge-hub-kusama = { path = "../../../../../system-parachains/bridge-hubs/bridge-hub-kusama/primitives"}
+    -bridge-hub-kusama-runtime = { path = "../../../../../system-parachains/bridge-hubs/bridge-hub-kusama" }
+    -asset-hub-kusama-runtime = { path = "../../../../../system-parachains/asset-hubs/asset-hub-kusama" }
+    -integration-tests-helpers = { path = "../../../helpers" }
+    -kusama-polkadot-system-emulated-network = { path = "../../../networks/kusama-polkadot-system" }
+    -kusama-system-emulated-network = { path = "../../../networks/kusama-system" }
+    -system-parachains-constants = { path = "../../../../../system-parachains/constants" }
+    +bp-bridge-hub-kusama = { workspace = true, default-features = true }
+    +bridge-hub-kusama-runtime = { workspace = true }
+    +asset-hub-kusama-runtime = { workspace = true }
+    +integration-tests-helpers = { workspace = true }
+    +kusama-polkadot-system-emulated-network = { workspace = true }
+    +kusama-system-emulated-network = { workspace = true }
+    +system-parachains-constants = { workspace = true, default-features = true }
+    diff --git integration-tests/emulated/tests/bridges/bridge-hub-polkadot/Cargo.toml integration-tests/emulated/tests/bridges/bridge-hub-polkadot/Cargo.toml
+    index 7a9b30559a..2275fb1486 100644
+    --- integration-tests/emulated/tests/bridges/bridge-hub-polkadot/Cargo.toml
+    +++ integration-tests/emulated/tests/bridges/bridge-hub-polkadot/Cargo.toml
+    @@ -25 +25 @@ pallet-message-queue = { workspace = true, default-features = true }
+    -xcm = { package = "staging-xcm", version = "8.0.1" }
+    +xcm = { workspace = true, default-features = true }
+    @@ -27 +27 @@ pallet-xcm = { workspace = true, default-features = true }
+    -xcm-executor = { package = "staging-xcm-executor", version = "8.0.1" }
+    +xcm-executor = { workspace = true, default-features = true }
+    @@ -39,7 +39,7 @@ pallet-bridge-messages = { workspace = true, default-features = true }
+    -bp-bridge-hub-polkadot = { path = "../../../../../system-parachains/bridge-hubs/bridge-hub-polkadot/primitives"}
+    -bridge-hub-polkadot-runtime = { path = "../../../../../system-parachains/bridge-hubs/bridge-hub-polkadot" }
+    -asset-hub-polkadot-runtime = { path = "../../../../../system-parachains/asset-hubs/asset-hub-polkadot" }
+    -integration-tests-helpers = { path = "../../../helpers" }
+    -kusama-polkadot-system-emulated-network = { path = "../../../networks/kusama-polkadot-system" }
+    -polkadot-system-emulated-network = { path = "../../../networks/polkadot-system" }
+    -system-parachains-constants = { path = "../../../../../system-parachains/constants" }
+    +bp-bridge-hub-polkadot = { workspace = true, default-features = true }
+    +bridge-hub-polkadot-runtime = { workspace = true }
+    +asset-hub-polkadot-runtime = { workspace = true }
+    +integration-tests-helpers = { workspace = true }
+    +kusama-polkadot-system-emulated-network = { workspace = true }
+    +polkadot-system-emulated-network = { workspace = true }
+    +system-parachains-constants = { workspace = true, default-features = true }
+    diff --git integration-tests/emulated/tests/collectives/collectives-polkadot/Cargo.toml integration-tests/emulated/tests/collectives/collectives-polkadot/Cargo.toml
+    index 5ad4da3221..e7dc0e729b 100644
+    --- integration-tests/emulated/tests/collectives/collectives-polkadot/Cargo.toml
+    +++ integration-tests/emulated/tests/collectives/collectives-polkadot/Cargo.toml
+    @@ -28 +28 @@ polkadot-runtime-common = { workspace = true, default-features = true }
+    -xcm = { package = "staging-xcm", version = "8.0.1" }
+    +xcm = { workspace = true, default-features = true }
+    @@ -30 +30 @@ pallet-xcm = { workspace = true, default-features = true }
+    -xcm-executor = { package = "staging-xcm-executor", version = "8.0.1" }
+    +xcm-executor = { workspace = true, default-features = true }
+    @@ -40,8 +40,8 @@ cumulus-pallet-parachain-system = { features = ["parameterized-consensus-hook"],
+    -asset-hub-polkadot-runtime = { path = "../../../../../system-parachains/asset-hubs/asset-hub-polkadot" }
+    -collectives-polkadot-runtime = { path = "../../../../../system-parachains/collectives/collectives-polkadot" }
+    -collectives-polkadot-runtime-constants = { path = "../../../../../system-parachains/collectives/collectives-polkadot/constants" }
+    -integration-tests-helpers = { path = "../../../helpers" }
+    -polkadot-runtime = { path = "../../../../../relay/polkadot" }
+    -polkadot-runtime-constants = { path = "../../../../../relay/polkadot/constants" }
+    -polkadot-system-emulated-network = { path = "../../../networks/polkadot-system" }
+    -system-parachains-constants = { path = "../../../../../system-parachains/constants" }
+    +asset-hub-polkadot-runtime = { workspace = true }
+    +collectives-polkadot-runtime = { workspace = true }
+    +collectives-polkadot-runtime-constants = { workspace = true }
+    +integration-tests-helpers = { workspace = true }
+    +polkadot-runtime = { workspace = true }
+    +polkadot-runtime-constants = { workspace = true, default-features = true }
+    +polkadot-system-emulated-network = { workspace = true }
+    +system-parachains-constants = { workspace = true, default-features = true }
+    diff --git integration-tests/emulated/tests/people/people-kusama/Cargo.toml integration-tests/emulated/tests/people/people-kusama/Cargo.toml
+    index 77db521083..8b56d53be3 100644
+    --- integration-tests/emulated/tests/people/people-kusama/Cargo.toml
+    +++ integration-tests/emulated/tests/people/people-kusama/Cargo.toml
+    @@ -22,2 +22,2 @@ polkadot-runtime-common = { workspace = true, default-features = true }
+    -xcm = { package = "staging-xcm", version = "8.0.1" }
+    -xcm-executor = { package = "staging-xcm-executor", default-features = false, version = "8.0.1" }
+    +xcm = { workspace = true, default-features = true }
+    +xcm-executor = { workspace = true }
+    @@ -32,4 +32,4 @@ cumulus-pallet-parachain-system = { features = ["parameterized-consensus-hook"],
+    -kusama-runtime-constants = { path = "../../../../../relay/kusama/constants" }
+    -kusama-runtime = { package = "staging-kusama-runtime", path = "../../../../../relay/kusama" }
+    -people-kusama-runtime = { path = "../../../../../system-parachains/people/people-kusama" }
+    -kusama-system-emulated-network = { path = "../../../networks/kusama-system" }
+    +kusama-runtime-constants = { workspace = true, default-features = true }
+    +kusama-runtime = { workspace = true }
+    +people-kusama-runtime = { workspace = true }
+    +kusama-system-emulated-network = { workspace = true }
+    diff --git relay/kusama/Cargo.toml relay/kusama/Cargo.toml
+    index 9c73470343..649f7a3276 100644
+    --- relay/kusama/Cargo.toml
+    +++ relay/kusama/Cargo.toml
+    @@ -20 +20 @@ binary-merkle-tree = { workspace = true }
+    -kusama-runtime-constants = { package = "kusama-runtime-constants", path = "constants", default-features = false }
+    +kusama-runtime-constants = { workspace = true }
+    @@ -100,3 +100,3 @@ primitives = { package = "polkadot-primitives", default-features = false , versi
+    -xcm = { package = "staging-xcm", default-features = false , version = "8.0.1" }
+    -xcm-executor = { package = "staging-xcm-executor", default-features = false , version = "8.0.1" }
+    -xcm-builder = { package = "staging-xcm-builder", default-features = false , version = "8.0.1" }
+    +xcm = { workspace = true }
+    +xcm-executor = { workspace = true }
+    +xcm-builder = { workspace = true }
+    @@ -111 +111 @@ serde_json = { workspace = true }
+    -remote-externalities = { package = "frame-remote-externalities", version = "0.36.0" }
+    +remote-externalities = { workspace = true }
+    diff --git relay/kusama/constants/Cargo.toml relay/kusama/constants/Cargo.toml
+    index e070c2d0d7..d13fa918d6 100644
+    --- relay/kusama/constants/Cargo.toml
+    +++ relay/kusama/constants/Cargo.toml
+    @@ -19 +19 @@ sp-core = { workspace = true }
+    -xcm-builder = { package = "staging-xcm-builder", default-features = false , version = "8.0.1" }
+    +xcm-builder = { workspace = true }
+    diff --git relay/polkadot/Cargo.toml relay/polkadot/Cargo.toml
+    index 52fd3131e4..46a1e662f0 100644
+    --- relay/polkadot/Cargo.toml
+    +++ relay/polkadot/Cargo.toml
+    @@ -75 +75 @@ frame-system-rpc-runtime-api = { workspace = true }
+    -polkadot-runtime-constants = { package = "polkadot-runtime-constants", path = "constants", default-features = false }
+    +polkadot-runtime-constants = { workspace = true }
+    @@ -97,3 +97,3 @@ primitives = { package = "polkadot-primitives", default-features = false , versi
+    -xcm = { package = "staging-xcm", default-features = false , version = "8.0.1" }
+    -xcm-executor = { package = "staging-xcm-executor", default-features = false , version = "8.0.1" }
+    -xcm-builder = { package = "staging-xcm-builder", default-features = false , version = "8.0.1" }
+    +xcm = { workspace = true }
+    +xcm-executor = { workspace = true }
+    +xcm-builder = { workspace = true }
+    @@ -108 +108 @@ separator = { workspace = true }
+    -remote-externalities = { package = "frame-remote-externalities", version = "0.36.0" }
+    +remote-externalities = { workspace = true }
+    diff --git relay/polkadot/constants/Cargo.toml relay/polkadot/constants/Cargo.toml
+    index 1e7f541293..f007bc03fa 100644
+    --- relay/polkadot/constants/Cargo.toml
+    +++ relay/polkadot/constants/Cargo.toml
+    @@ -19 +19 @@ sp-core = { workspace = true }
+    -xcm-builder = { package = "staging-xcm-builder", default-features = false , version = "8.0.1" }
+    +xcm-builder = { workspace = true }
+    diff --git system-parachains/asset-hubs/asset-hub-kusama/Cargo.toml system-parachains/asset-hubs/asset-hub-kusama/Cargo.toml
+    index 174abb81ed..12f8cb453f 100644
+    --- system-parachains/asset-hubs/asset-hub-kusama/Cargo.toml
+    +++ system-parachains/asset-hubs/asset-hub-kusama/Cargo.toml
+    @@ -18,6 +18,6 @@ scale-info = { features = ["derive"] , workspace = true }
+    -bp-asset-hub-kusama = { path = "./primitives", default-features = false}
+    -bp-asset-hub-polkadot = { path = "../asset-hub-polkadot/primitives", default-features = false}
+    -bp-bridge-hub-kusama = { path = "../../bridge-hubs/bridge-hub-kusama/primitives", default-features = false}
+    -bp-bridge-hub-polkadot = { path = "../../bridge-hubs/bridge-hub-polkadot/primitives", default-features = false}
+    -kusama-runtime-constants = { path = "../../../relay/kusama/constants", default-features = false}
+    -polkadot-runtime-constants = { path = "../../../relay/polkadot/constants", default-features = false}
+    +bp-asset-hub-kusama = { workspace = true }
+    +bp-asset-hub-polkadot = { workspace = true }
+    +bp-bridge-hub-kusama = { workspace = true }
+    +bp-bridge-hub-polkadot = { workspace = true }
+    +kusama-runtime-constants = { workspace = true }
+    +polkadot-runtime-constants = { workspace = true }
+    @@ -76,3 +76,3 @@ polkadot-runtime-common = { workspace = true }
+    -xcm = { package = "staging-xcm", default-features = false, version = "8.0.1" }
+    -xcm-builder = { package = "staging-xcm-builder", default-features = false, version = "8.0.1" }
+    -xcm-executor = { package = "staging-xcm-executor", default-features = false, version = "8.0.1" }
+    +xcm = { workspace = true }
+    +xcm-builder = { workspace = true }
+    +xcm-executor = { workspace = true }
+    @@ -91 +91 @@ pallet-collator-selection = { workspace = true }
+    -parachain-info = { package = "staging-parachain-info", default-features = false , version = "0.8.0" }
+    +parachain-info = { workspace = true }
+    @@ -93 +93 @@ parachains-common = { workspace = true }
+    -system-parachains-constants = { path = "../../constants", default-features = false }
+    +system-parachains-constants = { workspace = true }
+    diff --git system-parachains/asset-hubs/asset-hub-kusama/primitives/Cargo.toml system-parachains/asset-hubs/asset-hub-kusama/primitives/Cargo.toml
+    index 9fd39f7cf3..8c53b1ffce 100644
+    --- system-parachains/asset-hubs/asset-hub-kusama/primitives/Cargo.toml
+    +++ system-parachains/asset-hubs/asset-hub-kusama/primitives/Cargo.toml
+    @@ -15 +15 @@ scale-info = { features = ["derive"] , workspace = true }
+    -system-parachains-constants = { path = "../../../constants", default-features = false }
+    +system-parachains-constants = { workspace = true }
+    @@ -25 +25 @@ sp-std = { workspace = true }
+    -xcm = { package = "staging-xcm", default-features = false, version = "8.0.1" }
+    +xcm = { workspace = true }
+    diff --git system-parachains/asset-hubs/asset-hub-polkadot/Cargo.toml system-parachains/asset-hubs/asset-hub-polkadot/Cargo.toml
+    index 4e58c0414f..064351048d 100644
+    --- system-parachains/asset-hubs/asset-hub-polkadot/Cargo.toml
+    +++ system-parachains/asset-hubs/asset-hub-polkadot/Cargo.toml
+    @@ -18,7 +18,7 @@ scale-info = { features = ["derive"] , workspace = true }
+    -bp-asset-hub-kusama = { path = "../asset-hub-kusama/primitives", default-features = false}
+    -bp-asset-hub-polkadot = { path = "./primitives", default-features = false}
+    -bp-bridge-hub-kusama = { path = "../../bridge-hubs/bridge-hub-kusama/primitives", default-features = false}
+    -bp-bridge-hub-polkadot = { path = "../../bridge-hubs/bridge-hub-polkadot/primitives", default-features = false}
+    -collectives-polkadot-runtime-constants = { path = "../../collectives/collectives-polkadot/constants" }
+    -kusama-runtime-constants = { path = "../../../relay/kusama/constants", default-features = false}
+    -polkadot-runtime-constants = { path = "../../../relay/polkadot/constants", default-features = false}
+    +bp-asset-hub-kusama = { workspace = true }
+    +bp-asset-hub-polkadot = { workspace = true }
+    +bp-bridge-hub-kusama = { workspace = true }
+    +bp-bridge-hub-polkadot = { workspace = true }
+    +collectives-polkadot-runtime-constants = { workspace = true }
+    +kusama-runtime-constants = { workspace = true }
+    +polkadot-runtime-constants = { workspace = true }
+    @@ -76,3 +76,3 @@ polkadot-runtime-common = { workspace = true }
+    -xcm = { package = "staging-xcm", default-features = false, version = "8.0.1" }
+    -xcm-builder = { package = "staging-xcm-builder", default-features = false, version = "8.0.1" }
+    -xcm-executor = { package = "staging-xcm-executor", default-features = false, version = "8.0.1" }
+    +xcm = { workspace = true }
+    +xcm-builder = { workspace = true }
+    +xcm-executor = { workspace = true }
+    @@ -90 +90 @@ pallet-collator-selection = { workspace = true }
+    -parachain-info = { package = "staging-parachain-info", default-features = false , version = "0.8.0" }
+    +parachain-info = { workspace = true }
+    @@ -92 +92 @@ parachains-common = { workspace = true }
+    -system-parachains-constants = { path = "../../constants", default-features = false }
+    +system-parachains-constants = { workspace = true }
+    diff --git system-parachains/asset-hubs/asset-hub-polkadot/primitives/Cargo.toml system-parachains/asset-hubs/asset-hub-polkadot/primitives/Cargo.toml
+    index 459c812e37..6f271fdf1f 100644
+    --- system-parachains/asset-hubs/asset-hub-polkadot/primitives/Cargo.toml
+    +++ system-parachains/asset-hubs/asset-hub-polkadot/primitives/Cargo.toml
+    @@ -15 +15 @@ scale-info = { features = ["derive"] , workspace = true }
+    -system-parachains-constants = { path = "../../../constants", default-features = false }
+    +system-parachains-constants = { workspace = true }
+    @@ -25 +25 @@ sp-std = { workspace = true }
+    -xcm = { package = "staging-xcm", default-features = false, version = "8.0.1" }
+    +xcm = { workspace = true }
+    diff --git system-parachains/bridge-hubs/bridge-hub-kusama/Cargo.toml system-parachains/bridge-hubs/bridge-hub-kusama/Cargo.toml
+    index b19f86310e..4620823763 100644
+    --- system-parachains/bridge-hubs/bridge-hub-kusama/Cargo.toml
+    +++ system-parachains/bridge-hubs/bridge-hub-kusama/Cargo.toml
+    @@ -22,6 +22,6 @@ serde = { optional = true, features = ["derive"] , workspace = true }
+    -bp-asset-hub-kusama = { path = "../../asset-hubs/asset-hub-kusama/primitives", default-features = false}
+    -bp-asset-hub-polkadot = { path = "../../asset-hubs/asset-hub-polkadot/primitives", default-features = false}
+    -bp-bridge-hub-kusama = { path = "./primitives", default-features = false}
+    -bp-bridge-hub-polkadot = { path = "../bridge-hub-polkadot/primitives", default-features = false}
+    -kusama-runtime-constants = { path = "../../../relay/kusama/constants", default-features = false}
+    -polkadot-runtime-constants = { path = "../../../relay/polkadot/constants", default-features = false}
+    +bp-asset-hub-kusama = { workspace = true }
+    +bp-asset-hub-polkadot = { workspace = true }
+    +bp-bridge-hub-kusama = { workspace = true }
+    +bp-bridge-hub-polkadot = { workspace = true }
+    +kusama-runtime-constants = { workspace = true }
+    +polkadot-runtime-constants = { workspace = true }
+    @@ -68,3 +68,3 @@ polkadot-runtime-common = { workspace = true }
+    -xcm = { package = "staging-xcm", default-features = false, version = "8.0.1" }
+    -xcm-builder = { package = "staging-xcm-builder", default-features = false, version = "8.0.1" }
+    -xcm-executor = { package = "staging-xcm-executor", default-features = false, version = "8.0.1" }
+    +xcm = { workspace = true }
+    +xcm-builder = { workspace = true }
+    +xcm-executor = { workspace = true }
+    @@ -83 +83 @@ pallet-collator-selection = { workspace = true }
+    -parachain-info = { package = "staging-parachain-info", default-features = false , version = "0.8.0" }
+    +parachain-info = { workspace = true }
+    @@ -85 +85 @@ parachains-common = { workspace = true }
+    -system-parachains-constants = { path = "../../constants", default-features = false }
+    +system-parachains-constants = { workspace = true }
+    diff --git system-parachains/bridge-hubs/bridge-hub-kusama/primitives/Cargo.toml system-parachains/bridge-hubs/bridge-hub-kusama/primitives/Cargo.toml
+    index 09616be7a4..0136970cf9 100644
+    --- system-parachains/bridge-hubs/bridge-hub-kusama/primitives/Cargo.toml
+    +++ system-parachains/bridge-hubs/bridge-hub-kusama/primitives/Cargo.toml
+    @@ -13,3 +13,3 @@ license.workspace = true
+    -kusama-runtime-constants = { path = "../../../../relay/kusama/constants", default-features = false }
+    -polkadot-runtime-constants = { path = "../../../../relay/polkadot/constants", default-features = false }
+    -system-parachains-constants = { path = "../../../constants", default-features = false }
+    +kusama-runtime-constants = { workspace = true }
+    +polkadot-runtime-constants = { workspace = true }
+    +system-parachains-constants = { workspace = true }
+    @@ -30 +30 @@ sp-std = { workspace = true }
+    -xcm = { package = "staging-xcm", default-features = false, version = "8.0.1" }
+    +xcm = { workspace = true }
+    diff --git system-parachains/bridge-hubs/bridge-hub-polkadot/Cargo.toml system-parachains/bridge-hubs/bridge-hub-polkadot/Cargo.toml
+    index 0e02e51826..77145ca4a5 100644
+    --- system-parachains/bridge-hubs/bridge-hub-polkadot/Cargo.toml
+    +++ system-parachains/bridge-hubs/bridge-hub-polkadot/Cargo.toml
+    @@ -22,6 +22,6 @@ serde = { optional = true, features = ["derive"] , workspace = true }
+    -bp-asset-hub-kusama = { path = "../../asset-hubs/asset-hub-kusama/primitives", default-features = false}
+    -bp-asset-hub-polkadot = { path = "../../asset-hubs/asset-hub-polkadot/primitives", default-features = false}
+    -bp-bridge-hub-kusama = { path = "../bridge-hub-kusama/primitives", default-features = false}
+    -bp-bridge-hub-polkadot = { path = "../bridge-hub-polkadot/primitives", default-features = false}
+    -kusama-runtime-constants = { path = "../../../relay/kusama/constants", default-features = false}
+    -polkadot-runtime-constants = { path = "../../../relay/polkadot/constants", default-features = false}
+    +bp-asset-hub-kusama = { workspace = true }
+    +bp-asset-hub-polkadot = { workspace = true }
+    +bp-bridge-hub-kusama = { workspace = true }
+    +bp-bridge-hub-polkadot = { workspace = true }
+    +kusama-runtime-constants = { workspace = true }
+    +polkadot-runtime-constants = { workspace = true }
+    @@ -68,3 +68,3 @@ polkadot-runtime-common = { workspace = true }
+    -xcm = { package = "staging-xcm", default-features = false, version = "8.0.1" }
+    -xcm-builder = { package = "staging-xcm-builder", default-features = false, version = "8.0.1" }
+    -xcm-executor = { package = "staging-xcm-executor", default-features = false, version = "8.0.1" }
+    +xcm = { workspace = true }
+    +xcm-builder = { workspace = true }
+    +xcm-executor = { workspace = true }
+    @@ -82 +82 @@ pallet-collator-selection = { workspace = true }
+    -parachain-info = { package = "staging-parachain-info", default-features = false , version = "0.8.0" }
+    +parachain-info = { workspace = true }
+    @@ -84 +84 @@ parachains-common = { workspace = true }
+    -system-parachains-constants = { path = "../../constants", default-features = false }
+    +system-parachains-constants = { workspace = true }
+    diff --git system-parachains/bridge-hubs/bridge-hub-polkadot/primitives/Cargo.toml system-parachains/bridge-hubs/bridge-hub-polkadot/primitives/Cargo.toml
+    index 2ef5073045..be953d1648 100644
+    --- system-parachains/bridge-hubs/bridge-hub-polkadot/primitives/Cargo.toml
+    +++ system-parachains/bridge-hubs/bridge-hub-polkadot/primitives/Cargo.toml
+    @@ -13,3 +13,3 @@ license.workspace = true
+    -kusama-runtime-constants = { path = "../../../../relay/kusama/constants", default-features = false }
+    -polkadot-runtime-constants = { path = "../../../../relay/polkadot/constants", default-features = false }
+    -system-parachains-constants = { path = "../../../constants", default-features = false }
+    +kusama-runtime-constants = { workspace = true }
+    +polkadot-runtime-constants = { workspace = true }
+    +system-parachains-constants = { workspace = true }
+    @@ -30 +30 @@ sp-std = { workspace = true }
+    -xcm = { package = "staging-xcm", default-features = false, version = "8.0.1" }
+    +xcm = { workspace = true }
+    diff --git system-parachains/collectives/collectives-polkadot/Cargo.toml system-parachains/collectives/collectives-polkadot/Cargo.toml
+    index 94ab3b0dc3..7c48ea070f 100644
+    --- system-parachains/collectives/collectives-polkadot/Cargo.toml
+    +++ system-parachains/collectives/collectives-polkadot/Cargo.toml
+    @@ -66,4 +66,4 @@ polkadot-runtime-common = { workspace = true }
+    -polkadot-runtime-constants = { path = "../../../relay/polkadot/constants", default-features = false}
+    -xcm = { package = "staging-xcm", default-features = false, version = "8.0.1" }
+    -xcm-builder = { package = "staging-xcm-builder", default-features = false, version = "8.0.1" }
+    -xcm-executor = { package = "staging-xcm-executor", default-features = false, version = "8.0.1" }
+    +polkadot-runtime-constants = { workspace = true }
+    +xcm = { workspace = true }
+    +xcm-builder = { workspace = true }
+    +xcm-executor = { workspace = true }
+    @@ -81 +81 @@ pallet-collator-selection = { workspace = true }
+    -parachain-info = { package = "staging-parachain-info", default-features = false , version = "0.8.0" }
+    +parachain-info = { workspace = true }
+    @@ -83 +83 @@ parachains-common = { workspace = true }
+    -system-parachains-constants = { path = "../../constants", default-features = false }
+    +system-parachains-constants = { workspace = true }
+    @@ -86 +86 @@ system-parachains-constants = { path = "../../constants", default-features = fal
+    -collectives-polkadot-runtime-constants = { path = "constants" }
+    +collectives-polkadot-runtime-constants = { workspace = true }
+    diff --git system-parachains/constants/Cargo.toml system-parachains/constants/Cargo.toml
+    index 91de78d491..4cf93dcb6f 100644
+    --- system-parachains/constants/Cargo.toml
+    +++ system-parachains/constants/Cargo.toml
+    @@ -14 +14 @@ frame-support = { workspace = true }
+    -kusama-runtime-constants = { path = "../../relay/kusama/constants", default-features = false}
+    +kusama-runtime-constants = { workspace = true }
+    @@ -18 +18 @@ polkadot-primitives = { workspace = true }
+    -polkadot-runtime-constants = { path = "../../relay/polkadot/constants", default-features = false}
+    +polkadot-runtime-constants = { workspace = true }
+    diff --git system-parachains/coretime/coretime-kusama/Cargo.toml system-parachains/coretime/coretime-kusama/Cargo.toml
+    index 5bda2d1681..544f55a01c 100644
+    --- system-parachains/coretime/coretime-kusama/Cargo.toml
+    +++ system-parachains/coretime/coretime-kusama/Cargo.toml
+    @@ -19,2 +19,2 @@ serde = { optional = true, features = ["derive"] , workspace = true }
+    -kusama-runtime-constants = { path = "../../../relay/kusama/constants", default-features = false}
+    -system-parachains-constants = { path = "../../constants", default-features = false }
+    +kusama-runtime-constants = { workspace = true }
+    +system-parachains-constants = { workspace = true }
+    @@ -62,3 +62,3 @@ polkadot-runtime-common = { workspace = true }
+    -xcm = { package = "staging-xcm", default-features = false, version = "8.0.1" }
+    -xcm-builder = { package = "staging-xcm-builder", default-features = false, version = "8.0.1" }
+    -xcm-executor = { package = "staging-xcm-executor", default-features = false, version = "8.0.1" }
+    +xcm = { workspace = true }
+    +xcm-builder = { workspace = true }
+    +xcm-executor = { workspace = true }
+    @@ -76 +76 @@ pallet-collator-selection = { workspace = true }
+    -parachain-info = { package = "staging-parachain-info", default-features = false , version = "0.8.0" }
+    +parachain-info = { workspace = true }
+    diff --git system-parachains/encointer/Cargo.toml system-parachains/encointer/Cargo.toml
+    index ed55e0f845..f66405e761 100644
+    --- system-parachains/encointer/Cargo.toml
+    +++ system-parachains/encointer/Cargo.toml
+    @@ -86,3 +86,3 @@ polkadot-runtime-common = { workspace = true }
+    -xcm = { package = "staging-xcm", default-features = false, version = "8.0.1" }
+    -xcm-builder = { package = "staging-xcm-builder", default-features = false, version = "8.0.1" }
+    -xcm-executor = { package = "staging-xcm-executor", default-features = false, version = "8.0.1" }
+    +xcm = { workspace = true }
+    +xcm-builder = { workspace = true }
+    +xcm-executor = { workspace = true }
+    @@ -100 +100 @@ cumulus-primitives-utility = { workspace = true }
+    -parachain-info = { package = "staging-parachain-info", default-features = false, version = "0.8.0" }
+    +parachain-info = { workspace = true }
+    @@ -113,2 +113,2 @@ substrate-wasm-builder = { optional = true, workspace = true }
+    -kusama-runtime-constants = { path = "../../relay/kusama/constants" }
+    -system-parachains-constants = { path = "../constants" }
+    +kusama-runtime-constants = { workspace = true, default-features = true }
+    +system-parachains-constants = { workspace = true, default-features = true }
+    diff --git system-parachains/gluttons/glutton-kusama/Cargo.toml system-parachains/gluttons/glutton-kusama/Cargo.toml
+    index e5014e173e..374c2e2e39 100644
+    --- system-parachains/gluttons/glutton-kusama/Cargo.toml
+    +++ system-parachains/gluttons/glutton-kusama/Cargo.toml
+    @@ -40,3 +40,3 @@ sp-version = { workspace = true }
+    -xcm = { package = "staging-xcm", default-features = false, version = "8.0.1" }
+    -xcm-builder = { package = "staging-xcm-builder", default-features = false, version = "8.0.1" }
+    -xcm-executor = { package = "staging-xcm-executor", default-features = false, version = "8.0.1" }
+    +xcm = { workspace = true }
+    +xcm-builder = { workspace = true }
+    +xcm-executor = { workspace = true }
+    @@ -48 +48 @@ cumulus-primitives-core = { workspace = true }
+    -parachain-info = { package = "staging-parachain-info", default-features = false , version = "0.8.0" }
+    +parachain-info = { workspace = true }
+    @@ -50 +50 @@ parachains-common = { workspace = true }
+    -system-parachains-constants = { path = "../../constants", default-features = false }
+    +system-parachains-constants = { workspace = true }
+    diff --git system-parachains/people/people-kusama/Cargo.toml system-parachains/people/people-kusama/Cargo.toml
+    index a4e7a9d11a..f603500f6c 100644
+    --- system-parachains/people/people-kusama/Cargo.toml
+    +++ system-parachains/people/people-kusama/Cargo.toml
+    @@ -58,4 +58,4 @@ polkadot-runtime-common = { workspace = true }
+    -kusama-runtime-constants = { path = "../../../relay/kusama/constants", default-features = false}
+    -xcm = { package = "staging-xcm", default-features = false, version = "8.0.1" }
+    -xcm-builder = { package = "staging-xcm-builder", default-features = false, version = "8.0.1" }
+    -xcm-executor = { package = "staging-xcm-executor", default-features = false, version = "8.0.1" }
+    +kusama-runtime-constants = { workspace = true }
+    +xcm = { workspace = true }
+    +xcm-builder = { workspace = true }
+    +xcm-executor = { workspace = true }
+    @@ -73 +73 @@ pallet-collator-selection = { workspace = true }
+    -parachain-info = { package = "staging-parachain-info", default-features = false , version = "0.8.0" }
+    +parachain-info = { workspace = true }
+    @@ -75 +75 @@ parachains-common = { workspace = true }
+    -system-parachains-constants = { path = "../../constants", default-features = false }
+    +system-parachains-constants = { workspace = true }

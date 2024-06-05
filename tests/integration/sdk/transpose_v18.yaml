@@ -273,10 +273,10 @@ cases:
     [WARN] Dependency 'westend-runtime-constants' is renamed to itself in 'westend-runtime'
   diff: |
     diff --git Cargo.toml Cargo.toml
-    index 774ce1b52a..f481296c51 100644
+    index 774ce1b52a..81417afd1a 100644
     --- Cargo.toml
     +++ Cargo.toml
-    @@ -547,0 +548,674 @@ thiserror = { version = "1.0.48" }
+    @@ -547,0 +548,675 @@ thiserror = { version = "1.0.48" }
     +Inflector = { version = "0.11.4" }
     +aes-gcm = { version = "0.10" }
     +ahash = { version = "0.8.2" }
@@ -314,6 +314,7 @@ cases:
     +async-trait = { version = "0.1.74" }
     +asynchronous-codec = { version = "0.6" }
     +backtrace = { version = "0.3.64" }
+    +bandersnatch_vrfs = { version = "*", default-features = false }
     +binary-merkle-tree = { path = "substrate/utils/binary-merkle-tree", default-features = false }
     +bincode = { version = "1.3.3" }
     +bip39 = { version = "2.0.0", default-features = false }
@@ -12952,7 +12953,7 @@ cases:
     +sp-keystore = { workspace = true, default-features = true }
     +sp-tracing = { workspace = true, default-features = true }
     diff --git substrate/frame/contracts/fixtures/Cargo.toml substrate/frame/contracts/fixtures/Cargo.toml
-    index 7fdf56a91f..52bcb6a626 100644
+    index 7fdf56a91f..aa55e081f9 100644
     --- substrate/frame/contracts/fixtures/Cargo.toml
     +++ substrate/frame/contracts/fixtures/Cargo.toml
     @@ -14 +14 @@ workspace = true
@@ -12961,18 +12962,17 @@ cases:
     @@ -17 +17 @@ sp-runtime = { path = "../../../primitives/runtime" }
     -anyhow = "1.0.0"
     +anyhow = { workspace = true }
-    @@ -20,6 +20,6 @@ anyhow = "1.0.0"
+    @@ -20,4 +20,4 @@ anyhow = "1.0.0"
     -parity-wasm = "0.45.0"
     -tempfile = "3.8.1"
     -toml = "0.8.2"
     -twox-hash = "1.6.3"
-    -polkavm-linker = { version = "0.5.0", optional = true }
-    -anyhow = "1.0.0"
     +parity-wasm = { workspace = true }
     +tempfile = { workspace = true }
     +toml = { workspace = true }
     +twox-hash = { workspace = true, default-features = true }
-    +polkavm-linker = { optional = true , workspace = true }
+    @@ -25 +25 @@ polkavm-linker = { version = "0.5.0", optional = true }
+    -anyhow = "1.0.0"
     +anyhow = { workspace = true }
     diff --git substrate/frame/contracts/mock-network/Cargo.toml substrate/frame/contracts/mock-network/Cargo.toml
     index 0c4cd1356f..d7aa08839f 100644

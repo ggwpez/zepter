@@ -50,8 +50,8 @@ zepter = { path = ".", features = ["testing"] }
 [features]
 default = [ "logging" ]
 logging = [ "dep:env_logger", "dep:log" ]
-benchmarking = [ "dep:criterion" ]
-testing = [ "dep:anyhow", "dep:assert_cmd", "dep:colour", "dep:tempfile" ]
+benchmarking = [ "dep:criterion", "dep:serde_json" ]
+testing = [ "dep:anyhow", "dep:assert_cmd", "dep:colour", "dep:tempfile", "dep:serde_json" ]
 debugging = [ "dep:histo" ]
 
 [profile.dev]

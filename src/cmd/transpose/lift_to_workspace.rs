@@ -32,6 +32,10 @@ pub struct LiftToWorkspaceCmd {
 	#[clap(long, alias = "version-resolver", value_enum, default_value_t = VersionSelectorMode::Unambiguous, requires_if("exact", "exact_version"))]
 	version_selector: VersionSelectorMode,
 
+	/// Do not try to modify this package.
+	#[clap(long)]
+	skip_package: Option<String>,
+
 	/// Optionally only check dependencies with this source location.
 	#[clap(long, value_enum)]
 	source_location: Option<SourceLocationSelector>,
@@ -173,36 +177,6 @@ impl LiftToWorkspaceCmd {
 		// them off.
 		let workspace_default_features_enabled = all_use_default_features;
 
-		for (pkg, dep) in by_version.values().flatten() {
-			if !check_can_modify(&meta.workspace_root, &pkg.manifest_path)? {
-				continue
-			}
-
-			fixers.entry(pkg.name.clone()).or_insert_with(|| {
-				(Some(pkg.clone()), AutoFixer::from_manifest(&pkg.manifest_path).unwrap())
-			});
-			let (_, fixer) = fixers.get_mut(&pkg.name).unwrap();
-			// We can safely use the rename here, since we found it with `detect_rename`.
-			let dep_name = dep.rename.as_ref().unwrap_or(&dep.name);
-			if let Some(rename) = &maybe_rename {
-				assert_eq!(rename, dep_name);
-			}
-			let Some(ref location) = source_location else {
-				return Err("Could not determine source location".to_string());
-			};
-
-			if dep.uses_default_features != workspace_default_features_enabled {
-				fixer.lift_dependency(
-					dep_name,
-					&dep.kind,
-					Some(dep.uses_default_features),
-					location,
-				)?;
-			} else {
-				fixer.lift_dependency(dep_name, &dep.kind, None, location)?;
-			}
-		}
-
 		// Now create fixer for the root package
 		let root_manifest_path = meta.workspace_root.join("Cargo.toml");
 		fixers
@@ -232,6 +206,41 @@ impl LiftToWorkspaceCmd {
 			workspace_default_features_enabled,
 			location.as_deref(),
 		)?;
+
+		for (pkg, dep) in by_version.values().flatten() {
+			if !check_can_modify(&meta.workspace_root, &pkg.manifest_path)? {
+				continue
+			}
+			if let Some(skip_package) = &self.skip_package {
+				if pkg.name == *skip_package {
+					continue
+				}
+			}
+
+			fixers.entry(pkg.name.clone()).or_insert_with(|| {
+				(Some(pkg.clone()), AutoFixer::from_manifest(&pkg.manifest_path).unwrap())
+			});
+			let (_, fixer) = fixers.get_mut(&pkg.name).unwrap();
+			// We can safely use the rename here, since we found it with `detect_rename`.
+			let dep_name = dep.rename.as_ref().unwrap_or(&dep.name);
+			if let Some(rename) = &maybe_rename {
+				assert_eq!(rename, dep_name);
+			}
+			let Some(ref location) = source_location else {
+				return Err("Could not determine source location".to_string());
+			};
+
+			if dep.uses_default_features != workspace_default_features_enabled {
+				fixer.lift_dependency(
+					dep_name,
+					&dep.kind,
+					Some(dep.uses_default_features),
+					location,
+				)?;
+			} else {
+				fixer.lift_dependency(dep_name, &dep.kind, None, location)?;
+			}
+		}
 
 		#[cfg(feature = "logging")]
 		{
@@ -277,6 +286,12 @@ impl LiftToWorkspaceCmd {
 		// TODO check that they all point to the same folder
 
 		for pkg in meta.packages.iter() {
+			if let Some(skip_package) = &self.skip_package {
+				if pkg.name == *skip_package {
+					continue
+				}
+			}
+
 			for dep in pkg.dependencies.iter() {
 				if dep.name == name {
 					if dep.path.is_some() {
@@ -312,6 +327,12 @@ impl LiftToWorkspaceCmd {
 		let mut unnrenamed = BTreeSet::<String>::new();
 
 		for pkg in meta.packages.iter() {
+			if let Some(skip_package) = &self.skip_package {
+				if pkg.name == *skip_package {
+					continue
+				}
+			}
+
 			for dep in pkg.dependencies.iter() {
 				if dep.name == name {
 					if let Some(rename) = &dep.rename {

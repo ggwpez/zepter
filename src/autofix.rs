@@ -528,7 +528,7 @@ impl AutoFixer {
 				as_table.remove("default-features");
 			}
 		} else {
-			unreachable!("Unknown kind of dependency: {:?}", dep);
+			return Err("Dependency is not a string or an inline table".into())
 		}
 		Ok(())
 	}

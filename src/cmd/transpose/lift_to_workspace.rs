@@ -187,17 +187,18 @@ impl LiftToWorkspaceCmd {
 		let mut dep = by_version.values().next().unwrap().first().unwrap().1.clone();
 		dep.req = best_version.parse().unwrap();
 
-		let location = if source_location == Some(SourceLocationSelector::Local) {
-			let Some(ref path) = dep.path else {
-				unreachable!("Could not detect local source location for '{}'", name);
-			};
-			let relative = path.strip_prefix(&meta.workspace_root).unwrap_or_else(|_| {
-				log::warn!("Dependency '{}' is not in the workspace root", name);
-				path
-			});
-			Some(relative.to_string())
-		} else {
-			None
+		let location = match source_location {
+			SourceLocationSelector::Local => {
+				let Some(ref path) = dep.path else {
+					unreachable!("Could not detect local source location for '{}'", name);
+				};
+				let relative = path.strip_prefix(&meta.workspace_root).unwrap_or_else(|_| {
+					log::warn!("Dependency '{}' is not in the workspace root", name);
+					path
+				});
+				Some(relative.to_string())
+			},
+			SourceLocationSelector::Remote => None,
 		};
 
 		workspace_fixer.add_workspace_dep(
@@ -286,12 +287,6 @@ impl LiftToWorkspaceCmd {
 		// TODO check that they all point to the same folder
 
 		for pkg in meta.packages.iter() {
-			if let Some(skip_package) = &self.skip_package {
-				if pkg.name == *skip_package {
-					continue
-				}
-			}
-
 			for dep in pkg.dependencies.iter() {
 				if dep.name == name {
 					if dep.path.is_some() {
@@ -309,11 +304,14 @@ impl LiftToWorkspaceCmd {
 				name
 			))
 		} else if local {
-			Ok(Some(SourceLocationSelector::Local))
+			Ok(SourceLocationSelector::Local)
 		} else if remote {
-			Ok(Some(SourceLocationSelector::Remote))
+			Ok(SourceLocationSelector::Remote)
 		} else {
-			Ok(None)
+			Error(format!(
+				"Dependency '{}' is not used in the workspace. This cannot be fixed automatically.",
+				name
+			))
 		}
 	}
 

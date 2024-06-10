@@ -227,9 +227,7 @@ impl LiftToWorkspaceCmd {
 			if let Some(rename) = &maybe_rename {
 				assert_eq!(rename, dep_name);
 			}
-			let Some(ref location) = source_location else {
-				return Err("Could not determine source location".to_string());
-			};
+			let ref location = source_location;
 
 			if dep.uses_default_features != workspace_default_features_enabled {
 				fixer.lift_dependency(
@@ -280,7 +278,7 @@ impl LiftToWorkspaceCmd {
 		&self,
 		meta: &cargo_metadata::Metadata,
 		name: &str,
-	) -> Result<Option<SourceLocationSelector>, String> {
+	) -> Result<SourceLocationSelector, String> {
 		let mut local = false;
 		let mut remote = false;
 
@@ -308,7 +306,7 @@ impl LiftToWorkspaceCmd {
 		} else if remote {
 			Ok(SourceLocationSelector::Remote)
 		} else {
-			Error(format!(
+			Err(format!(
 				"Dependency '{}' is not used in the workspace. This cannot be fixed automatically.",
 				name
 			))

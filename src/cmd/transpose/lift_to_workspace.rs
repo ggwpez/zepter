@@ -285,6 +285,12 @@ impl LiftToWorkspaceCmd {
 		// TODO check that they all point to the same folder
 
 		for pkg in meta.packages.iter() {
+			if let Some(skip_package) = &self.skip_package {
+				if pkg.name == *skip_package {
+					continue
+				}
+			}
+
 			for dep in pkg.dependencies.iter() {
 				if dep.name == name {
 					if dep.path.is_some() {

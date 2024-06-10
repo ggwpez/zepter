@@ -187,17 +187,18 @@ impl LiftToWorkspaceCmd {
 		let mut dep = by_version.values().next().unwrap().first().unwrap().1.clone();
 		dep.req = best_version.parse().unwrap();
 
-		let location = if source_location == Some(SourceLocationSelector::Local) {
-			let Some(ref path) = dep.path else {
-				unreachable!("Could not detect local source location for '{}'", name);
-			};
-			let relative = path.strip_prefix(&meta.workspace_root).unwrap_or_else(|_| {
-				log::warn!("Dependency '{}' is not in the workspace root", name);
-				path
-			});
-			Some(relative.to_string())
-		} else {
-			None
+		let location = match source_location {
+			SourceLocationSelector::Local => {
+				let Some(ref path) = dep.path else {
+					unreachable!("Could not detect local source location for '{}'", name);
+				};
+				let relative = path.strip_prefix(&meta.workspace_root).unwrap_or_else(|_| {
+					log::warn!("Dependency '{}' is not in the workspace root", name);
+					path
+				});
+				Some(relative.to_string())
+			},
+			SourceLocationSelector::Remote => None,
 		};
 
 		workspace_fixer.add_workspace_dep(
@@ -226,9 +227,7 @@ impl LiftToWorkspaceCmd {
 			if let Some(rename) = &maybe_rename {
 				assert_eq!(rename, dep_name);
 			}
-			let Some(ref location) = source_location else {
-				return Err("Could not determine source location".to_string());
-			};
+			let ref location = source_location;
 
 			if dep.uses_default_features != workspace_default_features_enabled {
 				fixer.lift_dependency(
@@ -279,7 +278,7 @@ impl LiftToWorkspaceCmd {
 		&self,
 		meta: &cargo_metadata::Metadata,
 		name: &str,
-	) -> Result<Option<SourceLocationSelector>, String> {
+	) -> Result<SourceLocationSelector, String> {
 		let mut local = false;
 		let mut remote = false;
 
@@ -309,11 +308,14 @@ impl LiftToWorkspaceCmd {
 				name
 			))
 		} else if local {
-			Ok(Some(SourceLocationSelector::Local))
+			Ok(SourceLocationSelector::Local)
 		} else if remote {
-			Ok(Some(SourceLocationSelector::Remote))
+			Ok(SourceLocationSelector::Remote)
 		} else {
-			Ok(None)
+			Err(format!(
+				"Dependency '{}' is not used in the workspace. This cannot be fixed automatically.",
+				name
+			))
 		}
 	}
 

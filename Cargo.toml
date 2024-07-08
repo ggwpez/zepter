@@ -31,8 +31,8 @@ itertools = "0.13.0"
 log = { version = "0.4.22", optional = true }
 regex = "1.10.5"
 semver = "1"
-serde = "1.0.203"
-serde_json = { version = "1.0.119", optional = true }
+serde = "1.0.204"
+serde_json = { version = "1.0.120", optional = true }
 serde_yaml = "0.9.34"
 tempfile = { version = "3.10.1", optional = true }
 toml_edit = "0.22.14"
@@ -44,7 +44,7 @@ lazy_static = "1.5.0"
 pretty_assertions = "1.4.0"
 rand = "0.8.5"
 rstest = "0.21.0"
-serde = "1.0.203"
+serde = "1.0.204"
 zepter = { path = ".", features = ["testing"] }
 
 [features]

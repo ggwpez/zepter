@@ -1,6 +1,6 @@
 [package]
 name = "zepter"
-version = "1.5.0"
+version = "1.5.1"
 edition = "2021"
 authors = [ "Oliver Tale-Yazdi" ]
 description = "Analyze, Fix and Format features in your Rust workspace."
@@ -35,7 +35,7 @@ serde = "1.0.204"
 serde_json = { version = "1.0.120", optional = true }
 serde_yaml = "0.9.34"
 tempfile = { version = "3.10.1", optional = true }
-toml_edit = "0.22.15"
+toml_edit = "0.22.16"
 tracing = { version = "0.1.40", optional = true }
 
 [dev-dependencies]

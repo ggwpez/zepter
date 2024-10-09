@@ -620,12 +620,15 @@ impl AutoFixer {
 
 				if let Some(local) = local {
 					if let Some(path) = found.get("path") {
-						if path.as_str().unwrap() != local {
+						let l1 = Self::sanitize_path(local);
+						let l2 = Self::sanitize_path(path.as_str().unwrap());
+
+						if l1 != l2 {
 							return Err(format!(
 								"Dependency '{}' already exists in the workspace with a different 'path' field: '{}' vs '{}'",
 								dep_name,
-								path.as_str().unwrap(),
-								local
+								local,
+								path.as_str().unwrap()
 							))
 						}
 					}
@@ -680,6 +683,10 @@ impl AutoFixer {
 		deps.insert(new_name, Item::Value(Value::InlineTable(t)));
 
 		Ok(())
+	}
+
+	fn sanitize_path(p: &str) -> String {
+		p.trim_start_matches("./").trim_end_matches("/").to_string()
 	}
 
 	pub fn remove_feature(&mut self, name: &str) {

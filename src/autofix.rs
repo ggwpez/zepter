@@ -10,6 +10,8 @@ use crate::{
 use cargo_metadata::{Dependency, DependencyKind};
 use std::{
 	collections::BTreeMap as Map,
+	fmt,
+	fmt::Display,
 	path::{Path, PathBuf},
 };
 use toml_edit::{table, value, Array, DocumentMut, Formatted, InlineTable, Item, Table, Value};
@@ -408,7 +410,7 @@ impl AutoFixer {
 		let mut new_vals = Vec::new();
 
 		for mut value in values {
-			if value.as_str().map_or(false, |s| s.is_empty()) {
+			if value.as_str().is_some_and(|s| s.is_empty()) {
 				panic!("Empty value in feature");
 			}
 			let mut prefix: String = match value.decor().prefix() {
@@ -468,7 +470,7 @@ impl AutoFixer {
 			log::warn!("No '{}' entry found", kind);
 			return Ok(())
 		}
-		let deps: &mut Table = doc[&kind].as_table_mut().unwrap();
+		let deps: &mut Table = doc[kind].as_table_mut().unwrap();
 
 		if !deps.contains_key(dname) {
 			return Ok(())
@@ -747,9 +749,9 @@ impl AutoFixer {
 	}
 }
 
-impl ToString for AutoFixer {
-	fn to_string(&self) -> String {
-		self.doc.as_ref().unwrap().to_string()
+impl Display for AutoFixer {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		write!(f, "{}", self.doc.as_ref().unwrap())
 	}
 }
 

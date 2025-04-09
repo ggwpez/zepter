@@ -105,6 +105,7 @@ impl LiftToWorkspaceCmd {
 			match self.run_for_dependency(g, &meta, dep, &mut fixers) {
 				Ok(()) => (),
 				Err(e) if self.ignore_errors => {
+					let _ = e;
 					log::error!("Failed to lift up '{}': {}", dep, e);
 				},
 				Err(e) => return Err(format!("Failed to lift up '{}': {}", dep, e)),
@@ -227,7 +228,7 @@ impl LiftToWorkspaceCmd {
 			if let Some(rename) = &maybe_rename {
 				assert_eq!(rename, dep_name);
 			}
-			let ref location = source_location;
+			let location = &source_location;
 
 			if dep.uses_default_features != workspace_default_features_enabled {
 				fixer.lift_dependency(

@@ -7,9 +7,11 @@ cases:
     [INFO] Running workflow 'check'
     [INFO] 1/2 lint propagate-feature
     [INFO] 2/2 format features
+  code: 0
 - cmd: run default
   stderr: |
     [INFO] Running workflow 'default'
     [INFO] 1/2 lint propagate-feature
     [INFO] 2/2 format features
+  code: 0
 no_default_args: true

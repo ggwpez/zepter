@@ -315,11 +315,10 @@ impl NeverImpliesCmd {
 
 				// TODO cleanup this cluster fuck
 				let lookup = |id: &str| {
+					let referenced_crate =
+						pkgs.iter().find(|pkg| pkg.id.to_string() == id).unwrap();
 					pkgs.iter()
-						.find(|pkg| {
-							pkg.id.to_string().split(' ').next().unwrap() ==
-								id.split(' ').next().unwrap()
-						})
+						.find(|pkg| pkg.id == referenced_crate.id)
 						.unwrap_or_else(|| panic!("Could not find crate '{id}' in the metadata."))
 				};
 
@@ -396,12 +395,9 @@ impl NeverEnablesCmd {
 		}
 
 		for (lhs, rhss) in offenders {
-			// TODO hack
-			println!(
-				"crate {:?}\n  feature {:?}",
-				lhs.split(' ').next().unwrap(),
-				self.precondition
-			);
+			// Find by id
+			let lhs = pkgs.iter().find(|p| p.id.to_string() == lhs).unwrap();
+			println!("crate {:?}\n  feature {:?}", lhs.name, self.precondition);
 			// TODO support multiple left/right side features.
 			println!("    enables feature {:?} on dependencies:", self.stays_disabled);
 
@@ -488,7 +484,7 @@ impl PropagateFeatureCmd {
 				if !dep.pkg.features.contains_key(&feature) {
 					continue
 				}
-				if pkg.features.get(&feature).is_none() {
+				if !pkg.features.contains_key(&feature) {
 					if self.left_side_feature_missing != MuteSetting::Ignore {
 						feature_missing.entry(pkg.id.to_string()).or_default().insert(dep);
 					}
@@ -522,13 +518,10 @@ impl PropagateFeatureCmd {
 					continue
 				}
 
-				if let Some((_, lhs_ignore)) = ignore_missing_propagate
-					.iter()
-					.find(|(c, _)| pkg.id.repr.starts_with(&format!("{} ", c.0)) && c.1 == feature)
+				if let Some((_, lhs_ignore)) =
+					ignore_missing_propagate.iter().find(|(c, _)| pkg.name == c.0 && c.1 == feature)
 				{
-					if lhs_ignore.iter().any(|i| {
-						dep.pkg.id.repr.starts_with(&format!("{} ", i.0)) && i.1 == feature
-					}) {
+					if lhs_ignore.iter().any(|i| dep.pkg.name == i.0 && i.1 == feature) {
 						continue
 					}
 				}
@@ -614,7 +607,7 @@ impl PropagateFeatureCmd {
 						let non_optional = self
 							.feature_enables_dep
 							.as_ref()
-							.map_or(false, |v| v.contains(&(feature.clone(), dep_name.clone())));
+							.is_some_and(|v| v.contains(&(feature.clone(), dep_name.clone())));
 						let opt = if !non_optional && dep.optional { "?" } else { "" };
 
 						fixer

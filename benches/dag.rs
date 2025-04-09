@@ -13,8 +13,8 @@ fn build_dag(nodes: usize, edges: usize) -> Dag<usize> {
 		dag.add_node(i);
 	}
 	for _ in 0..edges {
-		let from = rng.gen_range(0..nodes);
-		let to = rng.gen_range(0..nodes);
+		let from = rng.random_range(0..nodes);
+		let to = rng.random_range(0..nodes);
 		dag.add_edge(from, to);
 	}
 	dag

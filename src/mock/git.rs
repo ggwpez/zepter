@@ -108,7 +108,7 @@ pub fn clone_repo(repo: &str, rev: &str) -> Result<PathBuf, anyhow::Error> {
 		cmd.arg("remote");
 		cmd.arg("add");
 		cmd.arg("origin");
-		cmd.arg(&format!("https://github.com/{}", repo));
+		cmd.arg(format!("https://github.com/{}", repo));
 		cmd.assert().try_success()?;
 
 		fetch(&dir, rev)?;

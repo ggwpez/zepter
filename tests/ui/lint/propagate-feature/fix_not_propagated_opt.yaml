@@ -16,7 +16,7 @@ cases:
         must propagate to:
           B
     Found 1 issue and fixed 1 (all fixed).
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 0311ca0ed0..258ff5172a 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -17,0 +18 @@ F0 = [\n+\t\"B?/F0\"\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 3332f79684..3dee770310 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -15,0 +16 @@ F0 = [\n+\t\"B?/F0\"\n"
 - cmd: lint propagate-feature -p A --feature F0 --fix
   stdout: |
     crate 'A'
@@ -24,7 +24,7 @@ cases:
         must propagate to:
           B
     Found 1 issue and fixed 1 (all fixed).
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 0311ca0ed0..258ff5172a 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -17,0 +18 @@ F0 = [\n+\t\"B?/F0\"\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 3332f79684..3dee770310 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -15,0 +16 @@ F0 = [\n+\t\"B?/F0\"\n"
 - cmd: lint propagate-feature -p B --feature F0 --fix
 - cmd: lint propagate-feature -p B --feature F1 --fix
 - cmd: lint propagate-feature --feature F0 --workspace --fix
@@ -34,7 +34,7 @@ cases:
         must propagate to:
           B
     Found 1 issue and fixed 1 (all fixed).
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 0311ca0ed0..258ff5172a 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -17,0 +18 @@ F0 = [\n+\t\"B?/F0\"\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 3332f79684..3dee770310 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -15,0 +16 @@ F0 = [\n+\t\"B?/F0\"\n"
 - cmd: lint propagate-feature -p A --feature F0 --workspace --fix
   stdout: |
     crate 'A'
@@ -42,6 +42,6 @@ cases:
         must propagate to:
           B
     Found 1 issue and fixed 1 (all fixed).
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 0311ca0ed0..258ff5172a 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -17,0 +18 @@ F0 = [\n+\t\"B?/F0\"\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 3332f79684..3dee770310 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -15,0 +16 @@ F0 = [\n+\t\"B?/F0\"\n"
 - cmd: lint propagate-feature -p B --feature F0 --workspace --fix
 - cmd: lint propagate-feature -p B --feature F1 --workspace --fix

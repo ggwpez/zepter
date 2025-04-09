@@ -21,7 +21,7 @@ cases:
         must propagate to:
           C
     Found 1 issue and fixed 1 (all fixed).
-  diff: "diff --git B/Cargo.toml B/Cargo.toml\nindex 446c68117a..2b4001fa1a 100644\n--- B/Cargo.toml\n+++ B/Cargo.toml\n@@ -17,0 +18 @@ F0 = [\n+\t\"C/F0\"\n"
+  diff: "diff --git B/Cargo.toml B/Cargo.toml\nindex 27e98ccfef..f5bb28facb 100644\n--- B/Cargo.toml\n+++ B/Cargo.toml\n@@ -15,0 +16 @@ F0 = [\n+\t\"C/F0\"\n"
 - cmd: lint propagate-feature --feature F0 --fix --ignore-missing-propagate=B/F0:C/F0
   stdout: |
     crate 'A'
@@ -29,7 +29,7 @@ cases:
         must propagate to:
           B
     Found 1 issue and fixed 1 (all fixed).
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex f0ab897a16..b3e6c0e7eb 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -17,0 +18 @@ F0 = [\n+\t\"B/F0\"\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex b2b4a461c2..8256aa1ec4 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -15,0 +16 @@ F0 = [\n+\t\"B/F0\"\n"
 - cmd: lint propagate-feature --feature F0 --fix --ignore-missing-propagate=A/F0:C/F0
   stdout: |
     crate 'A'
@@ -41,4 +41,4 @@ cases:
         must propagate to:
           C
     Found 2 issues and fixed 2 (all fixed).
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex f0ab897a16..b3e6c0e7eb 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -17,0 +18 @@ F0 = [\n+\t\"B/F0\"\ndiff --git B/Cargo.toml B/Cargo.toml\nindex 446c68117a..2b4001fa1a 100644\n--- B/Cargo.toml\n+++ B/Cargo.toml\n@@ -17,0 +18 @@ F0 = [\n+\t\"C/F0\"\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex b2b4a461c2..8256aa1ec4 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -15,0 +16 @@ F0 = [\n+\t\"B/F0\"\ndiff --git B/Cargo.toml B/Cargo.toml\nindex 27e98ccfef..f5bb28facb 100644\n--- B/Cargo.toml\n+++ B/Cargo.toml\n@@ -15,0 +16 @@ F0 = [\n+\t\"C/F0\"\n"

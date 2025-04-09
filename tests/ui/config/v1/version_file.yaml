@@ -2,7 +2,8 @@ crates:
 - name: A
 cases:
 - cmd: run default
-  stderr: |
+  stderr: |2
+
     thread 'main' panicked at src/cmd/run.rs:27:46:
     Invalid config file: "Can only parse workflow files with version '1'"
     note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

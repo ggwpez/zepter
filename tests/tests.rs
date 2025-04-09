@@ -174,7 +174,7 @@ fn integration() {
 		}
 	}
 	if failed == 0 && good == 0 {
-		panic!("No tests found");
+		panic!("No tests found. Try something like '**/never-enables/diamond.yaml'");
 	}
 	println!();
 }

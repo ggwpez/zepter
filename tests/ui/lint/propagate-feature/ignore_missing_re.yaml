@@ -17,4 +17,4 @@ cases:
         must propagate to:
           b (renamed from B)
     Found 1 issue and fixed 1 (all fixed).
-  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 1e5203c165..a1453d283c 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -17,0 +18 @@ F0 = [\n+\t\"b/F0\"\n"
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex a185683e4e..e715061b54 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -15,0 +16 @@ F0 = [\n+\t\"b/F0\"\n"

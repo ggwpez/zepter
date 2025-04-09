@@ -3,38 +3,13 @@ repo:
   ref: c86b633695299ed27053940d5ea5c5a2392964b3
 cases:
 - cmd: run check
-  stdout: |
-    crate 'sp-core' (/Users/vados/Documents/work/zepter/target/test-repos/paritytech/polkadot-sdk/substrate/primitives/core/Cargo.toml)
-      feature 'std'
-        must propagate to:
-          bandersnatch_vrfs
-    Found 1 issue.
-    Error: Command 'lint propagate-feature' failed with exit code 1
-
-    Polkadot-SDK uses the Zepter CLI to detect abnormalities in the feature configuration.
-    It looks like one more more checks failed; please check the console output. You can try to automatically address them by running `zepter`.
-    Otherwise please ask directly in the Merge Request, GitHub Discussions or on Matrix Chat, thank you.
-
-    For more information, see:
-      - https://github.com/paritytech/polkadot-sdk/issues/1831
-      - https://github.com/ggwpez/zepter
   stderr: |
     [INFO] Running workflow 'check'
-  code: 1
+  code: 0
 - cmd: run default
-  stdout: |
-    crate 'sp-core' (/Users/vados/Documents/work/zepter/target/test-repos/paritytech/polkadot-sdk/substrate/primitives/core/Cargo.toml)
-      feature 'std'
-        must propagate to:
-          bandersnatch_vrfs
-    Found 1 issue and fixed 1 (all fixed).
-    Found 1 crate with unformatted features:
-      sp-core
-    Formatted 1 crate (all fixed).
   stderr: |
     [INFO] Running workflow 'default'
     [INFO] 1/2 lint propagate-feature
     [INFO] 2/2 format features
   code: 0
-  diff: "diff --git substrate/primitives/core/Cargo.toml substrate/primitives/core/Cargo.toml\nindex 1b6b10eeee..c09916e389 100644\n--- substrate/primitives/core/Cargo.toml\n+++ substrate/primitives/core/Cargo.toml\n@@ -78,0 +79 @@ std = [\n+\t\"bandersnatch_vrfs?/std\",\n"
 no_default_args: true

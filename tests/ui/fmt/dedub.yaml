@@ -20,20 +20,20 @@ cases:
     Formatted 2 crates (all fixed).
   diff: |
     diff --git A/Cargo.toml A/Cargo.toml
-    index 78c5769bd7..8a27508a42 100644
+    index abe9319f17..1368faef82 100644
     --- A/Cargo.toml
     +++ A/Cargo.toml
-    @@ -17,4 +17 @@ B = { version = "*", path = "../B"}
+    @@ -15,4 +15 @@ B = { version = "*", path = "../B"}
     -F0 = [
     -"B/F0",
     -"B/F0",
     -]
     +F0 = [ "B/F0" ]
     diff --git B/Cargo.toml B/Cargo.toml
-    index 3fa22af3e1..db61ce3b2d 100644
+    index e52ef09a77..53767a7726 100644
     --- B/Cargo.toml
     +++ B/Cargo.toml
-    @@ -16,2 +16 @@ edition = "2021"
+    @@ -14,2 +14 @@ edition = "2021"
     -F0 = [
     -]
     +F0 = []

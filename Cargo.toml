@@ -1,6 +1,6 @@
 [package]
 name = "zepter"
-version = "1.5.1"
+version = "1.78.0"
 edition = "2021"
 authors = [ "Oliver Tale-Yazdi" ]
 description = "Analyze, Fix and Format features in your Rust workspace."

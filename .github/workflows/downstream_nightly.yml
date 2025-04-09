@@ -32,6 +32,8 @@ jobs:
       with:
         repository: ${{ matrix.repo }}
         fetch-depth: 1
+
+    - uses: actions-rust-lang/setup-rust-toolchain@v1
     
     - name: Install
       run: cargo install zepter --version '${{ matrix.version }}' -f --locked -q --no-default-features

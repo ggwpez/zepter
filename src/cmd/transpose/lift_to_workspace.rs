@@ -105,6 +105,7 @@ impl LiftToWorkspaceCmd {
 			match self.run_for_dependency(g, &meta, dep, &mut fixers) {
 				Ok(()) => (),
 				Err(e) if self.ignore_errors => {
+					let _ = e;
 					log::error!("Failed to lift up '{}': {}", dep, e);
 				},
 				Err(e) => return Err(format!("Failed to lift up '{}': {}", dep, e)),

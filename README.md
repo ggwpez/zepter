@@ -51,7 +51,7 @@ update some dependencies by pulling them up. To get around this and actually do 
 zepter transpose dependency lift-to-workspace "regex:^serde.*" --ignore-errors --fix --version-resolver=highest
 ```
 
-This will try to select the "highest" SemVer version of each crate.
+This will try to select the "highest" `SemVer` version of each crate.
 
 ## Example - Feature Formatting
 

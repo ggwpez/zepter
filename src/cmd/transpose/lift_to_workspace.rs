@@ -227,7 +227,7 @@ impl LiftToWorkspaceCmd {
 			if let Some(rename) = &maybe_rename {
 				assert_eq!(rename, dep_name);
 			}
-			let ref location = source_location;
+			let location = &source_location;
 
 			if dep.uses_default_features != workspace_default_features_enabled {
 				fixer.lift_dependency(

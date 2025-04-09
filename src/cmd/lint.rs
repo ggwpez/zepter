@@ -484,7 +484,7 @@ impl PropagateFeatureCmd {
 				if !dep.pkg.features.contains_key(&feature) {
 					continue
 				}
-				if pkg.features.get(&feature).is_none() {
+				if !pkg.features.contains_key(&feature) {
 					if self.left_side_feature_missing != MuteSetting::Ignore {
 						feature_missing.entry(pkg.id.to_string()).or_default().insert(dep);
 					}
@@ -607,7 +607,7 @@ impl PropagateFeatureCmd {
 						let non_optional = self
 							.feature_enables_dep
 							.as_ref()
-							.map_or(false, |v| v.contains(&(feature.clone(), dep_name.clone())));
+							.is_some_and(|v| v.contains(&(feature.clone(), dep_name.clone())));
 						let opt = if !non_optional && dep.optional { "?" } else { "" };
 
 						fixer

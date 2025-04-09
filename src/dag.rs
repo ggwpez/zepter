@@ -150,7 +150,7 @@ where
 	///
 	/// *Directly* means with via an edge.
 	pub fn adjacent(&self, from: &T, to: &T) -> bool {
-		self.edges.get(from).map_or(false, |v| v.contains(to))
+		self.edges.get(from).is_some_and(|v| v.contains(to))
 	}
 
 	/// Whether `from` is reachable to `to` via.

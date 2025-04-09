@@ -39,4 +39,4 @@ jobs:
         cargo clippy --all-targets --no-default-features -q
 
     - name: Format
-      run: cargo fmt --check
+      run: cargo +nightly fmt --check

@@ -16,7 +16,7 @@ cases:
   code: 0
   diff: |
     diff --git A/Cargo.toml A/Cargo.toml
-    index d2ffd1442c..9e0240b25f 100644
+    index 7f2ba2ef51..197e942470 100644
     --- A/Cargo.toml
     +++ A/Cargo.toml
     @@ -14,0 +15 @@ B = { version = "*", path = "../B"}
@@ -31,7 +31,7 @@ cases:
   code: 0
   diff: |
     diff --git A/Cargo.toml A/Cargo.toml
-    index d2ffd1442c..9e0240b25f 100644
+    index 7f2ba2ef51..197e942470 100644
     --- A/Cargo.toml
     +++ A/Cargo.toml
     @@ -14,0 +15 @@ B = { version = "*", path = "../B"}

@@ -23,7 +23,7 @@ cases:
     [INFO] 1/1 f f
   diff: |
     diff --git A/Cargo.toml A/Cargo.toml
-    index abe9319f17..1368faef82 100644
+    index eba55cd80c..8849621452 100644
     --- A/Cargo.toml
     +++ A/Cargo.toml
     @@ -15,4 +15 @@ B = { version = "*", path = "../B"}
@@ -33,10 +33,10 @@ cases:
     -]
     +F0 = [ "B/F0" ]
     diff --git B/Cargo.toml B/Cargo.toml
-    index e52ef09a77..53767a7726 100644
+    index 195f3af664..4f68eee744 100644
     --- B/Cargo.toml
     +++ B/Cargo.toml
-    @@ -14,2 +14 @@ edition = "2021"
+    @@ -14,2 +14 @@ edition = "2024"
     -F0 = [
     -]
     +F0 = []
@@ -60,7 +60,7 @@ cases:
     [INFO] 1/1 f f
   diff: |
     diff --git A/Cargo.toml A/Cargo.toml
-    index abe9319f17..1368faef82 100644
+    index eba55cd80c..8849621452 100644
     --- A/Cargo.toml
     +++ A/Cargo.toml
     @@ -15,4 +15 @@ B = { version = "*", path = "../B"}
@@ -70,10 +70,10 @@ cases:
     -]
     +F0 = [ "B/F0" ]
     diff --git B/Cargo.toml B/Cargo.toml
-    index e52ef09a77..53767a7726 100644
+    index 195f3af664..4f68eee744 100644
     --- B/Cargo.toml
     +++ B/Cargo.toml
-    @@ -14,2 +14 @@ edition = "2021"
+    @@ -14,2 +14 @@ edition = "2024"
     -F0 = [
     -]
     +F0 = []

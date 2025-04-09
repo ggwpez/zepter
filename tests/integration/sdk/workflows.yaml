@@ -5,6 +5,8 @@ cases:
 - cmd: run check
   stderr: |
     [INFO] Running workflow 'check'
+    [INFO] 1/2 lint propagate-feature
+    [INFO] 2/2 format features
   code: 0
 - cmd: run default
   stderr: |

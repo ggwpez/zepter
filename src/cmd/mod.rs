@@ -370,7 +370,7 @@ pub(crate) fn check_can_modify<P: AsRef<Path>>(root: P, modify: P) -> Result<boo
 	let modify = canonicalize(modify).err_to_str()?;
 
 	if !modify.starts_with(&root) {
-		format!(
+		println!(
 			"Path is outside of the workspace: {:?} (not in {:?})",
 			modify.display(),
 			root.display()

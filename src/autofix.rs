@@ -10,8 +10,9 @@ use crate::{
 use cargo_metadata::{Dependency, DependencyKind};
 use std::{
 	collections::BTreeMap as Map,
+	fmt,
+	fmt::Display,
 	path::{Path, PathBuf},
-	fmt, fmt::Display,
 };
 use toml_edit::{table, value, Array, DocumentMut, Formatted, InlineTable, Item, Table, Value};
 

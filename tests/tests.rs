@@ -9,6 +9,9 @@ use zepter::mock::*;
 #[test]
 #[ignore]
 fn integration() {
+	// Set backtrace since it appears in the UI test output
+	std::env::set_var("RUST_BACKTRACE", "0");
+
 	let filter = std::env::var("UI_FILTER").unwrap_or_else(|_| "**/*.yaml".into());
 	let regex = format!("tests/{}", filter);
 	// Loop through all files in tests/ recursively

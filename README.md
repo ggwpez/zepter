@@ -16,7 +16,7 @@ cargo install zepter -f --locked
 ## Commands
 
 zepter
-- : this is the same as `run`.
+- *no args*: this is the same as `run`.
 - run: Run a workflow from the config file. Uses `default` if none is specified.
 - format
   - features: Format features layout and remove duplicates.
@@ -31,6 +31,14 @@ zepter
 - transpose *(⚠️ unstable)*
   - dependency
     - lift-to-workspace: Lifts crate dependencies to the workspace.
+
+## Used By
+
+(Usage does not imply endorsement)
+
+- [alloy-rs/alloy](https://github.com/alloy-rs/alloy/blob/main/.config/zepter.yaml)
+- [paradigmxyz/reth](https://github.com/paradigmxyz/reth/blob/main/.config/zepter.yaml)
+- [paritytech/polkadot-sdk](https://github.com/paritytech/polkadot-sdk/blob/master/.config/zepter.yaml)
 
 ## Example - Using Workspace dependencies
 

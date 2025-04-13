@@ -1,0 +1,13 @@
+repo:
+  name: alloy-rs/alloy
+  ref: 8ef44f253609a2951846caa6514ee760656b30e2
+cases:
+- cmd: run default
+  stderr: |
+    [INFO] Running workflow 'default'
+    [INFO] 1/1 lint propagate-feature
+- cmd: run check
+  stderr: |
+    [INFO] Running workflow 'check'
+    [INFO] 1/1 lint propagate-feature
+no_default_args: true

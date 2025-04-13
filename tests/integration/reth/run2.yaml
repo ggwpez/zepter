@@ -1,0 +1,13 @@
+repo:
+  name: paradigmxyz/reth
+  ref: 8d51c608ce9c27f18411928fc3b1d61252bf9f1a
+cases:
+- cmd: run default
+  stderr: |
+    [INFO] Running workflow 'default'
+    [INFO] 1/1 lint propagate-feature
+- cmd: run check
+  stderr: |
+    [INFO] Running workflow 'check'
+    [INFO] 1/1 lint propagate-feature
+no_default_args: true

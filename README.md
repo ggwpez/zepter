@@ -39,6 +39,7 @@ zepter
 - [alloy-rs/alloy](https://github.com/alloy-rs/alloy/blob/main/.config/zepter.yaml)
 - [paradigmxyz/reth](https://github.com/paradigmxyz/reth/blob/main/.config/zepter.yaml)
 - [paritytech/polkadot-sdk](https://github.com/paritytech/polkadot-sdk/blob/master/.config/zepter.yaml)
+- - [chainflip-io/chainflip-backend](https://github.com/chainflip-io/chainflip-backend/blob/main/.zepter.yaml)
 
 ## Example - Using Workspace dependencies
 

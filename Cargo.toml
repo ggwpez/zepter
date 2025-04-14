@@ -18,11 +18,11 @@ harness = false
 required-features = [ "benchmarking" ]
 
 [dependencies]
-anyhow = { version = "1.0.97", optional = true }
+anyhow = { version = "1.0.98", optional = true }
 assert_cmd = { version = "2.0.16", optional = true }
 camino = "1.1.9"
 cargo_metadata = "0.19.2"
-clap = { version = "4.5.35", features = ["derive", "cargo"] }
+clap = { version = "4.5.36", features = ["derive", "cargo"] }
 colour = { version = "2.1.0", optional = true }
 criterion = { version = "0.5", optional = true }
 env_logger = { version = "0.11.8", features = [ "auto-color", "humantime" ], optional = true }

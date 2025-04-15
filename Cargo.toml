@@ -8,6 +8,8 @@ license = "GPL-3.0-only"
 repository = "https://github.com/ggwpez/zepter"
 # Update the README if you change this:
 rust-version = "1.78"
+keywords = ["features", "linting", "formatting"]
+categories = ["development-tools"]
 
 [[bin]]
 name = "zepter"
@@ -33,7 +35,7 @@ regex = "1.11.1"
 semver = "1"
 serde = "1.0.219"
 serde_json = { version = "1.0.140", optional = true }
-serde_yaml = "0.9.34"
+serde_yaml_ng = "0.10.0"
 tempfile = { version = "3.19.1", optional = true }
 toml_edit = "0.22.24"
 tracing = { version = "0.1.41", optional = true }

@@ -92,8 +92,8 @@ impl CaseFile {
 		let mut fd = fs::File::create(path).unwrap();
 
 		match self {
-			CaseFile::Ui(ui) => serde_yaml::to_writer(&mut fd, &ui),
-			CaseFile::Integration(integration) => serde_yaml::to_writer(&mut fd, &integration),
+			CaseFile::Ui(ui) => serde_yaml_ng::to_writer(&mut fd, &ui),
+			CaseFile::Integration(integration) => serde_yaml_ng::to_writer(&mut fd, &integration),
 		}
 		.map_err(|e| anyhow::anyhow!("Failed to write case file: {}", e))
 	}
@@ -158,7 +158,7 @@ impl UiCaseFile {
 	pub fn from_file(path: &Path) -> Result<Self, anyhow::Error> {
 		let content = fs::read_to_string(path)?;
 		let content = content.replace('\t', "  ");
-		serde_yaml::from_str(&content).map_err(|e| anyhow::anyhow!("Failed to parse: {}", e))
+		serde_yaml_ng::from_str(&content).map_err(|e| anyhow::anyhow!("Failed to parse: {}", e))
 	}
 
 	fn generate_config(&self, root: &Path) -> Result<(), anyhow::Error> {
@@ -187,7 +187,7 @@ impl IntegrationCaseFile {
 	pub fn from_file(path: &Path) -> Result<Self, anyhow::Error> {
 		let content = fs::read_to_string(path)?;
 		let content = content.replace('\t', "  ");
-		serde_yaml::from_str(&content).map_err(|e| anyhow::anyhow!("Failed to parse: {}", e))
+		serde_yaml_ng::from_str(&content).map_err(|e| anyhow::anyhow!("Failed to parse: {}", e))
 	}
 
 	pub fn init(&self) -> Result<PathBuf, anyhow::Error> {

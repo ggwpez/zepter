@@ -134,7 +134,7 @@ pub struct PropagateFeatureCmd {
 	cargo_args: super::CargoArgs,
 
 	/// Comma separated list of features to check.
-	/// 
+	///
 	/// Listing the same feature multiple times has the same effect as listing it once.
 	#[clap(long, alias = "feature", value_delimiter = ',', required = true)]
 	features: Vec<String>,

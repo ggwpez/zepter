@@ -1,0 +1,39 @@
+# Fix feature issue, but the same feature is listed multiple times.
+crates:
+- name: A
+  deps:
+  - B
+- name: B
+  features:
+    F0: null
+cases:
+- cmd: lint propagate-feature --feature F0,F0 --fix
+  stdout: |
+    crate 'A'
+      feature 'F0'
+        is required by 1 dependency:
+          B
+    Found 1 issue and fixed 1 (all fixed).
+  code: 0
+  diff: |
+    diff --git A/Cargo.toml A/Cargo.toml
+    index 7f2ba2ef51..197e942470 100644
+    --- A/Cargo.toml
+    +++ A/Cargo.toml
+    @@ -14,0 +15 @@ B = { version = "*", path = "../B"}
+    +F0 = []
+- cmd: lint propagate-feature --feature F0,F0,F0 --workspace --fix
+  stdout: |
+    crate 'A'
+      feature 'F0'
+        is required by 1 dependency:
+          B
+    Found 1 issue and fixed 1 (all fixed).
+  code: 0
+  diff: |
+    diff --git A/Cargo.toml A/Cargo.toml
+    index 7f2ba2ef51..197e942470 100644
+    --- A/Cargo.toml
+    +++ A/Cargo.toml
+    @@ -14,0 +15 @@ B = { version = "*", path = "../B"}
+    +F0 = []

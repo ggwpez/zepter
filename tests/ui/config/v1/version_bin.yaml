@@ -5,7 +5,7 @@ cases:
   stderr: |2
 
     thread 'main' panicked at src/cmd/run.rs:27:46:
-    Invalid config file: "Config file version is too new. The file requires at least version 2.0.0, but the current version is 1.78.1. Please update Zepter or ignore this check with `--check-cfg-compatibility=off`."
+    Invalid config file: "Config file version is too new. The file requires at least version 2.0.0, but the current version is 1.78.2. Please update Zepter or ignore this check with `--check-cfg-compatibility=off`."
     note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
   code: 101
 - cmd: run default --check-cfg-compatibility=off
@@ -15,7 +15,7 @@ cases:
     [INFO] Running workflow 'default'
 
     thread 'main' panicked at src/cmd/run.rs:27:46:
-    Invalid config file: "Config file version is too new. The file requires at least version 2.0.0, but the current version is 1.78.1. Please update Zepter or ignore this check with `--check-cfg-compatibility=off`."
+    Invalid config file: "Config file version is too new. The file requires at least version 2.0.0, but the current version is 1.78.2. Please update Zepter or ignore this check with `--check-cfg-compatibility=off`."
     note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
   code: 1
 configs:

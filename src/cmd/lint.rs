@@ -133,7 +133,9 @@ pub struct PropagateFeatureCmd {
 	#[clap(flatten)]
 	cargo_args: super::CargoArgs,
 
-	/// The feature to check.
+	/// Comma separated list of features to check.
+	///
+	/// Listing the same feature multiple times has the same effect as listing it once.
 	#[clap(long, alias = "feature", value_delimiter = ',', required = true)]
 	features: Vec<String>,
 
@@ -419,8 +421,9 @@ impl PropagateFeatureCmd {
 	pub fn run(&self, global: &GlobalArgs) -> Result<(), String> {
 		let meta = self.cargo_args.load_metadata()?;
 		let dag = build_feature_dag(&meta, &meta.packages);
+		let features = self.features.iter().collect::<BTreeSet<_>>();
 
-		for feature in self.features.iter() {
+		for feature in features.into_iter() {
 			self.run_feature(&meta, &dag, feature.clone(), global);
 		}
 

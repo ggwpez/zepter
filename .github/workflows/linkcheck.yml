@@ -40,5 +40,5 @@ jobs:
       - name: Link Checker
         uses: lycheeverse/lychee-action@v1.8.0
         with:
-          args: "--verbose --cache --max-cache-age 1d ."
+          args: "--verbose --cache --max-cache-age 1d . --accept 200,429"
           fail: true

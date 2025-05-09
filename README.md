@@ -24,22 +24,23 @@ zepter
 - lint
   - propagate-features: Check that features are passed down.
   - never-enables: A feature should never enable another other.
-  - never-implies *(⚠️ unstable)*: A feature should never transitively imply another one.
-  - only-enables *(⚠️ unstable)*: A features should exclusively enable another one.
-  - why-enables *(⚠️ unstable)*: Find out why a specific feature is enables.
-- debug: *(⚠️ unstable)* just for quick debugging some stuff.
-- transpose *(⚠️ unstable)*
+  - never-implies *(unstable)*: A feature should never transitively imply another one.
+  - only-enables *(unstable)*: A features should exclusively enable another one.
+  - why-enables *(unstable)*: Find out why a specific feature is enables.
+- debug: *(unstable)* just for quick debugging some stuff.
+- transpose *(unstable)*
   - dependency
     - lift-to-workspace: Lifts crate dependencies to the workspace.
 
 ## Used By
 
-(Usage does not imply endorsement)
+(Usage does not mean endorsement)
 
-- [alloy-rs/alloy](https://github.com/alloy-rs/alloy/blob/main/.config/zepter.yaml)
-- [paradigmxyz/reth](https://github.com/paradigmxyz/reth/blob/main/.config/zepter.yaml)
-- [paritytech/polkadot-sdk](https://github.com/paritytech/polkadot-sdk/blob/master/.config/zepter.yaml)
-- [chainflip-io/chainflip-backend](https://github.com/chainflip-io/chainflip-backend/blob/main/.zepter.yaml)
+- [alloy-rs/alloy](https://github.com/alloy-rs/alloy/blob/833f9a22ca7c30079d64554d435561877c15267a/.config/zepter.yaml)
+- [paradigmxyz/reth](https://github.com/paradigmxyz/reth/blob/8e7684d49db571891a265239faf8d462e92b23f0/.config/zepter.yaml)
+- [flashbots/rbuilder](https://github.com/flashbots/rbuilder/blob/d22c29b894702d0774e64af70d277ae7bde1da22/zepter.yaml)
+- [paritytech/polkadot-sdk](https://github.com/paritytech/polkadot-sdk/blob/4b83d24f4bc96a7b17964be94b178dd7b8f873b5/.config/zepter.yaml)
+- [chainflip-io/chainflip-backend](https://github.com/chainflip-io/chainflip-backend/blob/a9d15356dc2e41ea953baa4a0ba4c28e4f2c8b40/.zepter.yaml)
 
 ## Example - Using Workspace dependencies
 

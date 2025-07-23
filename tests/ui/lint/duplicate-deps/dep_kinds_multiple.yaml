@@ -1,0 +1,37 @@
+crates:
+- name: A
+  deps:
+  - name: BD
+    kind: dev
+  - name: BD
+    kind: build
+  features:
+    F0: null
+- name: B
+  deps:
+  - name: ND
+  - name: ND
+    kind: dev
+  features:
+    F0: null
+- name: C
+  deps:
+  - name: NB
+  - name: NB
+    kind: build
+  features:
+    F0: null
+- name: BD
+  features:
+    F0: null
+- name: ND
+  features:
+    F0: null
+- name: NB
+  features:
+    F0: null
+cases:
+- cmd: lint duplicate-deps
+  stdout: |
+    Package `B` has duplicated `ND` in both [dependencies] and [dev-dependencies]
+  code: 1

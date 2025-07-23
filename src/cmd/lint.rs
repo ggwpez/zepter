@@ -20,7 +20,7 @@ use core::{
 	fmt::{Display, Formatter},
 };
 use std::{
-	collections::{BTreeMap, BTreeSet, HashMap},
+	collections::{BTreeMap, BTreeSet, HashMap, HashSet},
 	fs::canonicalize,
 	path::PathBuf,
 };
@@ -48,6 +48,8 @@ pub enum SubCommand {
 	WhyEnabled(WhyEnabledCmd),
 	/// Check the crates for sane no-std feature configuration.
 	NoStd(NoStdCmd),
+	/// Check for duplicated dependencies in `[dependencies]` and `[dev-dependencies]`.
+	DuplicateDeps(DuplicateDepsCmd),
 }
 
 #[derive(Debug, clap::Parser)]
@@ -280,6 +282,10 @@ impl LintCmd {
 				Ok(())
 			},
 			SubCommand::NoStd(cmd) => cmd.run(global),
+			SubCommand::DuplicateDeps(cmd) => {
+				cmd.run(global);
+				Ok(())
+			},
 		}
 	}
 }
@@ -795,6 +801,57 @@ impl WhyEnabledCmd {
 	}
 }
 
+#[derive(Debug, clap::Parser)]
+pub struct DuplicateDepsCmd {
+	#[allow(missing_docs)]
+	#[clap(flatten)]
+	cargo_args: super::CargoArgs,
+}
+
+impl DuplicateDepsCmd {
+	pub fn run(&self, _global: &GlobalArgs) {
+		// To easily compare dependencies, we normalize them by removing the kind.
+		fn normalize_dep(dep: &cargo_metadata::Dependency) -> cargo_metadata::Dependency {
+			let mut dep = dep.clone();
+			dep.kind = cargo_metadata::DependencyKind::Unknown;
+			dep
+		}
+
+		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
+
+		let mut issues = vec![];
+
+		for pkg in &meta.workspace_packages() {
+			let deps: HashSet<_> = pkg
+				.dependencies
+				.iter()
+				.filter(|d| d.kind == cargo_metadata::DependencyKind::Normal)
+				.map(normalize_dep)
+				.collect();
+
+			let dev_deps: HashSet<_> = pkg
+				.dependencies
+				.iter()
+				.filter(|d| d.kind == cargo_metadata::DependencyKind::Development)
+				.map(normalize_dep)
+				.collect();
+
+			for dep in deps.intersection(&dev_deps) {
+				issues.push(format!(
+					"Package `{}` has duplicated `{}` in both [dependencies] and [dev-dependencies]",
+					pkg.name, dep.name
+				));
+			}
+		}
+
+		if !issues.is_empty() {
+			for issue in issues {
+				println!("{issue}");
+			}
+			std::process::exit(1);
+		}
+	}
+}
 // Complexity is `O(x ^ 4) with x=pkgs.len()`.
 pub fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeature> {
 	let mut dag = Dag::new();

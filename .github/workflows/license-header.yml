@@ -12,7 +12,7 @@ on:
 
 jobs:
   header:
-    runs-on: depot-ubuntu-24.04
+    runs-on: self-hosted
 
     steps:
     - uses: actions/checkout@v3

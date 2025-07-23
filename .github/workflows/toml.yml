@@ -16,7 +16,7 @@ env:
 jobs:
   lint:
     name: "Lint"
-    runs-on: depot-ubuntu-24.04
+    runs-on: self-hosted
 
     steps:
       - uses: actions/checkout@v2

@@ -19,9 +19,8 @@ use core::{
 	fmt,
 	fmt::{Display, Formatter},
 };
-use std::collections::HashSet;
 use std::{
-	collections::{BTreeMap, BTreeSet, HashMap},
+	collections::{BTreeMap, BTreeSet, HashMap, HashSet},
 	fs::canonicalize,
 	path::PathBuf,
 };
@@ -319,7 +318,7 @@ impl NeverImpliesCmd {
 						enabled == &self.stays_disabled
 					})
 				else {
-					continue;
+					continue
 				};
 
 				// TODO cleanup this cluster fuck
@@ -475,30 +474,30 @@ impl PropagateFeatureCmd {
 			// TODO that it does not enable other features.
 			let in_workspace = meta.workspace_members.iter().any(|m| m == &pkg.id);
 			if !in_workspace && self.left_side_outside_workspace == MuteSetting::Ignore {
-				continue;
+				continue
 			}
 
 			for dep in pkg.dependencies.iter() {
 				let mute = dep_kinds.get(&dep.kind).unwrap_or(&IgnoreSetting::Check);
 				if mute == &IgnoreSetting::Ignore {
-					continue;
+					continue
 				}
 				// TODO handle default features.
 				// Resolve the dep according to the metadata.
 				let Some(dep) = resolve_dep(pkg, dep, meta) else {
 					// Either outside workspace or not resolved, possibly due to not being used at
 					// all because of the target or whatever.
-					continue;
+					continue
 				};
 
 				if !dep.pkg.features.contains_key(&feature) {
-					continue;
+					continue
 				}
 				if !pkg.features.contains_key(&feature) {
 					if self.left_side_feature_missing != MuteSetting::Ignore {
 						feature_missing.entry(pkg.id.to_string()).or_default().insert(dep);
 					}
-					continue;
+					continue
 				}
 
 				// TODO check that optional deps are only enabled as optional unless
@@ -509,7 +508,7 @@ impl PropagateFeatureCmd {
 
 				if dag.adjacent(&want_opt, &target) || dag.adjacent(&want_req, &target) {
 					// Easy case, all good.
-					continue;
+					continue
 				}
 				let default_entrypoint = CrateAndFeature(pkg.id.repr.clone(), "#entrypoint".into());
 				// Now the more complicated case where `pkg/F -> dep/G .. -> dep/F`. So to say a
@@ -525,14 +524,14 @@ impl PropagateFeatureCmd {
 						target,
 						p.0
 					);
-					continue;
+					continue
 				}
 
 				if let Some((_, lhs_ignore)) =
 					ignore_missing_propagate.iter().find(|(c, _)| pkg.name == c.0 && c.1 == feature)
 				{
 					if lhs_ignore.iter().any(|i| dep.pkg.name == i.0 && i.1 == feature) {
-						continue;
+						continue
 					}
 				}
 
@@ -552,8 +551,8 @@ impl PropagateFeatureCmd {
 			let krate_path = canonicalize(krate.manifest_path.clone().into_std_path_buf()).unwrap();
 			// TODO move down
 			let mut fixer = if self.fixer_args.enable {
-				if krate_path.starts_with(&allowed_dir)
-					|| self.modify_paths.iter().any(|p| krate_path.starts_with(p))
+				if krate_path.starts_with(&allowed_dir) ||
+					self.modify_paths.iter().any(|p| krate_path.starts_with(p))
 				{
 					Some(AutoFixer::from_manifest(&krate_path).unwrap())
 				} else {
@@ -585,10 +584,10 @@ impl PropagateFeatureCmd {
 					named.join("\n      "),
 				);
 
-				if self.fixer_args.enable
-					&& self.fix_package.as_ref().map_or(true, |p| p == &krate.name)
-					&& self.left_side_feature_missing == MuteSetting::Fix
-					&& (self.left_side_outside_workspace == MuteSetting::Fix || in_workspace)
+				if self.fixer_args.enable &&
+					self.fix_package.as_ref().map_or(true, |p| p == &krate.name) &&
+					self.left_side_feature_missing == MuteSetting::Fix &&
+					(self.left_side_outside_workspace == MuteSetting::Fix || in_workspace)
 				{
 					let Some(fixer) = fixer.as_mut() else { continue };
 					fixer.add_feature(&feature).unwrap();
@@ -605,13 +604,13 @@ impl PropagateFeatureCmd {
 				named.sort();
 				println!("    must propagate to:\n      {}", named.join("\n      "));
 
-				if self.fixer_args.enable
-					&& self.fix_package.as_ref().map_or(true, |p| p == &krate.name)
+				if self.fixer_args.enable &&
+					self.fix_package.as_ref().map_or(true, |p| p == &krate.name)
 				{
 					for dep in deps.iter() {
 						let dep_name = dep.name();
 						if !self.fix_dependency.as_ref().map_or(true, |d| d == &dep_name) {
-							continue;
+							continue
 						}
 						let Some(fixer) = fixer.as_mut() else { continue };
 						let non_optional = self
@@ -649,7 +648,7 @@ impl PropagateFeatureCmd {
 
 	fn ignore_missing_propagate(&self) -> BTreeMap<CrateAndFeature, BTreeSet<CrateAndFeature>> {
 		let Some(ignore_missing) = &self.ignore_missing_propagate else {
-			return Default::default();
+			return Default::default()
 		};
 
 		let mut map = BTreeMap::<CrateAndFeature, BTreeSet<CrateAndFeature>>::new();
@@ -686,7 +685,7 @@ fn error_stats(
 	global: &GlobalArgs,
 ) -> Option<String> {
 	if errors + warnings + fixes == 0 {
-		return None;
+		return None
 	}
 
 	let mut ret: String = "Found ".into();
@@ -731,12 +730,12 @@ impl OnlyEnablesCmd {
 			for dep in pkg.dependencies.iter() {
 				let Some(dep) = resolve_dep(pkg, dep, &meta) else { continue };
 				if !dep.pkg.features.contains_key(&self.only_enables) {
-					continue;
+					continue
 				}
 
 				for (feat, imply) in pkg.features.iter() {
 					if feat == &self.precondition {
-						continue;
+						continue
 					}
 					log::info!("{}: {}", feat, imply.join(", "));
 

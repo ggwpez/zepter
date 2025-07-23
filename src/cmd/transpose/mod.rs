@@ -110,7 +110,7 @@ impl StripDevDepsCmd {
 		let allowed_dir = canonicalize(meta.workspace_root.as_std_path()).unwrap();
 
 		for name in self.packages.iter().flatten() {
-			if !meta.packages.iter().any(|p| p.name == *name) {
+			if !meta.packages.iter().any(|p| p.name.to_string() == *name) {
 				eprintln!("Could not find package named '{}'", g.red(name));
 				std::process::exit(1);
 			}
@@ -119,7 +119,7 @@ impl StripDevDepsCmd {
 		let mut fixers = Map::new();
 		for pkg in meta.packages.iter() {
 			if let Some(packages) = &self.packages {
-				if !packages.contains(&pkg.name) {
+				if !packages.contains(&pkg.name.to_string()) {
 					continue
 				}
 			}

@@ -9790,7 +9790,7 @@ cases:
     +sc-keystore = { workspace = true, default-features = true }
     +sc-client-db = { workspace = true, default-features = true }
     +sc-consensus = { workspace = true }
-    @@ -126,22 +126,22 @@ sc-consensus-babe = { path = "../../../client/consensus/babe" }
+    @@ -126,20 +126,20 @@ sc-consensus-babe = { path = "../../../client/consensus/babe" }
     -sc-consensus-epochs = { path = "../../../client/consensus/epochs" }
     -sc-service-test = { path = "../../../client/service/test" }
     -sc-block-builder = { path = "../../../client/block-builder" }
@@ -9811,8 +9811,6 @@ cases:
     -substrate-rpc-client = { path = "../../../utils/frame/rpc/client" }
     -pallet-timestamp = { path = "../../../frame/timestamp" }
     -substrate-cli-test-utils = { path = "../../../test-utils/cli" }
-    -
-    -wat = "1.0"
     +sc-consensus-epochs = { workspace = true }
     +sc-service-test = { workspace = true }
     +sc-block-builder = { workspace = true }
@@ -9833,7 +9831,8 @@ cases:
     +substrate-rpc-client = { workspace = true }
     +pallet-timestamp = { workspace = true, default-features = true }
     +substrate-cli-test-utils = { workspace = true }
-    +
+    @@ -147 +147 @@ substrate-cli-test-utils = { path = "../../../test-utils/cli" }
+    -wat = "1.0"
     +wat = { workspace = true }
     @@ -149,7 +149,7 @@ frame-support = { path = "../../../frame/support" }
     -node-testing = { path = "../testing" }

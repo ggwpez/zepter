@@ -16,13 +16,13 @@ crates:
 cases:
 - cmd: lint never-enables --precondition F0 --stays-disabled G0
   stdout: |
-    crate "A"
+    crate PackageName("A")
       feature "F0"
         enables feature "G0" on dependencies:
           B
 - cmd: lint never-enables --precondition F1 --stays-disabled G1
   stdout: |
-    crate "A"
+    crate PackageName("A")
       feature "F1"
         enables feature "G1" on dependencies:
           B

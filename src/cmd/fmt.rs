@@ -129,7 +129,7 @@ impl FormatFeaturesCmd {
 			let mut fixer = AutoFixer::from_manifest(&path).unwrap();
 			if let Err(errs) = fixer.canonicalize_features(&pkg.name, &modes, self.line_width) {
 				let path = path.strip_prefix(&allowed_dir).unwrap().to_path_buf();
-				errors.entry((path.clone(), pkg.name.clone())).or_default().extend(errs);
+				errors.entry((path.clone(), pkg.name.to_string())).or_default().extend(errs);
 			} else if fixer.modified() {
 				offenders.push((path, &pkg.name, fixer));
 			}

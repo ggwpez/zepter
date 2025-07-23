@@ -56,7 +56,7 @@ impl TraceCmd {
 
 		let froms = index
 			.iter()
-			.filter(|(_id, krate)| krate.name == self.from)
+			.filter(|(_id, krate)| krate.name.to_string() == self.from)
 			.map(|(id, _)| id)
 			.collect::<Vec<_>>();
 		if froms.is_empty() {
@@ -65,7 +65,7 @@ impl TraceCmd {
 
 		let tos = index
 			.iter()
-			.filter(|(_id, krate)| krate.name == self.to)
+			.filter(|(_id, krate)| krate.name.to_string() == self.to)
 			.map(|(id, _)| id)
 			.collect::<Vec<_>>();
 		if tos.is_empty() {

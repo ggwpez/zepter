@@ -29,14 +29,14 @@ crates:
 cases:
 - cmd: lint never-enables --precondition F0 --stays-disabled G0
   stdout: |
-    crate "A"
+    crate PackageName("A")
       feature "F0"
         enables feature "G0" on dependencies:
           B
           b
 - cmd: lint never-enables --precondition F0 --stays-disabled G0 --workspace
   stdout: |
-    crate "A"
+    crate PackageName("A")
       feature "F0"
         enables feature "G0" on dependencies:
           B

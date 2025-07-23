@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   changelog:
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04
     name: Validate
     steps:
       - uses: actions/checkout@v3

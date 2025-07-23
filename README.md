@@ -24,6 +24,7 @@ zepter
 - lint
   - propagate-features: Check that features are passed down.
   - never-enables: A feature should never enable another other.
+  - duplicate-deps: Check that dependencies are not defined in both normal an dev sections.
   - never-implies *(unstable)*: A feature should never transitively imply another one.
   - only-enables *(unstable)*: A features should exclusively enable another one.
   - why-enables *(unstable)*: Find out why a specific feature is enables.

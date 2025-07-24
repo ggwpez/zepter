@@ -61,8 +61,7 @@ impl AutoFixer {
 				let last_str = last.as_str().unwrap();
 				if cur_str < last_str {
 					return Err(format!(
-						"Cannot de-duplicate: feature is not sorted: {} < {}",
-						cur_str, last_str
+						"Cannot de-duplicate: feature is not sorted: {cur_str} < {last_str}"
 					))
 				}
 
@@ -214,7 +213,7 @@ impl AutoFixer {
 
 			prefix = Self::format_pre_and_suffix(prefix);
 			prefix = prefix.trim().into();
-			prefix = if prefix.is_empty() { "\n\t".into() } else { format!("\n\t{}\n\t", prefix) };
+			prefix = if prefix.is_empty() { "\n\t".into() } else { format!("\n\t{prefix}\n\t") };
 			value.decor_mut().set_suffix(suffix);
 			value.decor_mut().set_prefix(prefix);
 		}
@@ -228,7 +227,7 @@ impl AutoFixer {
 
 			suffix = Self::format_pre_and_suffix(suffix);
 			suffix = suffix.trim().into();
-			suffix = if suffix.is_empty() { ",\n".into() } else { format!(",\n\t{}\n", suffix) };
+			suffix = if suffix.is_empty() { ",\n".into() } else { format!(",\n\t{suffix}\n") };
 			value.decor_mut().set_suffix(suffix);
 		}
 
@@ -652,7 +651,7 @@ impl AutoFixer {
 				// - There is either no default-features or its compatible
 				t = found.clone();
 			} else {
-				return Err(format!("Dependency '{}' already exists in the workspace but could not validate its compatibility", dep_name))
+				return Err(format!("Dependency '{dep_name}' already exists in the workspace but could not validate its compatibility"))
 			}
 		}
 
@@ -667,11 +666,7 @@ impl AutoFixer {
 		}
 
 		let name = if maybe_rename.is_some() {
-			log::info!(
-				"Renaming workspace dependency '{}' to '{}'",
-				dep_name,
-				maybe_rename.unwrap()
-			);
+			log::info!("Renaming workspace dependency '{dep_name}' to '{}'", maybe_rename.unwrap());
 			t.insert("package", Value::String(Formatted::new(dep_name.to_string())));
 			maybe_rename.unwrap()
 		} else {
@@ -724,14 +719,14 @@ impl AutoFixer {
 
 		let deps = doc["dependencies"].as_table_mut().unwrap();
 		let Some(dep) = deps.get_mut(dep) else {
-			return Err(format!("Dependency '{}' not found", dep))
+			return Err(format!("Dependency '{dep}' not found"))
 		};
 
 		if let Some(dep) = dep.as_inline_table_mut() {
 			dep.insert("default-features", Value::Boolean(Formatted::new(false)));
 			Ok(())
 		} else {
-			Err(format!("Dependency '{}' is not an inline table", dep))
+			Err(format!("Dependency '{dep}' is not an inline table"))
 		}
 	}
 

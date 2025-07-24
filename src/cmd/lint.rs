@@ -235,7 +235,7 @@ impl core::str::FromStr for DepKind {
 			"normal" => Ok(Self::Normal),
 			"dev" => Ok(Self::Dev),
 			"build" => Ok(Self::Build),
-			_ => Err(format!("Unknown dependency kind '{}'", s)),
+			_ => Err(format!("Unknown dependency kind '{s}'")),
 		}
 	}
 }
@@ -258,7 +258,7 @@ impl core::str::FromStr for IgnoreSetting {
 		match s.to_ascii_lowercase().as_str() {
 			"ignore" => Ok(Self::Ignore),
 			"check" => Ok(Self::Check),
-			_ => Err(format!("Unknown ignore setting '{}'", s)),
+			_ => Err(format!("Unknown ignore setting '{s}'")),
 		}
 	}
 }
@@ -576,7 +576,7 @@ impl PropagateFeatureCmd {
 				krate_str.push_str(&format!(" ({})", krate.manifest_path));
 			}
 
-			println!("crate {krate_str}\n  feature '{}'", feature);
+			println!("crate {krate_str}\n  feature '{feature}'",);
 
 			if let Some(deps) = feature_missing.get(&krate.id.to_string()) {
 				let mut named = deps.iter().map(RenamedPackage::display_name).collect::<Vec<_>>();

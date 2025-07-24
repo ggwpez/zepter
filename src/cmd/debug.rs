@@ -52,7 +52,7 @@ impl DebugCmd {
 			histogram.add(dag.degree(node) as u64);
 		}
 
-		println!("{}", histogram);
+		println!("{histogram}");
 	}
 
 	fn measure(meta: &Metadata) -> (Duration, u32) {

@@ -431,7 +431,7 @@ impl PropagateFeatureCmd {
 		let dag = build_feature_dag(&meta, &meta.packages);
 		let features = self.features.iter().collect::<BTreeSet<_>>();
 
-		for feature in features.into_iter() {
+		for feature in features {
 			self.run_feature(&meta, &dag, feature.clone(), global);
 		}
 
@@ -589,7 +589,7 @@ impl PropagateFeatureCmd {
 				);
 
 				if self.fixer_args.enable &&
-					self.fix_package.as_ref().map_or(true, |p| p == &krate.name.to_string()) &&
+					self.fix_package.as_ref().is_none_or(|p| p == &krate.name.to_string()) &&
 					self.left_side_feature_missing == MuteSetting::Fix &&
 					(self.left_side_outside_workspace == MuteSetting::Fix || in_workspace)
 				{
@@ -609,11 +609,11 @@ impl PropagateFeatureCmd {
 				println!("    must propagate to:\n      {}", named.join("\n      "));
 
 				if self.fixer_args.enable &&
-					self.fix_package.as_ref().map_or(true, |p| p == &krate.name.to_string())
+					self.fix_package.as_ref().is_none_or(|p| p == &krate.name.to_string())
 				{
 					for dep in deps.iter() {
 						let dep_name = dep.name();
-						if !self.fix_dependency.as_ref().map_or(true, |d| d == &dep_name) {
+						if self.fix_dependency.as_ref().is_some_and(|d| d != &dep_name) {
 							continue
 						}
 						let Some(fixer) = fixer.as_mut() else { continue };
@@ -853,7 +853,7 @@ impl DuplicateDepsCmd {
 				issues
 					.entry((pkg.name.to_string(), pkg.manifest_path.clone()))
 					.or_default()
-					.insert(dep.name.to_string());
+					.insert(dep.name.clone());
 			}
 		}
 

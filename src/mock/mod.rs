@@ -85,7 +85,7 @@ impl CaseFile {
 		UiCaseFile::from_file(path)
 			.map(CaseFile::Ui)
 			.or_else(|_| IntegrationCaseFile::from_file(path).map(CaseFile::Integration))
-			.unwrap_or_else(|e| panic!("Failed to parse file {:?}: {}", path, e))
+			.unwrap_or_else(|e| panic!("Failed to parse file {path:?}: {e}"))
 	}
 
 	pub fn to_file(&self, path: &Path) -> Result<(), anyhow::Error> {
@@ -274,9 +274,9 @@ impl Context {
 
 		let mut txt = String::from("[features]\n");
 		for (feature, enables) in module.features.iter().flatten() {
-			txt.push_str(&format!("{} = [\n", feature));
+			txt.push_str(&format!("{feature} = [\n"));
 			for (dep, feat) in enables.iter().flatten() {
-				txt.push_str(&format!("\"{}/{}\",\n", dep, feat));
+				txt.push_str(&format!("\"{dep}/{feat}\",\n"));
 			}
 			txt.push_str("]\n");
 		}
@@ -290,7 +290,7 @@ impl Context {
 			out_deps.remove(&cargo_metadata::DependencyKind::Build).unwrap_or_default(),
 		);
 
-		let output = format!("{}\n{}", deps, txt);
+		let output = format!("{deps}\n{txt}");
 		// Append to the toml
 		let mut file = fs::OpenOptions::new().append(true).open(toml_path).unwrap();
 		file.write_all(output.as_bytes()).unwrap();

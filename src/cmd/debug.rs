@@ -40,7 +40,7 @@ impl DebugCmd {
 
 		if !self.no_benchmark {
 			let (took, points) = Self::measure(&meta);
-			println!("DAG setup time: {:.2?} (avg from {} runs)", took, points);
+			println!("DAG setup time: {took:.2?} (avg from {points} runs)");
 		}
 	}
 
@@ -52,7 +52,7 @@ impl DebugCmd {
 			histogram.add(dag.degree(node) as u64);
 		}
 
-		println!("{}", histogram);
+		println!("{histogram}");
 	}
 
 	fn measure(meta: &Metadata) -> (Duration, u32) {

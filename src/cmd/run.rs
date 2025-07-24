@@ -28,15 +28,15 @@ impl RunCmd {
 
 		let name = self.args.workflow.as_deref().unwrap_or(WORKFLOW_DEFAULT_NAME);
 		let Some(workflow) = config.workflow(name) else {
-			panic!("Workflow '{}' not found", name);
+			panic!("Workflow '{name}' not found");
 		};
 
 		log::info!("Running workflow '{}'", name);
 		if let Err(err) = workflow.run(g) {
-			println!("Error: {}", err);
+			println!("Error: {err}");
 
 			if let Some(help) = config.fmt_help() {
-				println!("\n{}", help);
+				println!("\n{help}");
 			}
 
 			std::process::exit(1);

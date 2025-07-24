@@ -33,5 +33,7 @@ crates:
 cases:
 - cmd: lint duplicate-deps
   stdout: |
-    Package `B` has duplicated `ND` in both [dependencies] and [dev-dependencies]
+    Found 1 crate with duplicated dependencies between [dependencies] and [dev-dependencies]
+      crate 'B'
+        ND
   code: 1

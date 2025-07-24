@@ -14,11 +14,13 @@ use crate::{
 	prelude::*,
 	CrateId,
 };
-use cargo_metadata::{Metadata, Package, PackageId};
+use camino::Utf8PathBuf;
+use cargo_metadata::{DependencyKind, Metadata, Package, PackageId};
 use core::{
 	fmt,
 	fmt::{Display, Formatter},
 };
+use itertools::Itertools;
 use std::{
 	collections::{BTreeMap, BTreeSet, HashMap, HashSet},
 	fs::canonicalize,
@@ -233,7 +235,7 @@ impl core::str::FromStr for DepKind {
 			"normal" => Ok(Self::Normal),
 			"dev" => Ok(Self::Dev),
 			"build" => Ok(Self::Build),
-			_ => Err(format!("Unknown dependency kind '{}'", s)),
+			_ => Err(format!("Unknown dependency kind '{s}'")),
 		}
 	}
 }
@@ -256,7 +258,7 @@ impl core::str::FromStr for IgnoreSetting {
 		match s.to_ascii_lowercase().as_str() {
 			"ignore" => Ok(Self::Ignore),
 			"check" => Ok(Self::Check),
-			_ => Err(format!("Unknown ignore setting '{}'", s)),
+			_ => Err(format!("Unknown ignore setting '{s}'")),
 		}
 	}
 }
@@ -429,7 +431,7 @@ impl PropagateFeatureCmd {
 		let dag = build_feature_dag(&meta, &meta.packages);
 		let features = self.features.iter().collect::<BTreeSet<_>>();
 
-		for feature in features.into_iter() {
+		for feature in features {
 			self.run_feature(&meta, &dag, feature.clone(), global);
 		}
 
@@ -574,7 +576,7 @@ impl PropagateFeatureCmd {
 				krate_str.push_str(&format!(" ({})", krate.manifest_path));
 			}
 
-			println!("crate {krate_str}\n  feature '{}'", feature);
+			println!("crate {krate_str}\n  feature '{feature}'",);
 
 			if let Some(deps) = feature_missing.get(&krate.id.to_string()) {
 				let mut named = deps.iter().map(RenamedPackage::display_name).collect::<Vec<_>>();
@@ -587,7 +589,7 @@ impl PropagateFeatureCmd {
 				);
 
 				if self.fixer_args.enable &&
-					self.fix_package.as_ref().map_or(true, |p| p == &krate.name.to_string()) &&
+					self.fix_package.as_ref().is_none_or(|p| p == &krate.name.to_string()) &&
 					self.left_side_feature_missing == MuteSetting::Fix &&
 					(self.left_side_outside_workspace == MuteSetting::Fix || in_workspace)
 				{
@@ -607,11 +609,11 @@ impl PropagateFeatureCmd {
 				println!("    must propagate to:\n      {}", named.join("\n      "));
 
 				if self.fixer_args.enable &&
-					self.fix_package.as_ref().map_or(true, |p| p == &krate.name.to_string())
+					self.fix_package.as_ref().is_none_or(|p| p == &krate.name.to_string())
 				{
 					for dep in deps.iter() {
 						let dep_name = dep.name();
-						if !self.fix_dependency.as_ref().map_or(true, |d| d == &dep_name) {
+						if self.fix_dependency.as_ref().is_some_and(|d| d != &dep_name) {
 							continue
 						}
 						let Some(fixer) = fixer.as_mut() else { continue };
@@ -622,10 +624,7 @@ impl PropagateFeatureCmd {
 						let opt = if !non_optional && dep.optional { "?" } else { "" };
 
 						fixer
-							.add_to_feature(
-								&feature,
-								format!("{}{}/{}", dep_name, opt, feature).as_str(),
-							)
+							.add_to_feature(&feature, format!("{dep_name}{opt}/{feature}").as_str())
 							.unwrap();
 						log::info!("Inserted '{dep_name}/{feature}' into '{}'", krate.name);
 						fixes += 1;
@@ -640,7 +639,7 @@ impl PropagateFeatureCmd {
 			}
 		}
 		if let Some(e) = error_stats(errors, 0, fixes, self.fixer_args.enable, global) {
-			println!("{}", e);
+			println!("{e}");
 		}
 
 		if errors > fixes {
@@ -703,7 +702,7 @@ fn error_stats(
 		if warnings + errors > 0 {
 			ret.push_str(" and");
 		}
-		let fixed = format!(" fixed {}", fixes);
+		let fixed = format!(" fixed {fixes}");
 		if fixes > 0 {
 			ret.push_str(&global.green(&fixed));
 			if fixes == warnings + errors {
@@ -720,7 +719,7 @@ fn error_stats(
 	} else if global.show_hints() {
 		ret.push_str(" (run with `--fix` to fix)");
 	}
-	Some(format!("{}.", ret))
+	Some(format!("{ret}."))
 }
 
 impl OnlyEnablesCmd {
@@ -798,62 +797,85 @@ impl WhyEnabledCmd {
 		debug_assert!(!enabled_by.is_empty());
 		println!("Feature {}/{} is enabled by:", self.feature, self.package);
 		for (name, feature) in enabled_by {
-			println!("  {}/{}", name, feature);
+			println!("  {name}/{feature}");
 		}
 	}
 }
 
+/// Detect crates that needlessly list the same dependency both as `normal` and `dev` dependency.
 #[derive(Debug, clap::Parser)]
 pub struct DuplicateDepsCmd {
 	#[allow(missing_docs)]
 	#[clap(flatten)]
 	cargo_args: super::CargoArgs,
+
+	/// Show the path of the crate in the output.
+	///
+	/// This is useful for make it easier to fix, since many IDEs allow to click links in the
+	/// console.
+	#[clap(long)]
+	show_paths: bool,
 }
 
 impl DuplicateDepsCmd {
 	pub fn run(&self, _global: &GlobalArgs) {
 		// To easily compare dependencies, we normalize them by removing the kind.
-		fn normalize_dep(dep: &cargo_metadata::Dependency) -> cargo_metadata::Dependency {
+		fn without_kind(dep: &cargo_metadata::Dependency) -> cargo_metadata::Dependency {
 			let mut dep = dep.clone();
-			dep.kind = cargo_metadata::DependencyKind::Unknown;
+			dep.kind = DependencyKind::Unknown;
 			dep
 		}
 
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
 
-		let mut issues = vec![];
+		let mut issues = BTreeMap::<(String, Utf8PathBuf), BTreeSet<String>>::new();
 
 		for pkg in &meta.workspace_packages() {
 			let deps: HashSet<_> = pkg
 				.dependencies
 				.iter()
-				.filter(|d| d.kind == cargo_metadata::DependencyKind::Normal)
-				.map(normalize_dep)
+				.filter(|d| d.kind == DependencyKind::Normal)
+				.map(without_kind)
 				.collect();
 
 			let dev_deps: HashSet<_> = pkg
 				.dependencies
 				.iter()
-				.filter(|d| d.kind == cargo_metadata::DependencyKind::Development)
-				.map(normalize_dep)
+				.filter(|d| d.kind == DependencyKind::Development)
+				.map(without_kind)
 				.collect();
 
-			for dep in deps.intersection(&dev_deps) {
-				issues.push(format!(
-					"Package `{}` has duplicated `{}` in both [dependencies] and [dev-dependencies]",
-					pkg.name, dep.name
-				));
+			let intersection = deps.intersection(&dev_deps).sorted_by(|a, b| a.name.cmp(&b.name));
+			for dep in intersection {
+				issues
+					.entry((pkg.name.to_string(), pkg.manifest_path.clone()))
+					.or_default()
+					.insert(dep.name.clone());
 			}
 		}
 
 		if !issues.is_empty() {
-			for issue in issues {
-				println!("{issue}");
+			println!("Found {} crate{} with duplicated dependencies between [dependencies] and [dev-dependencies]", issues.len(), plural(issues.len()));
+			for ((pkg, path), deps) in issues {
+				let maybe_path = if self.show_paths {
+					let rel = path.strip_prefix(&meta.workspace_root).unwrap();
+					format!(" ({rel})")
+				} else {
+					"".to_string()
+				};
+
+				println!("  crate '{pkg}'{maybe_path}");
+
+				for dep in deps {
+					println!("    {dep}");
+				}
 			}
+
 			std::process::exit(1);
 		}
 	}
 }
+
 // Complexity is `O(x ^ 4) with x=pkgs.len()`.
 pub fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeature> {
 	let mut dag = Dag::new();

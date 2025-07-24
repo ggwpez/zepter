@@ -87,7 +87,7 @@ pub(crate) trait ErrToStr<R> {
 
 impl<R, E: std::fmt::Display> ErrToStr<R> for Result<R, E> {
 	fn err_to_str(self) -> Result<R, String> {
-		self.map_err(|e| format!("{}", e))
+		self.map_err(|e| format!("{e}"))
 	}
 }
 

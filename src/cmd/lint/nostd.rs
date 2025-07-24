@@ -132,8 +132,8 @@ impl DefaultFeaturesDisabledCmd {
 		if !lib_rs.exists() {
 			return Ok(false)
 		}
-		let content = std::fs::read_to_string(&lib_rs)
-			.map_err(|e| format!("Could not read lib.rs: {}", e))?;
+		let content =
+			std::fs::read_to_string(&lib_rs).map_err(|e| format!("Could not read lib.rs: {e}"))?;
 
 		let ret = if content.contains("#![cfg_attr(not(feature = \"std\"), no_std)]") ||
 			content.contains("#![no_std]")

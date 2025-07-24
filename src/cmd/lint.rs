@@ -527,10 +527,12 @@ impl PropagateFeatureCmd {
 					continue
 				}
 
-				if let Some((_, lhs_ignore)) =
-					ignore_missing_propagate.iter().find(|(c, _)| pkg.name == c.0 && c.1 == feature)
+				if let Some((_, lhs_ignore)) = ignore_missing_propagate
+					.iter()
+					.find(|(c, _)| pkg.name.to_string() == c.0 && c.1 == feature)
 				{
-					if lhs_ignore.iter().any(|i| dep.pkg.name == i.0 && i.1 == feature) {
+					if lhs_ignore.iter().any(|i| dep.pkg.name.to_string() == i.0 && i.1 == feature)
+					{
 						continue
 					}
 				}
@@ -585,7 +587,7 @@ impl PropagateFeatureCmd {
 				);
 
 				if self.fixer_args.enable &&
-					self.fix_package.as_ref().map_or(true, |p| p == &krate.name) &&
+					self.fix_package.as_ref().map_or(true, |p| p == &krate.name.to_string()) &&
 					self.left_side_feature_missing == MuteSetting::Fix &&
 					(self.left_side_outside_workspace == MuteSetting::Fix || in_workspace)
 				{
@@ -605,7 +607,7 @@ impl PropagateFeatureCmd {
 				println!("    must propagate to:\n      {}", named.join("\n      "));
 
 				if self.fixer_args.enable &&
-					self.fix_package.as_ref().map_or(true, |p| p == &krate.name)
+					self.fix_package.as_ref().map_or(true, |p| p == &krate.name.to_string())
 				{
 					for dep in deps.iter() {
 						let dep_name = dep.name();
@@ -771,7 +773,7 @@ impl WhyEnabledCmd {
 		for (lhs, rhs) in dag.edges.iter() {
 			for rhs in rhs.iter() {
 				// A bit ghetto, but i don't want to loose unresolved rhs crates.
-				let resolved = lookup(&rhs.0).map(|r| r.name.clone()).unwrap_or(rhs.0.clone());
+				let resolved = lookup(&rhs.0).map(|r| r.name.to_string()).unwrap_or(rhs.0.clone());
 				if resolved == self.package {
 					found_crate = true;
 				}

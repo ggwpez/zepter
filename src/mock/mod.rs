@@ -256,7 +256,7 @@ impl Context {
 	}
 
 	pub fn persist(self) -> PathBuf {
-		self.root.into_path()
+		self.root.keep()
 	}
 
 	pub fn create_crate(&self, module: &CrateConfig) -> Result<(), anyhow::Error> {

@@ -214,15 +214,15 @@ impl LiftToWorkspaceCmd {
 				continue
 			}
 			if let Some(skip_package) = &self.skip_package {
-				if pkg.name == *skip_package {
+				if pkg.name.to_string() == *skip_package {
 					continue
 				}
 			}
 
-			fixers.entry(pkg.name.clone()).or_insert_with(|| {
+			fixers.entry(pkg.name.to_string()).or_insert_with(|| {
 				(Some(pkg.clone()), AutoFixer::from_manifest(&pkg.manifest_path).unwrap())
 			});
-			let (_, fixer) = fixers.get_mut(&pkg.name).unwrap();
+			let (_, fixer) = fixers.get_mut(&pkg.name.to_string()).unwrap();
 			// We can safely use the rename here, since we found it with `detect_rename`.
 			let dep_name = dep.rename.as_ref().unwrap_or(&dep.name);
 			if let Some(rename) = &maybe_rename {
@@ -287,7 +287,7 @@ impl LiftToWorkspaceCmd {
 
 		for pkg in meta.packages.iter() {
 			if let Some(skip_package) = &self.skip_package {
-				if pkg.name == *skip_package {
+				if pkg.name.to_string() == *skip_package {
 					continue
 				}
 			}
@@ -331,7 +331,7 @@ impl LiftToWorkspaceCmd {
 
 		for pkg in meta.packages.iter() {
 			if let Some(skip_package) = &self.skip_package {
-				if pkg.name == *skip_package {
+				if pkg.name.to_string() == *skip_package {
 					continue
 				}
 			}
@@ -345,15 +345,15 @@ impl LiftToWorkspaceCmd {
 								name,
 								pkg.name
 							);
-							unnrenamed.insert(pkg.name.clone());
+							unnrenamed.insert(pkg.name.to_string());
 						} else {
 							renames
 								.entry(dep.rename.clone().unwrap())
 								.or_default()
-								.push(pkg.name.clone());
+								.push(pkg.name.to_string());
 						}
 					} else {
-						unnrenamed.insert(pkg.name.clone());
+						unnrenamed.insert(pkg.name.to_string());
 					}
 				}
 			}

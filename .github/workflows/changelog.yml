@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   changelog:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     name: Validate
     steps:
       - uses: actions/checkout@v3

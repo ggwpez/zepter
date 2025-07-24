@@ -1,0 +1,160 @@
+repo:
+  name: paritytech/polkadot-sdk
+  ref: db5e645422ccf952018a3c466a33fef477858602
+cases:
+- cmd: lint duplicate-deps
+  stdout: |
+    Found 33 crates with duplicated dependencies between [dependencies] and [dev-dependencies]
+      crate 'bp-messages'
+        bp-runtime
+      crate 'cumulus-client-network'
+        sc-client-api
+        sp-consensus
+        sp-core
+      crate 'cumulus-client-pov-recovery'
+        sc-client-api
+      crate 'cumulus-relay-chain-inprocess-interface'
+        polkadot-primitives
+      crate 'cumulus-test-service'
+        polkadot-test-service
+        sc-cli
+      crate 'pallet-bridge-relayers'
+        bp-runtime
+        sp-runtime
+      crate 'pallet-election-provider-multi-block'
+        sp-core
+      crate 'pallet-election-provider-multi-phase'
+        sp-npos-elections
+      crate 'pallet-revive-eth-rpc'
+        subxt-signer
+      crate 'pallet-staking-async-ah-client'
+        sp-io
+      crate 'pallet-xcm-bridge-hub'
+        bp-runtime
+      crate 'polkadot-availability-distribution'
+        sc-network
+        sp-core
+      crate 'polkadot-availability-recovery'
+        sc-network
+      crate 'polkadot-dispute-distribution'
+        futures-timer
+      crate 'polkadot-node-core-approval-voting'
+        async-trait
+      crate 'polkadot-node-core-approval-voting-parallel'
+        async-trait
+      crate 'polkadot-node-core-av-store'
+        polkadot-node-subsystem-util
+      crate 'polkadot-node-core-pvf-prepare-worker'
+        sp-maybe-compressed-blob
+      crate 'polkadot-statement-distribution'
+        futures-timer
+      crate 'polkadot-test-malus'
+        sp-core
+      crate 'sc-consensus-grandpa'
+        sc-network
+      crate 'sc-consensus-grandpa-rpc'
+        sp-core
+      crate 'sc-network'
+        mockall
+        rand
+      crate 'sc-network-sync'
+        mockall
+      crate 'sc-offchain'
+        sc-transaction-pool-api
+      crate 'sc-rpc'
+        sc-block-builder
+        tokio
+      crate 'sc-transaction-pool'
+        thiserror
+      crate 'staging-chain-spec-builder'
+        docify
+      crate 'staging-node-cli'
+        futures
+        serde_json
+      crate 'substrate-test-runtime'
+        serde_json
+      crate 'test-parachain-adder-collator'
+        sc-service
+      crate 'test-parachain-undying-collator'
+        sc-service
+      crate 'xcm-runtime-apis'
+        staging-xcm-executor
+  code: 1
+- cmd: lint duplicate-deps --show-paths
+  stdout: |
+    Found 33 crates with duplicated dependencies between [dependencies] and [dev-dependencies]
+      crate 'bp-messages' (bridges/primitives/messages/Cargo.toml)
+        bp-runtime
+      crate 'cumulus-client-network' (cumulus/client/network/Cargo.toml)
+        sc-client-api
+        sp-consensus
+        sp-core
+      crate 'cumulus-client-pov-recovery' (cumulus/client/pov-recovery/Cargo.toml)
+        sc-client-api
+      crate 'cumulus-relay-chain-inprocess-interface' (cumulus/client/relay-chain-inprocess-interface/Cargo.toml)
+        polkadot-primitives
+      crate 'cumulus-test-service' (cumulus/test/service/Cargo.toml)
+        polkadot-test-service
+        sc-cli
+      crate 'pallet-bridge-relayers' (bridges/modules/relayers/Cargo.toml)
+        bp-runtime
+        sp-runtime
+      crate 'pallet-election-provider-multi-block' (substrate/frame/election-provider-multi-block/Cargo.toml)
+        sp-core
+      crate 'pallet-election-provider-multi-phase' (substrate/frame/election-provider-multi-phase/Cargo.toml)
+        sp-npos-elections
+      crate 'pallet-revive-eth-rpc' (substrate/frame/revive/rpc/Cargo.toml)
+        subxt-signer
+      crate 'pallet-staking-async-ah-client' (substrate/frame/staking-async/ah-client/Cargo.toml)
+        sp-io
+      crate 'pallet-xcm-bridge-hub' (bridges/modules/xcm-bridge-hub/Cargo.toml)
+        bp-runtime
+      crate 'polkadot-availability-distribution' (polkadot/node/network/availability-distribution/Cargo.toml)
+        sc-network
+        sp-core
+      crate 'polkadot-availability-recovery' (polkadot/node/network/availability-recovery/Cargo.toml)
+        sc-network
+      crate 'polkadot-dispute-distribution' (polkadot/node/network/dispute-distribution/Cargo.toml)
+        futures-timer
+      crate 'polkadot-node-core-approval-voting' (polkadot/node/core/approval-voting/Cargo.toml)
+        async-trait
+      crate 'polkadot-node-core-approval-voting-parallel' (polkadot/node/core/approval-voting-parallel/Cargo.toml)
+        async-trait
+      crate 'polkadot-node-core-av-store' (polkadot/node/core/av-store/Cargo.toml)
+        polkadot-node-subsystem-util
+      crate 'polkadot-node-core-pvf-prepare-worker' (polkadot/node/core/pvf/prepare-worker/Cargo.toml)
+        sp-maybe-compressed-blob
+      crate 'polkadot-statement-distribution' (polkadot/node/network/statement-distribution/Cargo.toml)
+        futures-timer
+      crate 'polkadot-test-malus' (polkadot/node/malus/Cargo.toml)
+        sp-core
+      crate 'sc-consensus-grandpa' (substrate/client/consensus/grandpa/Cargo.toml)
+        sc-network
+      crate 'sc-consensus-grandpa-rpc' (substrate/client/consensus/grandpa/rpc/Cargo.toml)
+        sp-core
+      crate 'sc-network' (substrate/client/network/Cargo.toml)
+        mockall
+        rand
+      crate 'sc-network-sync' (substrate/client/network/sync/Cargo.toml)
+        mockall
+      crate 'sc-offchain' (substrate/client/offchain/Cargo.toml)
+        sc-transaction-pool-api
+      crate 'sc-rpc' (substrate/client/rpc/Cargo.toml)
+        sc-block-builder
+        tokio
+      crate 'sc-transaction-pool' (substrate/client/transaction-pool/Cargo.toml)
+        thiserror
+      crate 'staging-chain-spec-builder' (substrate/bin/utils/chain-spec-builder/Cargo.toml)
+        docify
+      crate 'staging-node-cli' (substrate/bin/node/cli/Cargo.toml)
+        futures
+        serde_json
+      crate 'substrate-test-runtime' (substrate/test-utils/runtime/Cargo.toml)
+        serde_json
+      crate 'test-parachain-adder-collator' (polkadot/parachain/test-parachains/adder/collator/Cargo.toml)
+        sc-service
+      crate 'test-parachain-undying-collator' (polkadot/parachain/test-parachains/undying/collator/Cargo.toml)
+        sc-service
+      crate 'xcm-runtime-apis' (polkadot/xcm/xcm-runtime-apis/Cargo.toml)
+        staging-xcm-executor
+  code: 1

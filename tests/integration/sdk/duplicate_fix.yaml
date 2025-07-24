@@ -1,0 +1,16 @@
+repo:
+  name: paritytech/polkadot-sdk
+  ref: 6a951f77bf0cbdb4bbb07783aac8a45bfb38351a
+cases:
+- cmd: lint duplicate-deps
+  stdout: |
+    Found 1 crate with duplicated dependencies between [dependencies] and [dev-dependencies]
+      crate 'staging-chain-spec-builder'
+        docify
+  code: 1
+- cmd: lint duplicate-deps --show-paths
+  stdout: |
+    Found 1 crate with duplicated dependencies between [dependencies] and [dev-dependencies]
+      crate 'staging-chain-spec-builder' (substrate/bin/utils/chain-spec-builder/Cargo.toml)
+        docify
+  code: 1

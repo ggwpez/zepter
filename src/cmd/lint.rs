@@ -24,6 +24,7 @@ use std::{
 	fs::canonicalize,
 	path::PathBuf,
 };
+use camino::Utf8PathBuf;
 
 use super::GlobalArgs;
 
@@ -808,6 +809,13 @@ pub struct DuplicateDepsCmd {
 	#[allow(missing_docs)]
 	#[clap(flatten)]
 	cargo_args: super::CargoArgs,
+
+	/// Show the path of the crate in the output.
+	///
+	/// This is useful for make it easier to fix, since many IDEs allow to click links in the
+	/// console.
+	#[clap(long)]
+	show_paths: bool,
 }
 
 impl DuplicateDepsCmd {
@@ -821,7 +829,7 @@ impl DuplicateDepsCmd {
 
 		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
 
-		let mut issues = vec![];
+		let mut issues = BTreeMap::<(String, Utf8PathBuf), BTreeSet<String>>::new();
 
 		for pkg in &meta.workspace_packages() {
 			let deps: HashSet<_> = pkg
@@ -839,17 +847,27 @@ impl DuplicateDepsCmd {
 				.collect();
 
 			for dep in deps.intersection(&dev_deps) {
-				issues.push(format!(
-					"Package `{}` has duplicated `{}` in both [dependencies] and [dev-dependencies]",
-					pkg.name, dep.name
-				));
+				issues.entry((pkg.name.to_string(), pkg.manifest_path.clone())).or_default().insert(dep.name.to_string());
 			}
 		}
 
 		if !issues.is_empty() {
-			for issue in issues {
-				println!("{issue}");
+			println!("Found {} crate{} with duplicated dependencies between [dependencies] and [dev-dependencies]", issues.len(), plural(issues.len()));
+			for ((pkg, path), deps) in issues {
+				let maybe_path = if self.show_paths {
+					let rel = path.strip_prefix(&meta.workspace_root).unwrap();
+					format!(" ({})", rel)
+				} else {
+					"".to_string()
+				};
+				
+				println!("  crate '{pkg}'{maybe_path}");
+
+				for dep in deps {
+					println!("    {dep}");
+				}
 			}
+
 			std::process::exit(1);
 		}
 	}

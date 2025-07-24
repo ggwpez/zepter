@@ -108,7 +108,7 @@ impl LiftToWorkspaceCmd {
 					let _ = e;
 					log::error!("Failed to lift up '{}': {}", dep, e);
 				},
-				Err(e) => return Err(format!("Failed to lift up '{}': {}", dep, e)),
+				Err(e) => return Err(format!("Failed to lift up '{dep}': {e}")),
 			}
 		}
 
@@ -305,8 +305,7 @@ impl LiftToWorkspaceCmd {
 
 		if local && remote {
 			Err(format!(
-				"Dependency '{}' is used both locally and remotely. This cannot be fixed automatically.",
-				name
+				"Dependency '{name}' is used both locally and remotely. This cannot be fixed automatically."
 			))
 		} else if local {
 			Ok(SourceLocationSelector::Local)
@@ -314,8 +313,7 @@ impl LiftToWorkspaceCmd {
 			Ok(SourceLocationSelector::Remote)
 		} else {
 			Err(format!(
-				"Dependency '{}' is not used in the workspace. This cannot be fixed automatically.",
-				name
+				"Dependency '{name}' is not used in the workspace. This cannot be fixed automatically."
 			))
 		}
 	}
@@ -396,7 +394,7 @@ impl LiftToWorkspaceCmd {
 				plural(unnrenamed.len()),
 			))
 		} else if renames.is_empty() {
-			return Ok(None)
+			Ok(None)
 		} else if renames.len() == 1 {
 			Ok(Some(renames.keys().next().unwrap().clone()))
 		} else {
@@ -415,7 +413,7 @@ impl LiftToWorkspaceCmd {
 				err += "\n";
 			}
 
-			return Err(format!(
+			Err(format!(
 				"Dependency '{}' is used with {} conflicting aliases:\n\n{}\nThis cannot be fixed automatically since it would break your code and configs.",
 				g.bold(name),
 				renames.len(),
@@ -467,7 +465,7 @@ impl LiftToWorkspaceCmd {
 						},
 					};
 
-					let hint = format!("cargo upgrade -p {}@{version_hint}", name);
+					let hint = format!("cargo upgrade -p {name}@{version_hint}");
 					return Err(format!(
 						"\nFound {} different versions of '{}' in the workspace:\n\n{err}\nHint: {}\n",
 						versions.len(),
@@ -498,14 +496,14 @@ fn try_find_latest<'a, I: Iterator<Item = &'a VersionReq>>(reqs: I) -> Result<St
 	// Try to convert each to a version. This is done as best-effort:
 	for req in reqs {
 		if req.comparators.len() != 1 {
-			return Err(format!("Invalid version requirement: '{}'", req))
+			return Err(format!("Invalid version requirement: '{req}'"))
 		}
 		let comp = req.comparators.first().unwrap();
 		if comp.op != Op::Caret {
-			return Err(format!("Only caret is supported, but got: '{}'", req))
+			return Err(format!("Only caret is supported, but got: '{req}'"))
 		}
 		if !comp.pre.is_empty() {
-			return Err(format!("Pre-release versions are not supported: '{}'", req))
+			return Err(format!("Pre-release versions are not supported: '{req}'"))
 		}
 
 		versions.push(Version {

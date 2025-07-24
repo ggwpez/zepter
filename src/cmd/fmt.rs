@@ -170,7 +170,7 @@ impl FormatFeaturesCmd {
 		for (path, pkg, fixer) in offenders.iter_mut() {
 			// trim of the allowed_dir, if possible:
 			let psuffix =
-				self.print_paths.then(|| format!(" {}", path.display())).unwrap_or_default();
+				if self.print_paths { format!(" {}", path.display()) } else { Default::default() };
 			println!("  {}{}", global.bold(pkg), psuffix);
 
 			if !self.fix {

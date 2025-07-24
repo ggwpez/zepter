@@ -30,7 +30,7 @@ where
 	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
 		for (from, tos) in self.edges.iter() {
 			for to in tos {
-				writeln!(f, "{} -> {}", from, to)?;
+				writeln!(f, "{from} -> {to}")?;
 			}
 		}
 		Ok(())

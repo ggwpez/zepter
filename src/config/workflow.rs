@@ -103,7 +103,7 @@ impl WorkflowFile {
 	pub fn from_path<P: AsRef<std::path::Path>>(path: P) -> Result<Self, String> {
 		let path = path.as_ref();
 		let content = std::fs::read_to_string(path)
-			.map_err(|e| format!("Failed to read config file {:?}: {e}", path))?;
+			.map_err(|e| format!("Failed to read config file {path:?}: {e}"))?;
 
 		content.parse()
 	}
@@ -172,8 +172,7 @@ impl WorkflowFile {
 			Ok(())
 		} else {
 			Err(format!(
-				"Config file version is too new. The file requires at least version {}, but the current version is {}. Please update Zepter or ignore this check with `--check-cfg-compatibility=off`.",
-				file_version, current_version
+				"Config file version is too new. The file requires at least version {file_version}, but the current version is {current_version}. Please update Zepter or ignore this check with `--check-cfg-compatibility=off`."
 			))
 		}
 	}

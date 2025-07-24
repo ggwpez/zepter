@@ -13,7 +13,7 @@ fn integration() {
 	std::env::set_var("RUST_BACKTRACE", "0");
 
 	let filter = std::env::var("UI_FILTER").unwrap_or_else(|_| "**/*.yaml".into());
-	let regex = format!("tests/{}", filter);
+	let regex = format!("tests/{filter}");
 	// Loop through all files in tests/ recursively
 	let files = glob::glob(&regex).unwrap();
 	let overwrite = std::env::var("OVERWRITE").is_ok();
@@ -171,9 +171,9 @@ fn integration() {
 
 	if failed > 0 {
 		if std::env::var("OVERWRITE").is_ok() {
-			println!("Updated {} test(s)", failed);
+			println!("Updated {failed} test(s)");
 		} else {
-			panic!("{} test(s) failed", failed);
+			panic!("{failed} test(s) failed");
 		}
 	}
 	if failed == 0 && good == 0 {

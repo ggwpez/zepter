@@ -599,8 +599,7 @@ impl AutoFixer {
 					}
 				} else {
 					return Err(format!(
-						"Dependency '{}' already exists in the workspace, but an existing alias in one of the packages has the same name as an un-aliased workspace dependency. This would silently use a different package than expected.",
-						dep_name
+						"Dependency '{dep_name}' already exists in the workspace, but an existing alias in one of the packages has the same name as an un-aliased workspace dependency. This would silently use a different package than expected."
 					))
 				}
 			}
@@ -665,10 +664,10 @@ impl AutoFixer {
 			t.insert("default-features", Value::Boolean(Formatted::new(default_feats)));
 		}
 
-		let name = if maybe_rename.is_some() {
-			log::info!("Renaming workspace dependency '{dep_name}' to '{}'", maybe_rename.unwrap());
+		let name = if let Some(rename) = maybe_rename {
+			log::info!("Renaming workspace dependency '{dep_name}' to '{rename}'");
 			t.insert("package", Value::String(Formatted::new(dep_name.to_string())));
-			maybe_rename.unwrap()
+			rename
 		} else {
 			dep_name
 		};

@@ -624,10 +624,7 @@ impl PropagateFeatureCmd {
 						let opt = if !non_optional && dep.optional { "?" } else { "" };
 
 						fixer
-							.add_to_feature(
-								&feature,
-								format!("{}{}/{}", dep_name, opt, feature).as_str(),
-							)
+							.add_to_feature(&feature, format!("{dep_name}{opt}/{feature}").as_str())
 							.unwrap();
 						log::info!("Inserted '{dep_name}/{feature}' into '{}'", krate.name);
 						fixes += 1;
@@ -705,7 +702,7 @@ fn error_stats(
 		if warnings + errors > 0 {
 			ret.push_str(" and");
 		}
-		let fixed = format!(" fixed {}", fixes);
+		let fixed = format!(" fixed {fixes}");
 		if fixes > 0 {
 			ret.push_str(&global.green(&fixed));
 			if fixes == warnings + errors {
@@ -722,7 +719,7 @@ fn error_stats(
 	} else if global.show_hints() {
 		ret.push_str(" (run with `--fix` to fix)");
 	}
-	Some(format!("{}.", ret))
+	Some(format!("{ret}."))
 }
 
 impl OnlyEnablesCmd {
@@ -800,7 +797,7 @@ impl WhyEnabledCmd {
 		debug_assert!(!enabled_by.is_empty());
 		println!("Feature {}/{} is enabled by:", self.feature, self.package);
 		for (name, feature) in enabled_by {
-			println!("  {}/{}", name, feature);
+			println!("  {name}/{feature}");
 		}
 	}
 }
@@ -862,7 +859,7 @@ impl DuplicateDepsCmd {
 			for ((pkg, path), deps) in issues {
 				let maybe_path = if self.show_paths {
 					let rel = path.strip_prefix(&meta.workspace_root).unwrap();
-					format!(" ({})", rel)
+					format!(" ({rel})")
 				} else {
 					"".to_string()
 				};

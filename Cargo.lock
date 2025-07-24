@@ -1750,7 +1750,7 @@ dependencies = [
 
 [[package]]
 name = "zepter"
-version = "1.78.2"
+version = "1.82.0"
 dependencies = [
  "anyhow",
  "assert_cmd",

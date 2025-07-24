@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, Criterion};
 use rand::{Rng, SeedableRng};
+use std::hint::black_box;
 use zepter::{cmd::lint::build_feature_dag, prelude::*};
 
 fn build_dag(nodes: usize, edges: usize) -> Dag<usize> {

@@ -299,7 +299,8 @@ pub(crate) fn resolve_dep_from_graph(
 ) -> Option<RenamedPackage> {
 	let dep_name = dep.rename.clone().unwrap_or(dep.name.clone()).replace('-', "_");
 	let resolved_pkg = resolve.nodes.iter().find(|node| node.id == pkg.id)?;
-	let resolved_dep_id = resolved_pkg.deps.iter().find(|node| node.name.to_string() == dep_name)?;
+	let resolved_dep_id =
+		resolved_pkg.deps.iter().find(|node| node.name.to_string() == dep_name)?;
 	let resolve_dep = meta.packages.iter().find(|pkg| pkg.id == resolved_dep_id.pkg)?;
 
 	Some(RenamedPackage::new(resolve_dep.clone(), dep.rename.clone(), dep.optional))

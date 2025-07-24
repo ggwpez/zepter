@@ -19,4 +19,4 @@ jobs:
       with:
         fetch-depth: 1
     - name: SPDX Header
-      run: python .github/header.py .github/HEADER . 
+      run: python3 .github/header.py .github/HEADER . 

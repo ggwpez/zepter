@@ -48,12 +48,12 @@ impl Workflow {
 			args.push("--fix-hint=off".into());
 			let cmd = std::env::args().next().unwrap_or("zepter".into());
 
-			log::debug!("Running command '{} {}'", cmd, args.join(" "));
+			log::debug!("Running command '{cmd} {}'", args.join(" "));
 
 			let status = std::process::Command::new(&cmd)
 				.args(args.clone())
 				.status()
-				.map_err(|e| format!("Failed to run command '{}': {}", cmd, e))?;
+				.map_err(|e| format!("Failed to run command '{cmd}': {e}"))?;
 
 			let first_two_args = args
 				.iter()
@@ -67,8 +67,7 @@ impl Workflow {
 
 			if !status.success() {
 				return Err(format!(
-					"Command '{}' failed with exit code {}",
-					first_two_args,
+					"Command '{first_two_args}' failed with exit code {}",
 					status.code().unwrap_or(1)
 				))
 			}
@@ -85,7 +84,7 @@ impl FromStr for WorkflowFile {
 
 	fn from_str(content: &str) -> Result<Self, Self::Err> {
 		let parsed = serde_yaml_ng::from_str::<WorkflowFile>(content)
-			.map_err(|e| format!("yaml parsing: {}", e))?;
+			.map_err(|e| format!("yaml parsing: {e}"))?;
 
 		if parsed.version.format != (1, 0, 0).into() {
 			return Err("Can only parse workflow files with version '1'".into())
@@ -104,7 +103,7 @@ impl WorkflowFile {
 	pub fn from_path<P: AsRef<std::path::Path>>(path: P) -> Result<Self, String> {
 		let path = path.as_ref();
 		let content = std::fs::read_to_string(path)
-			.map_err(|e| format!("Failed to read config file {:?}: {}", path, e))?;
+			.map_err(|e| format!("Failed to read config file {:?}: {e}", path))?;
 
 		content.parse()
 	}
@@ -116,14 +115,14 @@ impl WorkflowFile {
 		let links = if !help.links.is_empty() {
 			format!(
 				"\n\nFor more information, see:\n{}",
-				help.links.iter().map(|s| format!("  - {}", s)).collect::<Vec<_>>().join("\n")
+				help.links.iter().map(|s| format!("  - {s}")).collect::<Vec<_>>().join("\n")
 			)
 		} else {
 			Default::default()
 		};
 
 		let text = help.text.strip_suffix('\n').unwrap_or("");
-		format!("{}{}", text, links).into()
+		format!("{text}{links}").into()
 	}
 
 	/// Iteratively resolve all references in the workflow file.
@@ -142,11 +141,11 @@ impl WorkflowFile {
 					if let Some(line) = orig_line.strip_prefix('$') {
 						let (vname, index) = line.split_once('.').expect("Expecting $name.index");
 						let index: u32 = index.parse().map_err(|e| {
-							format!("Failed to parse index '{}' in line '{}': {}", index, line, e)
+							format!("Failed to parse index '{index}' in line '{line}': {e}")
 						})?;
 
 						let value = wfs.get(vname).ok_or_else(|| {
-							format!("Failed to find workflow '{}' in line '{}'", vname, line)
+							format!("Failed to find workflow '{vname}' in line '{line}'")
 						})?;
 
 						step.0.remove(i);

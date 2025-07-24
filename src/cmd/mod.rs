@@ -149,7 +149,7 @@ impl GlobalArgs {
 		if !self.color {
 			s.to_string()
 		} else {
-			format!("\x1b[31m{}\x1b[0m", s)
+			format!("\x1b[31m{s}\x1b[0m")
 		}
 	}
 
@@ -157,7 +157,7 @@ impl GlobalArgs {
 		if !self.color {
 			s.to_string()
 		} else {
-			format!("\x1b[33m{}\x1b[0m", s)
+			format!("\x1b[33m{s}\x1b[0m")
 		}
 	}
 
@@ -165,7 +165,7 @@ impl GlobalArgs {
 		if !self.color {
 			s.to_string()
 		} else {
-			format!("\x1b[32m{}\x1b[0m", s)
+			format!("\x1b[32m{s}\x1b[0m")
 		}
 	}
 
@@ -173,7 +173,7 @@ impl GlobalArgs {
 		if !self.color {
 			s.to_string()
 		} else {
-			format!("\x1b[1m{}\x1b[0m", s)
+			format!("\x1b[1m{s}\x1b[0m")
 		}
 	}
 }

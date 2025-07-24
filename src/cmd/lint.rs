@@ -642,7 +642,7 @@ impl PropagateFeatureCmd {
 			}
 		}
 		if let Some(e) = error_stats(errors, 0, fixes, self.fixer_args.enable, global) {
-			println!("{}", e);
+			println!("{e}");
 		}
 
 		if errors > fixes {

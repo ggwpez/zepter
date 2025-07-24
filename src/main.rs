@@ -16,7 +16,7 @@ fn main() -> Result<(), ()> {
 	}
 
 	if let Err(err) = Command::parse_from(args).run() {
-		eprintln!("{}", err);
+		eprintln!("{err}");
 		Err(())
 	} else {
 		Ok(())

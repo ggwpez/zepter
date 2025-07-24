@@ -14,6 +14,7 @@ use crate::{
 	prelude::*,
 	CrateId,
 };
+use camino::Utf8PathBuf;
 use cargo_metadata::{Metadata, Package, PackageId};
 use core::{
 	fmt,
@@ -24,7 +25,6 @@ use std::{
 	fs::canonicalize,
 	path::PathBuf,
 };
-use camino::Utf8PathBuf;
 
 use super::GlobalArgs;
 
@@ -847,7 +847,10 @@ impl DuplicateDepsCmd {
 				.collect();
 
 			for dep in deps.intersection(&dev_deps) {
-				issues.entry((pkg.name.to_string(), pkg.manifest_path.clone())).or_default().insert(dep.name.to_string());
+				issues
+					.entry((pkg.name.to_string(), pkg.manifest_path.clone()))
+					.or_default()
+					.insert(dep.name.to_string());
 			}
 		}
 
@@ -860,7 +863,7 @@ impl DuplicateDepsCmd {
 				} else {
 					"".to_string()
 				};
-				
+
 				println!("  crate '{pkg}'{maybe_path}");
 
 				for dep in deps {

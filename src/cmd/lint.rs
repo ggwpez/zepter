@@ -15,11 +15,12 @@ use crate::{
 	CrateId,
 };
 use camino::Utf8PathBuf;
-use cargo_metadata::{Metadata, Package, PackageId};
+use cargo_metadata::{DependencyKind, Metadata, Package, PackageId};
 use core::{
 	fmt,
 	fmt::{Display, Formatter},
 };
+use itertools::Itertools;
 use std::{
 	collections::{BTreeMap, BTreeSet, HashMap, HashSet},
 	fs::canonicalize,
@@ -804,6 +805,7 @@ impl WhyEnabledCmd {
 	}
 }
 
+/// Detect crates that needlessly list the same dependency both as `normal` and `dev` dependency.
 #[derive(Debug, clap::Parser)]
 pub struct DuplicateDepsCmd {
 	#[allow(missing_docs)]
@@ -821,9 +823,9 @@ pub struct DuplicateDepsCmd {
 impl DuplicateDepsCmd {
 	pub fn run(&self, _global: &GlobalArgs) {
 		// To easily compare dependencies, we normalize them by removing the kind.
-		fn normalize_dep(dep: &cargo_metadata::Dependency) -> cargo_metadata::Dependency {
+		fn without_kind(dep: &cargo_metadata::Dependency) -> cargo_metadata::Dependency {
 			let mut dep = dep.clone();
-			dep.kind = cargo_metadata::DependencyKind::Unknown;
+			dep.kind = DependencyKind::Unknown;
 			dep
 		}
 
@@ -835,18 +837,19 @@ impl DuplicateDepsCmd {
 			let deps: HashSet<_> = pkg
 				.dependencies
 				.iter()
-				.filter(|d| d.kind == cargo_metadata::DependencyKind::Normal)
-				.map(normalize_dep)
+				.filter(|d| d.kind == DependencyKind::Normal)
+				.map(without_kind)
 				.collect();
 
 			let dev_deps: HashSet<_> = pkg
 				.dependencies
 				.iter()
-				.filter(|d| d.kind == cargo_metadata::DependencyKind::Development)
-				.map(normalize_dep)
+				.filter(|d| d.kind == DependencyKind::Development)
+				.map(without_kind)
 				.collect();
 
-			for dep in deps.intersection(&dev_deps) {
+			let intersection = deps.intersection(&dev_deps).sorted_by(|a, b| a.name.cmp(&b.name));
+			for dep in intersection {
 				issues
 					.entry((pkg.name.to_string(), pkg.manifest_path.clone()))
 					.or_default()
@@ -875,6 +878,7 @@ impl DuplicateDepsCmd {
 		}
 	}
 }
+
 // Complexity is `O(x ^ 4) with x=pkgs.len()`.
 pub fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeature> {
 	let mut dag = Dag::new();

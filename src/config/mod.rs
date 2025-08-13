@@ -72,7 +72,7 @@ pub fn search_config<P: AsRef<Path>>(workspace: P) -> Result<PathBuf, Vec<PathBu
 }
 
 impl ConfigArgs {
-	pub fn load_or_panic(&self,) -> WorkflowFile {
+	pub fn load_or_panic(&self) -> WorkflowFile {
 		self.load().unwrap_or_else(|e| {
 			eprintln!("{e}");
 			std::process::exit(GlobalArgs::error_code_cfg_parsing());

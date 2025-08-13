@@ -1,0 +1,25 @@
+crates:
+- name: A
+  deps:
+  - name: B
+    optional: true
+  features:
+    F0: null
+- name: B
+cases:
+- cmd: lint propagate-feature --feature F0 --feature-enables-dep F0:B --fix
+  stdout: |
+    crate 'A'
+      feature 'F0'
+        must enable dependency as non-optional:
+          B
+    Found 1 issue and fixed 1 (all fixed).
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 3332f79684..26dd2b015c 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -15,0 +16 @@ F0 = [\n+\t\"B\"\n"
+- cmd: lint propagate-feature --feature F0 --feature-enables-dep F0:B
+  stdout: |
+    crate 'A'
+      feature 'F0'
+        must enable dependency as non-optional:
+          B
+    Found 1 issue (run with `--fix` to fix).
+  code: 1

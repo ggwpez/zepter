@@ -147,7 +147,7 @@ pub struct PropagateFeatureCmd {
 	#[clap(long, short, num_args(0..))]
 	packages: Vec<String>,
 
-	/// The auto-fixer will enables the feature of the dependencies as non-optional.
+	/// Enables the feature of the dependencies as non-optional.
 	///
 	/// This can be used in case that a dependency should not be enabled like `dep?/feature` but
 	/// like `dep/feature` instead. In this case you would pass `--feature-enables-dep
@@ -471,6 +471,8 @@ impl PropagateFeatureCmd {
 		let dep_kinds = self.parse_dep_kinds().expect("Parse dependency kinds");
 		// (Crate that missing the feature) -> (Dependency that has it)
 		let mut feature_missing = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
+		// (Crate that is not enabling a optional dependency) -> (Dependency that it is not enabled)
+		let mut non_optional_missing = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
 
 		for pkg in to_check.iter() {
 			// TODO that it does not enable other features.
@@ -492,15 +494,28 @@ impl PropagateFeatureCmd {
 					continue
 				};
 
+				// If optional and require by `feature-enables-dep` but does not have the feature,
+				// then we need to enable it as non-optional.
+				if dep.optional {
+					if let Some((feature, _)) = self.feature_enables_dep.iter().flatten().find(|(f, name)| *f == feature && *name == dep.name()) {
+						if !dep.pkg.features.contains_key(feature) && !pkg.features.get(feature).is_some_and(|f| f.contains(&dep.name())) {
+							non_optional_missing.entry(pkg.id.to_string()).or_default().insert(dep.clone());
+						}
+					}
+					// Continue here should not make a difference. TODO check.
+				}
+
 				if !dep.pkg.features.contains_key(&feature) {
 					continue
 				}
+				
 				if !pkg.features.contains_key(&feature) {
 					if self.left_side_feature_missing != MuteSetting::Ignore {
 						feature_missing.entry(pkg.id.to_string()).or_default().insert(dep);
 					}
 					continue
 				}
+			
 
 				// TODO check that optional deps are only enabled as optional unless
 				// overwritten with `--feature-enables-dep`.
@@ -543,7 +558,7 @@ impl PropagateFeatureCmd {
 			}
 		}
 		let faulty_crates: BTreeSet<CrateId> =
-			propagate_missing.keys().chain(feature_missing.keys()).cloned().collect();
+			propagate_missing.keys().chain(feature_missing.keys()).chain(non_optional_missing.keys()).cloned().collect();
 		let mut faulty_crates =
 			faulty_crates.into_iter().map(|id| (lookup(&id), id)).collect::<Vec<_>>();
 		faulty_crates.sort_by(|(a, _), (b, _)| a.name.cmp(&b.name));
@@ -632,6 +647,29 @@ impl PropagateFeatureCmd {
 				}
 				errors += deps.len();
 			}
+
+			if let Some(deps) = non_optional_missing.get(&krate.id.to_string()) {
+				let mut named = deps.iter().map(RenamedPackage::display_name).collect::<Vec<_>>();
+				named.sort();
+				println!("    must enable dependency as non-optional:\n      {}", named.join("\n      "));
+				
+				if self.fixer_args.enable &&
+					self.fix_package.as_ref().is_none_or(|p| p == &krate.name.to_string())
+				{
+					for dep in deps.iter() {
+						let dep_name = dep.name();
+						let Some(fixer) = fixer.as_mut() else { continue };
+
+						fixer.add_to_feature(&feature, format!("{dep_name}").as_str()).unwrap();
+						
+						log::info!("Inserted '{dep_name}' into '{}'", krate.name);
+						fixes += 1;
+					}
+				}
+
+				errors += deps.len();
+			}
+
 			if let Some(fixer) = fixer.as_mut() {
 				if fixes > 0 {
 					fixer.save().unwrap();

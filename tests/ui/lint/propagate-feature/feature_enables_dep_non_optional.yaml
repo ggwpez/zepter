@@ -1,0 +1,9 @@
+crates:
+- name: A
+  deps:
+  - name: B  # Non-optional dependency
+  features:
+    F0: null
+- name: B
+cases:
+- cmd: lint propagate-feature --feature F0 --feature-enables-dep F0:B

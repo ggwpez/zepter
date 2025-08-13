@@ -1,0 +1,28 @@
+crates:
+- name: A
+  deps:
+  - name: B
+    optional: true
+  - name: C
+    optional: true
+  features:
+    F0: null
+    F1: null
+- name: B
+- name: C
+  features:
+    F1: null
+cases:
+- cmd: lint propagate-feature --feature F0,F1 --feature-enables-dep F0:B,F1:C --fix
+  stdout: |
+    crate 'A'
+      feature 'F0'
+        must enable dependency as non-optional:
+          B
+    Found 1 issue and fixed 1 (all fixed).
+    crate 'A'
+      feature 'F1'
+        must propagate to:
+          C
+    Found 1 issue and fixed 1 (all fixed).
+  diff: "diff --git A/Cargo.toml A/Cargo.toml\nindex 957fb1d723..0d14f8f860 100644\n--- A/Cargo.toml\n+++ A/Cargo.toml\n@@ -16,0 +17 @@ F0 = [\n+\t\"B\"\n@@ -18,0 +20 @@ F1 = [\n+\t\"C/F1\"\n"

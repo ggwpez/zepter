@@ -24,7 +24,7 @@ pub struct RunArgs {
 
 impl RunCmd {
 	pub fn run(&self, g: &GlobalArgs) {
-		let config = self.args.config.load().expect("Invalid config file");
+		let config = self.args.config.load_or_panic();
 
 		let name = self.args.workflow.as_deref().unwrap_or(WORKFLOW_DEFAULT_NAME);
 		let Some(workflow) = config.workflow(name) else {

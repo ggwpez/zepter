@@ -4,7 +4,7 @@
 pub mod semver;
 pub mod workflow;
 
-use crate::{config::workflow::WorkflowFile, log, ErrToStr};
+use crate::{cmd::GlobalArgs, config::workflow::WorkflowFile, log, ErrToStr};
 
 use std::{
 	fs::canonicalize,
@@ -72,6 +72,13 @@ pub fn search_config<P: AsRef<Path>>(workspace: P) -> Result<PathBuf, Vec<PathBu
 }
 
 impl ConfigArgs {
+	pub fn load_or_panic(&self) -> WorkflowFile {
+		self.load().unwrap_or_else(|e| {
+			eprintln!("{e}");
+			std::process::exit(GlobalArgs::error_code_cfg_parsing());
+		})
+	}
+
 	pub fn load(&self) -> Result<WorkflowFile, String> {
 		let path = self.locate_config()?;
 		log::debug!("Using config file: {path:?}");

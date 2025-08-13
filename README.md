@@ -237,7 +237,7 @@ When these two experiments proove the usefulness and reliability of Zepter for C
 ## Testing
 
 Unit tests: `cargo test`
-UI and downstream integration tests: `cargo test -- --ignored`
+UI and downstream integration tests: `cargo test -- --ignored --nocapture`
 
 Environment overwrites exist for the UI tests to:
 - `OVERWRITE`: Update the UI diff locks.

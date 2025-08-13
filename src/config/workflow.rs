@@ -166,13 +166,13 @@ impl WorkflowFile {
 	pub fn check_cfg_compatibility(&self) -> Result<(), String> {
 		let current_version =
 			Semver::try_from(clap::crate_version!()).expect("Crate version is valid semver");
-		let file_version = self.version.binary;
+		let required_version = self.version.binary;
 
-		if current_version.is_newer_or_equal(&file_version) {
+		if current_version.is_newer_or_equal(&required_version) {
 			Ok(())
 		} else {
 			Err(format!(
-				"Config file version is too new. The file requires at least version {file_version}, but the current version is {current_version}. Please update Zepter or ignore this check with `--check-cfg-compatibility=off`."
+				"Your version of Zepter is too old for this project.\n\n Required:  {required_version}\n Installed: {current_version}\n\nPlease update Zepter with:\n\n  cargo install zepter --locked\n\nOr add `--check-cfg-compatibility=off` to the config file."
 			))
 		}
 	}

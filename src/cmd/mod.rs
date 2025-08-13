@@ -48,7 +48,7 @@ pub struct GlobalArgs {
 
 	/// Try to exit with code zero if the intended check failed.
 	///
-	/// Will still return 1 in case of an actual error (eg. failed to find some file) or a panic
+	/// Will still return != 0 in case of an actual error (eg. failed to find some file) or a panic
 	/// (aka software bug).
 	#[clap(long, global = true, verbatim_doc_comment)]
 	exit_code_zero: bool,
@@ -143,6 +143,11 @@ impl GlobalArgs {
 		} else {
 			1
 		}
+	}
+
+	/// Error code when the config file is invalid or incompatible.
+	pub fn error_code_cfg_parsing() -> i32 {
+		101
 	}
 
 	pub fn red(&self, s: &str) -> String {

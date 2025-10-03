@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         repo: ["paritytech/polkadot-sdk", "open-web3-stack/open-runtime-module-library", "/alloy-rs/alloy", "paradigmxyz/reth"]
-        version: [1.82.1,  "*"]
+        version: ["*"]
 
     steps:
     - uses: actions/checkout@master

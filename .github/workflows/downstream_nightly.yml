@@ -23,7 +23,7 @@ jobs:
     name: "Check"
     strategy:
       matrix:
-        repo: ["paritytech/polkadot-sdk", "open-web3-stack/open-runtime-module-library", "/alloy-rs/alloy", "paradigmxyz/reth"]
+        repo: ["paritytech/polkadot-sdk", "open-web3-stack/open-runtime-module-library", "alloy-rs/alloy", "paradigmxyz/reth"]
         version: ["*"]
 
     steps:

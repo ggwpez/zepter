@@ -3,25 +3,25 @@ crates:
 cases:
 - cmd: run default
   stdout: |
-    zepter 1.82.2
+    zepter 1.85.0
   stderr: |
     [INFO] Running workflow 'default'
     [INFO] 1/1 --version
 - cmd: run
   stdout: |
-    zepter 1.82.2
+    zepter 1.85.0
   stderr: |
     [INFO] Running workflow 'default'
     [INFO] 1/1 --version
 - cmd: ''
   stdout: |
-    zepter 1.82.2
+    zepter 1.85.0
   stderr: |
     [INFO] Running workflow 'default'
     [INFO] 1/1 --version
 - cmd: run my_version
   stdout: |
-    zepter 1.82.2
+    zepter 1.85.0
   stderr: |
     [INFO] Running workflow 'my_version'
     [INFO] 1/1 --version
@@ -36,7 +36,7 @@ cases:
     [INFO] 1/1 debug --no-benchmark
 - cmd: run both
   stdout: |
-    zepter 1.82.2
+    zepter 1.85.0
     Num workspace members: 1
     Num dependencies: 1
     DAG nodes: 0, links: 0

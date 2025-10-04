@@ -2,7 +2,7 @@
 
 [![Rust](https://github.com/ggwpez/zepter/actions/workflows/rust.yml/badge.svg)](https://github.com/ggwpez/zepter/actions/workflows/rust.yml)
 [![crates.io](https://img.shields.io/crates/v/zepter.svg)](https://crates.io/crates/zepter)
-![MSRV](https://img.shields.io/badge/MSRV-1.78-informational)
+![MSRV](https://img.shields.io/badge/MSRV-1.82-informational)
 [![docs.rs](https://img.shields.io/docsrs/zepter)](https://docs.rs/zepter/latest/zepter)
 
 Analyze, Fix and Format features in your Rust workspace. The goal of this tool is to have this CI ready to prevent common errors with Rust features.

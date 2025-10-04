@@ -1,13 +1,13 @@
 [package]
 name = "zepter"
-version = "1.82.1"
+version = "1.85.0"
 edition = "2021"
 authors = [ "Oliver Tale-Yazdi" ]
 description = "Analyze, Fix and Format features in your Rust workspace."
 license = "GPL-3.0-only"
 repository = "https://github.com/ggwpez/zepter"
 # Update the README if you change this:
-rust-version = "1.82"
+rust-version = "1.85"
 keywords = ["features", "linting", "formatting"]
 categories = ["development-tools"]
 

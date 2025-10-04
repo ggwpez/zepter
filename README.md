@@ -9,8 +9,16 @@ Analyze, Fix and Format features in your Rust workspace. The goal of this tool i
 
 ## Install
 
+From source code:
+
 ```sh
 cargo install zepter -f --locked
+```
+
+As binary via [`cargo binstall`](https://github.com/cargo-bins/cargo-binstall):  
+
+```sh
+cargo binstall -y zepter
 ```
 
 ## Commands

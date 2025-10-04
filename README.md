@@ -15,7 +15,7 @@ From source code:
 cargo install zepter -f --locked
 ```
 
-From binary (build via GitHub CI):  
+As binary via [`cargo binstall`](https://github.com/cargo-bins/cargo-binstall):  
 
 ```sh
 cargo binstall -y zepter

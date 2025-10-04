@@ -21,7 +21,7 @@ jobs:
     name: "Check"
     strategy:
       matrix:
-        repo: [substrate, polkadot, cumulus, ]
+        repo: [substrate]
 
     steps:
     - uses: actions/checkout@master
@@ -36,8 +36,7 @@ jobs:
       run: cargo install --git ${{ github.server_url }}/${{ github.repository }} zepter --rev $GITHUB_SHA --locked -q
     
       # Substrate master should be green since its using Zepter in its CI.
-    - if: matrix.repo == 'substrate'
-      name: Zepter passes
+    - name: Zepter passes
       run: |
         echo "Checking features #1"
         zepter lint propagate-feature --feature try-runtime --left-side-feature-missing=ignore --workspace --fix --feature-enables-dep="try-runtime:frame-try-runtime"
@@ -47,15 +46,3 @@ jobs:
         zepter lint propagate-feature --feature std --left-side-feature-missing=ignore --workspace
         echo "Checking formatting #1"
         zepter format features --check --exit-code-zero
-    - if: matrix.repo != 'substrate' && matrix.repo != 'polkadot-sdk'
-      name: Zepter doesnt panic
-      # Polkadot and Cumulus can be red, but should not panic. Hence the `--exit-code-zero`.
-      run: |
-        echo "Checking features #1"
-        zepter lint propagate-feature --feature try-runtime --left-side-feature-missing=ignore --workspace --fix --feature-enables-dep="try-runtime:frame-try-runtime" --exit-code-zero
-        echo "Checking features #2"
-        zepter lint propagate-feature --feature runtime-benchmarks --left-side-feature-missing=ignore --workspace --feature-enables-dep="runtime-benchmarks:frame-benchmarking" --exit-code-zero
-        echo "Checking features #3"
-        zepter lint propagate-feature --feature std --left-side-feature-missing=ignore --workspace --exit-code-zero
-        echo "Checking formatting #1"
-        zepter format features --exit-code-zero

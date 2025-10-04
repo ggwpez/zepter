@@ -69,3 +69,7 @@ debug = true
 inherits = "release"
 lto = true
 codegen-units = 1
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "optimized"

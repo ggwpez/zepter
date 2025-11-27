@@ -127,12 +127,14 @@ fn integration() {
 					colour::red_ln!("FAILED");
 					colour::white!("");
 					if !keep_going {
-						// line by line comparison
-						let got_lines = got.lines().collect::<Vec<&str>>();
-						let case_lines = case.diff.lines().collect::<Vec<&str>>();
+						// assert in chunks of 10 lines
+						let got_lines = got.lines().collect::<Vec<_>>();
+						let got_chunks = got_lines.chunks(10).collect::<Vec<_>>();
+						let case_lines = case.diff.lines().collect::<Vec<_>>();
+						let case_chunks = case_lines.chunks(10).collect::<Vec<_>>();
 
-						for (i, line) in got_lines.iter().enumerate() {
-							pretty_assertions::assert_eq!(line, &case_lines[i]);
+						for (got_chunk, case_chunk) in got_chunks.iter().zip(case_chunks.iter()) {
+							pretty_assertions::assert_eq!(got_chunk, case_chunk);
 						}
 						unreachable!()
 					}

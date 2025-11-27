@@ -127,7 +127,14 @@ fn integration() {
 					colour::red_ln!("FAILED");
 					colour::white!("");
 					if !keep_going {
-						pretty_assertions::assert_eq!(got, case.diff);
+						// line by line comparison
+						let got_lines = got.lines().collect::<Vec<&str>>();
+						let case_lines = case.diff.lines().collect::<Vec<&str>>();
+
+						for (i, line) in got_lines.iter().enumerate() {
+							pretty_assertions::assert_eq!(line, &case_lines[i]);
+						}
+						unreachable!()
 					}
 				}
 			} else {

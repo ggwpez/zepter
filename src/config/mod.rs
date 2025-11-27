@@ -129,17 +129,16 @@ impl ConfigArgs {
 			cmd.arg("--manifest-path").arg(path);
 		}
 		let output = cmd.output().err_to_str()?;
-		let path = String::from_utf8(output.stdout).map(&PathBuf::from).err_to_str()?;
+		let path = String::from_utf8(output.stdout).map(PathBuf::from).err_to_str()?;
 
-		match path.parent() {
-			Some(root) => Ok(root.into()),
-			None => {
-				let err = output.stderr;
-				let err = String::from_utf8(err).err_to_str()?;
-				let err = err.replace("\n", "\n\t");
-
-				Err(format!("Failed to find the workspace root with `cargo locate-project`:\n\n\t{err}"))
-			},
+		if let Some(root) = path.parent() {
+			return Ok(root.into())
 		}
+
+		let err = output.stderr;
+		let err = String::from_utf8(err).err_to_str()?;
+		let err = err.replace("\n", "\n\t");
+
+		Err(format!("Failed to find the workspace root with `cargo locate-project`:\n\n\t{err}"))
 	}
 }

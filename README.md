@@ -12,7 +12,7 @@ Analyze, Fix and Format features in your Rust workspace. The goal of this tool i
 From source code:
 
 ```sh
-cargo install zepter -f --locked
+**cargo** install zepter -f --locked
 ```
 
 As binary via [`cargo binstall`](https://github.com/cargo-bins/cargo-binstall):  

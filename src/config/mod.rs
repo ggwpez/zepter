@@ -139,7 +139,9 @@ impl ConfigArgs {
 				let err = output.stderr;
 				let err = String::from_utf8(err).err_to_str()?;
 				let err = err.replace("\n", "\n\t");
-				return Err(format!("`cargo locate-project` failed to find the workspace root:\n\n\t{err}"));
+				return Err(format!(
+					"`cargo locate-project` failed to find the workspace root:\n\n\t{err}"
+				));
 			},
 		};
 

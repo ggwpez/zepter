@@ -37,6 +37,7 @@ fn integration() {
 			let _init = case.init(workspace.as_path()).unwrap();
 			colour::white!("{} {}/{} ", file.display(), i + 1, m);
 			git_reset(workspace.as_path()).unwrap();
+			#[allow(deprecated)]
 			let mut cmd = Command::cargo_bin("zepter").unwrap();
 			for arg in case.cmd.split_whitespace() {
 				cmd.arg(arg);

@@ -37,6 +37,7 @@ fn integration() {
 			let _init = case.init(workspace.as_path()).unwrap();
 			colour::white!("{} {}/{} ", file.display(), i + 1, m);
 			git_reset(workspace.as_path()).unwrap();
+			#[allow(deprecated)]
 			let mut cmd = Command::cargo_bin("zepter").unwrap();
 			for arg in case.cmd.split_whitespace() {
 				cmd.arg(arg);
@@ -126,7 +127,16 @@ fn integration() {
 					colour::red_ln!("FAILED");
 					colour::white!("");
 					if !keep_going {
-						pretty_assertions::assert_eq!(got, case.diff);
+						// assert in chunks of 10 lines
+						let got_lines = got.lines().collect::<Vec<_>>();
+						let got_chunks = got_lines.chunks(10).collect::<Vec<_>>();
+						let case_lines = case.diff.lines().collect::<Vec<_>>();
+						let case_chunks = case_lines.chunks(10).collect::<Vec<_>>();
+
+						for (got_chunk, case_chunk) in got_chunks.iter().zip(case_chunks.iter()) {
+							pretty_assertions::assert_eq!(got_chunk, case_chunk);
+						}
+						unreachable!()
 					}
 				}
 			} else {

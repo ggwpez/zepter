@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
 use criterion::{criterion_group, criterion_main, Criterion};
-use rand::{Rng, SeedableRng};
+use rand::{RngExt, SeedableRng};
 use std::hint::black_box;
 use zepter::{cmd::lint::build_feature_dag, prelude::*};
 

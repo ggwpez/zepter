@@ -43,4 +43,6 @@ jobs:
         cargo clippy --all-targets --no-default-features -q
 
     - name: Format
-      run: cargo +nightly fmt --check
+      run: |
+        cargo +nightly fmt --all --check -- --config-path .config/rustfmt.toml
+        taplo format --config .config/taplo.toml --check

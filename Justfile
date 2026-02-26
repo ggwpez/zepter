@@ -8,7 +8,10 @@ clippy:
 	@cargo clippy --all-targets --no-default-features -q
 
 format:
-	@cargo +nightly fmt --all --check
+	@cargo +nightly fmt --all --check -- --config-path .config/rustfmt.toml
+	@taplo format --config .config/taplo.toml
+
+fmt: format
 
 fix: clippy-fix format-fix
 

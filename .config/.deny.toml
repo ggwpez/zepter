@@ -17,11 +17,7 @@ vulnerability = "deny"
 yanked = "warn"
 
 [licenses]
-allow = [
-  "Apache-2.0",
-  "MIT",
-  "Unicode-DFS-2016",
-]
+allow = ["Apache-2.0", "MIT", "Unicode-DFS-2016"]
 allow-osi-fsf-free = "neither"
 confidence-threshold = 0.8
 copyleft = "allow"

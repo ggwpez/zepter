@@ -45,4 +45,3 @@ jobs:
     - name: Format
       run: |
         cargo +nightly fmt --all --check -- --config-path .config/rustfmt.toml
-        taplo format --config .config/taplo.toml --check

@@ -24,7 +24,7 @@ jobs:
         fetch-depth: 1
     - uses: actions-rust-lang/setup-rust-toolchain@v1
     - name: Install MSRV
-      run:
+      run: |
         if ! command -v cargo-msrv > /dev/null 2>&1; then
           cargo install cargo-msrv --locked -q
         fi

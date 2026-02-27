@@ -553,12 +553,10 @@ impl PropagateFeatureCmd {
 					continue
 				}
 
-				if let Some((_, lhs_ignore)) = ignore_missing_propagate
-					.iter()
-					.find(|(c, _)| pkg.name.to_string() == c.0 && c.1 == feature)
+				if let Some((_, lhs_ignore)) =
+					ignore_missing_propagate.iter().find(|(c, _)| pkg.name == c.0 && c.1 == feature)
 				{
-					if lhs_ignore.iter().any(|i| dep.pkg.name.to_string() == i.0 && i.1 == feature)
-					{
+					if lhs_ignore.iter().any(|i| dep.pkg.name == i.0 && i.1 == feature) {
 						continue
 					}
 				}

@@ -214,7 +214,7 @@ impl LiftToWorkspaceCmd {
 				continue
 			}
 			if let Some(skip_package) = &self.skip_package {
-				if pkg.name.to_string() == *skip_package {
+				if pkg.name == skip_package {
 					continue
 				}
 			}
@@ -287,7 +287,7 @@ impl LiftToWorkspaceCmd {
 
 		for pkg in meta.packages.iter() {
 			if let Some(skip_package) = &self.skip_package {
-				if pkg.name.to_string() == *skip_package {
+				if pkg.name == skip_package {
 					continue
 				}
 			}
@@ -329,7 +329,7 @@ impl LiftToWorkspaceCmd {
 
 		for pkg in meta.packages.iter() {
 			if let Some(skip_package) = &self.skip_package {
-				if pkg.name.to_string() == *skip_package {
+				if pkg.name == skip_package {
 					continue
 				}
 			}

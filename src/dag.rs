@@ -648,6 +648,15 @@ mod tests {
 	}
 
 	#[test]
+	fn path_translate_borrowed() {
+		let values = vec![(String::from("hello"), 1), (String::from("world"), 2)];
+		let path: Path<'_, (String, i32)> =
+			Path(values.iter().map(|v| Cow::Borrowed(v)).collect());
+		let translated: Path<'_, String> = path.translate_borrowed(|&(ref s, _)| s);
+		assert_eq!(format!("{translated}"), "hello -> world");
+	}
+
+	#[test]
 	fn path_translate_owned() {
 		let path: Path<'_, String> =
 			Path(vec![Cow::Owned("hello".into()), Cow::Owned("world".into())]);

@@ -29,6 +29,10 @@ impl TryFrom<&str> for Semver {
 		let minor = parts.next().unwrap_or("0").parse().map_err(|_| ())?;
 		let patch = parts.next().unwrap_or("0").parse().map_err(|_| ())?;
 
+		if parts.next().is_some() {
+			return Err(());
+		}
+
 		Ok(Self { major, minor, patch })
 	}
 }
@@ -77,6 +81,12 @@ mod test {
 		assert_eq!(Semver::try_from("1.2").unwrap(), Semver::from((1, 2, 0)));
 
 		assert_eq!(Semver::try_from("1.2.3").unwrap(), Semver::from((1, 2, 3)));
+	}
+
+	#[test]
+	fn parse_semver_rejects_extra_segments() {
+		assert!(Semver::try_from("1.2.3.4").is_err());
+		assert!(Semver::try_from("1.2.3.4.5").is_err());
 	}
 
 	#[test]

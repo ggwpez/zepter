@@ -129,7 +129,8 @@ impl ConfigArgs {
 			cmd.arg("--manifest-path").arg(path);
 		}
 		let output = cmd.output().err_to_str()?;
-		let path = String::from_utf8(output.stdout).map(PathBuf::from).err_to_str()?;
+		// `cargo locate-project` outputs a trailing newline that must be stripped.
+		let path = String::from_utf8(output.stdout).map(|s| PathBuf::from(s.trim())).err_to_str()?;
 
 		if let Some(root) = path.parent() {
 			return Ok(root.into())
@@ -140,5 +141,19 @@ impl ConfigArgs {
 		let err = err.replace("\n", "\n\t");
 
 		Err(format!("Failed to find the workspace root with `cargo locate-project`:\n\n\t{err}"))
+	}
+}
+
+#[cfg(test)]
+mod test {
+	#[test]
+	fn cargo_locate_project_has_trailing_newline() {
+		let output = std::process::Command::new("cargo")
+			.args(["locate-project", "--message-format", "plain", "--workspace", "--offline", "--locked"])
+			.output()
+			.expect("Failed to run cargo locate-project");
+
+		let stdout = String::from_utf8(output.stdout).unwrap();
+		assert!(stdout.ends_with('\n'), "Expected trailing newline in cargo locate-project output, got: {stdout:?}");
 	}
 }

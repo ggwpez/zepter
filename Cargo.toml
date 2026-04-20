@@ -21,7 +21,7 @@ required-features = ["benchmarking"]
 
 [dependencies]
 anyhow = { version = "1.0.102", optional = true }
-assert_cmd = { version = "2.1.2", optional = true }
+assert_cmd = { version = "2.2.1", optional = true }
 camino = "1.2.2"
 cargo_metadata = "0.23.1"
 clap = { version = "4.5.60", features = ["cargo", "derive"] }

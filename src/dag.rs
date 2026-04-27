@@ -362,8 +362,8 @@ mod tests {
 	fn assert_edges(dag: &Dag<String>, expected: &[(&str, &[&str])]) {
 		for (k, v) in expected {
 			assert_eq!(
-				dag.edges.get(&k.to_string()).unwrap(),
-				&v.iter().map(|s| s.to_string()).collect::<BTreeSet<_>>(),
+				dag.edges.get(*k).unwrap(),
+				&v.iter().map(|s| (*s).to_string()).collect::<BTreeSet<_>>(),
 				"edges for node '{k}' don't match"
 			);
 		}
@@ -568,8 +568,8 @@ mod tests {
 		let c = String::from("C");
 		let parents: BTreeSet<_> = dag.inverse_lookup(&c).collect();
 		assert_eq!(parents.len(), 2);
-		assert!(parents.contains(&"A".to_string()));
-		assert!(parents.contains(&"B".to_string()));
+		assert!(parents.contains(&String::from("A")));
+		assert!(parents.contains(&String::from("B")));
 	}
 
 	#[test]
@@ -644,9 +644,9 @@ mod tests {
 
 	#[test]
 	fn path_translate_borrowed() {
-		let values = vec![(String::from("hello"), 1), (String::from("world"), 2)];
-		let path: Path<'_, (String, i32)> = Path(values.iter().map(|v| Cow::Borrowed(v)).collect());
-		let translated: Path<'_, String> = path.translate_borrowed(|&(ref s, _)| s);
+		let values = [(String::from("hello"), 1), (String::from("world"), 2)];
+		let path: Path<'_, (String, i32)> = Path(values.iter().map(Cow::Borrowed).collect());
+		let translated: Path<'_, String> = path.translate_borrowed(|(s, _)| s);
 		assert_eq!(format!("{translated}"), "hello -> world");
 	}
 

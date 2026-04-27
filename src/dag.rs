@@ -326,9 +326,9 @@ where
 		self.edges.values().map(|v| v.len()).sum()
 	}
 
-	/// The number of nodes in the graph.
+	/// The number of distinct nodes in the graph (LHS ∪ RHS).
 	pub fn num_nodes(&self) -> usize {
-		self.edges.len()
+		self.node_iter().count()
 	}
 
 	pub fn lhs_iter(&self) -> impl Iterator<Item = &T> {
@@ -339,9 +339,10 @@ where
 		self.edges.iter().flat_map(|(_, v)| v.iter())
 	}
 
-	/// Iterate though all LHS and RHS nodes.
+	/// Iterate over all distinct nodes (LHS ∪ RHS), each yielded once.
 	pub fn node_iter(&self) -> impl Iterator<Item = &T> {
-		self.lhs_iter().chain(self.rhs_iter())
+		let mut seen: BTreeSet<&T> = BTreeSet::new();
+		self.lhs_iter().chain(self.rhs_iter()).filter(move |n| seen.insert(*n))
 	}
 }
 
@@ -381,15 +382,11 @@ mod tests {
 		assert_eq!(dag.num_edges(), before);
 	}
 
-	// === num_nodes undercounts ===
-
 	#[test]
-	fn num_nodes_misses_rhs_only_nodes() {
-		// A -> B -> C: C only appears on RHS
+	fn num_nodes_counts_rhs_only_nodes() {
+		// A -> B -> C: C only appears on RHS, but is still a distinct node.
 		let dag = dag_from(&[("A", "B"), ("B", "C")]);
-		// There are 3 distinct nodes: A, B, C
-		// But num_nodes() only counts LHS keys = {A, B} = 2
-		assert_eq!(dag.num_nodes(), 2, "BUG: num_nodes only counts LHS, misses leaf node C");
+		assert_eq!(dag.num_nodes(), 3);
 	}
 
 	// === add_edge / add_node / degree ===
@@ -534,7 +531,7 @@ mod tests {
 	fn dag_of_returns_single_node_subgraph() {
 		let dag = dag_from(&[("A", "B"), ("A", "C"), ("B", "D")]);
 		let sub = dag.dag_of("A".into());
-		assert_eq!(sub.num_nodes(), 1);
+		assert_eq!(sub.num_nodes(), 3); // A, B, C
 		assert_eq!(sub.num_edges(), 2);
 		assert!(sub.adjacent(&"A".into(), &"B".into()));
 		assert!(sub.adjacent(&"A".into(), &"C".into()));
@@ -554,7 +551,7 @@ mod tests {
 	fn sub_filters_lhs_by_predicate() {
 		let dag = dag_from(&[("A", "X"), ("B", "X"), ("C", "Y")]);
 		let filtered = dag.sub(|n| n == "A" || n == "C");
-		assert_eq!(filtered.num_nodes(), 2);
+		assert_eq!(filtered.num_nodes(), 4); // A, X, C, Y
 		assert!(filtered.lhs_contains(&"A".into()));
 		assert!(!filtered.lhs_contains(&"B".into()));
 		assert!(filtered.lhs_contains(&"C".into()));
@@ -606,8 +603,8 @@ mod tests {
 		let rhs: Vec<_> = dag.rhs_iter().collect();
 		assert_eq!(rhs.len(), 2); // B, C (B appears as both lhs and rhs)
 
-		let all: Vec<_> = dag.node_iter().collect();
-		assert_eq!(all.len(), 4); // A, B, B, C (not deduplicated)
+		let all: BTreeSet<_> = dag.node_iter().collect();
+		assert_eq!(all.len(), 3); // A, B, C — deduplicated
 	}
 
 	// === Display ===

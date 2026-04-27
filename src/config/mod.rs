@@ -167,6 +167,7 @@ mod test {
 	}
 
 	#[test]
+	#[ignore = "shells out to cargo; run explicitly to verify the trailing-newline assumption"]
 	fn cargo_locate_project_has_trailing_newline() {
 		let output = std::process::Command::new("cargo")
 			.args([

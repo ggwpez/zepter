@@ -25,8 +25,8 @@ jobs:
     - uses: actions-rust-lang/setup-rust-toolchain@v1
     - name: Install MSRV
       run: |
-        if ! command -v cargo-msrv > /dev/null 2>&1; then
-          cargo install cargo-msrv --locked -q
+        if ! command -v cargo-msrv > /dev/null 2>&1 || ! cargo msrv --version | grep -q ' 0\.18\.'; then
+          cargo install cargo-msrv@^0.18 --locked -q
         fi
     - name: Verify MSRV
       run: cargo msrv verify -- cargo install --locked --path .

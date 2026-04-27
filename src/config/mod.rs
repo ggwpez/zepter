@@ -8,7 +8,7 @@ use crate::{cmd::GlobalArgs, config::workflow::WorkflowFile, log, ErrToStr};
 
 use std::{
 	fs::canonicalize,
-	path::{Path, PathBuf},
+	path::{absolute, Path, PathBuf},
 };
 
 #[derive(Default, Debug, clap::Parser)]
@@ -93,7 +93,7 @@ impl ConfigArgs {
 
 	fn locate_config(&self) -> Result<PathBuf, String> {
 		if let Some(path) = &self.config {
-			let path = canonicalize(path).err_to_str()?;
+			let path = absolute(path).err_to_str()?;
 
 			if path.exists() {
 				Ok(path)
@@ -129,16 +129,62 @@ impl ConfigArgs {
 			cmd.arg("--manifest-path").arg(path);
 		}
 		let output = cmd.output().err_to_str()?;
-		let path = String::from_utf8(output.stdout).map(PathBuf::from).err_to_str()?;
 
-		if let Some(root) = path.parent() {
-			return Ok(root.into())
+		if !output.status.success() {
+			let err = String::from_utf8(output.stderr).err_to_str()?;
+			let err = err.replace("\n", "\n\t");
+			return Err(format!(
+				"Failed to find the workspace root with `cargo locate-project`:\n\n\t{err}"
+			));
 		}
 
-		let err = output.stderr;
-		let err = String::from_utf8(err).err_to_str()?;
-		let err = err.replace("\n", "\n\t");
+		// `cargo locate-project` outputs a trailing newline that must be stripped.
+		let path =
+			String::from_utf8(output.stdout).map(|s| PathBuf::from(s.trim())).err_to_str()?;
 
-		Err(format!("Failed to find the workspace root with `cargo locate-project`:\n\n\t{err}"))
+		path.parent()
+			.map(Into::into)
+			.ok_or_else(|| format!("Failed to get parent directory of: {}", path.display()))
+	}
+}
+
+#[cfg(test)]
+mod test {
+	use super::*;
+
+	#[test]
+	fn locate_config_nonexistent_path_gives_error() {
+		let args = ConfigArgs {
+			config: Some(PathBuf::from("/nonexistent/path/zepter.yaml")),
+			..Default::default()
+		};
+
+		let err = args.load().unwrap_err();
+		assert!(
+			err.contains("does not exist"),
+			"Expected 'does not exist' in error message, got: {err}"
+		);
+	}
+
+	#[test]
+	#[ignore = "shells out to cargo; run explicitly to verify the trailing-newline assumption"]
+	fn cargo_locate_project_has_trailing_newline() {
+		let output = std::process::Command::new("cargo")
+			.args([
+				"locate-project",
+				"--message-format",
+				"plain",
+				"--workspace",
+				"--offline",
+				"--locked",
+			])
+			.output()
+			.expect("Failed to run cargo locate-project");
+
+		let stdout = String::from_utf8(output.stdout).unwrap();
+		assert!(
+			stdout.ends_with('\n'),
+			"Expected trailing newline in cargo locate-project output, got: {stdout:?}"
+		);
 	}
 }

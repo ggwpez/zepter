@@ -374,11 +374,7 @@ mod tests {
 	fn transitive_hull_is_complete() {
 		let mut dag = dag_from(&[("A", "B"), ("B", "C"), ("C", "D")]);
 		dag.transitive_hull();
-		assert_edges(&dag, &[
-			("A", &["B", "C", "D"]),
-			("B", &["C", "D"]),
-			("C", &["D"]),
-		]);
+		assert_edges(&dag, &[("A", &["B", "C", "D"]), ("B", &["C", "D"]), ("C", &["D"])]);
 		// Idempotency: running again should not change anything.
 		let before = dag.num_edges();
 		dag.transitive_hull();
@@ -640,8 +636,7 @@ mod tests {
 
 	#[test]
 	fn path_for_each() {
-		let path: Path<'_, String> =
-			Path(vec![Cow::Owned("A".into()), Cow::Owned("B".into())]);
+		let path: Path<'_, String> = Path(vec![Cow::Owned("A".into()), Cow::Owned("B".into())]);
 		let mut visited = vec![];
 		path.for_each(|n| visited.push(n.clone()));
 		assert_eq!(visited, vec!["A", "B"]);
@@ -650,8 +645,7 @@ mod tests {
 	#[test]
 	fn path_translate_borrowed() {
 		let values = vec![(String::from("hello"), 1), (String::from("world"), 2)];
-		let path: Path<'_, (String, i32)> =
-			Path(values.iter().map(|v| Cow::Borrowed(v)).collect());
+		let path: Path<'_, (String, i32)> = Path(values.iter().map(|v| Cow::Borrowed(v)).collect());
 		let translated: Path<'_, String> = path.translate_borrowed(|&(ref s, _)| s);
 		assert_eq!(format!("{translated}"), "hello -> world");
 	}
@@ -675,11 +669,7 @@ mod tests {
 		//   D
 		let dag = dag_from(&[("A", "B"), ("A", "C"), ("B", "D"), ("C", "D")]);
 		let dag = dag.into_transitive_hull();
-		assert_edges(&dag, &[
-			("A", &["B", "C", "D"]),
-			("B", &["D"]),
-			("C", &["D"]),
-		]);
+		assert_edges(&dag, &[("A", &["B", "C", "D"]), ("B", &["D"]), ("C", &["D"])]);
 	}
 
 	#[test]

@@ -133,15 +133,18 @@ impl ConfigArgs {
 		if !output.status.success() {
 			let err = String::from_utf8(output.stderr).err_to_str()?;
 			let err = err.replace("\n", "\n\t");
-			return Err(format!("Failed to find the workspace root with `cargo locate-project`:\n\n\t{err}"));
+			return Err(format!(
+				"Failed to find the workspace root with `cargo locate-project`:\n\n\t{err}"
+			));
 		}
 
 		// `cargo locate-project` outputs a trailing newline that must be stripped.
-		let path = String::from_utf8(output.stdout).map(|s| PathBuf::from(s.trim())).err_to_str()?;
+		let path =
+			String::from_utf8(output.stdout).map(|s| PathBuf::from(s.trim())).err_to_str()?;
 
-		path.parent().map(Into::into).ok_or_else(|| {
-			format!("Failed to get parent directory of: {}", path.display())
-		})
+		path.parent()
+			.map(Into::into)
+			.ok_or_else(|| format!("Failed to get parent directory of: {}", path.display()))
 	}
 }
 
@@ -157,17 +160,30 @@ mod test {
 		};
 
 		let err = args.load().unwrap_err();
-		assert!(err.contains("does not exist"), "Expected 'does not exist' in error message, got: {err}");
+		assert!(
+			err.contains("does not exist"),
+			"Expected 'does not exist' in error message, got: {err}"
+		);
 	}
 
 	#[test]
 	fn cargo_locate_project_has_trailing_newline() {
 		let output = std::process::Command::new("cargo")
-			.args(["locate-project", "--message-format", "plain", "--workspace", "--offline", "--locked"])
+			.args([
+				"locate-project",
+				"--message-format",
+				"plain",
+				"--workspace",
+				"--offline",
+				"--locked",
+			])
 			.output()
 			.expect("Failed to run cargo locate-project");
 
 		let stdout = String::from_utf8(output.stdout).unwrap();
-		assert!(stdout.ends_with('\n'), "Expected trailing newline in cargo locate-project output, got: {stdout:?}");
+		assert!(
+			stdout.ends_with('\n'),
+			"Expected trailing newline in cargo locate-project output, got: {stdout:?}"
+		);
 	}
 }

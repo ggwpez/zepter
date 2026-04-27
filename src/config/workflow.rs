@@ -139,8 +139,9 @@ impl WorkflowFile {
 			for step in wf.0.iter_mut() {
 				for (i, orig_line) in step.0.iter_mut().enumerate() {
 					if let Some(line) = orig_line.strip_prefix('$') {
-						let (vname, index) = line.split_once('.')
-						.ok_or_else(|| format!("Expected '$name.index' format, got '${line}'"))?;
+						let (vname, index) = line.split_once('.').ok_or_else(|| {
+							format!("Expected '$name.index' format, got '${line}'")
+						})?;
 						let index: u32 = index.parse().map_err(|e| {
 							format!("Failed to parse index '{index}' in line '{line}': {e}")
 						})?;

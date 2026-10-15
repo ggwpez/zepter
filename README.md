@@ -249,8 +249,32 @@ UI and downstream integration tests: `cargo test -- --ignored --nocapture`
 
 Environment overwrites exist for the UI tests to:
 - `OVERWRITE`: Update the UI diff locks.
-- `UI_FILTER`: Regex to selectively run UI test.
+- `UI_FILTER`: Glob relative to `tests/` to selectively run tests (for example, `ui/**/*.yaml`).
 - `KEEP_GOING`: Print `FAILED` but don't abort on the first failed UI test.
+
+## Release checklist
+
+- [ ] Create a release branch and bump the package version in `Cargo.toml` and `Cargo.lock`.
+- [ ] Update version strings in the UI snapshots, including `tests/ui/root-args/version.yaml`
+  and `tests/ui/config/v1/{basic,finds_all,version_bin}.yaml`. Version bumps change both
+  version output and compatibility error messages.
+- [ ] Run `UI_FILTER='ui/**/*.yaml' cargo test --locked -- --ignored --nocapture`.
+  To regenerate snapshots, prefix the command with `OVERWRITE=1`, review every diff,
+  then rerun without `OVERWRITE` to verify the expectations.
+- [ ] Verify the declared MSRV: `cargo msrv verify -- cargo install --locked --path .`.
+  Alternatively, use the toolchain declared in `Cargo.toml` directly, currently
+  `cargo +1.88 install --locked --path . --root /tmp/zepter-msrv-check`.
+- [ ] Run unit tests (`cargo test --locked`) and the full UI/downstream suite
+  (`cargo test --locked -- --ignored --nocapture`), plus the build, Clippy, and format
+  checks in `.github/workflows/rust.yml`.
+- [ ] Commit and push the changes, open a PR into `master`, and check CI with
+  `gh pr checks`. Fix failures before merging, including the Rust and MSRV checks.
+- [ ] After merging, run `git switch master`, `git pull --ff-only`, and `just release`.
+  This creates a signed `v<version>` tag and asks for confirmation before pushing it.
+  If the tag already exists, verify its target before proceeding.
+- [ ] Confirm the Release workflow succeeds and the GitHub Release contains the binaries.
+- [ ] Publish the crate separately: run `cargo publish --dry-run`, then `cargo publish`.
+  Confirm the new version is available on crates.io.
 
 ## Development Principles
 

@@ -45,8 +45,8 @@ pub struct TraceCmd {
 }
 
 impl TraceCmd {
-	pub fn run(&self, _global: &GlobalArgs) {
-		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
+	pub fn run(&self, _global: &GlobalArgs) -> Result<(), String> {
+		let meta = self.cargo_args.load_metadata()?;
 		let (dag, index) = Self::build_dag(meta).expect("Builds dependency graph");
 		let lookup = |id: &str| {
 			index
@@ -117,6 +117,8 @@ impl TraceCmd {
 
 			println!("{out}");
 		}
+
+		Ok(())
 	}
 
 	/// Build a dependency graph over the crates ids and return an index of all crates.

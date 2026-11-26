@@ -23,9 +23,9 @@ pub struct DebugCmd {
 }
 
 impl DebugCmd {
-	pub fn run(&self, g: &GlobalArgs) {
+	pub fn run(&self, g: &GlobalArgs) -> Result<(), String> {
 		g.warn_unstable();
-		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
+		let meta = self.cargo_args.load_metadata()?;
 		let dag = build_feature_dag(&meta, &meta.packages);
 
 		if !self.no_root {
@@ -42,6 +42,8 @@ impl DebugCmd {
 			let (took, points) = Self::measure(&meta);
 			println!("DAG setup time: {took:.2?} (avg from {points} runs)");
 		}
+
+		Ok(())
 	}
 
 	#[cfg(feature = "debugging")]

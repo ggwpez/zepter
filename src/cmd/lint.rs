@@ -267,27 +267,12 @@ impl LintCmd {
 	pub(crate) fn run(&self, global: &GlobalArgs) -> Result<(), String> {
 		match &self.subcommand {
 			SubCommand::PropagateFeature(cmd) => cmd.run(global),
-			SubCommand::NeverEnables(cmd) => {
-				cmd.run(global);
-				Ok(())
-			},
-			SubCommand::NeverImplies(cmd) => {
-				cmd.run(global);
-				Ok(())
-			},
-			SubCommand::WhyEnabled(cmd) => {
-				cmd.run(global);
-				Ok(())
-			},
-			SubCommand::OnlyEnables(cmd) => {
-				cmd.run(global);
-				Ok(())
-			},
+			SubCommand::NeverEnables(cmd) => cmd.run(global),
+			SubCommand::NeverImplies(cmd) => cmd.run(global),
+			SubCommand::WhyEnabled(cmd) => cmd.run(global),
+			SubCommand::OnlyEnables(cmd) => cmd.run(global),
 			SubCommand::NoStd(cmd) => cmd.run(global),
-			SubCommand::DuplicateDeps(cmd) => {
-				cmd.run(global);
-				Ok(())
-			},
+			SubCommand::DuplicateDeps(cmd) => cmd.run(global),
 		}
 	}
 }
@@ -302,8 +287,8 @@ impl Display for CrateAndFeature {
 }
 
 impl NeverImpliesCmd {
-	pub fn run(&self, _global: &GlobalArgs) {
-		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
+	pub fn run(&self, _global: &GlobalArgs) -> Result<(), String> {
+		let meta = self.cargo_args.load_metadata()?;
 		log::info!(
 			"Checking that feature '{}' never implies '{}'",
 			self.precondition,
@@ -362,12 +347,14 @@ impl NeverImpliesCmd {
 				std::process::exit(0);
 			}
 		}
+
+		Ok(())
 	}
 }
 
 impl NeverEnablesCmd {
-	pub fn run(&self, _global: &GlobalArgs) {
-		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
+	pub fn run(&self, _global: &GlobalArgs) -> Result<(), String> {
+		let meta = self.cargo_args.load_metadata()?;
 		log::info!(
 			"Checking that feature {:?} never enables {:?}",
 			self.precondition,
@@ -422,6 +409,8 @@ impl NeverEnablesCmd {
 				}
 			}
 		}
+
+		Ok(())
 	}
 }
 
@@ -775,8 +764,8 @@ fn error_stats(
 }
 
 impl OnlyEnablesCmd {
-	pub fn run(&self, _global: &GlobalArgs) {
-		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
+	pub fn run(&self, _global: &GlobalArgs) -> Result<(), String> {
+		let meta = self.cargo_args.load_metadata()?;
 		let pkgs = &meta.packages;
 
 		for pkg in pkgs.iter() {
@@ -807,12 +796,14 @@ impl OnlyEnablesCmd {
 				}
 			}
 		}
+
+		Ok(())
 	}
 }
 
 impl WhyEnabledCmd {
-	pub fn run(&self, _global: &GlobalArgs) {
-		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
+	pub fn run(&self, _global: &GlobalArgs) -> Result<(), String> {
+		let meta = self.cargo_args.load_metadata()?;
 		let dag = build_feature_dag(&meta, &meta.packages);
 		let pkgs = meta.packages;
 		let mut found_crate_and_feature = false;
@@ -851,6 +842,8 @@ impl WhyEnabledCmd {
 		for (name, feature) in enabled_by {
 			println!("  {name}/{feature}");
 		}
+
+		Ok(())
 	}
 }
 
@@ -870,7 +863,7 @@ pub struct DuplicateDepsCmd {
 }
 
 impl DuplicateDepsCmd {
-	pub fn run(&self, _global: &GlobalArgs) {
+	pub fn run(&self, _global: &GlobalArgs) -> Result<(), String> {
 		// To easily compare dependencies, we normalize them by removing the kind.
 		fn without_kind(dep: &cargo_metadata::Dependency) -> cargo_metadata::Dependency {
 			let mut dep = dep.clone();
@@ -878,7 +871,7 @@ impl DuplicateDepsCmd {
 			dep
 		}
 
-		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
+		let meta = self.cargo_args.load_metadata()?;
 
 		let mut issues = BTreeMap::<(String, Utf8PathBuf), BTreeSet<String>>::new();
 
@@ -925,6 +918,8 @@ impl DuplicateDepsCmd {
 
 			std::process::exit(1);
 		}
+
+		Ok(())
 	}
 }
 

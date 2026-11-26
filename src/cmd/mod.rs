@@ -91,10 +91,7 @@ impl Command {
 		match self.subcommand.as_ref() {
 			Some(SubCommand::Transpose(cmd)) => cmd.run(&self.global),
 
-			Some(SubCommand::Trace(cmd)) => {
-				cmd.run(&self.global);
-				Ok(())
-			},
+			Some(SubCommand::Trace(cmd)) => cmd.run(&self.global),
 			Some(SubCommand::Lint(cmd)) => cmd.run(&self.global),
 			Some(SubCommand::Format(cmd)) => {
 				cmd.run(&self.global);
@@ -104,10 +101,7 @@ impl Command {
 				cmd.run(&self.global);
 				Ok(())
 			},
-			Some(SubCommand::Debug(cmd)) => {
-				cmd.run(&self.global);
-				Ok(())
-			},
+			Some(SubCommand::Debug(cmd)) => cmd.run(&self.global),
 			None => {
 				run::RunCmd::default().run(&self.global);
 				Ok(())
@@ -255,7 +249,21 @@ impl CargoArgs {
 			cmd.other_options(vec!["--locked".to_string()]);
 		}
 
-		cmd.exec().map_err(|e| format!("Failed to load metadata: {e}"))
+		cmd.exec().map_err(format_metadata_error)
+	}
+}
+
+fn format_metadata_error(err: cargo_metadata::Error) -> String {
+	match err {
+		cargo_metadata::Error::CargoMetadata { stderr } => {
+			let stderr = stderr.trim();
+			if stderr.is_empty() {
+				"Failed to load metadata: `cargo metadata` exited with an error".to_string()
+			} else {
+				format!("Failed to load metadata (`cargo metadata` failed):\n{stderr}")
+			}
+		},
+		other => format!("Failed to load metadata: {other}"),
 	}
 }
 
@@ -383,5 +391,42 @@ pub(crate) fn check_can_modify<P: AsRef<Path>>(root: P, modify: P) -> Result<boo
 		Ok(false)
 	} else {
 		Ok(true)
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn format_metadata_error_preserves_multiline_stderr() {
+		let err = cargo_metadata::Error::CargoMetadata {
+			stderr: "error: failed to parse manifest\n\nCaused by:\n  invalid toml\n".to_string(),
+		};
+		let formatted = format_metadata_error(err);
+		assert_eq!(
+			formatted,
+			"Failed to load metadata (`cargo metadata` failed):\nerror: failed to parse manifest\n\nCaused by:\n  invalid toml"
+		);
+		assert!(!formatted.contains("\\n"));
+	}
+
+	#[test]
+	fn format_metadata_error_handles_empty_stderr() {
+		let err = cargo_metadata::Error::CargoMetadata { stderr: "  \n".to_string() };
+		assert_eq!(
+			format_metadata_error(err),
+			"Failed to load metadata: `cargo metadata` exited with an error"
+		);
+	}
+
+	#[test]
+	fn locked_error_still_detected_after_formatting() {
+		let err = cargo_metadata::Error::CargoMetadata {
+			stderr: "error: the lock file Cargo.lock needs to be updated but --locked was passed to prevent this\n"
+				.to_string(),
+		};
+		let formatted = format_metadata_error(err);
+		assert!(check_for_locked_error(&formatted));
 	}
 }

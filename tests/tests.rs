@@ -190,3 +190,30 @@ fn integration() {
 	}
 	println!();
 }
+
+#[test]
+fn cargo_metadata_error_is_formatted_without_panic() {
+	let dir = std::env::temp_dir().join(format!("zepter-metadata-err-{}", std::process::id()));
+	let _ = std::fs::remove_dir_all(&dir);
+	std::fs::create_dir_all(&dir).unwrap();
+	let manifest = dir.join("Cargo.toml");
+	std::fs::write(&manifest, "[package]\nname = \"broken\"\nversion = \"not-a-semver\"\n")
+		.unwrap();
+
+	let output = Command::new(assert_cmd::cargo_bin!("zepter"))
+		.args(["lint", "why-enabled", "--package", "foo", "--feature", "bar", "--manifest-path"])
+		.arg(&manifest)
+		.output()
+		.unwrap();
+
+	let _ = std::fs::remove_dir_all(&dir);
+
+	assert_eq!(output.status.code(), Some(1));
+	let stderr = String::from_utf8_lossy(&output.stderr);
+	assert!(
+		stderr.contains("Failed to load metadata (`cargo metadata` failed):\n"),
+		"unexpected stderr:\n{stderr}"
+	);
+	assert!(!stderr.contains("panicked at"), "should not panic:\n{stderr}");
+	assert!(!stderr.contains("\\n"), "should not escape newlines:\n{stderr}");
+}

@@ -32,10 +32,7 @@ impl TransposeCmd {
 	pub fn run(&self, global: &GlobalArgs) -> Result<(), String> {
 		match &self.subcommand {
 			TransposeSubCmd::Dependency(cmd) => cmd.run(global),
-			TransposeSubCmd::Features(cmd) => {
-				cmd.run(global);
-				Ok(())
-			},
+			TransposeSubCmd::Features(cmd) => cmd.run(global),
 		}
 	}
 }
@@ -70,7 +67,7 @@ pub struct FeaturesCmd {
 }
 
 impl FeaturesCmd {
-	pub fn run(&self, global: &GlobalArgs) {
+	pub fn run(&self, global: &GlobalArgs) -> Result<(), String> {
 		match &self.subcommand {
 			FeaturesSubCmd::StripDevOnly(cmd) => cmd.run(global),
 		}
@@ -101,9 +98,9 @@ pub struct StripDevDepsCmd {
 }
 
 impl StripDevDepsCmd {
-	pub fn run(&self, g: &GlobalArgs) {
+	pub fn run(&self, g: &GlobalArgs) -> Result<(), String> {
 		g.warn_unstable();
-		let meta = self.cargo_args.load_metadata().expect("Loads metadata");
+		let meta = self.cargo_args.load_metadata()?;
 
 		let kind = DependencyKind::Development;
 		// Allowed dir that we can write to.
@@ -158,5 +155,7 @@ impl StripDevDepsCmd {
 		for fixer in fixers.values_mut() {
 			fixer.save().unwrap();
 		}
+
+		Ok(())
 	}
 }

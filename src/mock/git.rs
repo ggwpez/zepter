@@ -84,16 +84,28 @@ pub fn git_reset(dir: &Path) -> Result<(), anyhow::Error> {
 	Ok(())
 }
 
-pub fn clone_repo(repo: &str, rev: &str) -> Result<PathBuf, anyhow::Error> {
+fn test_repos_dir() -> PathBuf {
+	if let Ok(dir) = std::env::var("ZEPTER_TEST_REPOS_DIR") {
+		if !dir.is_empty() {
+			return PathBuf::from(dir)
+		}
+	}
 	let dir = std::env::var("CARGO_TARGET_DIR").unwrap_or_else(|_| "target".into());
-	let repos_dir = std::path::Path::new(&dir).join("test-repos");
+	PathBuf::from(dir).join("test-repos")
+}
+
+pub fn clone_repo(repo: &str, rev: &str) -> Result<PathBuf, anyhow::Error> {
+	let repos_dir = test_repos_dir();
 	let dir = repos_dir.join(repo);
 	colour::white_ln!("Checking out '{repo}' at '{}'", &rev[..10]);
 
-	// Check if the repo is already cloned
-	if Path::new(&dir).exists() {
-		git_reset(&dir)?;
-	} else {
+	// Reuse an existing cached checkout if healthy; otherwise wipe and re-init
+	// (e.g. if a previous CI run was cancelled mid-clone).
+	if dir.exists() && (!dir.join(".git").exists() || git_reset(&dir).is_err()) {
+		std::fs::remove_dir_all(&dir)?;
+	}
+
+	if !dir.exists() {
 		std::fs::create_dir_all(&dir)?;
 
 		let mut cmd = Command::new("git");

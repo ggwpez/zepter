@@ -232,6 +232,6 @@ fn workflow_lookup_returns_errors_to_the_caller() {
 	assert!(matches!(command.run(), Err(CommandError::InvalidConfig(_))));
 	std::fs::write(&path, "version: {format: 1, binary: 0.1.0}\nworkflows: {}\n").unwrap();
 	assert!(
-		matches!(command.run(), Err(CommandError::Failure(message)) if message == "Workflow 'missing' not found")
+		matches!(command.run(), Err(CommandError::InvalidConfig(message)) if message == "Workflow 'missing' not found")
 	);
 }

@@ -27,8 +27,9 @@ impl RunCmd {
 		let config = self.args.config.load().map_err(CommandError::InvalidConfig)?;
 
 		let name = self.args.workflow.as_deref().unwrap_or(WORKFLOW_DEFAULT_NAME);
-		let workflow =
-			config.workflow(name).ok_or_else(|| format!("Workflow '{name}' not found"))?;
+		let workflow = config
+			.workflow(name)
+			.ok_or_else(|| CommandError::InvalidConfig(format!("Workflow '{name}' not found")))?;
 
 		log::info!("Running workflow '{}'", name);
 		if let Err(err) = workflow.run(g) {

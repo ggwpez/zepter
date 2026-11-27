@@ -266,14 +266,15 @@ impl core::str::FromStr for IgnoreSetting {
 impl LintCmd {
 	pub(crate) fn run(&self, global: &GlobalArgs) -> Result<(), CommandError> {
 		match &self.subcommand {
-			SubCommand::PropagateFeature(cmd) => cmd.run(global),
-			SubCommand::NeverEnables(cmd) => cmd.run(global).map_err(Into::into),
-			SubCommand::NeverImplies(cmd) => cmd.run(global).map_err(Into::into),
-			SubCommand::WhyEnabled(cmd) => cmd.run(global),
-			SubCommand::OnlyEnables(cmd) => cmd.run(global).map_err(Into::into),
-			SubCommand::NoStd(cmd) => cmd.run(global).map_err(Into::into),
-			SubCommand::DuplicateDeps(cmd) => cmd.run(global),
+			SubCommand::PropagateFeature(cmd) => cmd.run(global)?,
+			SubCommand::NeverEnables(cmd) => cmd.run(global)?,
+			SubCommand::NeverImplies(cmd) => cmd.run(global)?,
+			SubCommand::WhyEnabled(cmd) => cmd.run(global)?,
+			SubCommand::OnlyEnables(cmd) => cmd.run(global)?,
+			SubCommand::NoStd(cmd) => cmd.run(global)?,
+			SubCommand::DuplicateDeps(cmd) => cmd.run(global)?,
 		}
+		Ok(())
 	}
 }
 

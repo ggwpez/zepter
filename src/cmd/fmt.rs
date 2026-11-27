@@ -3,7 +3,7 @@
 
 //! Format features in the crate manifest.
 
-use super::GlobalArgs;
+use super::{CommandError, GlobalArgs};
 use crate::{autofix::*, cmd::parse_key_val, grammar::*, log};
 
 use cargo_metadata::Metadata;
@@ -86,20 +86,24 @@ pub enum Mode {
 }
 
 impl FromStr for Mode {
-	type Err = std::string::ParseError;
+	type Err = std::io::Error;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s.to_ascii_lowercase().as_str() {
 			"canonicalize" => Ok(Self::Canonicalize),
 			"sort" => Ok(Self::Sort),
+			"dedub" => Ok(Self::Dedub),
 			"none" => Ok(Self::None),
-			_ => panic!("Invalid Mode: {s}. Expected 'canonicalize', 'sort' or 'none'"), // FIXME
+			_ => Err(std::io::Error::new(
+				std::io::ErrorKind::InvalidInput,
+				format!("Invalid Mode: {s}. Expected 'canonicalize', 'sort', 'dedub' or 'none'"),
+			)),
 		}
 	}
 }
 
 impl FormatCmd {
-	pub fn run(&self, global: &GlobalArgs) {
+	pub fn run(&self, global: &GlobalArgs) -> Result<(), CommandError> {
 		match &self.subcommand {
 			SubCommand::Features(cmd) => cmd.run(global),
 		}
@@ -107,15 +111,16 @@ impl FormatCmd {
 }
 
 impl FormatFeaturesCmd {
-	pub fn run(&self, global: &GlobalArgs) {
+	pub fn run(&self, global: &GlobalArgs) -> Result<(), CommandError> {
 		if self.unused_check {
 			log::warn!("The `--check` is now implicit and ignored");
 		}
 
 		let modes = self.parse_mode_per_feature();
-		let meta = self.load_metadata(global);
+		let meta = self.load_metadata(global)?;
 		// Allowed dir that we can write to.
-		let allowed_dir = canonicalize(meta.workspace_root.as_std_path()).unwrap();
+		let allowed_dir = canonicalize(meta.workspace_root.as_std_path())
+			.map_err(|e| format!("Failed to canonicalize workspace root: {e}"))?;
 		log::debug!("Allowed dir: {}", allowed_dir.display());
 		let mut offenders = Vec::new();
 		// (path, crate) -> errors
@@ -124,11 +129,13 @@ impl FormatFeaturesCmd {
 		log::debug!("Checking {} crate{}", meta.packages.len(), plural(meta.packages.len()));
 
 		for pkg in meta.packages.iter() {
-			let path = canonicalize(pkg.manifest_path.clone().into_std_path_buf()).unwrap();
+			let path = canonicalize(pkg.manifest_path.as_std_path()).map_err(|e| {
+				format!("Failed to canonicalize manifest {}: {e}", pkg.manifest_path)
+			})?;
 
-			let mut fixer = AutoFixer::from_manifest(&path).unwrap();
+			let mut fixer = AutoFixer::from_manifest(&path)?;
 			if let Err(errs) = fixer.canonicalize_features(&pkg.name, &modes, self.line_width) {
-				let path = path.strip_prefix(&allowed_dir).unwrap().to_path_buf();
+				let path = path.strip_prefix(&allowed_dir).unwrap_or(&path).to_path_buf();
 				errors.entry((path.clone(), pkg.name.to_string())).or_default().extend(errs);
 			} else if fixer.modified() {
 				offenders.push((path, &pkg.name, fixer));
@@ -149,7 +156,7 @@ impl FormatFeaturesCmd {
 					println!("    {err}");
 				}
 			}
-			std::process::exit(global.error_code())
+			return Err(CommandError::reported(global.error_code()))
 		}
 
 		if offenders.is_empty() {
@@ -158,7 +165,7 @@ impl FormatFeaturesCmd {
 				meta.packages.len(),
 				plural(meta.packages.len())
 			);
-			return
+			return Ok(())
 		}
 
 		let mut fixed = 0;
@@ -188,7 +195,7 @@ impl FormatFeaturesCmd {
 				continue
 			}
 
-			fixer.save().unwrap();
+			fixer.save()?;
 			fixed += 1;
 		}
 
@@ -208,12 +215,12 @@ impl FormatFeaturesCmd {
 				);
 			}
 
-			std::process::exit(0);
+			return Ok(())
 		} else if global.show_hints() {
 			println!("Run again with `--fix` to format them.");
 		}
 
-		std::process::exit(global.error_code())
+		Err(CommandError::reported(global.error_code()))
 	}
 
 	fn parse_mode_per_feature(&self) -> Map<String, Vec<Mode>> {
@@ -232,17 +239,17 @@ impl FormatFeaturesCmd {
 		map
 	}
 
-	fn load_metadata(&self, global: &GlobalArgs) -> Metadata {
+	fn load_metadata(&self, global: &GlobalArgs) -> Result<Metadata, CommandError> {
 		let mut args = self.cargo_args.clone();
 		if args.workspace {
 			println!("{}", global.yellow("WARNING: --workspace is the default now"));
 		}
 		args.workspace = !self.no_workspace;
 		match args.load_metadata() {
-			Ok(meta) => meta,
+			Ok(meta) => Ok(meta),
 			Err(err) => {
 				println!("{}", global.red(&err));
-				std::process::exit(1)
+				Err(CommandError::reported(1))
 			},
 		}
 	}

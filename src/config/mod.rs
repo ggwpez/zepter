@@ -4,7 +4,7 @@
 pub mod semver;
 pub mod workflow;
 
-use crate::{cmd::GlobalArgs, config::workflow::WorkflowFile, log, ErrToStr};
+use crate::{config::workflow::WorkflowFile, log, ErrToStr};
 
 use std::{
 	fs::canonicalize,
@@ -46,7 +46,7 @@ pub const WELL_KNOWN_CFG_PATHS: &[&str] = &["zepter.yaml", ".zepter.yaml"];
 /// - `./`
 /// - `./.cargo/`
 /// - `./.config`
-pub fn search_config<P: AsRef<Path>>(workspace: P) -> Result<PathBuf, Vec<PathBuf>> {
+pub fn search_config<P: AsRef<Path>>(workspace: P) -> Result<PathBuf, String> {
 	let paths: Vec<PathBuf> = vec![
 		workspace.as_ref().to_path_buf(),
 		workspace.as_ref().join(".cargo"),
@@ -59,26 +59,23 @@ pub fn search_config<P: AsRef<Path>>(workspace: P) -> Result<PathBuf, Vec<PathBu
 		.iter()
 		.flat_map(|name| paths.iter().map(move |path| (name, path)))
 	{
-		let mut path = path.join(name);
+		let path = path.join(name);
 
-		if path.exists() {
-			path = canonicalize(path).expect("Failed to canonicalize path");
-			return Ok(path)
+		if path.try_exists().err_to_str()? {
+			return canonicalize(path).err_to_str()
 		}
 		searched.push(path);
 	}
 
-	Err(searched)
+	let mut message = String::from("Failed to find config file in any of these locations:");
+	for path in searched {
+		message.push_str("\n - ");
+		message.push_str(&path.to_string_lossy());
+	}
+	Err(message)
 }
 
 impl ConfigArgs {
-	pub fn load_or_panic(&self) -> WorkflowFile {
-		self.load().unwrap_or_else(|e| {
-			eprintln!("{e}");
-			std::process::exit(GlobalArgs::error_code_cfg_parsing());
-		})
-	}
-
 	pub fn load(&self) -> Result<WorkflowFile, String> {
 		let path = self.locate_config()?;
 		log::debug!("Using config file: {path:?}");
@@ -103,16 +100,7 @@ impl ConfigArgs {
 		} else {
 			let root = self.locate_workspace()?;
 
-			match search_config(root) {
-				Ok(cfg) => Ok(cfg),
-				Err(searched) => {
-					println!("Failed to find config file in any of these locations:");
-					for path in searched {
-						println!(" - {}", path.display());
-					}
-					Err("Could not find a config file".into())
-				},
-			}
+			search_config(root)
 		}
 	}
 

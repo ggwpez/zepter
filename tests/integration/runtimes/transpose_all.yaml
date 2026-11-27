@@ -12,7 +12,6 @@ cases:
       2 times: no alias from polkadot-runtime, staging-kusama-runtime
 
     This cannot be fixed automatically since it would break your code and configs.
-    Error: ()
   code: 1
 - cmd: transpose dependency lift-to-workspace regex:.* --fix
   stderr: |
@@ -24,7 +23,6 @@ cases:
       2 times: no alias from polkadot-runtime, staging-kusama-runtime
 
     This cannot be fixed automatically since it would break your code and configs.
-    Error: ()
   code: 1
 - cmd: transpose dependency lift-to-workspace regex:.* --ignore-errors --fix
   stderr: |

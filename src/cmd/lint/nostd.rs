@@ -52,7 +52,9 @@ impl DefaultFeaturesDisabledCmd {
 		let mut autofixer = BTreeMap::new();
 		let mut issues = 0;
 		// Dir that we are allowed to write to.
-		let allowed_dir = canonicalize(meta.workspace_root.as_std_path()).unwrap();
+		let allowed_dir = canonicalize(meta.workspace_root.as_std_path()).map_err(|e| {
+			format!("Could not canonicalize workspace root {}: {e}", meta.workspace_root)
+		})?;
 
 		for lhs in pkgs.iter() {
 			// check if lhs supports no-std builds
@@ -84,7 +86,12 @@ impl DefaultFeaturesDisabledCmd {
 					Entry::Occupied(e) => e.into_mut(),
 					Entry::Vacant(e) => {
 						let krate_path =
-							canonicalize(lhs.manifest_path.clone().into_std_path_buf()).unwrap();
+							canonicalize(lhs.manifest_path.as_std_path()).map_err(|e| {
+								format!(
+									"Could not canonicalize manifest {}: {e}",
+									lhs.manifest_path
+								)
+							})?;
 
 						if !krate_path.starts_with(&allowed_dir) {
 							return Err(format!("Cannot write to path: {}", krate_path.display()))

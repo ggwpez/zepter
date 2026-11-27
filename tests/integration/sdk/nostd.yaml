@@ -34,7 +34,6 @@ cases:
     Found 19 issues in 9 crates and fixed none. Re-run with --fix to apply fixes.
   stderr: |
     Several issues were not fixed.
-    Error: ()
   code: 1
 - cmd: lint no-std default-features-of-nostd-dependencies-disabled --fix
   stdout: |

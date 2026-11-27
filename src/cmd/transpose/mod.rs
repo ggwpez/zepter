@@ -3,7 +3,7 @@
 
 mod lift_to_workspace;
 
-use super::GlobalArgs;
+use super::{CommandError, GlobalArgs};
 use crate::{
 	autofix::*,
 	cmd::{resolve_dep, transpose::lift_to_workspace::LiftToWorkspaceCmd},
@@ -29,9 +29,9 @@ pub struct TransposeCmd {
 }
 
 impl TransposeCmd {
-	pub fn run(&self, global: &GlobalArgs) -> Result<(), String> {
+	pub fn run(&self, global: &GlobalArgs) -> Result<(), CommandError> {
 		match &self.subcommand {
-			TransposeSubCmd::Dependency(cmd) => cmd.run(global),
+			TransposeSubCmd::Dependency(cmd) => cmd.run(global).map_err(Into::into),
 			TransposeSubCmd::Features(cmd) => cmd.run(global),
 		}
 	}
@@ -67,7 +67,7 @@ pub struct FeaturesCmd {
 }
 
 impl FeaturesCmd {
-	pub fn run(&self, global: &GlobalArgs) -> Result<(), String> {
+	pub fn run(&self, global: &GlobalArgs) -> Result<(), CommandError> {
 		match &self.subcommand {
 			FeaturesSubCmd::StripDevOnly(cmd) => cmd.run(global),
 		}
@@ -98,18 +98,20 @@ pub struct StripDevDepsCmd {
 }
 
 impl StripDevDepsCmd {
-	pub fn run(&self, g: &GlobalArgs) -> Result<(), String> {
+	pub fn run(&self, g: &GlobalArgs) -> Result<(), CommandError> {
 		g.warn_unstable();
 		let meta = self.cargo_args.load_metadata()?;
 
 		let kind = DependencyKind::Development;
 		// Allowed dir that we can write to.
-		let allowed_dir = canonicalize(meta.workspace_root.as_std_path()).unwrap();
+		let allowed_dir = canonicalize(meta.workspace_root.as_std_path()).map_err(|e| {
+			format!("Could not canonicalize workspace root '{}': {e}", meta.workspace_root)
+		})?;
 
 		for name in self.packages.iter().flatten() {
 			if !meta.packages.iter().any(|p| p.name == name) {
 				eprintln!("Could not find package named '{}'", g.red(name));
-				std::process::exit(1);
+				return Err(CommandError::reported(1))
 			}
 		}
 
@@ -122,11 +124,13 @@ impl StripDevDepsCmd {
 			}
 
 			// Are we allowed to modify this file path?
-			let krate_path = canonicalize(pkg.manifest_path.clone().into_std_path_buf()).unwrap();
+			let krate_path = canonicalize(pkg.manifest_path.as_std_path()).map_err(|e| {
+				format!("Could not canonicalize manifest '{}': {e}", pkg.manifest_path)
+			})?;
 			if !krate_path.starts_with(&allowed_dir) {
 				continue
 			}
-			let mut fixer = AutoFixer::from_manifest(&krate_path).unwrap();
+			let mut fixer = AutoFixer::from_manifest(&krate_path)?;
 
 			// Find all dependencies that are only used as dev dependencies in this package.
 			let devs = pkg.dependencies.iter().filter(|d| d.kind == kind);
@@ -140,11 +144,11 @@ impl StripDevDepsCmd {
 				// Account for renamed crates:
 				let Some(dep) = resolve_dep(pkg, dep, &meta) else {
 					eprintln!("Could not resolve dependency '{}'", g.red(&dep.name));
-					std::process::exit(1);
+					return Err(CommandError::reported(1))
 				};
 
-				fixer.remove_feature(&format!("{}/", dep.name()));
-				fixer.remove_feature(&format!("{}?/", dep.name()));
+				fixer.remove_feature(&format!("{}/", dep.name()))?;
+				fixer.remove_feature(&format!("{}?/", dep.name()))?;
 			}
 
 			if fixer.modified() {
@@ -153,7 +157,7 @@ impl StripDevDepsCmd {
 		}
 
 		for fixer in fixers.values_mut() {
-			fixer.save().unwrap();
+			fixer.save()?;
 		}
 
 		Ok(())

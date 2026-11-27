@@ -2,14 +2,17 @@
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
 use crate::{
-	cmd::{lint::AutoFixer, resolve_dep, CargoArgs, GlobalArgs},
+	autofix::AutoFixer,
+	cmd::{resolve_dep, CargoArgs, GlobalArgs},
 	grammar::plural,
 	log,
 };
+use camino::Utf8PathBuf;
 use cargo_metadata::{DependencyKind, Package};
 use std::{
 	collections::{btree_map::Entry, BTreeMap},
 	fs::canonicalize,
+	path::Path,
 };
 
 #[derive(Debug, clap::Parser)]
@@ -82,23 +85,7 @@ impl DefaultFeaturesDisabledCmd {
 					lhs.name, rhs.pkg.name
 				);
 
-				let fixer = match autofixer.entry(lhs.manifest_path.clone()) {
-					Entry::Occupied(e) => e.into_mut(),
-					Entry::Vacant(e) => {
-						let krate_path =
-							canonicalize(lhs.manifest_path.as_std_path()).map_err(|e| {
-								format!(
-									"Could not canonicalize manifest {}: {e}",
-									lhs.manifest_path
-								)
-							})?;
-
-						if !krate_path.starts_with(&allowed_dir) {
-							return Err(format!("Cannot write to path: {}", krate_path.display()))
-						}
-						e.insert(AutoFixer::from_manifest(&lhs.manifest_path)?)
-					},
-				};
+				let fixer = Self::fixer_for_package(&mut autofixer, lhs, &allowed_dir)?;
 
 				fixer.disable_default_features(&rhs.name())?;
 				issues += 1;
@@ -117,6 +104,26 @@ impl DefaultFeaturesDisabledCmd {
 			println!("and fixed none. Re-run with --fix to apply fixes.");
 			Err("Several issues were not fixed.".to_string())
 		}
+	}
+
+	fn fixer_for_package<'a>(
+		autofixer: &'a mut BTreeMap<Utf8PathBuf, AutoFixer>,
+		lhs: &Package,
+		allowed_dir: &Path,
+	) -> Result<&'a mut AutoFixer, String> {
+		Ok(match autofixer.entry(lhs.manifest_path.clone()) {
+			Entry::Occupied(e) => e.into_mut(),
+			Entry::Vacant(e) => {
+				let krate_path = canonicalize(lhs.manifest_path.as_std_path()).map_err(|e| {
+					format!("Could not canonicalize manifest {}: {e}", lhs.manifest_path)
+				})?;
+
+				if !krate_path.starts_with(allowed_dir) {
+					return Err(format!("Cannot write to path: {}", krate_path.display()))
+				}
+				e.insert(AutoFixer::from_manifest(&lhs.manifest_path)?)
+			},
+		})
 	}
 
 	fn supports_nostd(

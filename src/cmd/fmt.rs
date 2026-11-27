@@ -7,7 +7,12 @@ use super::{CommandError, GlobalArgs};
 use crate::{autofix::*, cmd::parse_key_val, grammar::*, log};
 
 use cargo_metadata::Metadata;
-use std::{collections::BTreeMap as Map, fs::canonicalize, path::PathBuf, str::FromStr};
+use std::{
+	collections::BTreeMap as Map,
+	fs::canonicalize,
+	path::{Path, PathBuf},
+	str::FromStr,
+};
 
 /// Format the features in your manifest files.
 #[derive(Debug, clap::Parser)]
@@ -138,24 +143,11 @@ impl FormatFeaturesCmd {
 				let path = path.strip_prefix(&allowed_dir).unwrap_or(&path).to_path_buf();
 				errors.entry((path.clone(), pkg.name.to_string())).or_default().extend(errs);
 			} else if fixer.modified() {
-				offenders.push((path, &pkg.name, fixer));
+				offenders.push((path, pkg.name.as_str(), fixer));
 			}
 		}
 		if !errors.is_empty() {
-			let num_errors = errors.values().map(|errs| errs.len()).sum::<usize>();
-			println!(
-				"Please fix {} error{} in {} crate{} manually:",
-				global.red(&num_errors.to_string()),
-				plural(num_errors),
-				global.red(&errors.len().to_string()),
-				plural(errors.len())
-			);
-			for ((path, pkg), errs) in errors.iter() {
-				println!("  {} ({})", global.bold(pkg), path.display());
-				for err in errs.iter() {
-					println!("    {err}");
-				}
-			}
+			Self::report_errors(&errors, global);
 			return Err(CommandError::reported(global.error_code()))
 		}
 
@@ -168,6 +160,32 @@ impl FormatFeaturesCmd {
 			return Ok(())
 		}
 
+		self.format_offenders(global, &allowed_dir, &mut offenders)
+	}
+
+	fn report_errors(errors: &Map<(PathBuf, String), Vec<String>>, global: &GlobalArgs) {
+		let num_errors = errors.values().map(|errs| errs.len()).sum::<usize>();
+		println!(
+			"Please fix {} error{} in {} crate{} manually:",
+			global.red(&num_errors.to_string()),
+			plural(num_errors),
+			global.red(&errors.len().to_string()),
+			plural(errors.len())
+		);
+		for ((path, pkg), errs) in errors.iter() {
+			println!("  {} ({})", global.bold(pkg), path.display());
+			for err in errs.iter() {
+				println!("    {err}");
+			}
+		}
+	}
+
+	fn format_offenders(
+		&self,
+		global: &GlobalArgs,
+		allowed_dir: &Path,
+		offenders: &mut [(PathBuf, &str, AutoFixer)],
+	) -> Result<(), CommandError> {
 		let mut fixed = 0;
 		println!(
 			"Found {} crate{} with unformatted features:",
@@ -184,7 +202,7 @@ impl FormatFeaturesCmd {
 				continue
 			}
 
-			let can_modify = path.starts_with(&allowed_dir) ||
+			let can_modify = path.starts_with(allowed_dir) ||
 				self.modify_paths.iter().any(|p| path.starts_with(p));
 			if !can_modify {
 				log::warn!(

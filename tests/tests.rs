@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
 use assert_cmd::{assert::OutputAssertExt, Command};
-use std::collections::HashMap;
+use std::{collections::HashMap, path::Path, process::Output};
 
 use zepter::mock::*;
 
@@ -37,33 +37,7 @@ fn integration() {
 			let _init = case.init(workspace.as_path()).unwrap();
 			colour::white!("{} {}/{} ", file.display(), i + 1, m);
 			git_reset(workspace.as_path()).unwrap();
-			let mut cmd = Command::new(assert_cmd::cargo_bin!("zepter"));
-			for arg in case.cmd.split_whitespace() {
-				cmd.arg(arg);
-			}
-
-			if config.default_args() {
-				let toml_path = workspace.as_path().join("Cargo.toml");
-				cmd.args([
-					"--manifest-path",
-					toml_path.as_path().to_str().unwrap(),
-					"--log",
-					"warn",
-				]);
-				if i > 0 {
-					cmd.arg("--offline");
-				}
-			} else {
-				cmd.current_dir(workspace.as_path());
-			}
-
-			// remove empty trailing and suffix lines
-			let res = cmd.output().unwrap();
-			if let Some(code) = case.code {
-				res.clone().assert().code(code);
-			} else {
-				res.clone().assert().success();
-			}
+			let res = run_case_command(case, &workspace, config.default_args(), i);
 
 			match (res.stdout == case.stdout.as_bytes(), res.stderr == case.stderr.as_bytes()) {
 				(true, true) => {
@@ -114,35 +88,7 @@ fn integration() {
 				},
 			}
 
-			let got = git_diff(workspace.as_path()).unwrap();
-			if got != case.diff {
-				if std::env::var("OVERWRITE").is_ok() {
-					diff_overwrites.insert(i, got);
-					colour::white!("diff:");
-					colour::yellow_ln!("OVERWRITE");
-					colour::white!("");
-				} else {
-					colour::white!("diff:");
-					colour::red_ln!("FAILED");
-					colour::white!("");
-					if !keep_going {
-						// assert in chunks of 10 lines
-						let got_lines = got.lines().collect::<Vec<_>>();
-						let got_chunks = got_lines.chunks(10).collect::<Vec<_>>();
-						let case_lines = case.diff.lines().collect::<Vec<_>>();
-						let case_chunks = case_lines.chunks(10).collect::<Vec<_>>();
-
-						for (got_chunk, case_chunk) in got_chunks.iter().zip(case_chunks.iter()) {
-							pretty_assertions::assert_eq!(got_chunk, case_chunk);
-						}
-						unreachable!()
-					}
-				}
-			} else {
-				colour::white!("diff:");
-				colour::green_ln!("OK");
-				colour::white!("");
-			}
+			check_diff(case, &workspace, keep_going, &mut diff_overwrites, i);
 			git_reset(workspace.as_path()).unwrap();
 		}
 
@@ -189,6 +135,70 @@ fn integration() {
 		panic!("No tests found. Try something like '**/never-enables/diamond.yaml'");
 	}
 	println!();
+}
+
+fn run_case_command(case: &Case, workspace: &Path, default_args: bool, index: usize) -> Output {
+	let mut cmd = Command::new(assert_cmd::cargo_bin!("zepter"));
+	for arg in case.cmd.split_whitespace() {
+		cmd.arg(arg);
+	}
+
+	if default_args {
+		let toml_path = workspace.join("Cargo.toml");
+		cmd.args(["--manifest-path", toml_path.as_path().to_str().unwrap(), "--log", "warn"]);
+		if index > 0 {
+			cmd.arg("--offline");
+		}
+	} else {
+		cmd.current_dir(workspace);
+	}
+
+	// remove empty trailing and suffix lines
+	let res = cmd.output().unwrap();
+	if let Some(code) = case.code {
+		res.clone().assert().code(code);
+	} else {
+		res.clone().assert().success();
+	}
+	res
+}
+
+fn check_diff(
+	case: &Case,
+	workspace: &Path,
+	keep_going: bool,
+	diff_overwrites: &mut HashMap<usize, String>,
+	index: usize,
+) {
+	let got = git_diff(workspace).unwrap();
+	if got != case.diff {
+		if std::env::var("OVERWRITE").is_ok() {
+			diff_overwrites.insert(index, got);
+			colour::white!("diff:");
+			colour::yellow_ln!("OVERWRITE");
+			colour::white!("");
+		} else {
+			colour::white!("diff:");
+			colour::red_ln!("FAILED");
+			colour::white!("");
+			if !keep_going {
+				// assert in chunks of 10 lines
+				let got_lines = got.lines().collect::<Vec<_>>();
+				let got_chunks = got_lines.chunks(10).collect::<Vec<_>>();
+				let case_lines = case.diff.lines().collect::<Vec<_>>();
+				let case_chunks = case_lines.chunks(10).collect::<Vec<_>>();
+
+				for (got_chunk, case_chunk) in got_chunks.iter().zip(case_chunks.iter()) {
+					pretty_assertions::assert_eq!(got_chunk, case_chunk);
+				}
+				unreachable!()
+			}
+		}
+	} else {
+		colour::white!("diff:");
+		colour::green_ln!("OK");
+		colour::white!("");
+	}
 }
 
 #[test]

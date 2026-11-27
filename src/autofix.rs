@@ -112,7 +112,7 @@ impl AutoFixer {
 		for feature in self.get_all_features() {
 			let feature = self
 				.get_feature_mut(&feature)
-				.map_err(|_| format!("Invalid feature '{feature}'"))?;
+				.map_err(|()| format!("Invalid feature '{feature}'"))?;
 			Self::sort_feature(feature)?;
 		}
 
@@ -121,8 +121,9 @@ impl AutoFixer {
 
 	pub fn format_all_feature(&mut self, line_width: u32) -> Result<(), String> {
 		for fname in self.get_all_features() {
-			let feature =
-				self.get_feature_mut(&fname).map_err(|_| format!("Invalid feature '{fname}'"))?;
+			let feature = self
+				.get_feature_mut(&fname)
+				.map_err(|()| format!("Invalid feature '{fname}'"))?;
 			Self::format_feature(&fname, feature, line_width)?;
 		}
 
@@ -321,12 +322,9 @@ impl AutoFixer {
 		let mut errors = Vec::new();
 
 		for fname in features.iter() {
-			let feature = match self.get_feature_mut(fname) {
-				Ok(feature) => feature,
-				Err(()) => {
-					errors.push(format!("Invalid feature '{fname}': expected an array"));
-					continue
-				},
+			let Ok(feature) = self.get_feature_mut(fname) else {
+				errors.push(format!("Invalid feature '{fname}': expected an array"));
+				continue
 			};
 			let modes = mode_per_feature.get(fname).cloned().unwrap_or_default();
 
@@ -609,10 +607,7 @@ impl AutoFixer {
 					})?;
 					if package != dep_name {
 						return Err(format!(
-							"Dependency '{}' already exists in the workspace with a different alias: '{}' vs '{}'",
-							dep_name,
-							package,
-							dep_name
+							"Dependency '{dep_name}' already exists in the workspace with a different alias: '{package}' vs '{dep_name}'"
 						))
 					}
 				} else {
@@ -631,10 +626,7 @@ impl AutoFixer {
 					})?;
 					if remove_carrot(version) != version_str {
 						return Err(format!(
-							"Dependency '{}' already exists in the workspace with a different 'version' field: '{}' vs '{}'",
-							dep_name,
-							version,
-							dep_version
+							"Dependency '{dep_name}' already exists in the workspace with a different 'version' field: '{version}' vs '{dep_version}'"
 						))
 					}
 				}
@@ -649,10 +641,7 @@ impl AutoFixer {
 
 						if l1 != l2 {
 							return Err(format!(
-								"Dependency '{}' already exists in the workspace with a different 'path' field: '{}' vs '{}'",
-								dep_name,
-								local,
-								path
+								"Dependency '{dep_name}' already exists in the workspace with a different 'path' field: '{local}' vs '{path}'"
 							))
 						}
 					}
@@ -665,10 +654,7 @@ impl AutoFixer {
 						})?;
 					if default != default_feats {
 						return Err(format!(
-							"Dependency '{}' already exists in the workspace with a different 'default-features' fields: '{}' vs '{}'",
-							dep_name,
-							default,
-							default_feats
+							"Dependency '{dep_name}' already exists in the workspace with a different 'default-features' fields: '{default}' vs '{default_feats}'"
 						))
 					}
 				}

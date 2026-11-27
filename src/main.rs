@@ -4,9 +4,10 @@
 //! Entry point of the program.
 
 use clap::Parser;
+use std::process::ExitCode;
 use zepter::cmd::{Command, CommandError};
 
-fn main() {
+fn main() -> ExitCode {
 	setup_logging();
 
 	// Need to remove this in case `cargo-zepter` is used:
@@ -27,7 +28,9 @@ fn main() {
 			},
 			CommandError::Reported(code) => code,
 		};
-		std::process::exit(code);
+		ExitCode::from(code)
+	} else {
+		ExitCode::SUCCESS
 	}
 }
 

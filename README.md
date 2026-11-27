@@ -217,8 +217,6 @@ It uses the first file that is found and errors if none is found. Currently it n
 It is possible to aggregate the long commands into workflows instead of typing them each time. Zepter tries to locate a config file and run the `default` workflow when it is bare invoked without any arguments.  
 Alternately, it is possible to use `zepter run default`, or any other workflow name.
 
-A workflow stops at the first step with a nonzero exit status. `zepter run` reports that step's status and returns `1`; failure to load the workflow configuration itself returns `101`.
-
 Config files can contain workflows like this:
 
 ```yaml

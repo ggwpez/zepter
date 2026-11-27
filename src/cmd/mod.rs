@@ -90,11 +90,11 @@ pub enum CommandError {
 	Failure(String),
 	InvalidConfig(String),
 	/// The command already printed the diagnostic, including any fix hints.
-	Reported(i32),
+	Reported(u8),
 }
 
 impl CommandError {
-	pub(crate) fn reported(code: i32) -> Self {
+	pub(crate) fn reported(code: u8) -> Self {
 		Self::Reported(code)
 	}
 }
@@ -160,7 +160,7 @@ impl GlobalArgs {
 		}
 	}
 
-	pub fn error_code(&self) -> i32 {
+	pub fn error_code(&self) -> u8 {
 		if self.exit_code_zero {
 			0
 		} else {

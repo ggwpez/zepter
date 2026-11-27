@@ -219,19 +219,26 @@ fn cargo_metadata_error_is_formatted_without_panic() {
 }
 
 #[test]
-fn workflow_lookup_returns_errors_to_the_caller() {
-	use clap::Parser;
-	use zepter::cmd::{Command, CommandError};
-
+fn workflow_lookup_failures_exit_with_config_error() {
 	let dir = tempfile::tempdir().unwrap();
 	let path = dir.path().join("zepter.yaml");
-	let command =
-		Command::try_parse_from(["zepter", "run", "missing", "--config", path.to_str().unwrap()])
+	let run = || {
+		let output = Command::new(assert_cmd::cargo_bin!("zepter"))
+			.args(["run", "missing", "--config"])
+			.arg(&path)
+			.output()
 			.unwrap();
+		let stderr = String::from_utf8_lossy(&output.stderr).into_owned();
+		assert!(!stderr.contains("panicked at"), "should not panic:\n{stderr}");
+		(output.status.code(), stderr)
+	};
 
-	assert!(matches!(command.run(), Err(CommandError::InvalidConfig(_))));
+	let (code, stderr) = run();
+	assert_eq!(code, Some(101), "stderr:\n{stderr}");
+	assert!(stderr.contains("Provided config path does not exist"), "stderr:\n{stderr}");
+
 	std::fs::write(&path, "version: {format: 1, binary: 0.1.0}\nworkflows: {}\n").unwrap();
-	assert!(
-		matches!(command.run(), Err(CommandError::InvalidConfig(message)) if message == "Workflow 'missing' not found")
-	);
+	let (code, stderr) = run();
+	assert_eq!(code, Some(101), "stderr:\n{stderr}");
+	assert!(stderr.contains("Workflow 'missing' not found"), "stderr:\n{stderr}");
 }

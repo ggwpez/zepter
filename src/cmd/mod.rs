@@ -127,14 +127,15 @@ impl Command {
 		self.global.setup_logging();
 
 		match self.subcommand.as_ref() {
-			Some(SubCommand::Transpose(cmd)) => cmd.run(&self.global),
-			Some(SubCommand::Trace(cmd)) => cmd.run(&self.global).map_err(Into::into),
-			Some(SubCommand::Lint(cmd)) => cmd.run(&self.global),
-			Some(SubCommand::Format(cmd)) => cmd.run(&self.global),
-			Some(SubCommand::Run(cmd)) => cmd.run(&self.global),
-			Some(SubCommand::Debug(cmd)) => cmd.run(&self.global).map_err(Into::into),
-			None => run::RunCmd::default().run(&self.global),
+			Some(SubCommand::Transpose(cmd)) => cmd.run(&self.global)?,
+			Some(SubCommand::Trace(cmd)) => cmd.run(&self.global)?,
+			Some(SubCommand::Lint(cmd)) => cmd.run(&self.global)?,
+			Some(SubCommand::Format(cmd)) => cmd.run(&self.global)?,
+			Some(SubCommand::Run(cmd)) => cmd.run(&self.global)?,
+			Some(SubCommand::Debug(cmd)) => cmd.run(&self.global)?,
+			None => run::RunCmd::default().run(&self.global)?,
 		}
+		Ok(())
 	}
 }
 

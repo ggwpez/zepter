@@ -309,9 +309,14 @@ impl NeverImpliesCmd {
 					continue
 				};
 
+				// TODO cleanup this cluster fuck
 				let lookup = |id: &str| {
-					pkgs.iter()
+					let referenced_crate = pkgs
+						.iter()
 						.find(|pkg| pkg.id.to_string() == id)
+						.ok_or_else(|| format!("Could not find crate '{id}' in the metadata."))?;
+					pkgs.iter()
+						.find(|pkg| pkg.id == referenced_crate.id)
 						.ok_or_else(|| format!("Could not find crate '{id}' in the metadata."))
 				};
 

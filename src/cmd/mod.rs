@@ -84,28 +84,56 @@ pub enum FixHint {
 	// NOTE: We could have a `Custom` here one day
 }
 
+/// A command failure and the status the CLI should return for it.
+#[derive(Debug)]
+pub enum CommandError {
+	Failure(String),
+	InvalidConfig(String),
+	/// The command already printed the diagnostic, including any fix hints.
+	Reported(i32),
+}
+
+impl CommandError {
+	pub(crate) fn reported(code: i32) -> Self {
+		Self::Reported(code)
+	}
+}
+
+impl std::fmt::Display for CommandError {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			Self::Failure(message) | Self::InvalidConfig(message) => f.write_str(message),
+			Self::Reported(code) => write!(f, "command reported a failure (exit code {code})"),
+		}
+	}
+}
+
+impl std::error::Error for CommandError {}
+
+impl From<String> for CommandError {
+	fn from(message: String) -> Self {
+		Self::Failure(message)
+	}
+}
+
+impl From<&str> for CommandError {
+	fn from(message: &str) -> Self {
+		Self::Failure(message.to_owned())
+	}
+}
+
 impl Command {
-	pub fn run(&self) -> Result<(), String> {
+	pub fn run(&self) -> Result<(), CommandError> {
 		self.global.setup_logging();
 
 		match self.subcommand.as_ref() {
 			Some(SubCommand::Transpose(cmd)) => cmd.run(&self.global),
-
-			Some(SubCommand::Trace(cmd)) => cmd.run(&self.global),
+			Some(SubCommand::Trace(cmd)) => cmd.run(&self.global).map_err(Into::into),
 			Some(SubCommand::Lint(cmd)) => cmd.run(&self.global),
-			Some(SubCommand::Format(cmd)) => {
-				cmd.run(&self.global);
-				Ok(())
-			},
-			Some(SubCommand::Run(cmd)) => {
-				cmd.run(&self.global);
-				Ok(())
-			},
-			Some(SubCommand::Debug(cmd)) => cmd.run(&self.global),
-			None => {
-				run::RunCmd::default().run(&self.global);
-				Ok(())
-			},
+			Some(SubCommand::Format(cmd)) => cmd.run(&self.global),
+			Some(SubCommand::Run(cmd)) => cmd.run(&self.global),
+			Some(SubCommand::Debug(cmd)) => cmd.run(&self.global).map_err(Into::into),
+			None => run::RunCmd::default().run(&self.global),
 		}
 	}
 }
@@ -137,11 +165,6 @@ impl GlobalArgs {
 		} else {
 			1
 		}
-	}
-
-	/// Error code when the config file is invalid or incompatible.
-	pub fn error_code_cfg_parsing() -> i32 {
-		101
 	}
 
 	pub fn red(&self, s: &str) -> String {

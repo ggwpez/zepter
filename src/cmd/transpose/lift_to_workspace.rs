@@ -180,18 +180,27 @@ impl LiftToWorkspaceCmd {
 
 		// Now create fixer for the root package
 		let root_manifest_path = meta.workspace_root.join("Cargo.toml");
-		fixers
-			.entry("magic:workspace".to_string())
-			.or_insert_with(|| (None, AutoFixer::from_manifest(&root_manifest_path).unwrap()));
-		let (_, workspace_fixer) = fixers.get_mut("magic:workspace").unwrap();
+		let (_, workspace_fixer) = match fixers.entry("magic:workspace".to_string()) {
+			std::collections::btree_map::Entry::Occupied(entry) => entry.into_mut(),
+			std::collections::btree_map::Entry::Vacant(entry) =>
+				entry.insert((None, AutoFixer::from_manifest(&root_manifest_path)?)),
+		};
 
-		let mut dep = by_version.values().next().unwrap().first().unwrap().1.clone();
-		dep.req = best_version.parse().unwrap();
+		let mut dep = by_version
+			.values()
+			.flatten()
+			.next()
+			.ok_or_else(|| format!("No dependencies found for '{name}'"))?
+			.1
+			.clone();
+		dep.req = best_version
+			.parse()
+			.map_err(|e| format!("Invalid version requirement '{best_version}': {e}"))?;
 
 		let location = match source_location {
 			SourceLocationSelector::Local => {
 				let Some(ref path) = dep.path else {
-					unreachable!("Could not detect local source location for '{}'", name);
+					return Err(format!("Could not detect local source location for '{name}'"))
 				};
 				let relative = path.strip_prefix(&meta.workspace_root).unwrap_or_else(|_| {
 					log::warn!("Dependency '{}' is not in the workspace root", name);
@@ -219,14 +228,15 @@ impl LiftToWorkspaceCmd {
 				}
 			}
 
-			fixers.entry(pkg.name.to_string()).or_insert_with(|| {
-				(Some(pkg.clone()), AutoFixer::from_manifest(&pkg.manifest_path).unwrap())
-			});
-			let (_, fixer) = fixers.get_mut(&pkg.name.to_string()).unwrap();
+			let (_, fixer) = match fixers.entry(pkg.name.to_string()) {
+				std::collections::btree_map::Entry::Occupied(entry) => entry.into_mut(),
+				std::collections::btree_map::Entry::Vacant(entry) =>
+					entry.insert((Some(pkg.clone()), AutoFixer::from_manifest(&pkg.manifest_path)?)),
+			};
 			// We can safely use the rename here, since we found it with `detect_rename`.
 			let dep_name = dep.rename.as_ref().unwrap_or(&dep.name);
-			if let Some(rename) = &maybe_rename {
-				assert_eq!(rename, dep_name);
+			if maybe_rename.as_ref().is_some_and(|rename| rename != dep_name) {
+				return Err(format!("Dependency '{name}' has conflicting alias '{dep_name}'"))
 			}
 			let location = &source_location;
 
@@ -430,7 +440,9 @@ impl LiftToWorkspaceCmd {
 		by_version: &HashMap<VersionReq, Vec<(Package, Dep)>>,
 	) -> Result<String, String> {
 		let found = match self.version_selector {
-			VersionSelectorMode::Exact => self.exact_version.clone().expect("Checked by clippy"),
+			VersionSelectorMode::Exact => self.exact_version.clone().ok_or_else(|| {
+				"Missing --exact-version for --version-selector=exact".to_string()
+			})?,
 			VersionSelectorMode::Highest => try_find_latest(by_version.keys())?,
 			VersionSelectorMode::Unambiguous => {
 				if versions.len() > 1 {
@@ -473,7 +485,7 @@ impl LiftToWorkspaceCmd {
 						g.bold(&hint),
 					))
 				} else {
-					versions.first().unwrap().to_string()
+					versions.first().ok_or_else(|| "No versions found".to_string())?.to_string()
 				}
 			},
 		};

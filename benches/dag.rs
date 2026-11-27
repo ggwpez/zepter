@@ -63,11 +63,11 @@ fn polkadot_sdk(c: &mut Criterion) {
 	let meta = serde_json::from_str::<cargo_metadata::Metadata>(&file).unwrap();
 
 	let pkgs = &meta.packages;
-	let dag = build_feature_dag(&meta, pkgs);
+	let dag = build_feature_dag(&meta, pkgs).expect("valid benchmark metadata");
 
 	c.bench_function("Polkadot-SDK / DAG / setup", |b| {
 		b.iter(|| {
-			let dag = build_feature_dag(&meta, pkgs);
+			let dag = build_feature_dag(&meta, pkgs).expect("valid benchmark metadata");
 			black_box(dag)
 		});
 	});

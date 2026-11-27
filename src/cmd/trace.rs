@@ -47,12 +47,7 @@ pub struct TraceCmd {
 impl TraceCmd {
 	pub fn run(&self, _global: &GlobalArgs) -> Result<(), String> {
 		let meta = self.cargo_args.load_metadata()?;
-		let (dag, index) = Self::build_dag(meta).expect("Builds dependency graph");
-		let lookup = |id: &str| {
-			index
-				.get(id)
-				.unwrap_or_else(|| panic!("Could not find crate {id} in the metadata"))
-		};
+		let (dag, index) = Self::build_dag(meta)?;
 
 		let froms = index
 			.iter()
@@ -60,7 +55,7 @@ impl TraceCmd {
 			.map(|(id, _)| id)
 			.collect::<Vec<_>>();
 		if froms.is_empty() {
-			panic!("Could not find crate {} in the left dependency graph", self.from);
+			return Err(format!("Could not find crate {} in the left dependency graph", self.from))
 		}
 
 		let tos = index
@@ -69,7 +64,7 @@ impl TraceCmd {
 			.map(|(id, _)| id)
 			.collect::<Vec<_>>();
 		if tos.is_empty() {
-			panic!("Could not find crate {} in the right dependency graph", self.to);
+			return Err(format!("Could not find crate {} in the right dependency graph", self.to))
 		}
 
 		log::info!(
@@ -86,7 +81,7 @@ impl TraceCmd {
 			}
 		}
 		if paths.is_empty() {
-			panic!("No path found");
+			return Err("No path found".to_string())
 		}
 		log::info!("Found {} distinct paths", paths.len());
 		// Unescape the delimiter - the ghetto way.
@@ -96,8 +91,10 @@ impl TraceCmd {
 			let mut out = String::new();
 			let mut is_first = true;
 
-			path.for_each(|id| {
-				let krate = lookup(id);
+			for id in &path.0 {
+				let krate = index
+					.get(id.as_ref())
+					.ok_or_else(|| format!("Could not find crate {id} in the metadata"))?;
 				if !is_first {
 					out.push_str(&delimiter);
 				}
@@ -113,7 +110,7 @@ impl TraceCmd {
 						out.push_str(" (local)");
 					}
 				}
-			});
+			}
 
 			println!("{out}");
 		}

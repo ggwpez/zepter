@@ -55,10 +55,14 @@ impl AutoFixer {
 		for i in (0..values.len()).rev() {
 			let last: Option<Value> = if i == 0 { None } else { Some(values[i - 1].clone()) };
 			let current = &values[i];
-			let cur_str = current.as_str().unwrap();
+			let cur_str = current
+				.as_str()
+				.ok_or_else(|| format!("feature '{fname}' contains a non-string value"))?;
 
 			if let Some(ref last) = last {
-				let last_str = last.as_str().unwrap();
+				let last_str = last
+					.as_str()
+					.ok_or_else(|| format!("feature '{fname}' contains a non-string value"))?;
 				if cur_str < last_str {
 					return Err(format!(
 						"Cannot de-duplicate: feature is not sorted: {cur_str} < {last_str}"
@@ -73,8 +77,8 @@ impl AutoFixer {
 				}
 
 				// TODO merge the comments
-				let prefix = current.decor().prefix().unwrap().as_str().unwrap();
-				let suffix = current.decor().suffix().unwrap().as_str().unwrap();
+				let prefix = current.decor().prefix().and_then(|p| p.as_str()).unwrap_or("");
+				let suffix = current.decor().suffix().and_then(|s| s.as_str()).unwrap_or("");
 				if !prefix.trim().is_empty() || !suffix.trim().is_empty() {
 					return Err(format!("feature '{fname}': has a comment '{cur_str}'"))
 				}
@@ -91,20 +95,25 @@ impl AutoFixer {
 		Ok(())
 	}
 
-	pub fn sort_feature(feature: &mut Array) {
+	pub fn sort_feature(feature: &mut Array) -> Result<(), String> {
 		let mut values = feature.iter().cloned().collect::<Vec<_>>();
-		// DOGSHIT CODE
-		values.sort_by(|a, b| a.as_str().unwrap().cmp(b.as_str().unwrap()));
+		if values.iter().any(|value| value.as_str().is_none()) {
+			return Err("feature contains a non-string value".into())
+		}
+		values.sort_by(|a, b| a.as_str().cmp(&b.as_str()));
 		feature.clear();
 		for value in values {
 			feature.push_formatted(value.clone());
 		}
+		Ok(())
 	}
 
 	pub fn sort_all_features(&mut self) -> Result<(), String> {
 		for feature in self.get_all_features() {
-			let feature = self.get_feature_mut(&feature).unwrap();
-			Self::sort_feature(feature);
+			let feature = self
+				.get_feature_mut(&feature)
+				.map_err(|_| format!("Invalid feature '{feature}'"))?;
+			Self::sort_feature(feature)?;
 		}
 
 		Ok(())
@@ -112,7 +121,8 @@ impl AutoFixer {
 
 	pub fn format_all_feature(&mut self, line_width: u32) -> Result<(), String> {
 		for fname in self.get_all_features() {
-			let feature = self.get_feature_mut(&fname).unwrap();
+			let feature =
+				self.get_feature_mut(&fname).map_err(|_| format!("Invalid feature '{fname}'"))?;
 			Self::format_feature(&fname, feature, line_width)?;
 		}
 
@@ -124,6 +134,9 @@ impl AutoFixer {
 		feature: &mut Array,
 		mut line_width: u32,
 	) -> Result<(), String> {
+		if feature.iter().any(|value| value.as_str().is_none()) {
+			return Err(format!("feature '{fname}' contains a non-string value"))
+		}
 		// First we try to format it into one line.
 		let mut oneliner = feature.clone();
 		if Self::format_feature_oneline(&mut oneliner).is_ok() {
@@ -263,13 +276,8 @@ impl AutoFixer {
 		if !doc.contains_table("features") {
 			return None
 		}
-		let features = doc["features"].as_table().unwrap();
-
-		if !features.contains_key(name) {
-			return None
-		}
-
-		Some(features[name].as_array().unwrap())
+		let features = doc["features"].as_table()?;
+		features.get(name)?.as_array()
 	}
 
 	pub(crate) fn get_feature_mut(&mut self, name: &str) -> Result<&mut Array, ()> {
@@ -277,13 +285,8 @@ impl AutoFixer {
 		if !doc.contains_table("features") {
 			return Err(())
 		}
-		let features = doc["features"].as_table_mut().unwrap();
-
-		if !features.contains_key(name) {
-			return Err(())
-		}
-
-		Ok(features[name].as_array_mut().unwrap())
+		let features = doc["features"].as_table_mut().ok_or(())?;
+		features.get_mut(name).and_then(Item::as_array_mut).ok_or(())
 	}
 
 	pub fn canonicalize_feature(
@@ -297,7 +300,7 @@ impl AutoFixer {
 			return Ok(())
 		}
 		if modes.is_empty() || modes.contains(&Mode::Sort) {
-			Self::sort_feature(feature);
+			Self::sort_feature(feature)?;
 		}
 		if modes.is_empty() || modes.contains(&Mode::Dedub) {
 			Self::dedub_feature(cname, fname, feature)?;
@@ -318,7 +321,13 @@ impl AutoFixer {
 		let mut errors = Vec::new();
 
 		for fname in features.iter() {
-			let feature = self.get_feature_mut(fname).unwrap();
+			let feature = match self.get_feature_mut(fname) {
+				Ok(feature) => feature,
+				Err(()) => {
+					errors.push(format!("Invalid feature '{fname}': expected an array"));
+					continue
+				},
+			};
 			let modes = mode_per_feature.get(fname).cloned().unwrap_or_default();
 
 			let _ = Self::canonicalize_feature(cname, fname, &modes, line_width, feature)
@@ -341,7 +350,9 @@ impl AutoFixer {
 	) -> Result<bool, String> {
 		let modes = mode_per_feature.get(fname).cloned().unwrap_or_default();
 
-		let orig = self.get_feature(fname).unwrap();
+		let orig = self
+			.get_feature(fname)
+			.ok_or_else(|| format!("Invalid or missing feature '{fname}'"))?;
 		let mut modified = orig.clone();
 
 		Self::canonicalize_feature(cname, fname, &modes, line_width, &mut modified)?;
@@ -383,6 +394,9 @@ impl AutoFixer {
 
 	/// Add something to a feature. Creates that feature if it does not exist.
 	pub fn add_to_feature(&mut self, feature: &str, v: &str) -> Result<(), String> {
+		if v.is_empty() {
+			return Err("Empty value in feature".into())
+		}
 		let doc: &mut DocumentMut = self.doc.as_mut().unwrap();
 
 		if !doc.contains_table("features") {
@@ -397,7 +411,12 @@ impl AutoFixer {
 			features.insert(feature, value(Array::new()));
 		}
 
-		let feature = features[feature].as_array_mut().unwrap();
+		let feature = features[feature]
+			.as_array_mut()
+			.ok_or_else(|| format!("Feature '{feature}' is not an array"))?;
+		if feature.iter().any(|value| value.as_str().is_none_or(str::is_empty)) {
+			return Err("Empty or non-string value in feature".into())
+		}
 		// Lets format them while were at it, otherwise you will end up with `feature = [… very long
 		// line …]`.
 		let values = feature.iter().cloned().collect::<Vec<_>>();
@@ -409,9 +428,7 @@ impl AutoFixer {
 		let mut new_vals = Vec::new();
 
 		for mut value in values {
-			if value.as_str().is_some_and(|s| s.is_empty()) {
-				panic!("Empty value in feature");
-			}
+			// Values were validated before modifying the array.
 			let mut prefix: String = match value.decor().prefix() {
 				None => "".into(),
 				Some(p) => p.as_str().unwrap().into(),
@@ -429,9 +446,6 @@ impl AutoFixer {
 			new_vals.push(value);
 		}
 
-		if v.is_empty() {
-			unreachable!("Empty value in feature");
-		}
 		let mut value: Value = v.into();
 		let suffix = "\n";
 		value = value.decorated("\n\t", suffix);
@@ -487,7 +501,8 @@ impl AutoFixer {
 		location: &SourceLocationSelector,
 	) -> Result<(), String> {
 		if let Some(as_str) = dep.as_str() {
-			cargo_metadata::semver::VersionReq::parse(as_str).expect("Is semver");
+			cargo_metadata::semver::VersionReq::parse(as_str)
+				.map_err(|e| format!("Invalid dependency version '{as_str}': {e}"))?;
 			let mut table = InlineTable::new();
 
 			table.insert("workspace", Value::Boolean(Formatted::new(true)));
@@ -589,11 +604,14 @@ impl AutoFixer {
 		if let Some(rename) = found_rename {
 			if let Some(rename) = rename.as_table_like() {
 				if let Some(pkg) = rename.get("package") {
-					if pkg.as_str().unwrap() != dep_name {
+					let package = pkg.as_str().ok_or_else(|| {
+						format!("Dependency '{dep_name}' has a non-string 'package' field")
+					})?;
+					if package != dep_name {
 						return Err(format!(
 							"Dependency '{}' already exists in the workspace with a different alias: '{}' vs '{}'",
 							dep_name,
-							pkg.as_str().unwrap(),
+							package,
 							dep_name
 						))
 					}
@@ -608,11 +626,14 @@ impl AutoFixer {
 		if let Some(found) = found_rename.or(found_orig) {
 			if let Some(found) = found.as_inline_table() {
 				if let Some(version) = found.get("version") {
-					if remove_carrot(version.as_str().unwrap()) != version_str {
+					let version = version.as_str().ok_or_else(|| {
+						format!("Dependency '{dep_name}' has a non-string 'version' field")
+					})?;
+					if remove_carrot(version) != version_str {
 						return Err(format!(
 							"Dependency '{}' already exists in the workspace with a different 'version' field: '{}' vs '{}'",
 							dep_name,
-							version.as_str().unwrap(),
+							version,
 							dep_version
 						))
 					}
@@ -620,26 +641,33 @@ impl AutoFixer {
 
 				if let Some(local) = local {
 					if let Some(path) = found.get("path") {
+						let path = path.as_str().ok_or_else(|| {
+							format!("Dependency '{dep_name}' has a non-string 'path' field")
+						})?;
 						let l1 = Self::sanitize_path(local);
-						let l2 = Self::sanitize_path(path.as_str().unwrap());
+						let l2 = Self::sanitize_path(path);
 
 						if l1 != l2 {
 							return Err(format!(
 								"Dependency '{}' already exists in the workspace with a different 'path' field: '{}' vs '{}'",
 								dep_name,
 								local,
-								path.as_str().unwrap()
+								path
 							))
 						}
 					}
 				}
 
 				if let Some(default) = found.get("default-features") {
-					if default.as_bool().unwrap() != default_feats {
+					let default =
+						default.as_bool().ok_or_else(|| {
+							format!("Dependency '{dep_name}' has a non-boolean 'default-features' field")
+						})?;
+					if default != default_feats {
 						return Err(format!(
 							"Dependency '{}' already exists in the workspace with a different 'default-features' fields: '{}' vs '{}'",
 							dep_name,
-							default.as_bool().unwrap(),
+							default,
 							default_feats
 						))
 					}
@@ -685,28 +713,35 @@ impl AutoFixer {
 		p.trim_start_matches("./").trim_end_matches("/").to_string()
 	}
 
-	pub fn remove_feature(&mut self, name: &str) {
+	pub fn remove_feature(&mut self, name: &str) -> Result<(), String> {
 		let doc: &mut DocumentMut = self.doc.as_mut().unwrap();
 
 		if !doc.contains_table("features") {
-			return
+			return Ok(())
 		}
 		let features = doc["features"].as_table_mut().unwrap();
 
-		for feature in features.iter_mut() {
-			let feature = feature.1.as_array_mut().unwrap();
-
-			// remove all values that start with `name`
+		for (feature_name, item) in features.iter_mut() {
+			let feature = item
+				.as_array_mut()
+				.ok_or_else(|| format!("Feature '{feature_name}' is not an array"))?;
+			if feature.iter().any(|value| value.as_str().is_none()) {
+				return Err(format!("Feature '{feature_name}' contains a non-string value"))
+			}
 			let mut i = 0;
 			while i < feature.len() {
-				let value = feature.get(i).unwrap().as_str().unwrap();
-				if value.starts_with(name) {
+				if feature
+					.get(i)
+					.and_then(Value::as_str)
+					.is_some_and(|value| value.starts_with(name))
+				{
 					feature.remove(i);
 				} else {
 					i += 1;
 				}
 			}
 		}
+		Ok(())
 	}
 
 	pub fn disable_default_features(&mut self, dep: &str) -> Result<(), String> {
@@ -734,11 +769,11 @@ impl AutoFixer {
 	}
 
 	pub fn save(&mut self) -> Result<(), String> {
-		if let (Some(doc), Some(path)) = (self.doc.take(), &self.manifest) {
-			std::fs::write(path, doc.to_string())
-				.map_err(|e| format!("Failed to write manifest: {:?}: {:?}", path.display(), e))?;
-			log::debug!("Modified manifest {:?}", path.display());
-		}
+		let doc = self.doc.as_ref().ok_or("No manifest document to save")?;
+		let path = self.manifest.as_ref().ok_or("No manifest path to save")?;
+		std::fs::write(path, doc.to_string())
+			.map_err(|e| format!("Failed to write manifest: {:?}: {:?}", path.display(), e))?;
+		log::debug!("Modified manifest {:?}", path.display());
 		Ok(())
 	}
 }
@@ -751,4 +786,35 @@ impl Display for AutoFixer {
 
 fn remove_carrot(version: &str) -> &str {
 	version.strip_prefix('^').unwrap_or(version)
+}
+
+#[cfg(test)]
+mod failure_tests {
+	use super::*;
+
+	#[test]
+	fn malformed_feature_returns_error() {
+		let mut fixer = AutoFixer::from_raw("[features]\ndefault = [1]\n").unwrap();
+		assert!(fixer.canonicalize_features("example", &Map::new(), 80).is_err());
+		assert!(fixer.remove_feature("dep/").is_err());
+	}
+
+	#[test]
+	fn empty_feature_value_returns_error() {
+		let mut fixer = AutoFixer::from_raw("[features]\ndefault = []\n").unwrap();
+		assert!(fixer.add_to_feature("default", "").is_err());
+	}
+
+	#[test]
+	fn invalid_dependency_version_returns_error() {
+		let mut dep = value("not a version");
+		assert!(AutoFixer::lift_some_dependency(&mut dep, None, &SourceLocationSelector::Remote)
+			.is_err());
+	}
+
+	#[test]
+	fn saving_without_manifest_returns_error() {
+		let mut fixer = AutoFixer::from_raw("").unwrap();
+		assert!(fixer.save().is_err());
+	}
 }

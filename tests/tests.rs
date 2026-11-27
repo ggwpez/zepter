@@ -217,3 +217,21 @@ fn cargo_metadata_error_is_formatted_without_panic() {
 	assert!(!stderr.contains("panicked at"), "should not panic:\n{stderr}");
 	assert!(!stderr.contains("\\n"), "should not escape newlines:\n{stderr}");
 }
+
+#[test]
+fn workflow_lookup_returns_errors_to_the_caller() {
+	use clap::Parser;
+	use zepter::cmd::{Command, CommandError};
+
+	let dir = tempfile::tempdir().unwrap();
+	let path = dir.path().join("zepter.yaml");
+	let command =
+		Command::try_parse_from(["zepter", "run", "missing", "--config", path.to_str().unwrap()])
+			.unwrap();
+
+	assert!(matches!(command.run(), Err(CommandError::InvalidConfig(_))));
+	std::fs::write(&path, "version: {format: 1, binary: 0.1.0}\nworkflows: {}\n").unwrap();
+	assert!(
+		matches!(command.run(), Err(CommandError::Failure(message)) if message == "Workflow 'missing' not found")
+	);
+}

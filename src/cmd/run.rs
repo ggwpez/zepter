@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
-use super::GlobalArgs;
+use super::{CommandError, GlobalArgs};
 use crate::{
 	config::{workflow::WORKFLOW_DEFAULT_NAME, ConfigArgs},
 	log,
@@ -23,13 +23,12 @@ pub struct RunArgs {
 }
 
 impl RunCmd {
-	pub fn run(&self, g: &GlobalArgs) {
-		let config = self.args.config.load_or_panic();
+	pub fn run(&self, g: &GlobalArgs) -> Result<(), CommandError> {
+		let config = self.args.config.load().map_err(CommandError::InvalidConfig)?;
 
 		let name = self.args.workflow.as_deref().unwrap_or(WORKFLOW_DEFAULT_NAME);
-		let Some(workflow) = config.workflow(name) else {
-			panic!("Workflow '{name}' not found");
-		};
+		let workflow =
+			config.workflow(name).ok_or_else(|| format!("Workflow '{name}' not found"))?;
 
 		log::info!("Running workflow '{}'", name);
 		if let Err(err) = workflow.run(g) {
@@ -39,7 +38,8 @@ impl RunCmd {
 				println!("\n{help}");
 			}
 
-			std::process::exit(1);
+			return Err(CommandError::reported(1))
 		}
+		Ok(())
 	}
 }

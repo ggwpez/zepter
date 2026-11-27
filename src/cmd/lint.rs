@@ -8,14 +8,14 @@ pub use nostd::*;
 
 use crate::{
 	autofix::*,
-	cmd::{parse_key_val, resolve_dep, RenamedPackage},
+	cmd::{parse_key_val, resolve_dep, CommandError, RenamedPackage},
 	grammar::*,
 	log,
 	prelude::*,
 	CrateId,
 };
 use camino::Utf8PathBuf;
-use cargo_metadata::{DependencyKind, Metadata, Package, PackageId};
+use cargo_metadata::{DependencyKind, Metadata, Package};
 use core::{
 	fmt,
 	fmt::{Display, Formatter},
@@ -264,14 +264,14 @@ impl core::str::FromStr for IgnoreSetting {
 }
 
 impl LintCmd {
-	pub(crate) fn run(&self, global: &GlobalArgs) -> Result<(), String> {
+	pub(crate) fn run(&self, global: &GlobalArgs) -> Result<(), CommandError> {
 		match &self.subcommand {
 			SubCommand::PropagateFeature(cmd) => cmd.run(global),
-			SubCommand::NeverEnables(cmd) => cmd.run(global),
-			SubCommand::NeverImplies(cmd) => cmd.run(global),
+			SubCommand::NeverEnables(cmd) => cmd.run(global).map_err(Into::into),
+			SubCommand::NeverImplies(cmd) => cmd.run(global).map_err(Into::into),
 			SubCommand::WhyEnabled(cmd) => cmd.run(global),
-			SubCommand::OnlyEnables(cmd) => cmd.run(global),
-			SubCommand::NoStd(cmd) => cmd.run(global),
+			SubCommand::OnlyEnables(cmd) => cmd.run(global).map_err(Into::into),
+			SubCommand::NoStd(cmd) => cmd.run(global).map_err(Into::into),
 			SubCommand::DuplicateDeps(cmd) => cmd.run(global),
 		}
 	}
@@ -295,7 +295,7 @@ impl NeverImpliesCmd {
 			self.stays_disabled
 		);
 		let pkgs = &meta.packages;
-		let dag = build_feature_dag(&meta, pkgs);
+		let dag = build_feature_dag(&meta, pkgs)?;
 
 		for CrateAndFeature(pkg, feature) in dag.lhs_nodes() {
 			let crate_and_feature = CrateAndFeature(pkg.clone(), feature.clone());
@@ -308,21 +308,18 @@ impl NeverImpliesCmd {
 					continue
 				};
 
-				// TODO cleanup this cluster fuck
 				let lookup = |id: &str| {
-					let referenced_crate =
-						pkgs.iter().find(|pkg| pkg.id.to_string() == id).unwrap();
 					pkgs.iter()
-						.find(|pkg| pkg.id == referenced_crate.id)
-						.unwrap_or_else(|| panic!("Could not find crate '{id}' in the metadata."))
+						.find(|pkg| pkg.id.to_string() == id)
+						.ok_or_else(|| format!("Could not find crate '{id}' in the metadata."))
 				};
 
 				let delimiter = self.path_delimiter.replace("\\n", "\n").replace("\\t", "\t");
 				let mut out = String::new();
 				let mut is_first = true;
 
-				path.for_each(|CrateAndFeature(id, feature)| {
-					let krate = lookup(id);
+				for CrateAndFeature(id, feature) in path.0.iter().map(|node| node.as_ref()) {
+					let krate = lookup(id)?;
 					if !is_first {
 						out.push_str(&delimiter);
 					}
@@ -338,13 +335,13 @@ impl NeverImpliesCmd {
 							out.push_str(" (local)");
 						}
 					}
-				});
+				}
 				println!(
 					"Feature '{}' implies '{}' via path:\n  {}",
 					self.precondition, self.stays_disabled, out
 				);
 
-				std::process::exit(0);
+				return Ok(())
 			}
 		}
 
@@ -393,7 +390,10 @@ impl NeverEnablesCmd {
 
 		for (lhs, rhss) in offenders {
 			// Find by id
-			let lhs = pkgs.iter().find(|p| p.id.to_string() == lhs).unwrap();
+			let lhs = pkgs
+				.iter()
+				.find(|p| p.id.to_string() == lhs)
+				.ok_or_else(|| format!("Could not find crate '{lhs}' in the metadata."))?;
 			println!("crate {:?}\n  feature {:?}", lhs.name, self.precondition);
 			// TODO support multiple left/right side features.
 			println!("    enables feature {:?} on dependencies:", self.stays_disabled);
@@ -415,13 +415,13 @@ impl NeverEnablesCmd {
 }
 
 impl PropagateFeatureCmd {
-	pub fn run(&self, global: &GlobalArgs) -> Result<(), String> {
+	pub fn run(&self, global: &GlobalArgs) -> Result<(), CommandError> {
 		let meta = self.cargo_args.load_metadata()?;
-		let dag = build_feature_dag(&meta, &meta.packages);
+		let dag = build_feature_dag(&meta, &meta.packages)?;
 		let features = self.features.iter().collect::<BTreeSet<_>>();
 
 		for feature in features {
-			self.run_feature(&meta, &dag, feature.clone(), global);
+			self.run_feature(&meta, &dag, feature.clone(), global)?;
 		}
 
 		Ok(())
@@ -433,9 +433,11 @@ impl PropagateFeatureCmd {
 		dag: &Dag<CrateAndFeature>,
 		feature: String,
 		global: &GlobalArgs,
-	) {
+	) -> Result<(), CommandError> {
 		// Allowed dir that we can write to.
-		let allowed_dir = canonicalize(meta.workspace_root.as_std_path()).unwrap();
+		let allowed_dir = canonicalize(meta.workspace_root.as_std_path()).map_err(|e| {
+			format!("Could not canonicalize workspace root {}: {e}", meta.workspace_root)
+		})?;
 
 		let pkgs = meta.packages.iter().collect::<Vec<_>>();
 		let mut to_check = pkgs.clone();
@@ -444,20 +446,20 @@ impl PropagateFeatureCmd {
 				pkgs.iter().filter(|pkg| self.packages.contains(&pkg.name)).cloned().collect();
 		}
 		if to_check.is_empty() {
-			panic!("No packages found: {:?}", self.packages);
+			return Err(format!("No packages found: {:?}", self.packages).into())
 		}
 
 		let lookup = |id: &str| {
-			let id = PackageId { repr: id.to_string() }; // TODO optimize
 			pkgs.iter()
-				.find(|pkg| pkg.id == id)
-				.unwrap_or_else(|| panic!("Could not find crate {id} in the metadata"))
+				.find(|pkg| pkg.id.repr == id)
+				.copied()
+				.ok_or_else(|| format!("Could not find crate {id} in the metadata"))
 		};
 
 		// (Crate that is not forwarding the feature) -> (Dependency that it is not forwarded to)
 		let mut propagate_missing = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
-		let ignore_missing_propagate = self.ignore_missing_propagate();
-		let dep_kinds = self.parse_dep_kinds().expect("Parse dependency kinds");
+		let ignore_missing_propagate = self.ignore_missing_propagate()?;
+		let dep_kinds = self.parse_dep_kinds()?;
 		// (Crate that missing the feature) -> (Dependency that has it)
 		let mut feature_missing = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
 		// (Crate that is not enabling a optional dependency) -> (Dependency that it is not enabled)
@@ -559,21 +561,25 @@ impl PropagateFeatureCmd {
 			.chain(non_optional_missing.keys())
 			.cloned()
 			.collect();
-		let mut faulty_crates =
-			faulty_crates.into_iter().map(|id| (lookup(&id), id)).collect::<Vec<_>>();
+		let mut faulty_crates = faulty_crates
+			.into_iter()
+			.map(|id| lookup(&id).map(|pkg| (pkg, id)))
+			.collect::<Result<Vec<_>, _>>()?;
 		faulty_crates.sort_by(|(a, _), (b, _)| a.name.cmp(&b.name));
 
 		let (mut errors, mut fixes) = (0, 0);
 		for (krate, _) in faulty_crates {
 			let in_workspace = meta.workspace_members.iter().any(|m| m == &krate.id);
 			// check if we can modify in allowed_dir
-			let krate_path = canonicalize(krate.manifest_path.clone().into_std_path_buf()).unwrap();
+			let krate_path = canonicalize(krate.manifest_path.as_std_path()).map_err(|e| {
+				format!("Could not canonicalize manifest {}: {e}", krate.manifest_path)
+			})?;
 			// TODO move down
 			let mut fixer = if self.fixer_args.enable {
 				if krate_path.starts_with(&allowed_dir) ||
 					self.modify_paths.iter().any(|p| krate_path.starts_with(p))
 				{
-					Some(AutoFixer::from_manifest(&krate_path).unwrap())
+					Some(AutoFixer::from_manifest(&krate_path)?)
 				} else {
 					log::info!(
 						"Cargo path is outside of the workspace: {:?} not in {:?}",
@@ -609,7 +615,7 @@ impl PropagateFeatureCmd {
 					(self.left_side_outside_workspace == MuteSetting::Fix || in_workspace)
 				{
 					let Some(fixer) = fixer.as_mut() else { continue };
-					fixer.add_feature(&feature).unwrap();
+					fixer.add_feature(&feature)?;
 
 					log::info!("Inserted feature '{}' into '{}'", &feature, &krate.name);
 					fixes += 1;
@@ -638,9 +644,10 @@ impl PropagateFeatureCmd {
 							.is_some_and(|v| v.contains(&(feature.clone(), dep_name.clone())));
 						let opt = if !non_optional && dep.optional { "?" } else { "" };
 
-						fixer
-							.add_to_feature(&feature, format!("{dep_name}{opt}/{feature}").as_str())
-							.unwrap();
+						fixer.add_to_feature(
+							&feature,
+							format!("{dep_name}{opt}/{feature}").as_str(),
+						)?;
 						log::info!("Inserted '{dep_name}/{feature}' into '{}'", krate.name);
 						fixes += 1;
 					}
@@ -663,7 +670,7 @@ impl PropagateFeatureCmd {
 						let dep_name = dep.name();
 						let Some(fixer) = fixer.as_mut() else { continue };
 
-						fixer.add_to_feature(&feature, &dep_name).unwrap();
+						fixer.add_to_feature(&feature, &dep_name)?;
 
 						log::info!("Inserted '{dep_name}' into '{}'", krate.name);
 						fixes += 1;
@@ -675,7 +682,7 @@ impl PropagateFeatureCmd {
 
 			if let Some(fixer) = fixer.as_mut() {
 				if fixes > 0 {
-					fixer.save().unwrap();
+					fixer.save()?;
 				}
 			}
 		}
@@ -684,26 +691,33 @@ impl PropagateFeatureCmd {
 		}
 
 		if errors > fixes {
-			std::process::exit(global.error_code());
+			return Err(CommandError::reported(global.error_code()))
 		}
+		Ok(())
 	}
 
-	fn ignore_missing_propagate(&self) -> BTreeMap<CrateAndFeature, BTreeSet<CrateAndFeature>> {
+	fn ignore_missing_propagate(
+		&self,
+	) -> Result<BTreeMap<CrateAndFeature, BTreeSet<CrateAndFeature>>, String> {
 		let Some(ignore_missing) = &self.ignore_missing_propagate else {
-			return Default::default()
+			return Ok(Default::default())
 		};
 
 		let mut map = BTreeMap::<CrateAndFeature, BTreeSet<CrateAndFeature>>::new();
 		for (lhs, rhs) in ignore_missing {
-			let (lhs_c, lhs_f) = lhs.split_once('/').unwrap();
-			let (rhs_c, rhs_f) = rhs.split_once('/').unwrap();
+			let (lhs_c, lhs_f) = lhs
+				.split_once('/')
+				.ok_or_else(|| format!("Expected CRATE/FEATURE, got '{lhs}'"))?;
+			let (rhs_c, rhs_f) = rhs
+				.split_once('/')
+				.ok_or_else(|| format!("Expected CRATE/FEATURE, got '{rhs}'"))?;
 
 			let lhs = CrateAndFeature(lhs_c.into(), lhs_f.into());
 			let rhs = CrateAndFeature(rhs_c.into(), rhs_f.into());
 
 			map.entry(lhs).or_default().insert(rhs);
 		}
-		map
+		Ok(map)
 	}
 
 	fn parse_dep_kinds(
@@ -802,9 +816,9 @@ impl OnlyEnablesCmd {
 }
 
 impl WhyEnabledCmd {
-	pub fn run(&self, _global: &GlobalArgs) -> Result<(), String> {
+	pub fn run(&self, _global: &GlobalArgs) -> Result<(), CommandError> {
 		let meta = self.cargo_args.load_metadata()?;
-		let dag = build_feature_dag(&meta, &meta.packages);
+		let dag = build_feature_dag(&meta, &meta.packages)?;
 		let pkgs = meta.packages;
 		let mut found_crate_and_feature = false;
 		let mut found_crate = false;
@@ -821,7 +835,9 @@ impl WhyEnabledCmd {
 				}
 
 				if resolved == self.package && rhs.1 == self.feature {
-					let lhs_resolved = lookup(&lhs.0).unwrap();
+					let lhs_resolved = lookup(&lhs.0).ok_or_else(|| {
+						format!("Could not find crate '{}' in the metadata", lhs.0)
+					})?;
 					found_crate_and_feature = true;
 					enabled_by.push((lhs_resolved.name.clone(), lhs.1.clone()));
 				}
@@ -830,12 +846,12 @@ impl WhyEnabledCmd {
 
 		if !found_crate {
 			println!("Did not find package {} on the rhs of the dependency tree", self.package);
-			std::process::exit(1);
+			return Err(CommandError::reported(1))
 		}
 		if !found_crate_and_feature {
 			// TODO find edit distance to the closest one
 			println!("Package {} does not have feature {}", self.package, self.feature);
-			std::process::exit(1);
+			return Err(CommandError::reported(1))
 		}
 		debug_assert!(!enabled_by.is_empty());
 		println!("Feature {}/{} is enabled by:", self.feature, self.package);
@@ -863,7 +879,7 @@ pub struct DuplicateDepsCmd {
 }
 
 impl DuplicateDepsCmd {
-	pub fn run(&self, _global: &GlobalArgs) -> Result<(), String> {
+	pub fn run(&self, _global: &GlobalArgs) -> Result<(), CommandError> {
 		// To easily compare dependencies, we normalize them by removing the kind.
 		fn without_kind(dep: &cargo_metadata::Dependency) -> cargo_metadata::Dependency {
 			let mut dep = dep.clone();
@@ -903,7 +919,9 @@ impl DuplicateDepsCmd {
 			println!("Found {} crate{} with duplicated dependencies between [dependencies] and [dev-dependencies]", issues.len(), plural(issues.len()));
 			for ((pkg, path), deps) in issues {
 				let maybe_path = if self.show_paths {
-					let rel = path.strip_prefix(&meta.workspace_root).unwrap();
+					let rel = path.strip_prefix(&meta.workspace_root).map_err(|e| {
+						format!("Manifest {path} is outside workspace {}: {e}", meta.workspace_root)
+					})?;
 					format!(" ({rel})")
 				} else {
 					"".to_string()
@@ -916,7 +934,7 @@ impl DuplicateDepsCmd {
 				}
 			}
 
-			std::process::exit(1);
+			return Err(CommandError::reported(1))
 		}
 
 		Ok(())
@@ -924,7 +942,10 @@ impl DuplicateDepsCmd {
 }
 
 // Complexity is `O(x ^ 4) with x=pkgs.len()`.
-pub fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeature> {
+pub fn build_feature_dag(
+	meta: &Metadata,
+	pkgs: &[Package],
+) -> Result<Dag<CrateAndFeature>, String> {
 	let mut dag = Dag::new();
 
 	for pkg in pkgs.iter() {
@@ -954,14 +975,15 @@ pub fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeatu
 		for (feature, deps) in pkg.features.iter() {
 			for dep in deps {
 				if dep.contains(':') {
-					let mut splits = dep.split(':');
-					let dep = splits.nth(1).unwrap();
+					let (_, dep) = dep.split_once(':').ok_or_else(|| {
+						format!("Invalid dependency feature '{dep}' in {}", pkg.id)
+					})?;
 					let dep_feature = "default";
 					let dep = pkg
 						.dependencies
 						.iter()
 						.find(|d| d.rename.as_ref().unwrap_or(&d.name) == dep)
-						.unwrap();
+						.ok_or_else(|| format!("Could not resolve dep {dep} of {}", pkg.id))?;
 
 					let dep_id = match resolve_dep(pkg, dep, meta) {
 						None => {
@@ -977,15 +999,16 @@ pub fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeatu
 						CrateAndFeature(dep_id.clone(), dep_feature.into()),
 					);
 				} else if dep.contains('/') {
-					let mut splits = dep.split('/');
-					let dep = splits.next().unwrap().replace('?', "");
-					let dep_feature = splits.next().unwrap();
+					let (dep, dep_feature) = dep.split_once('/').ok_or_else(|| {
+						format!("Invalid dependency feature '{dep}' in {}", pkg.id)
+					})?;
+					let dep = dep.replace('?', "");
 
 					let dep = pkg
 						.dependencies
 						.iter()
 						.find(|d| d.rename.as_ref().unwrap_or(&d.name) == &dep)
-						.unwrap_or_else(|| panic!("Could not resolve dep {} of {}", dep, pkg.id));
+						.ok_or_else(|| format!("Could not resolve dep {} of {}", dep, pkg.id))?;
 
 					let dep_id = match resolve_dep(pkg, dep, meta) {
 						None => {
@@ -1002,8 +1025,6 @@ pub fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeatu
 					);
 				} else {
 					let dep_feature = dep;
-					// Sanity check
-					debug_assert!(pkg.features.contains_key(dep_feature));
 					// Enables one of its own features.
 					dag.add_edge(
 						CrateAndFeature(pkg.id.to_string(), feature.clone()),
@@ -1013,5 +1034,5 @@ pub fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Dag<CrateAndFeatu
 			}
 		}
 	}
-	dag
+	Ok(dag)
 }

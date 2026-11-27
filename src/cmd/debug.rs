@@ -26,7 +26,7 @@ impl DebugCmd {
 	pub fn run(&self, g: &GlobalArgs) -> Result<(), String> {
 		g.warn_unstable();
 		let meta = self.cargo_args.load_metadata()?;
-		let dag = build_feature_dag(&meta, &meta.packages);
+		let dag = build_feature_dag(&meta, &meta.packages)?;
 
 		if !self.no_root {
 			println!("Root: {}", meta.workspace_root);
@@ -39,7 +39,7 @@ impl DebugCmd {
 		self.connectivity_buckets(&dag);
 
 		if !self.no_benchmark {
-			let (took, points) = Self::measure(&meta);
+			let (took, points) = Self::measure(&meta)?;
 			println!("DAG setup time: {took:.2?} (avg from {points} runs)");
 		}
 
@@ -57,23 +57,22 @@ impl DebugCmd {
 		println!("{histogram}");
 	}
 
-	fn measure(meta: &Metadata) -> (Duration, u32) {
+	fn measure(meta: &Metadata) -> Result<(Duration, u32), String> {
 		// Run at least: 10 times or 5 secs, whatever takes longer.
 		let mut took = Duration::default();
 		let mut count = 0;
 
 		while took < Duration::from_secs(1) || count < 10 {
-			took += Self::measure_once(meta);
+			took += Self::measure_once(meta)?;
 			count += 1;
 		}
 
-		assert!(took >= Duration::from_secs(1) || count >= 10);
-		(took / count, count)
+		Ok((took / count, count))
 	}
 
-	fn measure_once(meta: &Metadata) -> Duration {
+	fn measure_once(meta: &Metadata) -> Result<Duration, String> {
 		let start = Instant::now();
-		let _ = build_feature_dag(meta, &meta.packages);
-		start.elapsed()
+		let _ = build_feature_dag(meta, &meta.packages)?;
+		Ok(start.elapsed())
 	}
 }

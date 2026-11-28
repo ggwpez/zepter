@@ -24,7 +24,7 @@ jobs:
 
       - name: Skip if unchanged
         id: changed-files-specific
-        uses: tj-actions/changed-files@v47
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
         with:
           files: |
             *.md
@@ -41,7 +41,7 @@ jobs:
 
       - name: Link Checker
         if: github.event_name == 'push' || steps.changed-files-specific.outputs.any_changed == 'true'
-        uses: lycheeverse/lychee-action@v2.9.0
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
           args: "--verbose --cache --max-cache-age 1d . --accept 200,429,503"
           fail: true

@@ -185,10 +185,16 @@ impl Reporter<'_> {
 		println!("    must enable dependency as non-optional:\n      {}", names(deps));
 		if self.can_fix(krate) {
 			for dep in deps {
-				let dep_name = dep.name();
 				let Some(fixer) = fixer.as_mut() else { continue };
-				fixer.add_to_feature(self.feature, &dep_name)?;
-				log::info!(target: super::super::LOG_TARGET, "Inserted '{dep_name}' into '{}'", krate.name);
+				let name = dep.rename.as_deref().unwrap_or(dep.pkg.name.as_str());
+				let explicit = format!("dep:{name}");
+				// Introducing `dep:name` suppresses Cargo's implicit public `name` feature.
+				let activation = match krate.features.get(name).map(Vec::as_slice) {
+					Some([only]) if only == &explicit => name,
+					_ => &explicit,
+				};
+				fixer.add_to_feature(self.feature, activation)?;
+				log::info!(target: super::super::LOG_TARGET, "Inserted '{activation}' into '{}'", krate.name);
 				self.fixes += 1;
 			}
 		}

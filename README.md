@@ -157,7 +157,7 @@ This can be fixed by appending the `--fix` flag, which results in this diff:
 +]
 ```
 
-The auto-fix can be configured to enable specific optional dependencies as non-optional via `--feature-enables-dep="runtime-benchmarks:frame-benchmarking"` for example. In this case the `frame-benchmarking` dependency would enabled as non-optional if the `runtime-benchmarks` feature is enabled.
+Use `--feature-enables-dep="runtime-benchmarks:frame-benchmarking"` to activate the optional `frame-benchmarking` dependency when `runtime-benchmarks` is enabled. If the dependency does not expose `runtime-benchmarks`, the fix activates the dependency directly, preserving Cargo's implicit feature when present and using `dep:frame-benchmarking` when it is hidden.
 
 ## Example - Feature tracing
 

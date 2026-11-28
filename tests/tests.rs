@@ -268,3 +268,56 @@ helper = { path = "helper" }
 	let root_node = meta.resolve.as_ref().unwrap().nodes.iter().find(|n| &n.id == root_id).unwrap();
 	assert!(root_node.dependencies.contains(helper_id));
 }
+
+#[test]
+fn propagation_preserves_namespaced_optional_dependency_activation() {
+	let dir = tempfile::tempdir().unwrap();
+	let root = dir.path();
+	for src in ["src", "helper/src"] {
+		std::fs::create_dir_all(root.join(src)).unwrap();
+		std::fs::write(root.join(src).join("lib.rs"), "").unwrap();
+	}
+	std::fs::write(
+		root.join("helper/Cargo.toml"),
+		"[package]\nname = 'helper'\nversion = '0.1.0'\nedition = '2021'\n[features]\nextra = []\n",
+	)
+	.unwrap();
+	let manifest = root.join("Cargo.toml");
+	let original = "[package]
+name = 'app'
+version = '0.1.0'
+edition = '2021'
+[dependencies]
+alias = { package = 'helper', path = 'helper', optional = true }
+[features]
+enabled = ['dep:alias']
+missing = ['alias?/extra']
+";
+	std::fs::write(&manifest, original).unwrap();
+	let fix = |feature: &str| {
+		Command::new(assert_cmd::cargo_bin!("zepter"))
+			.current_dir(root)
+			.args(["lint", "propagate-feature", "--offline", "--fix", "-p", "app", "--feature"])
+			.arg(feature)
+			.args(["--feature-enables-dep", &format!("{feature}:alias")])
+			.assert()
+			.success();
+	};
+
+	fix("enabled");
+	assert_eq!(std::fs::read_to_string(&manifest).unwrap(), original);
+	fix("missing");
+	let fixed = std::fs::read_to_string(&manifest).unwrap();
+	let meta = cargo_metadata::MetadataCommand::new()
+		.manifest_path(&manifest)
+		.other_options(vec!["--offline".into(), "--features=missing".into()])
+		.exec()
+		.unwrap();
+	let app = meta.root_package().unwrap();
+	assert_eq!(app.features["missing"], ["alias?/extra", "dep:alias"]);
+	assert!(!app.features.contains_key("alias"));
+	let app_node = meta.resolve.as_ref().unwrap().nodes.iter().find(|n| n.id == app.id).unwrap();
+	assert!(app_node.deps.iter().any(|dep| dep.name == "alias"));
+	fix("missing");
+	assert_eq!(std::fs::read_to_string(manifest).unwrap(), fixed);
+}

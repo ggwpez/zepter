@@ -79,11 +79,26 @@ impl FeatureCheck<'_> {
 		let Some(requested) = self.cmd.feature_enables_dep.as_ref().filter(|_| dep.optional) else {
 			return false
 		};
-		let name = dep.name();
-		let requested = requested.iter().any(|(f, d)| f == self.feature && *d == name);
-		requested &&
-			!pkg.features.get(self.feature).is_some_and(|features| features.contains(&name))
+		let name = dep.rename.as_deref().unwrap_or(dep.pkg.name.as_str());
+		if !requested.iter().any(|(f, d)| f == self.feature && d == name) {
+			return false
+		}
+		let Some(entries) = pkg.features.get(self.feature) else { return true };
+		if entries.iter().any(|entry| activates_dependency(entry, name)) {
+			return false
+		}
+		// A bare name enables a local feature, which may be Cargo's implicit dependency feature.
+		let via_name = entries.iter().any(|entry| entry == name) &&
+			pkg.features.get(name).is_some_and(|values| {
+				values.iter().any(|value| activates_dependency(value, name))
+			});
+		!via_name
 	}
+}
+
+fn activates_dependency(entry: &str, name: &str) -> bool {
+	entry.strip_prefix("dep:") == Some(name) ||
+		entry.split_once('/').is_some_and(|(dep, _)| dep == name)
 }
 
 fn is_ignored(

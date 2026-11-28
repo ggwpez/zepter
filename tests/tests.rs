@@ -291,6 +291,8 @@ edition = '2021'
 alias = { package = 'helper', path = 'helper', optional = true }
 [features]
 enabled = ['dep:alias']
+bench = ['middle']
+middle = ['enabled']
 missing = ['alias?/extra']
 ";
 	std::fs::write(&manifest, original).unwrap();
@@ -306,6 +308,8 @@ missing = ['alias?/extra']
 
 	fix("enabled");
 	assert_eq!(std::fs::read_to_string(&manifest).unwrap(), original);
+	fix("bench");
+	assert_eq!(std::fs::read_to_string(&manifest).unwrap(), original);
 	fix("missing");
 	let fixed = std::fs::read_to_string(&manifest).unwrap();
 	let meta = cargo_metadata::MetadataCommand::new()
@@ -319,5 +323,11 @@ missing = ['alias?/extra']
 	let app_node = meta.resolve.as_ref().unwrap().nodes.iter().find(|n| n.id == app.id).unwrap();
 	assert!(app_node.deps.iter().any(|dep| dep.name == "alias"));
 	fix("missing");
-	assert_eq!(std::fs::read_to_string(manifest).unwrap(), fixed);
+	assert_eq!(std::fs::read_to_string(&manifest).unwrap(), fixed);
+
+	// Without `dep:alias`, Cargo provides a public `alias` feature that activates the dependency.
+	let implicit = original.replace("enabled = ['dep:alias']", "enabled = ['alias']");
+	std::fs::write(&manifest, &implicit).unwrap();
+	fix("enabled");
+	assert_eq!(std::fs::read_to_string(&manifest).unwrap(), implicit);
 }

@@ -186,7 +186,7 @@ impl Reporter<'_> {
 		if self.can_fix(krate) {
 			for dep in deps {
 				let Some(fixer) = fixer.as_mut() else { continue };
-				let name = dep.rename.as_deref().unwrap_or(dep.pkg.name.as_str());
+				let name = dep.manifest_name();
 				let explicit = format!("dep:{name}");
 				// Introducing `dep:name` suppresses Cargo's implicit public `name` feature.
 				let activation = match krate.features.get(name).map(Vec::as_slice) {

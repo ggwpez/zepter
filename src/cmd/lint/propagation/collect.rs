@@ -79,26 +79,30 @@ impl FeatureCheck<'_> {
 		let Some(requested) = self.cmd.feature_enables_dep.as_ref().filter(|_| dep.optional) else {
 			return false
 		};
-		let name = dep.rename.as_deref().unwrap_or(dep.pkg.name.as_str());
-		if !requested.iter().any(|(f, d)| f == self.feature && d == name) {
-			return false
-		}
-		let Some(entries) = pkg.features.get(self.feature) else { return true };
-		if entries.iter().any(|entry| activates_dependency(entry, name)) {
-			return false
-		}
-		// A bare name enables a local feature, which may be Cargo's implicit dependency feature.
-		let via_name = entries.iter().any(|entry| entry == name) &&
-			pkg.features.get(name).is_some_and(|values| {
-				values.iter().any(|value| activates_dependency(value, name))
-			});
-		!via_name
+		let name = dep.manifest_name();
+		requested.iter().any(|(f, d)| f == self.feature && d == name) &&
+			!feature_activates_dependency(pkg, self.feature, name)
 	}
 }
 
-fn activates_dependency(entry: &str, name: &str) -> bool {
-	entry.strip_prefix("dep:") == Some(name) ||
-		entry.split_once('/').is_some_and(|(dep, _)| dep == name)
+fn feature_activates_dependency(pkg: &Package, feature: &str, name: &str) -> bool {
+	let mut next = pkg.features.get(feature);
+	let mut pending = Vec::new();
+	let mut visited = BTreeSet::new();
+	while let Some(entries) = next {
+		for entry in entries {
+			// `name?/feature` only forwards a feature if the dependency is already active.
+			let dependency =
+				entry.strip_prefix("dep:").or_else(|| entry.split_once('/').map(|(dep, _)| dep));
+			match dependency {
+				Some(dep) if dep == name => return true,
+				None if visited.insert(entry) => pending.extend(pkg.features.get(entry)),
+				_ => {},
+			}
+		}
+		next = pending.pop();
+	}
+	false
 }
 
 fn is_ignored(

@@ -63,9 +63,6 @@ For example, pulling up all `serde*` crates to the workspace can look like this:
 zepter transpose dependency lift-to-workspace "regex:^serde.*" --ignore-errors
 ```
 
-With `--ignore-errors`, a rejected dependency leaves no edits in the workspace or member manifests.
-Other selected dependencies can still be lifted.
-
 It will probably print that some versions are not aligned. Zepter has the default behaviour to be cautious to not accidentally
 update some dependencies by pulling them up. To get around this and actually do the changes, you can do:
 

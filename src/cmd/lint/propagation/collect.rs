@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
-use super::{CrateAndFeature, Dag, Findings, IgnoreSetting, MuteSetting, PropagateFeatureCmd};
+use super::{
+	CrateAndFeature, FeatureGraph, Findings, IgnoreSetting, MuteSetting, PropagateFeatureCmd,
+};
 use crate::{
 	cmd::{resolve_dep, RenamedPackage},
 	log,
@@ -11,7 +13,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 struct FeatureCheck<'a> {
 	cmd: &'a PropagateFeatureCmd,
-	dag: &'a Dag<CrateAndFeature>,
+	dag: &'a FeatureGraph,
 	feature: &'a str,
 	ignore_missing: BTreeMap<CrateAndFeature, BTreeSet<CrateAndFeature>>,
 }
@@ -20,7 +22,7 @@ impl PropagateFeatureCmd {
 	pub(super) fn collect_findings(
 		&self,
 		meta: &Metadata,
-		dag: &Dag<CrateAndFeature>,
+		dag: &FeatureGraph,
 		feature: &str,
 		to_check: &[&Package],
 	) -> Result<Findings, String> {
@@ -117,30 +119,42 @@ fn is_ignored(
 		.is_some_and(|(_, lhs)| lhs.iter().any(|i| dep.pkg.name == i.0 && i.1 == feature))
 }
 
-fn is_propagated(
-	dag: &Dag<CrateAndFeature>,
-	pkg: &Package,
-	dep: &RenamedPackage,
-	feature: &str,
-) -> bool {
+fn is_propagated(dag: &FeatureGraph, pkg: &Package, dep: &RenamedPackage, feature: &str) -> bool {
 	let target = CrateAndFeature(dep.pkg.id.repr.clone(), feature.into());
-	let want_opt = CrateAndFeature(format!("{}?", &pkg.id), feature.into());
-	let want_req = CrateAndFeature(pkg.id.repr.clone(), feature.into());
-	if dag.adjacent(&want_opt, &target) || dag.adjacent(&want_req, &target) {
+	let source = CrateAndFeature(pkg.id.repr.clone(), feature.into());
+	// Propagation is checked for builds in which this dependency is present, so a
+	// weak forward satisfies the lint without implying that it activates the dependency.
+	let binding = CrateAndFeature::activation(pkg, dep.manifest_name());
+	if dag.direct.adjacent(&source, &target) || dag.forwards_when_active(&source, &binding, &target)
+	{
 		return true
 	}
-	let default_entrypoint = CrateAndFeature(pkg.id.repr.clone(), "#entrypoint".into());
-	let sub_dag = dag.sub(|CrateAndFeature(p, f)| {
-		(p == &pkg.id.repr && f == "#entrypoint") || (p == &dep.pkg.id.repr)
-	});
-	if let Some(p) = sub_dag.any_path(&default_entrypoint, &target) {
-		log::debug!(
-			target: super::super::LOG_TARGET,
-			"Reachable from the default entrypoint: {:?} vis {:?}",
-			target,
-			p.0
-		);
-		return true
+	// Check what this declaration enables, not what another consumer of the
+	// same package might enable in a different build.
+	let mut pending: Vec<_> = dag
+		.direct
+		.edges
+		.get(&binding)
+		.into_iter()
+		.flatten()
+		.filter(|node| node.0 == target.0 && !node.internal())
+		.collect();
+	let mut seen = BTreeSet::new();
+	while let Some(node) = pending.pop() {
+		if node == &target {
+			log::debug!(target: super::super::LOG_TARGET, "Dependency enables {target}");
+			return true
+		}
+		if seen.insert(node) {
+			pending.extend(
+				dag.direct
+					.edges
+					.get(node)
+					.into_iter()
+					.flatten()
+					.filter(|next| next.0 == target.0 && !next.internal()),
+			);
+		}
 	}
 	false
 }

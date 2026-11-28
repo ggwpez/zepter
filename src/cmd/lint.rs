@@ -10,7 +10,7 @@ mod propagation;
 mod relationships;
 
 pub use duplicate::DuplicateDepsCmd;
-pub use graph::{build_feature_dag, CrateAndFeature};
+pub use graph::{build_feature_dag, CrateAndFeature, FeatureGraph};
 pub use nostd::*;
 pub use propagation::{DepKind, IgnoreSetting, MuteSetting, PropagateFeatureCmd};
 pub use relationships::{NeverEnablesCmd, NeverImpliesCmd, OnlyEnablesCmd, WhyEnabledCmd};

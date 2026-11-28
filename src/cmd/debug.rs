@@ -33,10 +33,10 @@ impl DebugCmd {
 		}
 		println!("Num workspace members: {}", meta.workspace_members.len());
 		println!("Num dependencies: {}", meta.packages.len());
-		println!("DAG nodes: {}, links: {}", dag.num_nodes(), dag.num_edges());
+		println!("DAG nodes: {}, links: {}", dag.direct.num_nodes(), dag.direct.num_edges());
 
 		#[cfg(feature = "debugging")]
-		self.connectivity_buckets(&dag);
+		self.connectivity_buckets(&dag.direct);
 
 		if !self.no_benchmark {
 			let (took, points) = Self::measure(&meta)?;

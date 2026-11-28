@@ -7,7 +7,6 @@ use crate::{
 		lint::{build_feature_dag, CrateAndFeature},
 		GlobalArgs,
 	},
-	dag::Path,
 	log,
 };
 use cargo_metadata::Package;
@@ -24,16 +23,12 @@ impl NeverImpliesCmd {
 		let pkgs = &meta.packages;
 		let dag = build_feature_dag(&meta, pkgs)?;
 
-		for CrateAndFeature(pkg, feature) in dag.lhs_nodes() {
+		for start in dag.direct.lhs_nodes().filter(|node| !node.internal()) {
+			let feature = &start.1;
 			if feature != &self.precondition {
 				continue
 			}
-			let crate_and_feature = CrateAndFeature(pkg.clone(), feature.clone());
-			let Some(path) = dag
-				.reachable_predicate(&crate_and_feature, |CrateAndFeature(_, enabled)| {
-					enabled == &self.stays_disabled
-				})
-			else {
+			let Some(path) = dag.implied_path(start, |node| node.1 == self.stays_disabled) else {
 				continue
 			};
 			let out = self.format_path(&path, pkgs)?;
@@ -46,15 +41,11 @@ impl NeverImpliesCmd {
 		Ok(())
 	}
 
-	fn format_path(
-		&self,
-		path: &Path<'_, CrateAndFeature>,
-		pkgs: &[Package],
-	) -> Result<String, String> {
+	fn format_path(&self, path: &[&CrateAndFeature], pkgs: &[Package]) -> Result<String, String> {
 		let delimiter = self.path_delimiter.replace("\\n", "\n").replace("\\t", "\t");
 		let mut out = String::new();
 		for (index, CrateAndFeature(id, feature)) in
-			path.0.iter().map(|node| node.as_ref()).enumerate()
+			path.iter().filter(|node| !node.internal()).enumerate()
 		{
 			let krate = pkgs
 				.iter()

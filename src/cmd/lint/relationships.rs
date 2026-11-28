@@ -165,8 +165,8 @@ impl WhyEnabledCmd {
 
 		let lookup = |id: &str| pkgs.iter().find(|pkg| pkg.id.to_string() == id);
 
-		for (lhs, rhs) in dag.edges.iter() {
-			for rhs in rhs.iter() {
+		for (lhs, rhs) in &dag.direct.edges {
+			for rhs in rhs.iter().filter(|node| !node.internal()) {
 				// A bit ghetto, but i don't want to loose unresolved rhs crates.
 				let resolved = lookup(&rhs.0).map(|r| r.name.to_string()).unwrap_or(rhs.0.clone());
 				if resolved == self.package {
@@ -178,7 +178,19 @@ impl WhyEnabledCmd {
 						format!("Could not find crate '{}' in the metadata", lhs.0)
 					})?;
 					found_crate_and_feature = true;
-					enabled_by.push((lhs_resolved.name.clone(), lhs.1.clone()));
+					enabled_by.push((lhs_resolved.name.clone(), lhs.1.as_str(), None));
+				}
+			}
+		}
+		for (lhs, rhs, activation) in dag.weak_forwards() {
+			let resolved = lookup(&rhs.0).map_or(rhs.0.as_str(), |pkg| pkg.name.as_str());
+			if resolved == self.package {
+				found_crate = true;
+				if rhs.1 == self.feature {
+					let pkg =
+						lookup(&lhs.0).expect("feature rules are declared by a metadata package");
+					found_crate_and_feature = true;
+					enabled_by.push((pkg.name.clone(), lhs.1.as_str(), Some(activation)));
 				}
 			}
 		}
@@ -194,8 +206,12 @@ impl WhyEnabledCmd {
 		}
 		debug_assert!(!enabled_by.is_empty());
 		println!("Feature {}/{} is enabled by:", self.feature, self.package);
-		for (name, feature) in enabled_by {
-			println!("  {name}/{feature}");
+		for (name, feature, condition) in enabled_by {
+			if let Some(binding) = condition {
+				println!("  {name}/{feature} (if {binding} is active)");
+			} else {
+				println!("  {name}/{feature}");
+			}
 		}
 
 		Ok(())

@@ -392,3 +392,100 @@ missing = ['alias?/extra']
 	fix("enabled");
 	assert_eq!(std::fs::read_to_string(&manifest).unwrap(), implicit);
 }
+
+#[test]
+fn feature_implications_match_cargo_optional_dependency_activation() {
+	let dir = tempfile::tempdir().unwrap();
+	let root = dir.path();
+	for src in ["src", "helper/src"] {
+		std::fs::create_dir_all(root.join(src)).unwrap();
+		std::fs::write(root.join(src).join("lib.rs"), "").unwrap();
+	}
+	std::fs::write(
+		root.join("helper/Cargo.toml"),
+		"\
+[package]
+name = 'helper'
+version = '0.1.0'
+edition = '2021'
+[features]
+default = ['via-default']
+via-default = []
+extra = []
+declared = []
+",
+	)
+	.unwrap();
+	let manifest = root.join("Cargo.toml");
+	let app = "\
+[package]
+name = 'app'
+version = '0.1.0'
+edition = '2021'
+[dependencies]
+alias = { package = 'helper', path = 'helper', optional = true, default-features = false, features = ['declared'] }
+[features]
+weak = ['alias?/extra']
+activate = ['dep:alias']
+both = ['activate', 'weak']
+strong = ['alias/extra']
+";
+	for (defaults, feature, target, expected) in [
+		(false, "weak", "extra", false),
+		(false, "weak", "declared", false),
+		(false, "both", "extra", true),
+		(false, "activate", "via-default", false),
+		(false, "activate", "declared", true),
+		(false, "strong", "extra", true),
+		(true, "activate", "via-default", true),
+		(true, "weak", "via-default", false),
+	] {
+		std::fs::write(
+			&manifest,
+			app.replace("default-features = false", &format!("default-features = {defaults}")),
+		)
+		.unwrap();
+		// `cargo tree` reports the selected build, unlike the metadata resolve graph
+		// which can include features of dependencies that are not built.
+		let tree = Command::new(env!("CARGO"))
+			.current_dir(root)
+			.args([
+				"tree",
+				"--offline",
+				"--features",
+				feature,
+				"--prefix",
+				"none",
+				"--format",
+				"{p}|{f}",
+			])
+			.assert()
+			.success();
+		let active = std::str::from_utf8(&tree.get_output().stdout)
+			.unwrap()
+			.lines()
+			.filter_map(|line| line.strip_prefix("helper v")?.split_once('|'))
+			.any(|(_, features)| features.split(',').any(|f| f == target));
+		assert_eq!(active, expected, "Cargo: {feature} -> {target}, defaults={defaults}");
+
+		let result = Command::new(assert_cmd::cargo_bin!("zepter"))
+			.current_dir(root)
+			.args([
+				"lint",
+				"never-implies",
+				"--offline",
+				"--precondition",
+				feature,
+				"--stays-disabled",
+				target,
+			])
+			.assert()
+			.success();
+		let stdout = std::str::from_utf8(&result.get_output().stdout).unwrap();
+		if active {
+			assert!(stdout.contains(&format!("helper/{target}")), "{stdout}");
+		} else {
+			assert!(stdout.is_empty(), "{stdout}");
+		}
+	}
+}

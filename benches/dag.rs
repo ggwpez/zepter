@@ -72,14 +72,12 @@ fn polkadot_sdk(c: &mut Criterion) {
 		});
 	});
 
-	let from = dag.lhs_iter().find(|c| c.0.starts_with("kitchensink-runtime ")).unwrap();
-	let to = dag.rhs_iter().find(|c| c.0.starts_with("sp-io ")).unwrap();
-	assert!(dag.lhs_contains(from), "LHS:\n{:?}", dag.lhs_nodes().collect::<Vec<_>>());
-	assert!(dag.rhs_contains(to));
+	let from = dag.direct.lhs_iter().find(|c| c.0.starts_with("kitchensink-runtime ")).unwrap();
+	let to = dag.direct.rhs_iter().find(|c| c.0.starts_with("sp-io ")).unwrap();
 
 	c.bench_function("Polkadot-SDK / DAG / reachability: false", |b| {
 		b.iter(|| {
-			let p = dag.any_path(from, to);
+			let p = dag.implied_path(from, |node| node == to);
 			black_box(p)
 		});
 	});

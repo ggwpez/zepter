@@ -169,6 +169,8 @@ zepter lint never-implies --precondition default --stays-disabled try-runtime --
 
 The `precondition` defines the feature on the left side of the implication and `stays-disabled` expressing that the precondition never enables this.
 
+`dep:foo` activates the dependency with the features requested in its declaration; it does not override `default-features = false`. `foo?/bar` forwards `bar` only if `foo` is also activated, even when another feature in the chain activates it later.
+
 Errors correctly with:
 ```pre
 Feature 'default' implies 'try-runtime' via path:

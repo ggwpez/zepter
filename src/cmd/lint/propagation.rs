@@ -4,11 +4,10 @@
 mod collect;
 mod report;
 
-use super::{build_feature_dag, CrateAndFeature};
+use super::{build_feature_dag, CrateAndFeature, FeatureGraph};
 use crate::{
 	autofix::AutoFixerArgs,
 	cmd::{parse_key_val, CargoArgs, CommandError, GlobalArgs, RenamedPackage},
-	dag::Dag,
 	CrateId,
 };
 use cargo_metadata::Metadata;
@@ -175,7 +174,7 @@ impl PropagateFeatureCmd {
 	fn run_feature(
 		&self,
 		meta: &Metadata,
-		dag: &Dag<CrateAndFeature>,
+		dag: &FeatureGraph,
 		feature: &str,
 		global: &GlobalArgs,
 	) -> Result<(), CommandError> {

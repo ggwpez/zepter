@@ -217,3 +217,54 @@ fn workflow_lookup_failures_exit_with_config_error() {
 	assert_eq!(code, Some(101), "stderr:\n{stderr}");
 	assert!(stderr.contains("Workflow 'missing' not found"), "stderr:\n{stderr}");
 }
+
+#[test]
+fn lift_preserves_both_edits_to_root_package_manifest() {
+	let dir = tempfile::tempdir().unwrap();
+	let root = dir.path();
+	let manifest = root.join("Cargo.toml");
+	std::fs::create_dir_all(root.join("src")).unwrap();
+	std::fs::write(root.join("src/lib.rs"), "").unwrap();
+	std::fs::write(
+		&manifest,
+		r#"[package]
+name = "zapp"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+members = ["helper"]
+
+[dependencies]
+helper = { path = "helper" }
+"#,
+	)
+	.unwrap();
+	std::fs::create_dir_all(root.join("helper/src")).unwrap();
+	std::fs::write(root.join("helper/src/lib.rs"), "").unwrap();
+	std::fs::write(
+		root.join("helper/Cargo.toml"),
+		"[package]\nname = \"helper\"\nversion = \"0.1.0\"\nedition = \"2021\"\n",
+	)
+	.unwrap();
+
+	Command::new(assert_cmd::cargo_bin!("zepter"))
+		.current_dir(root)
+		.args(["transpose", "dependency", "lift-to-workspace", "helper", "--offline", "--fix"])
+		.assert()
+		.success();
+
+	let doc: toml_edit::DocumentMut = std::fs::read_to_string(&manifest).unwrap().parse().unwrap();
+	assert_eq!(doc["workspace"]["dependencies"]["helper"]["path"].as_str(), Some("helper"));
+	assert_eq!(doc["dependencies"]["helper"]["workspace"].as_bool(), Some(true));
+
+	let meta = cargo_metadata::MetadataCommand::new()
+		.manifest_path(&manifest)
+		.other_options(vec!["--offline".into()])
+		.exec()
+		.unwrap();
+	let root_id = &meta.root_package().unwrap().id;
+	let helper_id = &meta.packages.iter().find(|p| p.name == "helper").unwrap().id;
+	let root_node = meta.resolve.as_ref().unwrap().nodes.iter().find(|n| &n.id == root_id).unwrap();
+	assert!(root_node.dependencies.contains(helper_id));
+}

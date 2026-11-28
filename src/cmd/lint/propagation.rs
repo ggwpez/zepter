@@ -35,13 +35,12 @@ pub struct PropagateFeatureCmd {
 	#[clap(long, short, num_args(0..))]
 	packages: Vec<String>,
 
-	/// Enables the feature of the dependencies as non-optional.
+	/// Require FEATURE to activate the optional dependency CRATE.
 	///
-	/// This can be used in case that a dependency should not be enabled like `dep?/feature` but
-	/// like `dep/feature` instead. In this case you would pass `--feature-enables-dep
-	/// feature:dep`. The option can be passed multiple times, or multiple key-value pairs can be
-	/// passed at once by separating them with a comma like: `--feature-enables-dep
-	/// feature:dep,feature2:dep2`. (TODO: Duplicate entries are undefined).
+	/// When forwarding a missing feature, --fix adds `crate/feature` instead of `crate?/feature`.
+	/// If the dependency has no such feature, --fix activates it directly, using its implicit
+	/// feature when available or `dep:crate` when hidden. Use the dependency's manifest alias.
+	/// Repeat the option or separate FEATURE:CRATE pairs with commas.
 	#[clap(long, value_name = "FEATURE:CRATE", value_parser = parse_key_val::<String, String>, value_delimiter = ',', verbatim_doc_comment)]
 	feature_enables_dep: Option<Vec<(String, String)>>,
 

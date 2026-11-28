@@ -79,11 +79,30 @@ impl FeatureCheck<'_> {
 		let Some(requested) = self.cmd.feature_enables_dep.as_ref().filter(|_| dep.optional) else {
 			return false
 		};
-		let name = dep.name();
-		let requested = requested.iter().any(|(f, d)| f == self.feature && *d == name);
-		requested &&
-			!pkg.features.get(self.feature).is_some_and(|features| features.contains(&name))
+		let name = dep.manifest_name();
+		requested.iter().any(|(f, d)| f == self.feature && d == name) &&
+			!feature_activates_dependency(pkg, self.feature, name)
 	}
+}
+
+fn feature_activates_dependency(pkg: &Package, feature: &str, name: &str) -> bool {
+	let mut next = pkg.features.get(feature);
+	let mut pending = Vec::new();
+	let mut visited = BTreeSet::new();
+	while let Some(entries) = next {
+		for entry in entries {
+			// `name?/feature` only forwards a feature if the dependency is already active.
+			let dependency =
+				entry.strip_prefix("dep:").or_else(|| entry.split_once('/').map(|(dep, _)| dep));
+			match dependency {
+				Some(dep) if dep == name => return true,
+				None if visited.insert(entry) => pending.extend(pkg.features.get(entry)),
+				_ => {},
+			}
+		}
+		next = pending.pop();
+	}
+	false
 }
 
 fn is_ignored(

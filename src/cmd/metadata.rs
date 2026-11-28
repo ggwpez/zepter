@@ -156,8 +156,12 @@ impl RenamedPackage {
 		Self { pkg, rename, optional }
 	}
 
+	pub(crate) fn manifest_name(&self) -> &str {
+		self.rename.as_deref().unwrap_or(self.pkg.name.as_str())
+	}
+
 	pub fn name(&self) -> String {
-		self.rename.clone().unwrap_or(self.pkg.name.to_string())
+		self.manifest_name().to_owned()
 	}
 
 	pub fn original_name(&self) -> String {

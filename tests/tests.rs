@@ -559,3 +559,92 @@ try-runtime = []
 	lint(&["why-enabled", "-p", "helper", "--feature", "try-runtime"]).assert().success()
 		.stdout("Feature try-runtime/helper is enabled by:\n  app requests alias/try-runtime in [dev-dependencies]\n");
 }
+
+#[test]
+fn never_implies_matches_features_compiled_into_normal_dependency() {
+	let dir = tempfile::tempdir().unwrap();
+	let root = dir.path();
+	for (name, declarations, source, contents) in [
+		(
+			"app",
+			"[dependencies]\nhelper = { path = '../helper' }\n\
+			 [build-dependencies]\nhelper = { path = '../helper', features = ['from-build'] }\n\
+			 [dev-dependencies]\nhelper = { path = '../helper', features = ['from-dev'] }\n\
+			 test-only = { path = '../test-only', features = ['only-in-tests'] }\n\
+			 [features]\ndefault = []\n",
+			"main.rs",
+			"fn main() { println!(\"{} {} {}\", helper::BUILD, helper::DEV, helper::DEV_TREE); }",
+		),
+		(
+			"helper",
+			"[features]\nfrom-build = []\nfrom-dev = []\nfrom-dev-tree = []\n",
+			"lib.rs",
+			"pub const BUILD: bool = cfg!(feature = \"from-build\");\n\
+			 pub const DEV: bool = cfg!(feature = \"from-dev\");\n\
+			 pub const DEV_TREE: bool = cfg!(feature = \"from-dev-tree\");",
+		),
+		(
+			"test-only",
+			"[dependencies]\nhelper = { path = '../helper', features = ['from-dev-tree'] }\n\
+			 [features]\nonly-in-tests = []\n",
+			"lib.rs",
+			"",
+		),
+	] {
+		let pkg = root.join(name);
+		std::fs::create_dir_all(pkg.join("src")).unwrap();
+		std::fs::write(pkg.join("src").join(source), contents).unwrap();
+		std::fs::write(
+			pkg.join("Cargo.toml"),
+			format!(
+				"[package]\nname = '{name}'\nversion = '0.1.0'\nedition = '2018'\n{declarations}"
+			),
+		)
+		.unwrap();
+	}
+	std::fs::write(root.join("app/build.rs"), "fn main() {}").unwrap();
+	// A virtual workspace with no explicit resolver uses v1.
+	for (resolver, unified) in [("", true), ("resolver = '2'", false)] {
+		std::fs::write(
+			root.join("Cargo.toml"),
+			format!("[workspace]\nmembers = ['app', 'helper', 'test-only']\n{resolver}\n"),
+		)
+		.unwrap();
+		Command::new(env!("CARGO"))
+			.current_dir(root)
+			.args(["run", "--quiet", "--offline", "-p", "app"])
+			.assert()
+			.success()
+			.stdout(format!("{unified} {unified} {unified}\n"));
+		for (feature, expected) in [
+			("from-build", unified),
+			("from-dev", unified),
+			("from-dev-tree", unified),
+			("only-in-tests", false),
+		] {
+			let result = Command::new(assert_cmd::cargo_bin!("zepter"))
+				.current_dir(root.join("app"))
+				.args([
+					"lint",
+					"never-implies",
+					"--offline",
+					"--precondition",
+					"default",
+					"--stays-disabled",
+					feature,
+				])
+				.assert()
+				.success();
+			let stdout = std::str::from_utf8(&result.get_output().stdout).unwrap();
+			if expected {
+				assert!(
+					stdout.contains("app/default -> ") &&
+						stdout.contains(&format!("helper/{feature}")),
+					"{stdout}"
+				);
+			} else {
+				assert!(stdout.is_empty(), "{stdout}");
+			}
+		}
+	}
+}

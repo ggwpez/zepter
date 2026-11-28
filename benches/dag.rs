@@ -4,7 +4,7 @@
 use criterion::{criterion_group, criterion_main, Criterion};
 use rand::{RngExt, SeedableRng};
 use std::hint::black_box;
-use zepter::{cmd::lint::build_feature_dag, prelude::*};
+use zepter::{cmd::lint::build_feature_dag_with_resolver, prelude::*};
 
 fn build_dag(nodes: usize, edges: usize) -> Dag<usize> {
 	let mut rng = rand::rngs::StdRng::seed_from_u64(42);
@@ -63,11 +63,15 @@ fn polkadot_sdk(c: &mut Criterion) {
 	let meta = serde_json::from_str::<cargo_metadata::Metadata>(&file).unwrap();
 
 	let pkgs = &meta.packages;
-	let dag = build_feature_dag(&meta, pkgs).expect("valid benchmark metadata");
+	// The captured Polkadot-SDK metadata uses resolver 2 and may be detached
+	// from its workspace manifest.
+	let dag =
+		build_feature_dag_with_resolver(&meta, pkgs, false).expect("valid benchmark metadata");
 
 	c.bench_function("Polkadot-SDK / DAG / setup", |b| {
 		b.iter(|| {
-			let dag = build_feature_dag(&meta, pkgs).expect("valid benchmark metadata");
+			let dag = build_feature_dag_with_resolver(&meta, pkgs, false)
+				.expect("valid benchmark metadata");
 			black_box(dag)
 		});
 	});

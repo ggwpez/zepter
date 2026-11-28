@@ -187,7 +187,9 @@ impl WhyEnabledCmd {
 								dep.name == self.package &&
 									dep.rename.as_deref().unwrap_or(&dep.name) == alias
 							}) {
-							let reason = if name == alias {
+							let always_active = name == alias ||
+								super::feature_activates_dependency(pkg, feature, alias);
+							let reason = if always_active {
 								format!("{}/{feature}", pkg.name)
 							} else {
 								format!("{}/{feature} (if {alias} is active)", pkg.name)

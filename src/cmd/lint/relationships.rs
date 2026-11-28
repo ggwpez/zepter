@@ -4,7 +4,6 @@
 mod never_implies;
 mod only_enables;
 
-use super::build_feature_dag;
 use crate::{
 	cmd::{resolve_dep, CargoArgs, CommandError, GlobalArgs, RenamedPackage},
 	log, CrateId,
@@ -157,40 +156,50 @@ impl NeverEnablesCmd {
 impl WhyEnabledCmd {
 	pub fn run(&self, _global: &GlobalArgs) -> Result<(), CommandError> {
 		let meta = self.cargo_args.load_metadata()?;
-		let dag = build_feature_dag(&meta, &meta.packages)?;
-		let pkgs = meta.packages;
-		let mut found_crate_and_feature = false;
 		let mut found_crate = false;
-		let mut enabled_by = vec![];
-
-		let lookup = |id: &str| pkgs.iter().find(|pkg| pkg.id.to_string() == id);
-
-		for (lhs, rhs) in &dag.direct.edges {
-			for rhs in rhs.iter().filter(|node| !node.internal()) {
-				// A bit ghetto, but i don't want to loose unresolved rhs crates.
-				let resolved = lookup(&rhs.0).map(|r| r.name.to_string()).unwrap_or(rhs.0.clone());
-				if resolved == self.package {
-					found_crate = true;
-				}
-
-				if resolved == self.package && rhs.1 == self.feature {
-					let lhs_resolved = lookup(&lhs.0).ok_or_else(|| {
-						format!("Could not find crate '{}' in the metadata", lhs.0)
-					})?;
-					found_crate_and_feature = true;
-					enabled_by.push((lhs_resolved.name.clone(), lhs.1.as_str(), None));
+		let mut enabled_by = BTreeSet::new();
+		for pkg in &meta.packages {
+			// A dependency-table request is not a feature on the parent. Keep
+			// the declaration's kind, alias and target in its explanation.
+			for dep in pkg.dependencies.iter().filter(|dep| dep.name == self.package) {
+				found_crate = true;
+				if (self.feature == "default" && dep.uses_default_features) ||
+					dep.features.contains(&self.feature)
+				{
+					let kind = crate::kind_to_str(&dep.kind);
+					let table = match &dep.target {
+						Some(target) => format!("target.'{target}'.{kind}"),
+						None => kind.to_owned(),
+					};
+					let alias = dep.rename.as_deref().unwrap_or(&dep.name);
+					enabled_by.insert(format!(
+						"{} requests {alias}/{} in [{table}]",
+						pkg.name, self.feature
+					));
 				}
 			}
-		}
-		for (lhs, rhs, activation) in dag.weak_forwards() {
-			let resolved = lookup(&rhs.0).map_or(rhs.0.as_str(), |pkg| pkg.name.as_str());
-			if resolved == self.package {
-				found_crate = true;
-				if rhs.1 == self.feature {
-					let pkg =
-						lookup(&lhs.0).expect("feature rules are declared by a metadata package");
-					found_crate_and_feature = true;
-					enabled_by.push((pkg.name.clone(), lhs.1.as_str(), Some(activation)));
+			for (feature, entries) in &pkg.features {
+				for entry in entries {
+					if let Some((name, target)) = entry.split_once('/') {
+						let alias = name.trim_end_matches('?');
+						if target == self.feature &&
+							pkg.dependencies.iter().any(|dep| {
+								dep.name == self.package &&
+									dep.rename.as_deref().unwrap_or(&dep.name) == alias
+							}) {
+							let reason = if name == alias {
+								format!("{}/{feature}", pkg.name)
+							} else {
+								format!("{}/{feature} (if {alias} is active)", pkg.name)
+							};
+							enabled_by.insert(reason);
+						}
+					} else if pkg.name == self.package && !entry.starts_with("dep:") {
+						found_crate = true;
+						if entry == &self.feature {
+							enabled_by.insert(format!("{}/{feature}", pkg.name));
+						}
+					}
 				}
 			}
 		}
@@ -199,19 +208,14 @@ impl WhyEnabledCmd {
 			println!("Did not find package {} on the rhs of the dependency tree", self.package);
 			return Err(CommandError::reported(1))
 		}
-		if !found_crate_and_feature {
+		if enabled_by.is_empty() {
 			// TODO find edit distance to the closest one
 			println!("Package {} does not have feature {}", self.package, self.feature);
 			return Err(CommandError::reported(1))
 		}
-		debug_assert!(!enabled_by.is_empty());
 		println!("Feature {}/{} is enabled by:", self.feature, self.package);
-		for (name, feature, condition) in enabled_by {
-			if let Some(binding) = condition {
-				println!("  {name}/{feature} (if {binding} is active)");
-			} else {
-				println!("  {name}/{feature}");
-			}
+		for reason in enabled_by {
+			println!("  {reason}");
 		}
 
 		Ok(())

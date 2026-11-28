@@ -1,19 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
-use super::{
-	CrateAndFeature, FeatureGraph, Findings, IgnoreSetting, MuteSetting, PropagateFeatureCmd,
-};
-use crate::{
-	cmd::{resolve_dep, RenamedPackage},
-	log,
-};
-use cargo_metadata::{Metadata, Package};
+use super::{CrateAndFeature, Findings, IgnoreSetting, MuteSetting, PropagateFeatureCmd};
+use crate::cmd::{resolve_dep, RenamedPackage};
+use cargo_metadata::{Dependency, Metadata, Package};
 use std::collections::{BTreeMap, BTreeSet};
 
 struct FeatureCheck<'a> {
 	cmd: &'a PropagateFeatureCmd,
-	dag: &'a FeatureGraph,
 	feature: &'a str,
 	ignore_missing: BTreeMap<CrateAndFeature, BTreeSet<CrateAndFeature>>,
 }
@@ -22,16 +16,11 @@ impl PropagateFeatureCmd {
 	pub(super) fn collect_findings(
 		&self,
 		meta: &Metadata,
-		dag: &FeatureGraph,
 		feature: &str,
 		to_check: &[&Package],
 	) -> Result<Findings, String> {
-		let check = FeatureCheck {
-			cmd: self,
-			dag,
-			feature,
-			ignore_missing: self.ignore_missing_propagate()?,
-		};
+		let check =
+			FeatureCheck { cmd: self, feature, ignore_missing: self.ignore_missing_propagate()? };
 		let dep_kinds = self.parse_dep_kinds()?;
 		let mut findings = Findings::default();
 
@@ -41,8 +30,10 @@ impl PropagateFeatureCmd {
 				.iter()
 				.filter(|dep| dep_kinds.get(&dep.kind) != Some(&IgnoreSetting::Ignore));
 			// Unresolved dependencies may be unused or outside the workspace.
-			for dep in deps.filter_map(|dep| resolve_dep(pkg, dep, meta)) {
-				check.record(&mut findings, pkg, dep);
+			for declaration in deps {
+				if let Some(dep) = resolve_dep(pkg, declaration, meta) {
+					check.record(&mut findings, pkg, declaration, dep);
+				}
 			}
 		}
 		Ok(findings)
@@ -55,7 +46,13 @@ impl PropagateFeatureCmd {
 }
 
 impl FeatureCheck<'_> {
-	fn record(&self, findings: &mut Findings, pkg: &Package, dep: RenamedPackage) {
+	fn record(
+		&self,
+		findings: &mut Findings,
+		pkg: &Package,
+		declaration: &Dependency,
+		dep: RenamedPackage,
+	) {
 		let missing = if !dep.pkg.features.contains_key(self.feature) {
 			if !self.needs_non_optional(pkg, &dep) {
 				return
@@ -67,7 +64,7 @@ impl FeatureCheck<'_> {
 			}
 			&mut findings.feature_missing
 		} else {
-			if is_propagated(self.dag, pkg, &dep, self.feature) ||
+			if is_propagated(pkg, declaration, &dep, self.feature) ||
 				is_ignored(&self.ignore_missing, pkg, &dep, self.feature)
 			{
 				return
@@ -119,41 +116,35 @@ fn is_ignored(
 		.is_some_and(|(_, lhs)| lhs.iter().any(|i| dep.pkg.name == i.0 && i.1 == feature))
 }
 
-fn is_propagated(dag: &FeatureGraph, pkg: &Package, dep: &RenamedPackage, feature: &str) -> bool {
-	let target = CrateAndFeature(dep.pkg.id.repr.clone(), feature.into());
-	let source = CrateAndFeature(pkg.id.repr.clone(), feature.into());
-	// Propagation is checked for builds in which this dependency is present, so a
-	// weak forward satisfies the lint without implying that it activates the dependency.
-	let binding = CrateAndFeature::activation(pkg, dep.manifest_name());
-	if dag.direct.adjacent(&source, &target) || dag.forwards_when_active(&source, &binding, &target)
-	{
+fn is_propagated(
+	pkg: &Package,
+	declaration: &Dependency,
+	dep: &RenamedPackage,
+	feature: &str,
+) -> bool {
+	let alias = dep.manifest_name();
+	// This lint checks a declaration when active. Both strong and weak forwards
+	// satisfy it, independently of what a normal build would activate.
+	if pkg.features[feature].iter().any(|entry| {
+		entry
+			.split_once('/')
+			.is_some_and(|(name, f)| name.trim_end_matches('?') == alias && f == feature)
+	}) {
 		return true
 	}
-	// Check what this declaration enables, not what another consumer of the
-	// same package might enable in a different build.
-	let mut pending: Vec<_> = dag
-		.direct
-		.edges
-		.get(&binding)
-		.into_iter()
-		.flatten()
-		.filter(|node| node.0 == target.0 && !node.internal())
-		.collect();
+	let mut pending: Vec<&str> = declaration.features.iter().map(String::as_str).collect();
+	if declaration.uses_default_features {
+		pending.push("default");
+	}
 	let mut seen = BTreeSet::new();
-	while let Some(node) = pending.pop() {
-		if node == &target {
-			log::debug!(target: super::super::LOG_TARGET, "Dependency enables {target}");
+	while let Some(name) = pending.pop() {
+		if name == feature {
 			return true
 		}
-		if seen.insert(node) {
-			pending.extend(
-				dag.direct
-					.edges
-					.get(node)
-					.into_iter()
-					.flatten()
-					.filter(|next| next.0 == target.0 && !next.internal()),
-			);
+		if seen.insert(name) {
+			if let Some(entries) = dep.pkg.features.get(name) {
+				pending.extend(entries.iter().map(String::as_str));
+			}
 		}
 	}
 	false

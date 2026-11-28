@@ -1513,6 +1513,7 @@ cases:
       feature 'std'
         must propagate to:
           num-traits
+          rand
     crate 'ark-transcript'
       feature 'std'
         must propagate to:
@@ -1522,14 +1523,6 @@ cases:
           digest
           rand_core
           sha3
-    crate 'asn1-rs'
-      feature 'std'
-        must propagate to:
-          nom
-    crate 'asn1-rs'
-      feature 'std'
-        must propagate to:
-          nom
     crate 'assert_cmd'
       feature 'std'
         is required by 2 dependencies:
@@ -1685,7 +1678,6 @@ cases:
       feature 'std'
         must propagate to:
           num-traits
-          winapi
     crate 'ciborium'
       feature 'std'
         must propagate to:
@@ -1747,9 +1739,7 @@ cases:
     crate 'cranelift-codegen'
       feature 'std'
         must propagate to:
-          gimli
           log
-          target-lexicon
     crate 'cranelift-entity'
       feature 'std'
         is required by 1 dependency:
@@ -1758,11 +1748,6 @@ cases:
       feature 'std'
         must propagate to:
           log
-          target-lexicon
-    crate 'cranelift-native'
-      feature 'std'
-        must propagate to:
-          target-lexicon
     crate 'cranelift-wasm'
       feature 'std'
         must propagate to:
@@ -2104,8 +2089,6 @@ cases:
     crate 'futures-util'
       feature 'std'
         must propagate to:
-          futures-channel
-          futures-io
           futures-sink
     crate 'fxhash'
       feature 'std'
@@ -3007,10 +2990,18 @@ cases:
       feature 'std'
         must propagate to:
           log
+    crate 'pallet-session-benchmarking'
+      feature 'std'
+        must propagate to:
+          codec (renamed from parity-scale-codec)
     crate 'pallet-society'
       feature 'std'
         must propagate to:
           log
+    crate 'pallet-staking'
+      feature 'std'
+        must propagate to:
+          rand_chacha
     crate 'pallet-staking-reward-curve'
       feature 'std'
         is required by 1 dependency:
@@ -3219,7 +3210,6 @@ cases:
       feature 'std'
         must propagate to:
           libc
-          once_cell
           winapi
     crate 'rocksdb'
       feature 'std'
@@ -3912,6 +3902,7 @@ cases:
           getrandom
           merlin
           rand_core
+          sha2
           subtle
           zeroize
     crate 'sct'
@@ -3997,13 +3988,14 @@ cases:
           winapi
     crate 'soketto'
       feature 'std'
-        is required by 6 dependencies:
+        is required by 7 dependencies:
           base64
           bytes
           futures
           httparse
           log
           rand
+          sha-1
     crate 'sp-api-proc-macro'
       feature 'std'
         must propagate to:
@@ -4149,11 +4141,6 @@ cases:
       feature 'std'
         must propagate to:
           base64ct
-    crate 'ss58-registry'
-      feature 'std'
-        must propagate to:
-          serde
-          serde_json
     crate 'static_init'
       feature 'std'
         is required by 2 dependencies:
@@ -4165,8 +4152,9 @@ cases:
           memchr
     crate 'stun'
       feature 'std'
-        is required by 4 dependencies:
+        is required by 5 dependencies:
           base64
+          md-5
           rand
           ring
           subtle
@@ -4485,10 +4473,11 @@ cases:
           serde_json
     crate 'turn'
       feature 'std'
-        is required by 5 dependencies:
+        is required by 6 dependencies:
           base64
           futures
           log
+          md-5
           rand
           ring
     crate 'twox-hash'
@@ -4754,13 +4743,14 @@ cases:
           rand
     crate 'webrtc-srtp'
       feature 'std'
-        is required by 7 dependencies:
+        is required by 8 dependencies:
           aead
           aes-gcm
           byteorder
           bytes
           hmac
           log
+          sha-1
           subtle
     crate 'webrtc-util'
       feature 'std'
@@ -4824,10 +4814,6 @@ cases:
           log
           nohash-hasher
           rand
-    crate 'yasna'
-      feature 'std'
-        must propagate to:
-          time
     crate 'zstd'
       feature 'std'
         is required by 1 dependency:
@@ -4836,7 +4822,7 @@ cases:
       feature 'std'
         is required by 1 dependency:
           zstd-safe
-    Found 658 issues (run with `--fix` to fix).
+    Found 649 issues (run with `--fix` to fix).
   code: 1
 - cmd: lint propagate-feature --feature std --workspace
   stdout: |

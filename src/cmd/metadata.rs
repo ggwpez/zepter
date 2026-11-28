@@ -111,37 +111,70 @@ pub(crate) fn resolve_dep(
 	}
 }
 
-/// Resolve the dependency `dep` within the workspace.
-///
-/// Errors if `dep` is not a workspace member.
+/// Resolve a dependency to a workspace member when its identity can be established from metadata.
 pub(crate) fn resolve_dep_from_workspace(
 	dep: &Dependency,
 	meta: &Metadata,
 ) -> Option<RenamedPackage> {
-	for work in meta.workspace_packages() {
-		if work.name == dep.name {
-			let pkg = meta.packages.iter().find(|pkg| pkg.id == work.id).cloned();
-			return pkg.map(|pkg| RenamedPackage::new(pkg, dep.rename.clone(), dep.optional))
-		}
-	}
-	None
+	let pkg = meta.workspace_packages().into_iter().find(|pkg| {
+		pkg.name == dep.name &&
+			pkg.source == dep.source &&
+			declaration_matches_version(dep, pkg) &&
+			dep.path
+				.as_ref()
+				.is_none_or(|path| pkg.manifest_path.parent() == Some(path.as_path()))
+	})?;
+	Some(RenamedPackage::new(pkg.clone(), dep.rename.clone(), dep.optional))
 }
 
-/// Resolve the dependency `dep` of `pkg` within the resolve graph.
-///
-/// The resolve graph should only be used for external crates. I did not try what happens for
-/// workspace members - better don't do it.
+// Cargo reports a versionless path dependency as `*`, even for prerelease
+// packages. semver's registry requirement `*` does not match prereleases.
+fn declaration_matches_version(dep: &Dependency, pkg: &Package) -> bool {
+	(dep.path.is_some() && dep.req == semver::VersionReq::STAR) || dep.req.matches(&pkg.version)
+}
+
+/// Resolve a dependency using its package identity, manifest alias, kind and target.
 pub(crate) fn resolve_dep_from_graph(
 	pkg: &Package,
 	dep: &Dependency,
 	(meta, resolve): (&Metadata, &Resolve),
 ) -> Option<RenamedPackage> {
-	let dep_name = dep.rename.clone().unwrap_or(dep.name.clone()).replace('-', "_");
 	let resolved_pkg = resolve.nodes.iter().find(|node| node.id == pkg.id)?;
-	let resolved_dep_id = resolved_pkg.deps.iter().find(|node| node.name == dep_name)?;
-	let resolve_dep = meta.packages.iter().find(|pkg| pkg.id == resolved_dep_id.pkg)?;
-
-	Some(RenamedPackage::new(resolve_dep.clone(), dep.rename.clone(), dep.optional))
+	let renamed = dep.rename.as_ref().map(|name| name.replace('-', "_"));
+	let mut matches = resolved_pkg.deps.iter().filter_map(|node| {
+		if renamed.as_ref().is_some_and(|name| node.name != *name) ||
+			!node
+				.dep_kinds
+				.iter()
+				.any(|kind| kind.kind == dep.kind && kind.target == dep.target)
+		{
+			return None
+		}
+		let candidate = meta.packages.iter().find(|pkg| pkg.id == node.pkg)?;
+		// Cargo has already resolved the source and version, including patches
+		// and versionless git dependencies on prerelease packages.
+		if candidate.name != dep.name {
+			return None
+		}
+		let name_matches = match &renamed {
+			Some(_) => true,
+			None =>
+				candidate.targets.iter().any(|target| {
+					(target.is_lib() ||
+						target.is_proc_macro() ||
+						target.is_rlib() || target.is_dylib() ||
+						target.is_cdylib() || target.is_staticlib()) &&
+						target.name == node.name
+				}),
+		};
+		name_matches.then_some(candidate)
+	});
+	let candidate = matches.next()?;
+	// Do not pick an arbitrary package if the graph is ambiguous.
+	if matches.any(|other| other.id != candidate.id) {
+		return None
+	}
+	Some(RenamedPackage::new(candidate.clone(), dep.rename.clone(), dep.optional))
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -194,6 +227,147 @@ impl PartialOrd for RenamedPackage {
 #[cfg(test)]
 mod tests {
 	use super::*;
+
+	#[test]
+	fn resolves_alias_by_kind_and_target_from_cargo_metadata() {
+		use std::fs;
+
+		let dir = tempfile::tempdir().unwrap();
+		let root = dir.path();
+		fs::create_dir_all(root.join(".cargo")).unwrap();
+		fs::create_dir_all(root.join("src")).unwrap();
+		fs::write(root.join("src/lib.rs"), "").unwrap();
+		fs::write(
+			root.join(".cargo/config.toml"),
+			"[source.crates-io]\nreplace-with = 'vendored-sources'\n\
+			 [source.vendored-sources]\ndirectory = 'vendor'\n",
+		)
+		.unwrap();
+		fs::write(
+			root.join("Cargo.toml"),
+			r#"
+[package]
+name = "fixture"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+members = ["workspace-only"]
+exclude = ["vendor"]
+
+[dependencies]
+chosen = { package = "shared-package", version = "1" }
+other = { package = "shared-package", version = "5" }
+lib-package = "1"
+workspace-only = { path = "workspace-only" }
+
+[dev-dependencies]
+chosen = { package = "shared-package", version = "2" }
+
+[build-dependencies]
+chosen = { package = "shared-package", version = "3" }
+
+[target.'cfg(windows)'.dependencies]
+chosen = { package = "shared-package", version = "4" }
+
+[features]
+forward = ["chosen/extra"]
+"#,
+		)
+		.unwrap();
+		fs::create_dir_all(root.join("workspace-only/src")).unwrap();
+		fs::write(
+			root.join("workspace-only/Cargo.toml"),
+			"[package]\nname = 'workspace-only'\nversion = '1.0.0-dev'\nedition = '2021'\n",
+		)
+		.unwrap();
+		fs::write(root.join("workspace-only/src/lib.rs"), "").unwrap();
+		for (name, versions, lib_name) in [
+			("shared-package", &[1, 2, 3, 4, 5][..], "shared_package"),
+			("lib-package", &[1][..], "unusual_lib"),
+		] {
+			for version in versions {
+				let package = root.join(format!("vendor/{name}-{version}.0.0"));
+				fs::create_dir_all(package.join("src")).unwrap();
+				fs::write(package.join("src/lib.rs"), "").unwrap();
+				fs::write(
+					package.join("Cargo.toml"),
+					format!(
+						"[package]\nname = '{name}'\nversion = '{version}.0.0'\nedition = '2021'\n\
+					 [lib]\nname = '{lib_name}'\n[features]\nextra = []\n"
+					),
+				)
+				.unwrap();
+				fs::write(package.join(".cargo-checksum.json"), r#"{"files":{},"package":null}"#)
+					.unwrap();
+			}
+		}
+
+		let metadata = MetadataCommand::new()
+			.current_dir(root)
+			.other_options(vec!["--offline".into()])
+			.exec()
+			.unwrap();
+		let fixture = metadata.packages.iter().find(|pkg| pkg.name == "fixture").unwrap();
+		for dep in &fixture.dependencies {
+			let resolved = resolve_dep(fixture, dep, &metadata).unwrap();
+			let expected = if dep.name == "shared-package" {
+				if dep.rename.as_deref() == Some("other") {
+					5
+				} else if dep.target.is_some() {
+					4
+				} else {
+					match dep.kind {
+						cargo_metadata::DependencyKind::Normal => 1,
+						cargo_metadata::DependencyKind::Development => 2,
+						cargo_metadata::DependencyKind::Build => 3,
+						_ => panic!("unexpected dependency kind"),
+					}
+				}
+			} else {
+				1
+			};
+			assert_eq!(resolved.pkg.name, dep.name);
+			assert_eq!(resolved.pkg.version.major, expected, "{dep:?}");
+		}
+		let graph = crate::cmd::lint::build_feature_dag(&metadata, &metadata.packages).unwrap();
+		let from = crate::cmd::lint::CrateAndFeature(fixture.id.repr.clone(), "forward".into());
+		for pkg in metadata.packages.iter().filter(|p| p.name == "shared-package") {
+			let reached =
+				graph.implied_path(&from, |node| node.0 == pkg.id.repr && node.1 == "extra");
+			assert_eq!(reached.is_some(), matches!(pkg.version.major, 1 | 4), "{}", pkg.id);
+		}
+
+		let workspace_metadata = MetadataCommand::new()
+			.current_dir(root)
+			.no_deps()
+			.other_options(vec!["--offline".into()])
+			.exec()
+			.unwrap();
+		let fixture = workspace_metadata.packages.iter().find(|pkg| pkg.name == "fixture").unwrap();
+		let workspace_dep =
+			fixture.dependencies.iter().find(|dep| dep.name == "workspace-only").unwrap();
+		assert_eq!(
+			resolve_dep(fixture, workspace_dep, &workspace_metadata).unwrap().pkg.name,
+			"workspace-only"
+		);
+		let mut wrong_version = workspace_dep.clone();
+		wrong_version.req = "2".parse().unwrap();
+		assert!(resolve_dep(fixture, &wrong_version, &workspace_metadata).is_none());
+		let mut wrong_path = workspace_dep.clone();
+		wrong_path.path = Some(root.join("src").try_into().unwrap());
+		assert!(resolve_dep(fixture, &wrong_path, &workspace_metadata).is_none());
+		let mut wrong_source = workspace_dep.clone();
+		wrong_source.path = None;
+		wrong_source.source = fixture
+			.dependencies
+			.iter()
+			.find(|dep| dep.name == "shared-package")
+			.unwrap()
+			.source
+			.clone();
+		assert!(resolve_dep(fixture, &wrong_source, &workspace_metadata).is_none());
+	}
 
 	#[test]
 	fn format_metadata_error_preserves_multiline_stderr() {

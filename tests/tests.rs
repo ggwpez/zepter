@@ -148,11 +148,24 @@ fn run_case_command(case: &Case, workspace: &Path, default_args: bool, index: us
 	}
 
 	// remove empty trailing and suffix lines
-	let res = cmd.output().unwrap();
+	let mut res = cmd.output().unwrap();
 	if let Some(code) = case.code {
 		res.clone().assert().code(code);
 	} else {
 		res.clone().assert().success();
+	}
+	if !default_args {
+		// Cargo diagnostics may contain the checkout path. Keep no-default-args
+		// snapshots independent of the temporary repository location.
+		let canonical = workspace.canonicalize().unwrap();
+		for stream in [&mut res.stdout, &mut res.stderr] {
+			if let Ok(text) = std::str::from_utf8(stream) {
+				let normalized = text
+					.replace(canonical.to_str().unwrap(), "<workspace>")
+					.replace(workspace.to_str().unwrap(), "<workspace>");
+				*stream = normalized.into_bytes();
+			}
+		}
 	}
 	res
 }
@@ -424,6 +437,10 @@ version = '0.1.0'
 edition = '2021'
 [dependencies]
 alias = { package = 'helper', path = 'helper', optional = true, default-features = false, features = ['declared'] }
+[dev-dependencies]
+alias = { package = 'helper', path = 'helper', features = ['extra'] }
+[build-dependencies]
+alias = { package = 'helper', path = 'helper', features = ['declared'] }
 [features]
 weak = ['alias?/extra']
 activate = ['dep:alias']
@@ -451,6 +468,8 @@ strong = ['alias/extra']
 			.current_dir(root)
 			.args([
 				"tree",
+				"--edges",
+				"normal",
 				"--offline",
 				"--features",
 				feature,
@@ -488,4 +507,55 @@ strong = ['alias/extra']
 			assert!(stdout.is_empty(), "{stdout}");
 		}
 	}
+}
+
+#[test]
+fn dev_feature_request_does_not_satisfy_normal_propagation() {
+	let dir = tempfile::tempdir().unwrap();
+	let root = dir.path();
+	for (path, name, declarations) in [
+		(
+			"",
+			"app",
+			"\
+[dependencies]
+alias = { package = 'helper', path = 'helper', default-features = false }
+[dev-dependencies]
+alias = { package = 'helper', path = 'helper', features = ['try-runtime'] }
+[features]
+default = ['std']
+std = []
+try-runtime = []
+",
+		),
+		("helper", "helper", "[features]\ntry-runtime = []\n"),
+	] {
+		let pkg = root.join(path);
+		std::fs::create_dir_all(pkg.join("src")).unwrap();
+		std::fs::write(pkg.join("src/lib.rs"), "").unwrap();
+		std::fs::write(
+			pkg.join("Cargo.toml"),
+			format!(
+				"[package]\nname = '{name}'\nversion = '0.1.0'\nedition = '2021'\n{declarations}"
+			),
+		)
+		.unwrap();
+	}
+	let lint = |args: &[&str]| {
+		let mut cmd = Command::new(assert_cmd::cargo_bin!("zepter"));
+		cmd.current_dir(root).arg("lint").args(args).arg("--offline");
+		cmd
+	};
+	let propagation = ["propagate-feature", "-p", "app", "--feature", "try-runtime"];
+	let missing = lint(&propagation).assert().code(1);
+	assert!(std::str::from_utf8(&missing.get_output().stdout)
+		.unwrap()
+		.contains("must propagate to:\n      alias"));
+	lint(&propagation).args(["--dep-kinds", "normal:ignore"]).assert().success();
+	lint(&["never-implies", "--precondition", "default", "--stays-disabled", "try-runtime"])
+		.assert()
+		.success()
+		.stdout("");
+	lint(&["why-enabled", "-p", "helper", "--feature", "try-runtime"]).assert().success()
+		.stdout("Feature try-runtime/helper is enabled by:\n  app requests alias/try-runtime in [dev-dependencies]\n");
 }

@@ -171,6 +171,8 @@ The `precondition` defines the feature on the left side of the implication and `
 
 `dep:foo` activates the dependency with the features requested in its declaration; it does not override `default-features = false`. `foo?/bar` forwards `bar` only if `foo` is also activated, even when another feature in the chain activates it later.
 
+`never-implies` traces normal dependencies, not dependencies used only for tests or build scripts. `propagate-feature` checks each selected dependency declaration separately: a dev-dependency's features do not satisfy a normal dependency's propagation requirement.
+
 Errors correctly with:
 ```pre
 Feature 'default' implies 'try-runtime' via path:

@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
 use crate::{cmd::resolve_dep, dag::Dag};
-use cargo_metadata::{Dependency, Metadata, Package};
+use cargo_metadata::{Dependency, DependencyKind, Metadata, Package};
 use core::fmt::{self, Display, Formatter};
 use std::collections::{btree_map::Entry, BTreeMap};
 
@@ -35,8 +35,12 @@ impl CrateAndFeature {
 		Self(pkg.into(), feature.into())
 	}
 
-	pub(super) fn activation(pkg: &Package, alias: &str) -> Self {
-		Self(pkg.id.repr.clone(), format!("dep:{alias}"))
+	fn activation(pkg: &Package, alias: &str, dep: &Dependency) -> Self {
+		let binding = match &dep.target {
+			Some(target) => format!("dep:{alias}@{target}"),
+			None => format!("dep:{alias}"),
+		};
+		Self(pkg.id.repr.clone(), binding)
 	}
 
 	pub(super) fn internal(&self) -> bool {
@@ -54,35 +58,33 @@ pub fn build_feature_dag(meta: &Metadata, pkgs: &[Package]) -> Result<FeatureGra
 
 impl FeatureGraph {
 	fn add_package(&mut self, meta: &Metadata, pkg: &Package) -> Result<(), String> {
-		let mut ids = BTreeMap::new();
-		for dep in &pkg.dependencies {
+		let mut bindings = BTreeMap::<&str, Vec<(CrateAndFeature, String)>>::new();
+		for dep in pkg.dependencies.iter().filter(|d| d.kind == DependencyKind::Normal) {
 			let alias = dep.rename.as_deref().unwrap_or(&dep.name);
-			let id =
-				resolve_dep(pkg, dep, meta).map_or_else(|| dep.name.clone(), |p| p.pkg.id.repr);
-			self.add_dependency(pkg, dep, alias, &id);
-			ids.entry(alias).or_insert(id);
+			// An unresolved declaration (e.g. outside --workspace) has no target in this graph.
+			let Some(resolved) = resolve_dep(pkg, dep, meta) else { continue };
+			let id = resolved.pkg.id.repr;
+			let activation = CrateAndFeature::activation(pkg, alias, dep);
+			self.add_dependency(pkg, dep, &activation, &id);
+			bindings.entry(alias).or_default().push((activation, id));
 		}
 		for (feature, entries) in &pkg.features {
 			let source = CrateAndFeature::new(&pkg.id.repr, feature);
 			for entry in entries {
 				if let Some(alias) = entry.strip_prefix("dep:") {
-					self.direct.add_edge(source.clone(), CrateAndFeature::activation(pkg, alias));
+					for (activation, _) in bindings.get(alias).into_iter().flatten() {
+						self.direct.add_edge(source.clone(), activation.clone());
+					}
 				} else if let Some((name, target_feature)) = entry.split_once('/') {
 					let alias = name.strip_suffix('?').unwrap_or(name);
-					let id = ids
-						.get(alias)
-						.ok_or_else(|| format!("Could not resolve dep {alias} of {}", pkg.id))?;
-					let target = CrateAndFeature::new(id, target_feature);
-					let activation = CrateAndFeature::activation(pkg, alias);
-					if name == alias {
-						self.direct.add_edge(source.clone(), activation);
-						self.direct.add_edge(source.clone(), target);
-					} else {
-						self.direct.add_node(source.clone());
-						let index = self.weak.len();
-						self.by_input.entry(source.clone()).or_default().push(index);
-						self.by_input.entry(activation.clone()).or_default().push(index);
-						self.weak.push(WeakForward { source: source.clone(), activation, target });
+					for (activation, id) in bindings.get(alias).into_iter().flatten() {
+						let target = CrateAndFeature::new(id, target_feature);
+						if name == alias {
+							self.direct.add_edge(source.clone(), activation.clone());
+							self.direct.add_edge(source.clone(), target);
+						} else {
+							self.add_weak(&source, activation, target);
+						}
 					}
 				} else {
 					self.direct.add_edge(source.clone(), CrateAndFeature::new(&pkg.id.repr, entry));
@@ -92,8 +94,13 @@ impl FeatureGraph {
 		Ok(())
 	}
 
-	fn add_dependency(&mut self, pkg: &Package, dep: &Dependency, alias: &str, id: &str) {
-		let activation = CrateAndFeature::activation(pkg, alias);
+	fn add_dependency(
+		&mut self,
+		pkg: &Package,
+		dep: &Dependency,
+		activation: &CrateAndFeature,
+		id: &str,
+	) {
 		if !dep.optional {
 			self.direct
 				.add_edge(CrateAndFeature::new(&pkg.id.repr, "#entrypoint"), activation.clone());
@@ -108,22 +115,21 @@ impl FeatureGraph {
 		}
 	}
 
-	pub(super) fn forwards_when_active(
-		&self,
+	fn add_weak(
+		&mut self,
 		source: &CrateAndFeature,
 		activation: &CrateAndFeature,
-		target: &CrateAndFeature,
-	) -> bool {
-		self.by_input.get(source).into_iter().flatten().any(|&i| {
-			let rule = &self.weak[i];
-			rule.activation == *activation && rule.target == *target
-		})
-	}
-
-	pub(super) fn weak_forwards(
-		&self,
-	) -> impl Iterator<Item = (&CrateAndFeature, &CrateAndFeature, &str)> {
-		self.weak.iter().map(|w| (&w.source, &w.target, w.activation.1.as_str()))
+		target: CrateAndFeature,
+	) {
+		self.direct.add_node(source.clone());
+		let index = self.weak.len();
+		self.by_input.entry(source.clone()).or_default().push(index);
+		self.by_input.entry(activation.clone()).or_default().push(index);
+		self.weak.push(WeakForward {
+			source: source.clone(),
+			activation: activation.clone(),
+			target,
+		});
 	}
 
 	/// Find a witness under the activation state induced by `from`, not by `--all-features`.

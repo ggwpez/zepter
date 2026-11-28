@@ -101,7 +101,6 @@ impl StripDevDepsCmd {
 		g.warn_unstable();
 		let meta = self.cargo_args.load_metadata()?;
 
-		let kind = DependencyKind::Development;
 		// Allowed dir that we can write to.
 		let allowed_dir = canonicalize(meta.workspace_root.as_std_path()).map_err(|e| {
 			format!("Could not canonicalize workspace root '{}': {e}", meta.workspace_root)
@@ -116,41 +115,7 @@ impl StripDevDepsCmd {
 
 		let mut fixers = Map::new();
 		for pkg in meta.packages.iter() {
-			if let Some(packages) = &self.packages {
-				if !packages.contains(&pkg.name) {
-					continue
-				}
-			}
-
-			// Are we allowed to modify this file path?
-			let krate_path = canonicalize(pkg.manifest_path.as_std_path()).map_err(|e| {
-				format!("Could not canonicalize manifest '{}': {e}", pkg.manifest_path)
-			})?;
-			if !krate_path.starts_with(&allowed_dir) {
-				continue
-			}
-			let mut fixer = AutoFixer::from_manifest(&krate_path)?;
-
-			// Find all dependencies that are only used as dev dependencies in this package.
-			let devs = pkg.dependencies.iter().filter(|d| d.kind == kind);
-			let only_dev = devs
-				.filter(|dev| {
-					pkg.dependencies.iter().filter(|d| d.name == dev.name).all(|d| d.kind == kind)
-				})
-				.collect::<Vec<_>>();
-
-			for dep in only_dev.iter() {
-				// Account for renamed crates:
-				let Some(dep) = resolve_dep(pkg, dep, &meta) else {
-					eprintln!("Could not resolve dependency '{}'", g.red(&dep.name));
-					return Err(CommandError::reported(1))
-				};
-
-				fixer.remove_feature(&format!("{}/", dep.name()))?;
-				fixer.remove_feature(&format!("{}?/", dep.name()))?;
-			}
-
-			if fixer.modified() {
+			if let Some(fixer) = self.strip_package(g, &meta, pkg, &allowed_dir)? {
 				fixers.insert(pkg.name.clone(), fixer);
 			}
 		}
@@ -160,5 +125,43 @@ impl StripDevDepsCmd {
 		}
 
 		Ok(())
+	}
+
+	fn strip_package(
+		&self,
+		g: &GlobalArgs,
+		meta: &cargo_metadata::Metadata,
+		pkg: &cargo_metadata::Package,
+		allowed_dir: &std::path::Path,
+	) -> Result<Option<AutoFixer>, CommandError> {
+		if self.packages.as_ref().is_some_and(|packages| !packages.contains(&pkg.name)) {
+			return Ok(None)
+		}
+
+		let krate_path = canonicalize(pkg.manifest_path.as_std_path())
+			.map_err(|e| format!("Could not canonicalize manifest '{}': {e}", pkg.manifest_path))?;
+		if !krate_path.starts_with(allowed_dir) {
+			return Ok(None)
+		}
+		let mut fixer = AutoFixer::from_manifest(&krate_path)?;
+
+		let kind = DependencyKind::Development;
+		let devs = pkg.dependencies.iter().filter(|d| d.kind == kind);
+		let only_dev = devs
+			.filter(|dev| {
+				pkg.dependencies.iter().filter(|d| d.name == dev.name).all(|d| d.kind == kind)
+			})
+			.collect::<Vec<_>>();
+
+		for dep in only_dev.iter() {
+			let Some(dep) = resolve_dep(pkg, dep, meta) else {
+				eprintln!("Could not resolve dependency '{}'", g.red(&dep.name));
+				return Err(CommandError::reported(1))
+			};
+			fixer.remove_feature(&format!("{}/", dep.name()))?;
+			fixer.remove_feature(&format!("{}?/", dep.name()))?;
+		}
+
+		Ok(fixer.modified().then_some(fixer))
 	}
 }

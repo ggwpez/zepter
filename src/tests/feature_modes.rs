@@ -9,12 +9,12 @@ use rstest::rstest;
 use std::{collections::BTreeMap as Map, vec};
 
 #[rstest]
-#[case(vec![], r#""#, None)]
-#[case(vec![], r#"
+#[case((vec![], r#""#), None)]
+#[case((vec![], r#"
 [features]
 default = ["std"]
 std = ["B", "A"]
-"#, Some(r#"
+"#), Some(r#"
 [features]
 default = [
 	"std",
@@ -24,11 +24,11 @@ std = [
 	"B",
 ]
 "#))]
-#[case(vec![], r#"
+#[case((vec![], r#"
 [features]
 default = ["std", "std"]
 std = ["B", "A", "B", "A"]
-"#, Some(r#"
+"#), Some(r#"
 [features]
 default = [
 	"std",
@@ -38,22 +38,22 @@ std = [
 	"B",
 ]
 "#))]
-#[case(vec![("std", vec![Sort, Dedub])], r#"
+#[case((vec![("std", vec![Sort, Dedub])], r#"
 [features]
 default = ["std", "std"]
 std = ["B", "A", "B", "A"]
-"#, Some(r#"
+"#), Some(r#"
 [features]
 default = [
 	"std",
 ]
 std = [ "A","B"]
 "#))]
-#[case(vec![("default", vec![Sort, Canonicalize])], r#"
+#[case((vec![("default", vec![Sort, Canonicalize])], r#"
 [features]
 default = ["std"]
 std = ["B", "A"]
-"#, Some(r#"
+"#), Some(r#"
 [features]
 default = [
 	"std",
@@ -63,11 +63,11 @@ std = [
 	"B",
 ]
 "#))]
-#[case(vec![("default", vec![Sort])], r#"
+#[case((vec![("default", vec![Sort])], r#"
 [features]
 default = ["std"]
 std = ["B", "A"]
-"#, Some(r#"
+"#), Some(r#"
 [features]
 default = ["std"]
 std = [
@@ -75,11 +75,11 @@ std = [
 	"B",
 ]
 "#))]
-#[case(vec![("default", vec![Canonicalize])], r#"
+#[case((vec![("default", vec![Canonicalize])], r#"
 [features]
 default = ["std"]
 std = ["B", "A"]
-"#, Some(r#"
+"#), Some(r#"
 [features]
 default = [
 	"std",
@@ -89,11 +89,11 @@ std = [
 	"B",
 ]
 "#))]
-#[case(vec![("default", vec![Sort])], r#"
+#[case((vec![("default", vec![Sort])], r#"
 [features]
 default = ["std", "A"]
 std = ["B", "A"]
-"#,
+"#),
 Some(r#"
 [features]
 default = [ "A","std"]
@@ -102,11 +102,11 @@ std = [
 	"B",
 ]
 "#))]
-#[case(vec![("default", vec![Sort])], r#"
+#[case((vec![("default", vec![Sort])], r#"
 [features]
 default = ["std", "A"]
 std = ["B", "A"]
-"#,
+"#),
 Some(r#"
 [features]
 default = [ "A","std"]
@@ -116,10 +116,10 @@ std = [
 ]
 "#))]
 fn canon_some_features_with_modes_works(
-	#[case] modes: Vec<(&str, Vec<Mode>)>,
-	#[case] input: &str,
+	#[case] config: (Vec<(&str, Vec<Mode>)>, &str),
 	#[case] modify: Option<&str>,
 ) {
+	let (modes, input) = config;
 	let mut fixer = AutoFixer::from_raw(input).unwrap();
 	let modes = modes.into_iter().map(|(f, m)| (f.into(), m)).collect::<Map<_, _>>();
 	fixer.canonicalize_features("krate", &modes, 0).unwrap();

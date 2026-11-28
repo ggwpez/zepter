@@ -6,11 +6,10 @@ use cargo_metadata::DependencyKind::*;
 use rstest::rstest;
 
 #[rstest]
-#[case("", false, Err("No workspace entry found"))]
+#[case(("", false), Err("No workspace entry found"))]
 // simple
 #[case(
-	r#"[workspace]"#,
-	true,
+	(r#"[workspace]"#, true),
 	Ok(Some(
 		r#"[workspace]
 
@@ -20,8 +19,7 @@ log = { version = "0.4.20" }
 	))
 )]
 #[case(
-	r#"[workspace]"#,
-	false,
+	(r#"[workspace]"#, false),
 	Ok(Some(
 		r#"[workspace]
 
@@ -32,12 +30,12 @@ log = { version = "0.4.20", default-features = false }
 )]
 // when there is something present already
 #[case(
-	r#"[workspace]
+	(r#"[workspace]
 
 [workspace.dependencies]
 log = { version = "0.4.20" }
 "#,
-	true,
+	true),
 	Ok(Some(
 		r#"[workspace]
 
@@ -47,12 +45,12 @@ log = { version = "0.4.20" }
 	))
 )]
 #[case(
-	r#"[workspace]
+	(r#"[workspace]
 
 [workspace.dependencies]
 log = { default-features = true }
 "#,
-	true,
+	true),
 	Ok(Some(
 		r#"[workspace]
 
@@ -62,12 +60,12 @@ log = { default-features = true , version = "0.4.20" }
 	))
 )]
 #[case(
-	r#"[workspace]
+	(r#"[workspace]
 
 [workspace.dependencies]
 log = { version = "0.4.20" }
 "#,
-	true,
+	true),
 	Ok(Some(
 		r#"[workspace]
 
@@ -77,28 +75,28 @@ log = { version = "0.4.20" }
 	))
 )]
 #[case(
-	r#"[workspace]
+	(r#"[workspace]
 
 [workspace.dependencies]
 log = { version = "0.4.20", default-features = true }
-"#, false,
+"#, false),
 	Err("Dependency 'log' already exists in the workspace with a different 'default-features' fields: 'true' vs 'false'"),
 )]
 #[case(
-	r#"[workspace]
+	(r#"[workspace]
 
 [workspace.dependencies]
 log = { version = "0.4.21", default-features = true }
-"#, true,
+"#, true),
 	Err("Dependency 'log' already exists in the workspace with a different 'version' field: '0.4.21' vs '^0.4.20'"),
 )]
 #[case(
-	r#"[workspace]
+	(r#"[workspace]
 
 [workspace.dependencies]
 log = { random = "321", version = "0.4.20", hey = true, git = "123" }
 "#,
-	true,
+	true),
 	Ok(Some(
 		r#"[workspace]
 
@@ -108,12 +106,12 @@ log = { random = "321", version = "0.4.20", hey = true, git = "123" }
 	))
 )]
 #[case(
-	r#"[workspace]
+	(r#"[workspace]
 
 [workspace.dependencies]
 log = { random = "321", hey = true, git = "123" }
 "#,
-	true,
+	true),
 	Ok(Some(
 		r#"[workspace]
 
@@ -123,12 +121,12 @@ log = { random = "321", hey = true, git = "123" , version = "0.4.20" }
 	))
 )]
 #[case(
-	r#"[workspace]
+	(r#"[workspace]
 
 [workspace.dependencies]
 log = { random = "321", default-features = true, hey = true, git = "123" }
 "#,
-	true,
+	true),
 	Ok(Some(
 		r#"[workspace]
 
@@ -138,10 +136,10 @@ log = { random = "321", default-features = true, hey = true, git = "123" , versi
 	))
 )]
 fn inject_workspace_dep_works(
-	#[case] input: &str,
-	#[case] default: bool,
+	#[case] config: (&str, bool),
 	#[case] output: Result<Option<&str>, &str>,
 ) {
+	let (input, default) = config;
 	let mut fixer = AutoFixer::from_raw(input).unwrap();
 	let res = fixer.add_workspace_dep_inner("log", None, "^0.4.20", default, None);
 
@@ -158,24 +156,24 @@ fn inject_workspace_dep_works(
 
 #[rstest]
 #[case(
-	r#"[dependencies]
+	(r#"[dependencies]
 log = { random = "321", default-features = true, hey = true, git = "123" }
 "#,
-	Some(true),
+	Some(true)),
 	Err("Cannot lift git dependencies")
 )]
 #[case(
-	r#"[dependencies]
+	(r#"[dependencies]
 log = { random = "321", default-features = true, hey = true, path = "123" }
 "#,
-	Some(true),
+	Some(true)),
 	Err("Lifting dependency would change it from a path dependency to a crates-io dependency")
 )]
 #[case(
-	r#"[dependencies]
+	(r#"[dependencies]
 log = { random = "321", default-features = true, version = "0.4.20", hey = true }
 "#,
-	Some(true),
+	Some(true)),
 	Ok(Some(
 		r#"[dependencies]
 log = { random = "321", default-features = true, hey = true , workspace = true }
@@ -183,10 +181,10 @@ log = { random = "321", default-features = true, hey = true , workspace = true }
 	))
 )]
 #[case(
-	r#"[dependencies]
+	(r#"[dependencies]
 log = "321"
 "#,
-	Some(true),
+	Some(true)),
 	Ok(Some(
 		r#"[dependencies]
 log = { workspace = true, default-features = true }
@@ -194,10 +192,10 @@ log = { workspace = true, default-features = true }
 	))
 )]
 #[case(
-	r#"[dependencies]
+	(r#"[dependencies]
 log = "321"
 "#,
-	Some(false),
+	Some(false)),
 	Ok(Some(
 		r#"[dependencies]
 log = { workspace = true, default-features = false }
@@ -205,10 +203,10 @@ log = { workspace = true, default-features = false }
 	))
 )]
 #[case(
-	r#"[dependencies]
+	(r#"[dependencies]
 log = "321"
 "#,
-	None,
+	None),
 	Ok(Some(
 		r#"[dependencies]
 log = { workspace = true }
@@ -216,10 +214,10 @@ log = { workspace = true }
 	))
 )]
 fn lift_to_workspace_works(
-	#[case] input: &str,
-	#[case] default: Option<bool>,
+	#[case] config: (&str, Option<bool>),
 	#[case] output: Result<Option<&str>, &str>,
 ) {
+	let (input, default) = config;
 	for kind in [Normal, Build, Development] {
 		let table = kind_to_str(&kind);
 		let input = &input.replace("dependencies", table);

@@ -8,7 +8,7 @@ use crate::{
 	log,
 };
 use camino::Utf8PathBuf;
-use cargo_metadata::{DependencyKind, Package};
+use cargo_metadata::{DependencyKind, Metadata, Package};
 use std::{
 	collections::{btree_map::Entry, BTreeMap},
 	fs::canonicalize,
@@ -65,31 +65,13 @@ impl DefaultFeaturesDisabledCmd {
 				continue;
 			}
 
-			for dep in lhs.dependencies.iter() {
-				if dep.kind != DependencyKind::Normal {
-					continue;
-				}
-
-				let Some(rhs) = resolve_dep(lhs, dep, &meta) else { continue };
-
-				if !Self::supports_nostd(g, &rhs.pkg, &mut cache)? {
-					continue;
-				}
-
-				if !dep.uses_default_features {
-					continue;
-				}
-
-				println!(
-					"Default features not disabled for dependency: {} -> {}",
-					lhs.name, rhs.pkg.name
-				);
-
-				let fixer = Self::fixer_for_package(&mut autofixer, lhs, &allowed_dir)?;
-
-				fixer.disable_default_features(&rhs.name())?;
-				issues += 1;
-			}
+			issues += Self::check_dependencies(
+				g,
+				lhs,
+				&meta,
+				(&mut cache, &mut autofixer),
+				&allowed_dir,
+			)?;
 		}
 
 		let s = plural(autofixer.len());
@@ -104,6 +86,36 @@ impl DefaultFeaturesDisabledCmd {
 			println!("and fixed none. Re-run with --fix to apply fixes.");
 			Err("Several issues were not fixed.".to_string())
 		}
+	}
+
+	fn check_dependencies(
+		g: &GlobalArgs,
+		lhs: &Package,
+		meta: &Metadata,
+		(cache, autofixer): (&mut BTreeMap<String, bool>, &mut BTreeMap<Utf8PathBuf, AutoFixer>),
+		allowed_dir: &Path,
+	) -> Result<usize, String> {
+		let mut issues = 0;
+		for dep in &lhs.dependencies {
+			if dep.kind != DependencyKind::Normal {
+				continue;
+			}
+			let Some(rhs) = resolve_dep(lhs, dep, meta) else { continue };
+			if !Self::supports_nostd(g, &rhs.pkg, cache)? {
+				continue;
+			}
+			if !dep.uses_default_features {
+				continue;
+			}
+			println!(
+				"Default features not disabled for dependency: {} -> {}",
+				lhs.name, rhs.pkg.name
+			);
+			let fixer = Self::fixer_for_package(autofixer, lhs, allowed_dir)?;
+			fixer.disable_default_features(&rhs.name())?;
+			issues += 1;
+		}
+		Ok(issues)
 	}
 
 	fn fixer_for_package<'a>(

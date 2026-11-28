@@ -20,32 +20,26 @@ impl LiftToWorkspaceCmd {
 		let mut unnrenamed = BTreeSet::<String>::new();
 
 		for pkg in meta.packages.iter() {
-			if let Some(skip_package) = &self.skip_package {
-				if pkg.name == skip_package {
-					continue
-				}
+			if self.skip_package.as_ref().is_some_and(|skip| pkg.name == *skip) {
+				continue
 			}
 
-			for dep in pkg.dependencies.iter() {
-				if dep.name == name {
-					if let Some(rename) = &dep.rename {
-						if name == rename {
+			for dep in pkg.dependencies.iter().filter(|dep| dep.name == name) {
+				match &dep.rename {
+					Some(rename) if name != rename => {
+						renames.entry(rename.clone()).or_default().push(pkg.name.to_string());
+					},
+					rename => {
+						if rename.is_some() {
 							log::warn!(
 								target: super::LOG_TARGET,
 								"Dependency '{}' is renamed to itself in '{}'",
 								name,
 								pkg.name
 							);
-							unnrenamed.insert(pkg.name.to_string());
-						} else {
-							renames
-								.entry(dep.rename.clone().unwrap())
-								.or_default()
-								.push(pkg.name.to_string());
 						}
-					} else {
 						unnrenamed.insert(pkg.name.to_string());
-					}
+					},
 				}
 			}
 		}

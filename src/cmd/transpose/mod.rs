@@ -9,8 +9,7 @@ use crate::{
 	cmd::{resolve_dep, transpose::lift_to_workspace::LiftToWorkspaceCmd},
 };
 
-use cargo_metadata::{Dependency as Dep, DependencyKind};
-use semver::{Op, Version, VersionReq};
+use cargo_metadata::DependencyKind;
 use std::{collections::BTreeMap as Map, fs::canonicalize};
 
 #[derive(Debug, Clone, PartialEq, clap::ValueEnum)]

@@ -3,8 +3,11 @@
 
 //! Trace the dependency path from one crate to another.
 
-use super::*;
-use crate::{dag::Dag, log, CrateId};
+use super::{resolve_dep, GlobalArgs};
+use crate::{
+	dag::{Dag, Path},
+	log, CrateId,
+};
 use cargo_metadata::{Metadata, Package};
 use clap::Parser;
 use std::collections::{BTreeMap, BTreeSet};
@@ -88,34 +91,43 @@ impl TraceCmd {
 		let delimiter = self.path_delimiter.replace("\\n", "\n").replace("\\t", "\t");
 
 		for path in paths {
-			let mut out = String::new();
-			let mut is_first = true;
-
-			for id in &path.0 {
-				let krate = index
-					.get(id.as_ref())
-					.ok_or_else(|| format!("Could not find crate {id} in the metadata"))?;
-				if !is_first {
-					out.push_str(&delimiter);
-				}
-				is_first = false;
-				out.push_str(&krate.name);
-				if self.show_version {
-					out.push_str(&format!(" v{}", krate.version));
-				}
-				if self.show_source {
-					if let Some(source) = krate.source.as_ref() {
-						out.push_str(&format!(" ({})", source.repr));
-					} else {
-						out.push_str(" (local)");
-					}
-				}
-			}
-
+			let out = self.render_path(&path, &index, &delimiter)?;
 			println!("{out}");
 		}
 
 		Ok(())
+	}
+
+	fn render_path(
+		&self,
+		path: &Path<'_, CrateId>,
+		index: &BTreeMap<CrateId, Package>,
+		delimiter: &str,
+	) -> Result<String, String> {
+		let mut out = String::new();
+		let mut is_first = true;
+
+		for id in &path.0 {
+			let krate = index
+				.get(id.as_ref())
+				.ok_or_else(|| format!("Could not find crate {id} in the metadata"))?;
+			if !is_first {
+				out.push_str(delimiter);
+			}
+			is_first = false;
+			out.push_str(&krate.name);
+			if self.show_version {
+				out.push_str(&format!(" v{}", krate.version));
+			}
+			if self.show_source {
+				if let Some(source) = krate.source.as_ref() {
+					out.push_str(&format!(" ({})", source.repr));
+				} else {
+					out.push_str(" (local)");
+				}
+			}
+		}
+		Ok(out)
 	}
 
 	/// Build a dependency graph over the crates ids and return an index of all crates.

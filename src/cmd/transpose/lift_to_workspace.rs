@@ -1,18 +1,26 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
+mod alias;
+mod version;
+
 use crate::{
 	cmd::{
 		check_can_modify,
-		transpose::{AutoFixer, Dep, Op, SourceLocationSelector, Version, VersionReq},
+		transpose::{AutoFixer, SourceLocationSelector},
 		CargoArgs, GlobalArgs,
 	},
-	grammar::{plural, plural_or},
+	grammar::plural,
 	log, ErrToStr,
 };
-use cargo_metadata::Package;
-use itertools::Itertools;
-use std::collections::{BTreeMap, BTreeMap as Map, BTreeSet, HashMap};
+use cargo_metadata::{Dependency as Dep, Metadata, Package};
+use semver::VersionReq;
+use std::collections::{BTreeMap as Map, BTreeSet, HashMap};
+
+use version::VersionSelectorMode;
+
+#[cfg(feature = "logging")]
+const LOG_TARGET: &str = module_path!();
 
 /// Lift up a dependency to the workspace and reference it from all packages.
 #[derive(Debug, clap::Parser)]
@@ -49,19 +57,6 @@ pub struct LiftToWorkspaceCmd {
 	ignore_errors: bool,
 }
 
-/// How to determine which version to use for the whole workspace.
-#[derive(Debug, Clone, PartialEq, clap::ValueEnum)]
-pub enum VersionSelectorMode {
-	/// The version must be unambiguous - eg. there is only one version in the workspace.
-	Unambiguous,
-	/// A specific version.
-	Exact,
-	/// The latest version that was seen in the workspace.
-	///
-	/// The highest version number that it found.
-	Highest,
-}
-
 impl LiftToWorkspaceCmd {
 	pub fn run(&self, g: &GlobalArgs) -> Result<(), String> {
 		g.warn_unstable();
@@ -70,6 +65,24 @@ impl LiftToWorkspaceCmd {
 		let meta = self.cargo_args.clone().with_workspace(true).load_metadata()?;
 		let mut fixers = Map::new();
 
+		let dependencies = self.select_dependencies(&meta)?;
+
+		log::info!("Scanning for {} dependencies in the workspace.", dependencies.len());
+		for dep in &dependencies {
+			match self.run_for_dependency(g, &meta, dep, &mut fixers) {
+				Ok(()) => (),
+				Err(e) if self.ignore_errors => {
+					let _ = e;
+					log::error!("Failed to lift up '{}': {}", dep, e);
+				},
+				Err(e) => return Err(format!("Failed to lift up '{dep}': {e}")),
+			}
+		}
+
+		self.try_apply_changes(&mut fixers)
+	}
+
+	fn select_dependencies<'a>(&self, meta: &'a Metadata) -> Result<BTreeSet<&'a str>, String> {
 		// TODO optimize to not be O^3
 		let mut dependencies = BTreeSet::<&str>::new();
 		let mut regex_lookup = Map::new();
@@ -100,19 +113,7 @@ impl LiftToWorkspaceCmd {
 			}
 		}
 
-		log::info!("Scanning for {} dependencies in the workspace.", dependencies.len());
-		for dep in &dependencies {
-			match self.run_for_dependency(g, &meta, dep, &mut fixers) {
-				Ok(()) => (),
-				Err(e) if self.ignore_errors => {
-					let _ = e;
-					log::error!("Failed to lift up '{}': {}", dep, e);
-				},
-				Err(e) => return Err(format!("Failed to lift up '{dep}': {e}")),
-			}
-		}
-
-		self.try_apply_changes(&mut fixers)
+		Ok(dependencies)
 	}
 
 	fn validate_args(&self) -> Result<(), String> {
@@ -165,14 +166,7 @@ impl LiftToWorkspaceCmd {
 		let versions = by_version.keys().collect::<Vec<_>>();
 		let best_version = self.find_best_version(g, name, &versions, &by_version)?;
 
-		let mut all_use_default_features = true;
-		for (pkg, dep) in by_version.values().flatten() {
-			if !check_can_modify(&meta.workspace_root, &pkg.manifest_path)? {
-				continue
-			}
-
-			all_use_default_features &= dep.uses_default_features;
-		}
+		let all_use_default_features = Self::workspace_default_features(meta, &by_version)?;
 
 		// We default in the workspace to enabling them if all packages use them but otherwise turn
 		// them off.
@@ -233,23 +227,14 @@ impl LiftToWorkspaceCmd {
 				std::collections::btree_map::Entry::Vacant(entry) =>
 					entry.insert((Some(pkg.clone()), AutoFixer::from_manifest(&pkg.manifest_path)?)),
 			};
-			// We can safely use the rename here, since we found it with `detect_rename`.
-			let dep_name = dep.rename.as_ref().unwrap_or(&dep.name);
-			if maybe_rename.as_ref().is_some_and(|rename| rename != dep_name) {
-				return Err(format!("Dependency '{name}' has conflicting alias '{dep_name}'"))
-			}
-			let location = &source_location;
-
-			if dep.uses_default_features != workspace_default_features_enabled {
-				fixer.lift_dependency(
-					dep_name,
-					&dep.kind,
-					Some(dep.uses_default_features),
-					location,
-				)?;
-			} else {
-				fixer.lift_dependency(dep_name, &dep.kind, None, location)?;
-			}
+			Self::configure_member_dependency(
+				fixer,
+				dep,
+				name,
+				maybe_rename.as_ref(),
+				&source_location,
+				workspace_default_features_enabled,
+			)?;
 		}
 
 		#[cfg(feature = "logging")]
@@ -265,6 +250,43 @@ impl LiftToWorkspaceCmd {
 		}
 
 		Ok(())
+	}
+
+	fn workspace_default_features(
+		meta: &Metadata,
+		by_version: &HashMap<VersionReq, Vec<(Package, Dep)>>,
+	) -> Result<bool, String> {
+		let mut all_use_default_features = true;
+		for (pkg, dep) in by_version.values().flatten() {
+			if !check_can_modify(&meta.workspace_root, &pkg.manifest_path)? {
+				continue
+			}
+
+			all_use_default_features &= dep.uses_default_features;
+		}
+
+		Ok(all_use_default_features)
+	}
+
+	fn configure_member_dependency(
+		fixer: &mut AutoFixer,
+		dep: &Dep,
+		name: &str,
+		maybe_rename: Option<&String>,
+		location: &SourceLocationSelector,
+		workspace_default_features_enabled: bool,
+	) -> Result<(), String> {
+		// We can safely use the rename here, since we found it with `detect_rename`.
+		let dep_name = dep.rename.as_ref().unwrap_or(&dep.name);
+		if maybe_rename.is_some_and(|rename| rename != dep_name) {
+			return Err(format!("Dependency '{name}' has conflicting alias '{dep_name}'"))
+		}
+
+		if dep.uses_default_features != workspace_default_features_enabled {
+			fixer.lift_dependency(dep_name, &dep.kind, Some(dep.uses_default_features), location)
+		} else {
+			fixer.lift_dependency(dep_name, &dep.kind, None, location)
+		}
 	}
 
 	/// Index what versions of a crate are used in the workspace.
@@ -327,206 +349,4 @@ impl LiftToWorkspaceCmd {
 			))
 		}
 	}
-
-	fn detect_rename(
-		&self,
-		g: &GlobalArgs,
-		name: &str,
-		meta: &cargo_metadata::Metadata,
-	) -> Result<Option<String>, String> {
-		let mut renames = BTreeMap::<String, Vec<String>>::new();
-		let mut unnrenamed = BTreeSet::<String>::new();
-
-		for pkg in meta.packages.iter() {
-			if let Some(skip_package) = &self.skip_package {
-				if pkg.name == skip_package {
-					continue
-				}
-			}
-
-			for dep in pkg.dependencies.iter() {
-				if dep.name == name {
-					if let Some(rename) = &dep.rename {
-						if name == rename {
-							log::warn!(
-								"Dependency '{}' is renamed to itself in '{}'",
-								name,
-								pkg.name
-							);
-							unnrenamed.insert(pkg.name.to_string());
-						} else {
-							renames
-								.entry(dep.rename.clone().unwrap())
-								.or_default()
-								.push(pkg.name.to_string());
-						}
-					} else {
-						unnrenamed.insert(pkg.name.to_string());
-					}
-				}
-			}
-		}
-
-		// TODO write formatting function to also sort them
-		if !renames.is_empty() && !unnrenamed.is_empty() {
-			let mut err = String::new();
-			for (rename, pkgs) in renames.iter() {
-				let s = plural_or(pkgs.len(), " ");
-				err += &format!(
-					"{: >3} time{s}: {} from {}",
-					pkgs.len(),
-					g.bold(rename),
-					pkgs.iter().take(3).cloned().collect::<Vec<_>>().join(", ")
-				);
-				if pkgs.len() > 3 {
-					err += &format!(", … ({} more)", pkgs.len() - 3);
-				}
-				err += "\n";
-			}
-			let s = plural_or(unnrenamed.len(), " ");
-			err += &format!(
-				"{: >3} time{s}: {} from {}",
-				unnrenamed.len(),
-				g.bold("no alias"),
-				unnrenamed.iter().take(3).cloned().collect::<Vec<_>>().join(", ")
-			);
-			if unnrenamed.len() > 3 {
-				err += &format!(", … ({} more)", unnrenamed.len() - 3);
-			}
-
-			let renames_count = renames.values().map(|pkgs| pkgs.len()).sum::<usize>();
-			Err(format!(
-				"Dependency '{}' is used {} time{} with and {} time{} without an alias:\n\n{err}\n\nThis cannot be fixed automatically since it would break your code and configs.",
-				g.bold(name),
-				renames_count,
-				plural(renames_count),
-				unnrenamed.len(),
-				plural(unnrenamed.len()),
-			))
-		} else if renames.is_empty() {
-			Ok(None)
-		} else if renames.len() == 1 {
-			Ok(Some(renames.keys().next().unwrap().clone()))
-		} else {
-			let mut err = String::new();
-			for (rename, pkgs) in renames.iter() {
-				let s = plural_or(pkgs.len(), " ");
-				err += &format!(
-					"{: >3} time{s}: {} from {}",
-					pkgs.len(),
-					g.bold(rename),
-					pkgs.iter().take(3).cloned().collect::<Vec<_>>().join(", ")
-				);
-				if pkgs.len() > 3 {
-					err += &format!(", … ({} more)", pkgs.len() - 3);
-				}
-				err += "\n";
-			}
-
-			Err(format!(
-				"Dependency '{}' is used with {} conflicting aliases:\n\n{}\nThis cannot be fixed automatically since it would break your code and configs.",
-				g.bold(name),
-				renames.len(),
-				err
-			))
-		}
-	}
-
-	fn find_best_version(
-		&self,
-		g: &GlobalArgs,
-		name: &str,
-		versions: &[&VersionReq],
-		by_version: &HashMap<VersionReq, Vec<(Package, Dep)>>,
-	) -> Result<String, String> {
-		let found = match self.version_selector {
-			VersionSelectorMode::Exact => self.exact_version.clone().ok_or_else(|| {
-				"Missing --exact-version for --version-selector=exact".to_string()
-			})?,
-			VersionSelectorMode::Highest => try_find_latest(by_version.keys())?,
-			VersionSelectorMode::Unambiguous => {
-				if versions.len() > 1 {
-					let str_width = versions.iter().map(|v| v.to_string().len()).max().unwrap();
-					let mut err = String::new();
-					// iter by descending frequency
-					for (version, pkgs) in by_version
-						.iter()
-						.sorted_by_key(|(v, pkgs)| (pkgs.len(), v.to_string()))
-						.rev()
-					{
-						let ddd = if pkgs.len() > 3 { ", …" } else { "" };
-						let s = plural_or(pkgs.len(), " ");
-						err.push_str(&format!(
-							"  {: <width$}: {: >3} time{s} ({}{ddd})\n",
-							version.to_string(),
-							pkgs.len(),
-							pkgs.iter()
-								.map(|(c, _)| c.name.as_str())
-								.take(3)
-								.collect::<Vec<_>>()
-								.join(", "),
-							width = str_width
-						));
-					}
-
-					let version_hint = match try_find_latest(by_version.keys()) {
-						Ok(latest) => latest,
-						Err(_e) => {
-							log::warn!("Could not find determine latest common version: {}", _e);
-							"version".to_string()
-						},
-					};
-
-					let hint = format!("cargo upgrade -p {name}@{version_hint}");
-					return Err(format!(
-						"\nFound {} different versions of '{}' in the workspace:\n\n{err}\nHint: {}\n",
-						versions.len(),
-						name,
-						g.bold(&hint),
-					))
-				} else {
-					versions.first().ok_or_else(|| "No versions found".to_string())?.to_string()
-				}
-			},
-		};
-		Ok(found)
-	}
-}
-
-fn try_find_latest<'a, I: Iterator<Item = &'a VersionReq>>(reqs: I) -> Result<String, String> {
-	let reqs = reqs.collect::<Vec<_>>();
-
-	if reqs.is_empty() {
-		return Err("No versions found".to_string())
-	}
-	if reqs.iter().all(|r| r == &reqs[0]) {
-		return Ok(reqs[0].to_string())
-	}
-
-	let mut versions = Vec::<Version>::new();
-
-	// Try to convert each to a version. This is done as best-effort:
-	for req in reqs {
-		if req.comparators.len() != 1 {
-			return Err(format!("Invalid version requirement: '{req}'"))
-		}
-		let comp = req.comparators.first().unwrap();
-		if comp.op != Op::Caret {
-			return Err(format!("Only caret is supported, but got: '{req}'"))
-		}
-		if !comp.pre.is_empty() {
-			return Err(format!("Pre-release versions are not supported: '{req}'"))
-		}
-
-		versions.push(Version {
-			major: comp.major,
-			minor: comp.minor.unwrap_or(0),
-			patch: comp.patch.unwrap_or(0),
-			pre: Default::default(),
-			build: Default::default(),
-		});
-	}
-
-	let latest = versions.iter().max().ok_or_else(|| "No versions found".to_string())?;
-	Ok(latest.clone().to_string())
 }

@@ -387,10 +387,10 @@ fn format_all_features_works(#[case] input: &str, #[case] modify: Option<&str>) 
 
 #[rstest]
 #[case(
-	80,
+	(80,
 	r#"[features]
 F0 = [  "A/F0"	, 	"B/F0"	]
-"#,
+"#),
 	Some(
 		r#"[features]
 F0 = [ "A/F0", "B/F0" ]
@@ -398,10 +398,10 @@ F0 = [ "A/F0", "B/F0" ]
 	)
 )]
 #[case(
-	30,
+	(30,
 	r#"[features]
 F0 = [ "LONG/F0", "FEATU/F0" ]
-"#,
+"#),
 	Some(
 		r#"[features]
 F0 = [ "LONG/F0", "FEATU/F0" ]
@@ -409,10 +409,10 @@ F0 = [ "LONG/F0", "FEATU/F0" ]
 	)
 )]
 #[case(
-	30,
+	(30,
 	r#"[features]
 F0 = [ "LONG/F0", "FEATUR/F0" ]
-"#,
+"#),
 	Some(
 		r#"[features]
 F0 = [
@@ -423,11 +423,11 @@ F0 = [
 	)
 )]
 #[case(
-	30,
+	(30,
 	r#"[features]
 F0 = [ "LONG/F0", "FEATU/F0" ]
 G0 = [ "LONG/F0", "FEATUR/F0" ]
-"#,
+"#),
 	Some(
 		r#"[features]
 F0 = [ "LONG/F0", "FEATU/F0" ]
@@ -439,12 +439,12 @@ G0 = [
 	)
 )]
 #[case(
-	30,
+	(30,
 	r#"[features]
 default = [
 	"std",
 ]
-"#,
+"#),
 	Some(
 		r#"[features]
 default = [ "std" ]
@@ -453,21 +453,18 @@ default = [ "std" ]
 )]
 // FIXME: known bug
 #[case(
-	30,
+	(30,
 	r#"[features]
 default 	=					[ "std" ] # lel
-"#,
+"#),
 	Some(
 		r#"[features]
 default 	=					[ "std" ] # lel
 "#
 	)
 )]
-fn format_all_features_line_width_works(
-	#[case] line_width: u32,
-	#[case] input: &str,
-	#[case] modify: Option<&str>,
-) {
+fn format_all_features_line_width_works(#[case] config: (u32, &str), #[case] modify: Option<&str>) {
+	let (line_width, input) = config;
 	let mut fixer = AutoFixer::from_raw(input).unwrap();
 	fixer.format_all_feature(line_width).unwrap();
 	pretty_assertions::assert_str_eq!(fixer.to_string(), modify.unwrap_or(input));

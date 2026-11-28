@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
 mod alias;
+mod selection;
 mod version;
 
 use crate::{
@@ -11,11 +12,11 @@ use crate::{
 		CargoArgs, GlobalArgs,
 	},
 	grammar::plural,
-	log, ErrToStr,
+	log,
 };
 use cargo_metadata::{Dependency as Dep, Metadata, Package};
 use semver::VersionReq;
-use std::collections::{BTreeMap as Map, BTreeSet, HashMap};
+use std::collections::{BTreeMap as Map, HashMap};
 
 use version::VersionSelectorMode;
 
@@ -80,40 +81,6 @@ impl LiftToWorkspaceCmd {
 		}
 
 		self.try_apply_changes(&mut fixers)
-	}
-
-	fn select_dependencies<'a>(&self, meta: &'a Metadata) -> Result<BTreeSet<&'a str>, String> {
-		// TODO optimize to not be O^3
-		let mut dependencies = BTreeSet::<&str>::new();
-		let mut regex_lookup = Map::new();
-		for filter in self.dependencies.iter() {
-			if let Some(regex) = filter.strip_prefix("regex:") {
-				regex_lookup.insert(regex, regex::Regex::new(regex).err_to_str()?);
-			}
-		}
-
-		for pkg in meta.packages.iter() {
-			for dep in pkg.dependencies.iter() {
-				if !regex_lookup.values().any(|r| r.is_match(&dep.name)) &&
-					!self.dependencies.contains(&dep.name)
-				{
-					continue;
-				}
-
-				if let Some(location_filter) = &self.source_location {
-					let is_local = dep.path.is_some();
-					match location_filter {
-						SourceLocationSelector::Local if !is_local => continue,
-						SourceLocationSelector::Remote if is_local => continue,
-						_ => (),
-					}
-				}
-
-				dependencies.insert(&dep.name);
-			}
-		}
-
-		Ok(dependencies)
 	}
 
 	fn validate_args(&self) -> Result<(), String> {
@@ -230,7 +197,6 @@ impl LiftToWorkspaceCmd {
 			Self::configure_member_dependency(
 				fixer,
 				dep,
-				name,
 				maybe_rename.as_ref(),
 				&source_location,
 				workspace_default_features_enabled,
@@ -271,7 +237,6 @@ impl LiftToWorkspaceCmd {
 	fn configure_member_dependency(
 		fixer: &mut AutoFixer,
 		dep: &Dep,
-		name: &str,
 		maybe_rename: Option<&String>,
 		location: &SourceLocationSelector,
 		workspace_default_features_enabled: bool,
@@ -279,74 +244,13 @@ impl LiftToWorkspaceCmd {
 		// We can safely use the rename here, since we found it with `detect_rename`.
 		let dep_name = dep.rename.as_ref().unwrap_or(&dep.name);
 		if maybe_rename.is_some_and(|rename| rename != dep_name) {
-			return Err(format!("Dependency '{name}' has conflicting alias '{dep_name}'"))
+			return Err(format!("Dependency '{}' has conflicting alias '{dep_name}'", dep.name))
 		}
 
 		if dep.uses_default_features != workspace_default_features_enabled {
 			fixer.lift_dependency(dep_name, &dep.kind, Some(dep.uses_default_features), location)
 		} else {
 			fixer.lift_dependency(dep_name, &dep.kind, None, location)
-		}
-	}
-
-	/// Index what versions of a crate are used in the workspace.
-	fn build_version_index(
-		meta: &cargo_metadata::Metadata,
-		name: &str,
-	) -> HashMap<VersionReq, Vec<(Package, Dep)>> {
-		let mut by_version = HashMap::<VersionReq, Vec<(Package, Dep)>>::new();
-		for pkg in meta.packages.iter() {
-			for dep in pkg.dependencies.iter() {
-				if dep.name != name {
-					continue
-				}
-
-				by_version.entry(dep.req.clone()).or_default().push((pkg.clone(), dep.clone()));
-			}
-		}
-		by_version
-	}
-
-	fn detect_source_location(
-		&self,
-		meta: &cargo_metadata::Metadata,
-		name: &str,
-	) -> Result<SourceLocationSelector, String> {
-		let mut local = false;
-		let mut remote = false;
-
-		// TODO check that they all point to the same folder
-
-		for pkg in meta.packages.iter() {
-			if let Some(skip_package) = &self.skip_package {
-				if pkg.name == skip_package {
-					continue
-				}
-			}
-
-			for dep in pkg.dependencies.iter() {
-				if dep.name == name {
-					if dep.path.is_some() {
-						local = true;
-					} else {
-						remote = true;
-					}
-				}
-			}
-		}
-
-		if local && remote {
-			Err(format!(
-				"Dependency '{name}' is used both locally and remotely. This cannot be fixed automatically."
-			))
-		} else if local {
-			Ok(SourceLocationSelector::Local)
-		} else if remote {
-			Ok(SourceLocationSelector::Remote)
-		} else {
-			Err(format!(
-				"Dependency '{name}' is not used in the workspace. This cannot be fixed automatically."
-			))
 		}
 	}
 }

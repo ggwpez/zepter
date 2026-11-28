@@ -239,25 +239,13 @@ where
 	/// Calculate the transitive hull of `self` by using the connectivity of `topology`.
 	fn transitive_in(&mut self, topology: &Self) -> bool {
 		let mut changed = false;
-		// The edges that are added in this stage.
-		let mut new_edges: BTreeMap<T, BTreeSet<T>> = BTreeMap::new();
-
-		for (k, vs) in self.edges.iter() {
-			for v in vs {
-				if let Some(new_deps) = topology.edges.get(v) {
-					let edge = self.edges.get(k);
-					for new_dep in new_deps {
-						if !edge.unwrap().contains(new_dep) {
-							new_edges.entry(k.clone()).or_default().insert(new_dep.clone());
-							changed = true;
-						}
-					}
-				}
+		for deps in self.edges.values_mut() {
+			let mut additions: BTreeSet<&T> = BTreeSet::new();
+			for next in deps.iter().filter_map(|node| topology.edges.get(node)) {
+				additions.extend(next.iter().filter(|node| !deps.contains(*node)));
 			}
-		}
-
-		for (k, v) in new_edges {
-			self.edges.entry(k).or_default().extend(v);
+			changed |= !additions.is_empty();
+			deps.extend(additions.into_iter().cloned());
 		}
 
 		changed
@@ -270,26 +258,7 @@ where
 	///
 	/// This returns `Some` if (and only if) `to` is *reachable* from `from`.
 	pub fn any_path<'a>(&'a self, from: &'a T, to: &T) -> Option<Path<'a, T>> {
-		let mut visited = BTreeSet::new();
-		let mut stack = vec![(from, vec![from])];
-
-		while let Some((node, mut path)) = stack.pop() {
-			if visited.contains(&node) {
-				continue
-			}
-			visited.insert(node);
-			if node == to {
-				return path.try_into().ok()
-			}
-			if let Some(neighbors) = self.edges.get(node) {
-				for neighbor in neighbors.iter() {
-					path.push(neighbor);
-					stack.push((neighbor, path.clone()));
-					path.pop();
-				}
-			}
-		}
-		None
+		self.reachable_predicate(from, |node| node == to)
 	}
 
 	/// Check if any node which fulfills `pred` can be reached from `from` and return the first
@@ -303,10 +272,9 @@ where
 		let mut stack = vec![(from, vec![from])];
 
 		while let Some((node, mut path)) = stack.pop() {
-			if visited.contains(&node) {
+			if !visited.insert(node) {
 				continue
 			}
-			visited.insert(node);
 			if pred(node) {
 				return path.try_into().ok()
 			}

@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
-use super::{build_feature_dag, CrateAndFeature};
+mod never_implies;
+mod only_enables;
+
+use super::build_feature_dag;
 use crate::{
 	cmd::{resolve_dep, CargoArgs, CommandError, GlobalArgs, RenamedPackage},
 	log, CrateId,
@@ -84,75 +87,6 @@ pub struct NeverImpliesCmd {
 	path_delimiter: String,
 }
 
-impl NeverImpliesCmd {
-	pub fn run(&self, _global: &GlobalArgs) -> Result<(), String> {
-		let meta = self.cargo_args.load_metadata()?;
-		log::info!(
-			target: super::LOG_TARGET,
-			"Checking that feature '{}' never implies '{}'",
-			self.precondition,
-			self.stays_disabled
-		);
-		let pkgs = &meta.packages;
-		let dag = build_feature_dag(&meta, pkgs)?;
-
-		for CrateAndFeature(pkg, feature) in dag.lhs_nodes() {
-			let crate_and_feature = CrateAndFeature(pkg.clone(), feature.clone());
-			if feature == &self.precondition {
-				let Some(path) = dag
-					.reachable_predicate(&crate_and_feature, |CrateAndFeature(_, enabled)| {
-						enabled == &self.stays_disabled
-					})
-				else {
-					continue
-				};
-
-				// TODO cleanup this cluster fuck
-				let lookup = |id: &str| {
-					let referenced_crate = pkgs
-						.iter()
-						.find(|pkg| pkg.id.to_string() == id)
-						.ok_or_else(|| format!("Could not find crate '{id}' in the metadata."))?;
-					pkgs.iter()
-						.find(|pkg| pkg.id == referenced_crate.id)
-						.ok_or_else(|| format!("Could not find crate '{id}' in the metadata."))
-				};
-
-				let delimiter = self.path_delimiter.replace("\\n", "\n").replace("\\t", "\t");
-				let mut out = String::new();
-				let mut is_first = true;
-
-				for CrateAndFeature(id, feature) in path.0.iter().map(|node| node.as_ref()) {
-					let krate = lookup(id)?;
-					if !is_first {
-						out.push_str(&delimiter);
-					}
-					is_first = false;
-					out.push_str(&format!("{}/{}", krate.name, feature));
-					if self.show_version {
-						out.push_str(&format!(" v{}", krate.version));
-					}
-					if self.show_source {
-						if let Some(source) = krate.source.as_ref() {
-							out.push_str(&format!(" ({})", source.repr));
-						} else {
-							out.push_str(" (local)");
-						}
-					}
-				}
-				println!(
-					"Feature '{}' implies '{}' via path:\n  {}",
-					self.precondition, self.stays_disabled, out
-				);
-
-				return Ok(())
-			}
-		}
-
-		Ok(())
-	}
-}
-
 impl NeverEnablesCmd {
 	pub fn run(&self, _global: &GlobalArgs) -> Result<(), String> {
 		let meta = self.cargo_args.load_metadata()?;
@@ -212,44 +146,6 @@ impl NeverEnablesCmd {
 					None => {
 						println!("      {}", rhs.name());
 					},
-				}
-			}
-		}
-
-		Ok(())
-	}
-}
-
-impl OnlyEnablesCmd {
-	pub fn run(&self, _global: &GlobalArgs) -> Result<(), String> {
-		let meta = self.cargo_args.load_metadata()?;
-		let pkgs = &meta.packages;
-
-		for pkg in pkgs.iter() {
-			for dep in pkg.dependencies.iter() {
-				let Some(dep) = resolve_dep(pkg, dep, &meta) else { continue };
-				if !dep.pkg.features.contains_key(&self.only_enables) {
-					continue
-				}
-
-				for (feat, imply) in pkg.features.iter() {
-					if feat == &self.precondition {
-						continue
-					}
-					log::info!(target: super::LOG_TARGET, "{}: {}", feat, imply.join(", "));
-
-					let opt = if dep.optional { "?" } else { "" };
-					let bad_opt = format!("{}{}/{}", dep.name(), opt, self.only_enables);
-					let bad = format!("{}/{}", dep.name(), self.only_enables);
-					if imply.contains(&bad) || imply.contains(&bad_opt) {
-						println!(
-							"{}/{} enables {}/{}",
-							pkg.name,
-							feat,
-							dep.name(),
-							self.only_enables
-						);
-					}
 				}
 			}
 		}

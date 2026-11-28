@@ -1,18 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
-use super::{build_feature_dag, error_stats, CrateAndFeature};
+mod collect;
+mod report;
+
+use super::{build_feature_dag, CrateAndFeature};
 use crate::{
-	autofix::{AutoFixer, AutoFixerArgs},
-	cmd::{parse_key_val, resolve_dep, CargoArgs, CommandError, GlobalArgs, RenamedPackage},
+	autofix::AutoFixerArgs,
+	cmd::{parse_key_val, CargoArgs, CommandError, GlobalArgs, RenamedPackage},
 	dag::Dag,
-	log, CrateId,
+	CrateId,
 };
-use cargo_metadata::{Metadata, Package};
+use cargo_metadata::Metadata;
 use std::{
 	collections::{BTreeMap, BTreeSet, HashMap},
 	fs::canonicalize,
-	path::{Path, PathBuf},
+	path::PathBuf,
 };
 
 /// Verifies that rust features are properly propagated.
@@ -150,6 +153,7 @@ impl core::str::FromStr for IgnoreSetting {
 
 type MissingDependencies = BTreeMap<CrateId, BTreeSet<RenamedPackage>>;
 
+#[derive(Default)]
 struct Findings {
 	propagate_missing: MissingDependencies,
 	feature_missing: MissingDependencies,
@@ -163,7 +167,7 @@ impl PropagateFeatureCmd {
 		let features = self.features.iter().collect::<BTreeSet<_>>();
 
 		for feature in features {
-			self.run_feature(&meta, &dag, feature.clone(), global)?;
+			self.run_feature(&meta, &dag, feature, global)?;
 		}
 
 		Ok(())
@@ -173,7 +177,7 @@ impl PropagateFeatureCmd {
 		&self,
 		meta: &Metadata,
 		dag: &Dag<CrateAndFeature>,
-		feature: String,
+		feature: &str,
 		global: &GlobalArgs,
 	) -> Result<(), CommandError> {
 		// Allowed dir that we can write to.
@@ -181,301 +185,17 @@ impl PropagateFeatureCmd {
 			format!("Could not canonicalize workspace root {}: {e}", meta.workspace_root)
 		})?;
 
-		let pkgs = meta.packages.iter().collect::<Vec<_>>();
-		let mut to_check = pkgs.clone();
-		if !self.packages.is_empty() {
-			to_check =
-				pkgs.iter().filter(|pkg| self.packages.contains(&pkg.name)).cloned().collect();
-		}
+		let to_check: Vec<_> = meta
+			.packages
+			.iter()
+			.filter(|pkg| self.packages.is_empty() || self.packages.contains(&pkg.name))
+			.collect();
 		if to_check.is_empty() {
 			return Err(format!("No packages found: {:?}", self.packages).into())
 		}
 
-		let findings = self.collect_findings(meta, dag, &feature, &to_check)?;
-		self.report_findings(meta, &pkgs, &allowed_dir, &feature, global, findings)
-	}
-
-	fn collect_findings(
-		&self,
-		meta: &Metadata,
-		dag: &Dag<CrateAndFeature>,
-		feature: &String,
-		to_check: &[&Package],
-	) -> Result<Findings, String> {
-		// (Crate that is not forwarding the feature) -> (Dependency that it is not forwarded to)
-		let mut propagate_missing = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
-		let ignore_missing_propagate = self.ignore_missing_propagate()?;
-		let dep_kinds = self.parse_dep_kinds()?;
-		// (Crate that missing the feature) -> (Dependency that has it)
-		let mut feature_missing = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
-		// (Crate that is not enabling a optional dependency) -> (Dependency that it is not enabled)
-		let mut non_optional_missing = BTreeMap::<CrateId, BTreeSet<RenamedPackage>>::new();
-
-		for pkg in to_check.iter() {
-			// TODO that it does not enable other features.
-			let in_workspace = meta.workspace_members.iter().any(|m| m == &pkg.id);
-			if !in_workspace && self.left_side_outside_workspace == MuteSetting::Ignore {
-				continue
-			}
-
-			for dep in pkg.dependencies.iter() {
-				let mute = dep_kinds.get(&dep.kind).unwrap_or(&IgnoreSetting::Check);
-				if mute == &IgnoreSetting::Ignore {
-					continue
-				}
-				// TODO handle default features.
-				// Resolve the dep according to the metadata.
-				let Some(dep) = resolve_dep(pkg, dep, meta) else {
-					// Either outside workspace or not resolved, possibly due to not being used at
-					// all because of the target or whatever.
-					continue
-				};
-
-				// If optional and require by `feature-enables-dep` but does not have the feature,
-				// then we need to enable it as non-optional.
-				if dep.optional {
-					if let Some((feature, _)) = self
-						.feature_enables_dep
-						.iter()
-						.flatten()
-						.find(|(f, name)| f == feature && *name == dep.name())
-					{
-						if !dep.pkg.features.contains_key(feature) &&
-							!pkg.features.get(feature).is_some_and(|f| f.contains(&dep.name()))
-						{
-							non_optional_missing
-								.entry(pkg.id.to_string())
-								.or_default()
-								.insert(dep.clone());
-						}
-					}
-					// Continue here should not make a difference. TODO check.
-				}
-
-				if !dep.pkg.features.contains_key(feature) {
-					continue
-				}
-
-				if !pkg.features.contains_key(feature) {
-					if self.left_side_feature_missing != MuteSetting::Ignore {
-						feature_missing.entry(pkg.id.to_string()).or_default().insert(dep);
-					}
-					continue
-				}
-
-				// TODO check that optional deps are only enabled as optional unless
-				// overwritten with `--feature-enables-dep`.
-				let target = CrateAndFeature(dep.pkg.id.repr.clone(), feature.clone());
-				let want_opt = CrateAndFeature(format!("{}?", &pkg.id), feature.clone());
-				let want_req = CrateAndFeature(pkg.id.repr.clone(), feature.clone());
-
-				if dag.adjacent(&want_opt, &target) || dag.adjacent(&want_req, &target) {
-					// Easy case, all good.
-					continue
-				}
-				let default_entrypoint = CrateAndFeature(pkg.id.repr.clone(), "#entrypoint".into());
-				// Now the more complicated case where `pkg/F -> dep/G .. -> dep/F`. So to say a
-				// multi-hop internal transitive propagation of the feature on the dependency side.
-				let sub_dag = dag.sub(|CrateAndFeature(p, f)| {
-					(p == &pkg.id.repr && f == "#entrypoint") || (p == &dep.pkg.id.repr)
-				});
-				if let Some(p) = sub_dag.any_path(&default_entrypoint, &target) {
-					let _ = p;
-					// Easy case, all good.
-					log::debug!(
-						target: super::LOG_TARGET,
-						"Reachable from the default entrypoint: {:?} vis {:?}",
-						target,
-						p.0
-					);
-					continue
-				}
-
-				if let Some((_, lhs_ignore)) = ignore_missing_propagate
-					.iter()
-					.find(|(c, _)| pkg.name == c.0 && &c.1 == feature)
-				{
-					if lhs_ignore.iter().any(|i| dep.pkg.name == i.0 && &i.1 == feature) {
-						continue
-					}
-				}
-
-				propagate_missing.entry(pkg.id.to_string()).or_default().insert(dep);
-			}
-		}
-		Ok(Findings { propagate_missing, feature_missing, non_optional_missing })
-	}
-
-	fn report_findings(
-		&self,
-		meta: &Metadata,
-		pkgs: &[&Package],
-		allowed_dir: &Path,
-		feature: &String,
-		global: &GlobalArgs,
-		findings: Findings,
-	) -> Result<(), CommandError> {
-		let Findings { propagate_missing, feature_missing, non_optional_missing } = findings;
-		let lookup = |id: &str| {
-			pkgs.iter()
-				.find(|pkg| pkg.id.repr == id)
-				.copied()
-				.ok_or_else(|| format!("Could not find crate {id} in the metadata"))
-		};
-
-		let faulty_crates: BTreeSet<CrateId> = propagate_missing
-			.keys()
-			.chain(feature_missing.keys())
-			.chain(non_optional_missing.keys())
-			.cloned()
-			.collect();
-		let mut faulty_crates = faulty_crates
-			.into_iter()
-			.map(|id| lookup(&id).map(|pkg| (pkg, id)))
-			.collect::<Result<Vec<_>, _>>()?;
-		faulty_crates.sort_by(|(a, _), (b, _)| a.name.cmp(&b.name));
-
-		let (mut errors, mut fixes) = (0, 0);
-		for (krate, _) in faulty_crates {
-			let in_workspace = meta.workspace_members.iter().any(|m| m == &krate.id);
-			// check if we can modify in allowed_dir
-			let krate_path = canonicalize(krate.manifest_path.as_std_path()).map_err(|e| {
-				format!("Could not canonicalize manifest {}: {e}", krate.manifest_path)
-			})?;
-			// TODO move down
-			let mut fixer = if self.fixer_args.enable {
-				if krate_path.starts_with(allowed_dir) ||
-					self.modify_paths.iter().any(|p| krate_path.starts_with(p))
-				{
-					Some(AutoFixer::from_manifest(&krate_path)?)
-				} else {
-					log::info!(
-						target: super::LOG_TARGET,
-						"Cargo path is outside of the workspace: {:?} not in {:?}",
-						krate_path.display(),
-						allowed_dir.display()
-					);
-					None
-				}
-			} else {
-				None
-			};
-
-			let mut krate_str = format!("'{}'", krate.name);
-			if self.show_path {
-				krate_str.push_str(&format!(" ({})", krate.manifest_path));
-			}
-
-			println!("crate {krate_str}\n  feature '{feature}'",);
-
-			if let Some(deps) = feature_missing.get(&krate.id.to_string()) {
-				let mut named = deps.iter().map(RenamedPackage::display_name).collect::<Vec<_>>();
-				named.sort();
-				println!(
-					"    is required by {} dependenc{}:\n      {}",
-					deps.len(),
-					if deps.len() == 1 { "y" } else { "ies" },
-					named.join("\n      "),
-				);
-
-				if self.fixer_args.enable &&
-					self.fix_package.as_ref().is_none_or(|p| p == &krate.name.to_string()) &&
-					self.left_side_feature_missing == MuteSetting::Fix &&
-					(self.left_side_outside_workspace == MuteSetting::Fix || in_workspace)
-				{
-					let Some(fixer) = fixer.as_mut() else { continue };
-					fixer.add_feature(feature)?;
-
-					log::info!(
-						target: super::LOG_TARGET,
-						"Inserted feature '{}' into '{}'",
-						&feature,
-						&krate.name
-					);
-					fixes += 1;
-				}
-
-				errors += 1;
-			}
-
-			if let Some(deps) = propagate_missing.get(&krate.id.to_string()) {
-				let mut named = deps.iter().map(RenamedPackage::display_name).collect::<Vec<_>>();
-				named.sort();
-				println!("    must propagate to:\n      {}", named.join("\n      "));
-
-				if self.fixer_args.enable &&
-					self.fix_package.as_ref().is_none_or(|p| p == &krate.name.to_string())
-				{
-					for dep in deps.iter() {
-						let dep_name = dep.name();
-						if self.fix_dependency.as_ref().is_some_and(|d| d != &dep_name) {
-							continue
-						}
-						let Some(fixer) = fixer.as_mut() else { continue };
-						let non_optional = self
-							.feature_enables_dep
-							.as_ref()
-							.is_some_and(|v| v.contains(&(feature.clone(), dep_name.clone())));
-						let opt = if !non_optional && dep.optional { "?" } else { "" };
-
-						fixer.add_to_feature(
-							feature,
-							format!("{dep_name}{opt}/{feature}").as_str(),
-						)?;
-						log::info!(
-							target: super::LOG_TARGET,
-							"Inserted '{dep_name}/{feature}' into '{}'",
-							krate.name
-						);
-						fixes += 1;
-					}
-				}
-				errors += deps.len();
-			}
-
-			if let Some(deps) = non_optional_missing.get(&krate.id.to_string()) {
-				let mut named = deps.iter().map(RenamedPackage::display_name).collect::<Vec<_>>();
-				named.sort();
-				println!(
-					"    must enable dependency as non-optional:\n      {}",
-					named.join("\n      ")
-				);
-
-				if self.fixer_args.enable &&
-					self.fix_package.as_ref().is_none_or(|p| p == &krate.name.to_string())
-				{
-					for dep in deps.iter() {
-						let dep_name = dep.name();
-						let Some(fixer) = fixer.as_mut() else { continue };
-
-						fixer.add_to_feature(feature, &dep_name)?;
-
-						log::info!(
-							target: super::LOG_TARGET,
-							"Inserted '{dep_name}' into '{}'",
-							krate.name
-						);
-						fixes += 1;
-					}
-				}
-
-				errors += deps.len();
-			}
-
-			if let Some(fixer) = fixer.as_mut() {
-				if fixes > 0 {
-					fixer.save()?;
-				}
-			}
-		}
-		if let Some(e) = error_stats(errors, 0, fixes, self.fixer_args.enable, global) {
-			println!("{e}");
-		}
-
-		if errors > fixes {
-			return Err(CommandError::reported(global.error_code()))
-		}
-		Ok(())
+		let findings = self.collect_findings(meta, dag, feature, &to_check)?;
+		report::Reporter::new(self, meta, &allowed_dir, feature, findings).report(global)
 	}
 
 	fn ignore_missing_propagate(

@@ -270,6 +270,67 @@ helper = { path = "helper" }
 }
 
 #[test]
+fn lift_discards_failed_dependency_edits_and_keeps_successful_lifts() {
+	let dir = tempfile::tempdir().unwrap();
+	let root = dir.path();
+	let manifest = root.join("Cargo.toml");
+	let workspace = "[workspace]\nmembers = ['app', 'other', 'broken', 'works']\nresolver = '2'\n";
+	std::fs::write(&manifest, workspace).unwrap();
+	let mut originals = Vec::new();
+	for (name, deps) in [
+		("app", "[dependencies]\nbroken = { path = '../broken' }\nworks = { path = '../works' }\n"),
+		("other", "[dependencies.broken]\npath = '../broken'\n"),
+		("broken", ""),
+		("works", ""),
+	] {
+		let pkg = root.join(name);
+		std::fs::create_dir_all(pkg.join("src")).unwrap();
+		std::fs::write(pkg.join("src/lib.rs"), "").unwrap();
+		let contents =
+			format!("[package]\nname = '{name}'\nversion = '0.1.0'\nedition = '2021'\n{deps}");
+		let path = pkg.join("Cargo.toml");
+		std::fs::write(&path, &contents).unwrap();
+		originals.push((path, contents));
+	}
+
+	let lift = |deps: &[&str]| {
+		Command::new(assert_cmd::cargo_bin!("zepter"))
+			.current_dir(root)
+			.args([
+				"transpose",
+				"dependency",
+				"lift-to-workspace",
+				"--offline",
+				"--ignore-errors",
+				"--fix",
+			])
+			.args(deps)
+			.assert()
+			.success();
+	};
+	lift(&["broken"]);
+	assert_eq!(std::fs::read_to_string(&manifest).unwrap(), workspace);
+	for (path, contents) in &originals {
+		assert_eq!(&std::fs::read_to_string(path).unwrap(), contents);
+	}
+
+	lift(&["broken", "works"]);
+	let doc: toml_edit::DocumentMut = std::fs::read_to_string(&manifest).unwrap().parse().unwrap();
+	let deps = doc["workspace"]["dependencies"].as_table().unwrap();
+	assert!(!deps.contains_key("broken"));
+	assert_eq!(deps["works"]["path"].as_str(), Some("works"));
+	let app: toml_edit::DocumentMut =
+		std::fs::read_to_string(&originals[0].0).unwrap().parse().unwrap();
+	assert_eq!(app["dependencies"]["works"]["workspace"].as_bool(), Some(true));
+	assert_eq!(app["dependencies"]["broken"]["path"].as_str(), Some("../broken"));
+	cargo_metadata::MetadataCommand::new()
+		.manifest_path(&manifest)
+		.other_options(vec!["--offline".into()])
+		.exec()
+		.unwrap();
+}
+
+#[test]
 fn propagation_preserves_namespaced_optional_dependency_activation() {
 	let dir = tempfile::tempdir().unwrap();
 	let root = dir.path();

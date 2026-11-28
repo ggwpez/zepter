@@ -16,23 +16,26 @@ impl AutoFixer {
 		default_feats: Option<bool>,
 		location: &SourceLocationSelector,
 	) -> Result<(), String> {
+		if let Some(dep) = self.dependency_mut(dname, kind) {
+			Self::lift_some_dependency(dep, default_feats, location)?;
+		}
+		Ok(())
+	}
+
+	pub(crate) fn dependency_mut(
+		&mut self,
+		name: &str,
+		kind: &DependencyKind,
+	) -> Option<&mut Item> {
 		let kind = crate::kind_to_str(kind);
 		let doc: &mut DocumentMut = self.doc.as_mut().unwrap();
 
 		if !doc.contains_table(kind) {
 			log::warn!(target: super::LOG_TARGET, "No '{}' entry found", kind);
-			return Ok(())
+			return None
 		}
 		let deps: &mut Table = doc[kind].as_table_mut().unwrap();
-
-		if !deps.contains_key(dname) {
-			return Ok(())
-		}
-
-		let dep = deps.get_mut(dname).unwrap();
-		Self::lift_some_dependency(dep, default_feats, location)?;
-
-		Ok(())
+		deps.get_mut(name)
 	}
 
 	pub fn lift_some_dependency(

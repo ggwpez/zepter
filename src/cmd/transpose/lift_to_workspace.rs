@@ -16,12 +16,33 @@ use crate::{
 };
 use cargo_metadata::{Dependency as Dep, Metadata, Package};
 use semver::VersionReq;
-use std::collections::{BTreeMap as Map, HashMap};
+use std::{
+	collections::{btree_map::Entry, BTreeMap as Map, HashMap},
+	path::{Path, PathBuf},
+};
 
 use version::VersionSelectorMode;
 
 #[cfg(feature = "logging")]
 const LOG_TARGET: &str = module_path!();
+
+type ManifestFixers = Map<PathBuf, AutoFixer>;
+
+fn manifest_fixer<'a>(
+	fixers: &'a mut ManifestFixers,
+	path: &Path,
+) -> Result<&'a mut AutoFixer, String> {
+	let path = path
+		.canonicalize()
+		.map_err(|e| format!("Could not resolve {}: {e}", path.display()))?;
+	match fixers.entry(path) {
+		Entry::Occupied(entry) => Ok(entry.into_mut()),
+		Entry::Vacant(entry) => {
+			let fixer = AutoFixer::from_manifest(entry.key())?;
+			Ok(entry.insert(fixer))
+		},
+	}
+}
 
 /// Lift up a dependency to the workspace and reference it from all packages.
 #[derive(Debug, clap::Parser)]
@@ -90,12 +111,9 @@ impl LiftToWorkspaceCmd {
 		Ok(())
 	}
 
-	fn try_apply_changes(
-		&self,
-		fixers: &mut Map<String, (Option<Package>, AutoFixer)>,
-	) -> Result<(), String> {
+	fn try_apply_changes(&self, fixers: &mut ManifestFixers) -> Result<(), String> {
 		let mut modified = 0;
-		for (_pkg, fixer) in fixers.values_mut() {
+		for (_path, fixer) in fixers.iter_mut() {
 			if !fixer.modified() {
 				continue
 			}
@@ -103,10 +121,8 @@ impl LiftToWorkspaceCmd {
 			modified += 1;
 			if self.fix {
 				fixer.save()?;
-			} else if let Some(_pkg) = _pkg {
-				log::debug!("Would modify {:?}", _pkg.name);
 			} else {
-				log::debug!("Would modify the workspace");
+				log::debug!("Would modify {}", _path.display());
 			}
 		}
 		if modified > 0 && !self.fix {
@@ -125,7 +141,7 @@ impl LiftToWorkspaceCmd {
 		g: &GlobalArgs,
 		meta: &cargo_metadata::Metadata,
 		name: &str,
-		fixers: &mut Map<String, (Option<Package>, AutoFixer)>,
+		fixers: &mut ManifestFixers,
 	) -> Result<(), String> {
 		let maybe_rename = self.detect_rename(g, name, meta)?;
 		let source_location = self.detect_source_location(meta, name)?;
@@ -139,13 +155,8 @@ impl LiftToWorkspaceCmd {
 		// them off.
 		let workspace_default_features_enabled = all_use_default_features;
 
-		// Now create fixer for the root package
 		let root_manifest_path = meta.workspace_root.join("Cargo.toml");
-		let (_, workspace_fixer) = match fixers.entry("magic:workspace".to_string()) {
-			std::collections::btree_map::Entry::Occupied(entry) => entry.into_mut(),
-			std::collections::btree_map::Entry::Vacant(entry) =>
-				entry.insert((None, AutoFixer::from_manifest(&root_manifest_path)?)),
-		};
+		let workspace_fixer = manifest_fixer(fixers, root_manifest_path.as_std_path())?;
 
 		let mut dep = by_version
 			.values()
@@ -189,11 +200,7 @@ impl LiftToWorkspaceCmd {
 				}
 			}
 
-			let (_, fixer) = match fixers.entry(pkg.name.to_string()) {
-				std::collections::btree_map::Entry::Occupied(entry) => entry.into_mut(),
-				std::collections::btree_map::Entry::Vacant(entry) =>
-					entry.insert((Some(pkg.clone()), AutoFixer::from_manifest(&pkg.manifest_path)?)),
-			};
+			let fixer = manifest_fixer(fixers, pkg.manifest_path.as_std_path())?;
 			Self::configure_member_dependency(
 				fixer,
 				dep,

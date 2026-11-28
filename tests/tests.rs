@@ -148,11 +148,24 @@ fn run_case_command(case: &Case, workspace: &Path, default_args: bool, index: us
 	}
 
 	// remove empty trailing and suffix lines
-	let res = cmd.output().unwrap();
+	let mut res = cmd.output().unwrap();
 	if let Some(code) = case.code {
 		res.clone().assert().code(code);
 	} else {
 		res.clone().assert().success();
+	}
+	if !default_args {
+		// Cargo diagnostics may contain the checkout path. Keep no-default-args
+		// snapshots independent of the temporary repository location.
+		let canonical = workspace.canonicalize().unwrap();
+		for stream in [&mut res.stdout, &mut res.stderr] {
+			if let Ok(text) = std::str::from_utf8(stream) {
+				let normalized = text
+					.replace(canonical.to_str().unwrap(), "<workspace>")
+					.replace(workspace.to_str().unwrap(), "<workspace>");
+				*stream = normalized.into_bytes();
+			}
+		}
 	}
 	res
 }
@@ -391,4 +404,247 @@ missing = ['alias?/extra']
 	std::fs::write(&manifest, &implicit).unwrap();
 	fix("enabled");
 	assert_eq!(std::fs::read_to_string(&manifest).unwrap(), implicit);
+}
+
+#[test]
+fn feature_implications_match_cargo_optional_dependency_activation() {
+	let dir = tempfile::tempdir().unwrap();
+	let root = dir.path();
+	for src in ["src", "helper/src"] {
+		std::fs::create_dir_all(root.join(src)).unwrap();
+		std::fs::write(root.join(src).join("lib.rs"), "").unwrap();
+	}
+	std::fs::write(
+		root.join("helper/Cargo.toml"),
+		"\
+[package]
+name = 'helper'
+version = '0.1.0'
+edition = '2021'
+[features]
+default = ['via-default']
+via-default = []
+extra = []
+declared = []
+",
+	)
+	.unwrap();
+	let manifest = root.join("Cargo.toml");
+	let app = "\
+[package]
+name = 'app'
+version = '0.1.0'
+edition = '2021'
+[dependencies]
+alias = { package = 'helper', path = 'helper', optional = true, default-features = false, features = ['declared'] }
+[dev-dependencies]
+alias = { package = 'helper', path = 'helper', features = ['extra'] }
+[build-dependencies]
+alias = { package = 'helper', path = 'helper', features = ['declared'] }
+[features]
+weak = ['alias?/extra']
+activate = ['dep:alias']
+both = ['activate', 'weak']
+strong = ['alias/extra']
+";
+	for (defaults, feature, target, expected) in [
+		(false, "weak", "extra", false),
+		(false, "weak", "declared", false),
+		(false, "both", "extra", true),
+		(false, "activate", "via-default", false),
+		(false, "activate", "declared", true),
+		(false, "strong", "extra", true),
+		(true, "activate", "via-default", true),
+		(true, "weak", "via-default", false),
+	] {
+		std::fs::write(
+			&manifest,
+			app.replace("default-features = false", &format!("default-features = {defaults}")),
+		)
+		.unwrap();
+		// `cargo tree` reports the selected build, unlike the metadata resolve graph
+		// which can include features of dependencies that are not built.
+		let tree = Command::new(env!("CARGO"))
+			.current_dir(root)
+			.args([
+				"tree",
+				"--edges",
+				"normal",
+				"--offline",
+				"--features",
+				feature,
+				"--prefix",
+				"none",
+				"--format",
+				"{p}|{f}",
+			])
+			.assert()
+			.success();
+		let active = std::str::from_utf8(&tree.get_output().stdout)
+			.unwrap()
+			.lines()
+			.filter_map(|line| line.strip_prefix("helper v")?.split_once('|'))
+			.any(|(_, features)| features.split(',').any(|f| f == target));
+		assert_eq!(active, expected, "Cargo: {feature} -> {target}, defaults={defaults}");
+
+		let result = Command::new(assert_cmd::cargo_bin!("zepter"))
+			.current_dir(root)
+			.args([
+				"lint",
+				"never-implies",
+				"--offline",
+				"--precondition",
+				feature,
+				"--stays-disabled",
+				target,
+			])
+			.assert()
+			.success();
+		let stdout = std::str::from_utf8(&result.get_output().stdout).unwrap();
+		if active {
+			assert!(stdout.contains(&format!("helper/{target}")), "{stdout}");
+		} else {
+			assert!(stdout.is_empty(), "{stdout}");
+		}
+	}
+}
+
+#[test]
+fn dev_feature_request_does_not_satisfy_normal_propagation() {
+	let dir = tempfile::tempdir().unwrap();
+	let root = dir.path();
+	for (path, name, declarations) in [
+		(
+			"",
+			"app",
+			"\
+[dependencies]
+alias = { package = 'helper', path = 'helper', default-features = false }
+[dev-dependencies]
+alias = { package = 'helper', path = 'helper', features = ['try-runtime'] }
+[features]
+default = ['std']
+std = []
+try-runtime = []
+",
+		),
+		("helper", "helper", "[features]\ntry-runtime = []\n"),
+	] {
+		let pkg = root.join(path);
+		std::fs::create_dir_all(pkg.join("src")).unwrap();
+		std::fs::write(pkg.join("src/lib.rs"), "").unwrap();
+		std::fs::write(
+			pkg.join("Cargo.toml"),
+			format!(
+				"[package]\nname = '{name}'\nversion = '0.1.0'\nedition = '2021'\n{declarations}"
+			),
+		)
+		.unwrap();
+	}
+	let lint = |args: &[&str]| {
+		let mut cmd = Command::new(assert_cmd::cargo_bin!("zepter"));
+		cmd.current_dir(root).arg("lint").args(args).arg("--offline");
+		cmd
+	};
+	let propagation = ["propagate-feature", "-p", "app", "--feature", "try-runtime"];
+	let missing = lint(&propagation).assert().code(1);
+	assert!(std::str::from_utf8(&missing.get_output().stdout)
+		.unwrap()
+		.contains("must propagate to:\n      alias"));
+	lint(&propagation).args(["--dep-kinds", "normal:ignore"]).assert().success();
+	lint(&["never-implies", "--precondition", "default", "--stays-disabled", "try-runtime"])
+		.assert()
+		.success()
+		.stdout("");
+	lint(&["why-enabled", "-p", "helper", "--feature", "try-runtime"]).assert().success()
+		.stdout("Feature try-runtime/helper is enabled by:\n  app requests alias/try-runtime in [dev-dependencies]\n");
+}
+
+#[test]
+fn never_implies_matches_features_compiled_into_normal_dependency() {
+	let dir = tempfile::tempdir().unwrap();
+	let root = dir.path();
+	for (name, declarations, source, contents) in [
+		(
+			"app",
+			"[dependencies]\nhelper = { path = '../helper' }\n\
+			 [build-dependencies]\nhelper = { path = '../helper', features = ['from-build'] }\n\
+			 [dev-dependencies]\nhelper = { path = '../helper', features = ['from-dev'] }\n\
+			 test-only = { path = '../test-only', features = ['only-in-tests'] }\n\
+			 [features]\ndefault = []\n",
+			"main.rs",
+			"fn main() { println!(\"{} {} {}\", helper::BUILD, helper::DEV, helper::DEV_TREE); }",
+		),
+		(
+			"helper",
+			"[features]\nfrom-build = []\nfrom-dev = []\nfrom-dev-tree = []\n",
+			"lib.rs",
+			"pub const BUILD: bool = cfg!(feature = \"from-build\");\n\
+			 pub const DEV: bool = cfg!(feature = \"from-dev\");\n\
+			 pub const DEV_TREE: bool = cfg!(feature = \"from-dev-tree\");",
+		),
+		(
+			"test-only",
+			"[dependencies]\nhelper = { path = '../helper', features = ['from-dev-tree'] }\n\
+			 [features]\nonly-in-tests = []\n",
+			"lib.rs",
+			"",
+		),
+	] {
+		let pkg = root.join(name);
+		std::fs::create_dir_all(pkg.join("src")).unwrap();
+		std::fs::write(pkg.join("src").join(source), contents).unwrap();
+		std::fs::write(
+			pkg.join("Cargo.toml"),
+			format!(
+				"[package]\nname = '{name}'\nversion = '0.1.0'\nedition = '2018'\n{declarations}"
+			),
+		)
+		.unwrap();
+	}
+	std::fs::write(root.join("app/build.rs"), "fn main() {}").unwrap();
+	// A virtual workspace with no explicit resolver uses v1.
+	for (resolver, unified) in [("", true), ("resolver = '2'", false)] {
+		std::fs::write(
+			root.join("Cargo.toml"),
+			format!("[workspace]\nmembers = ['app', 'helper', 'test-only']\n{resolver}\n"),
+		)
+		.unwrap();
+		Command::new(env!("CARGO"))
+			.current_dir(root)
+			.args(["run", "--quiet", "--offline", "-p", "app"])
+			.assert()
+			.success()
+			.stdout(format!("{unified} {unified} {unified}\n"));
+		for (feature, expected) in [
+			("from-build", unified),
+			("from-dev", unified),
+			("from-dev-tree", unified),
+			("only-in-tests", false),
+		] {
+			let result = Command::new(assert_cmd::cargo_bin!("zepter"))
+				.current_dir(root.join("app"))
+				.args([
+					"lint",
+					"never-implies",
+					"--offline",
+					"--precondition",
+					"default",
+					"--stays-disabled",
+					feature,
+				])
+				.assert()
+				.success();
+			let stdout = std::str::from_utf8(&result.get_output().stdout).unwrap();
+			if expected {
+				assert!(
+					stdout.contains("app/default -> ") &&
+						stdout.contains(&format!("helper/{feature}")),
+					"{stdout}"
+				);
+			} else {
+				assert!(stdout.is_empty(), "{stdout}");
+			}
+		}
+	}
 }

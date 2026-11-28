@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
 use super::GlobalArgs;
-use crate::cmd::lint::build_feature_dag;
+use crate::cmd::lint::{build_feature_dag, build_feature_dag_with_resolver, resolver_one};
 #[cfg(feature = "debugging")]
 use crate::{cmd::lint::CrateAndFeature, prelude::Dag};
 
@@ -33,10 +33,10 @@ impl DebugCmd {
 		}
 		println!("Num workspace members: {}", meta.workspace_members.len());
 		println!("Num dependencies: {}", meta.packages.len());
-		println!("DAG nodes: {}, links: {}", dag.num_nodes(), dag.num_edges());
+		println!("DAG nodes: {}, links: {}", dag.direct.num_nodes(), dag.direct.num_edges());
 
 		#[cfg(feature = "debugging")]
-		self.connectivity_buckets(&dag);
+		self.connectivity_buckets(&dag.direct);
 
 		if !self.no_benchmark {
 			let (took, points) = Self::measure(&meta)?;
@@ -59,20 +59,21 @@ impl DebugCmd {
 
 	fn measure(meta: &Metadata) -> Result<(Duration, u32), String> {
 		// Run at least: 10 times or 5 secs, whatever takes longer.
+		let resolver_one = resolver_one(meta)?;
 		let mut took = Duration::default();
 		let mut count = 0;
 
 		while took < Duration::from_secs(1) || count < 10 {
-			took += Self::measure_once(meta)?;
+			took += Self::measure_once(meta, resolver_one)?;
 			count += 1;
 		}
 
 		Ok((took / count, count))
 	}
 
-	fn measure_once(meta: &Metadata) -> Result<Duration, String> {
+	fn measure_once(meta: &Metadata, resolver_one: bool) -> Result<Duration, String> {
 		let start = Instant::now();
-		let _ = build_feature_dag(meta, &meta.packages)?;
+		let _ = build_feature_dag_with_resolver(meta, &meta.packages, resolver_one)?;
 		Ok(start.elapsed())
 	}
 }

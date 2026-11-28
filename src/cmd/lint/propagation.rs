@@ -4,11 +4,10 @@
 mod collect;
 mod report;
 
-use super::{build_feature_dag, CrateAndFeature};
+use super::CrateAndFeature;
 use crate::{
 	autofix::AutoFixerArgs,
 	cmd::{parse_key_val, CargoArgs, CommandError, GlobalArgs, RenamedPackage},
-	dag::Dag,
 	CrateId,
 };
 use cargo_metadata::Metadata;
@@ -162,11 +161,10 @@ struct Findings {
 impl PropagateFeatureCmd {
 	pub fn run(&self, global: &GlobalArgs) -> Result<(), CommandError> {
 		let meta = self.cargo_args.load_metadata()?;
-		let dag = build_feature_dag(&meta, &meta.packages)?;
 		let features = self.features.iter().collect::<BTreeSet<_>>();
 
 		for feature in features {
-			self.run_feature(&meta, &dag, feature, global)?;
+			self.run_feature(&meta, feature, global)?;
 		}
 
 		Ok(())
@@ -175,7 +173,6 @@ impl PropagateFeatureCmd {
 	fn run_feature(
 		&self,
 		meta: &Metadata,
-		dag: &Dag<CrateAndFeature>,
 		feature: &str,
 		global: &GlobalArgs,
 	) -> Result<(), CommandError> {
@@ -193,7 +190,7 @@ impl PropagateFeatureCmd {
 			return Err(format!("No packages found: {:?}", self.packages).into())
 		}
 
-		let findings = self.collect_findings(meta, dag, feature, &to_check)?;
+		let findings = self.collect_findings(meta, feature, &to_check)?;
 		report::Reporter::new(self, meta, &allowed_dir, feature, findings).report(global)
 	}
 

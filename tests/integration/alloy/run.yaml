@@ -3,11 +3,35 @@ repo:
   ref: 8ef44f253609a2951846caa6514ee760656b30e2
 cases:
 - cmd: run default
+  stdout: |
+    crate 'alloy-eips' (<workspace>/crates/eips/Cargo.toml)
+      feature 'arbitrary'
+        must propagate to:
+          ethereum_ssz
+    Found 1 issue and fixed 1 (all fixed).
   stderr: |
     [INFO] Running workflow 'default'
     [INFO] 1/1 lint propagate-feature
+  code: 0
+  diff: "diff --git crates/eips/Cargo.toml crates/eips/Cargo.toml\nindex cedea30f86..d4c373da3e 100644\n--- crates/eips/Cargo.toml\n+++ crates/eips/Cargo.toml\n@@ -106,9 +106,10 @@ arbitrary = [\n-    \"std\",\n-    \"kzg-sidecar\",\n-    \"dep:arbitrary\",\n-    \"alloy-primitives/arbitrary\",\n-    \"alloy-serde?/arbitrary\",\n-    \"alloy-eip2124/arbitrary\",\n-    \"alloy-eip2930/arbitrary\",\n-    \"alloy-eip7702/arbitrary\",\n-    \"alloy-eip7702/k256\",\n+\t\"std\",\n+\t\"kzg-sidecar\",\n+\t\"dep:arbitrary\",\n+\t\"alloy-primitives/arbitrary\",\n+\t\"alloy-serde?/arbitrary\",\n+\t\"alloy-eip2124/arbitrary\",\n+\t\"alloy-eip2930/arbitrary\",\n+\t\"alloy-eip7702/arbitrary\",\n+\t\"alloy-eip7702/k256\",\n+\t\"ethereum_ssz?/arbitrary\"\n"
 - cmd: run check
+  stdout: |
+    crate 'alloy-eips' (<workspace>/crates/eips/Cargo.toml)
+      feature 'arbitrary'
+        must propagate to:
+          ethereum_ssz
+    Found 1 issue.
+    Error: Command 'lint propagate-feature' failed with exit code 1
+
+    Alloy uses the Zepter CLI to detect abnormalities in Cargo features, e.g. missing propagation.
+
+    It looks like one more checks failed; please check the console output.
+
+    You can try to automatically address them by installing zepter (`cargo install zepter --locked`) and simply running `zepter` in the workspace root.
+
+    For more information, see:
+      - https://github.com/ggwpez/zepter
   stderr: |
     [INFO] Running workflow 'check'
-    [INFO] 1/1 lint propagate-feature
+  code: 1
 no_default_args: true

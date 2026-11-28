@@ -4,7 +4,7 @@
 use criterion::{criterion_group, criterion_main, Criterion};
 use rand::{RngExt, SeedableRng};
 use std::hint::black_box;
-use zepter::{cmd::lint::build_feature_dag, prelude::*};
+use zepter::{cmd::lint::build_feature_dag_with_resolver, prelude::*};
 
 fn build_dag(nodes: usize, edges: usize) -> Dag<usize> {
 	let mut rng = rand::rngs::StdRng::seed_from_u64(42);
@@ -63,23 +63,25 @@ fn polkadot_sdk(c: &mut Criterion) {
 	let meta = serde_json::from_str::<cargo_metadata::Metadata>(&file).unwrap();
 
 	let pkgs = &meta.packages;
-	let dag = build_feature_dag(&meta, pkgs).expect("valid benchmark metadata");
+	// The captured Polkadot-SDK metadata uses resolver 2 and may be detached
+	// from its workspace manifest.
+	let dag =
+		build_feature_dag_with_resolver(&meta, pkgs, false).expect("valid benchmark metadata");
 
 	c.bench_function("Polkadot-SDK / DAG / setup", |b| {
 		b.iter(|| {
-			let dag = build_feature_dag(&meta, pkgs).expect("valid benchmark metadata");
+			let dag = build_feature_dag_with_resolver(&meta, pkgs, false)
+				.expect("valid benchmark metadata");
 			black_box(dag)
 		});
 	});
 
-	let from = dag.lhs_iter().find(|c| c.0.starts_with("kitchensink-runtime ")).unwrap();
-	let to = dag.rhs_iter().find(|c| c.0.starts_with("sp-io ")).unwrap();
-	assert!(dag.lhs_contains(from), "LHS:\n{:?}", dag.lhs_nodes().collect::<Vec<_>>());
-	assert!(dag.rhs_contains(to));
+	let from = dag.direct.lhs_iter().find(|c| c.0.starts_with("kitchensink-runtime ")).unwrap();
+	let to = dag.direct.rhs_iter().find(|c| c.0.starts_with("sp-io ")).unwrap();
 
 	c.bench_function("Polkadot-SDK / DAG / reachability: false", |b| {
 		b.iter(|| {
-			let p = dag.any_path(from, to);
+			let p = dag.implied_path(from, |node| node == to);
 			black_box(p)
 		});
 	});

@@ -3,15 +3,83 @@ repo:
   ref: c86b633695299ed27053940d5ea5c5a2392964b3
 cases:
 - cmd: run check
+  stdout: |
+    crate 'cumulus-pallet-parachain-system' (<workspace>/cumulus/pallets/parachain-system/Cargo.toml)
+      feature 'std'
+        must propagate to:
+          sp-version
+    crate 'pallet-session-benchmarking' (<workspace>/substrate/frame/session/benchmarking/Cargo.toml)
+      feature 'std'
+        must propagate to:
+          codec (renamed from parity-scale-codec)
+    crate 'pallet-staking' (<workspace>/substrate/frame/staking/Cargo.toml)
+      feature 'std'
+        must propagate to:
+          rand_chacha
+    crate 'pallet-xcm-benchmarks' (<workspace>/polkadot/xcm/pallet-xcm-benchmarks/Cargo.toml)
+      feature 'std'
+        must propagate to:
+          xcm (renamed from staging-xcm)
+    crate 'polkadot-runtime-common' (<workspace>/polkadot/runtime/common/Cargo.toml)
+      feature 'std'
+        must propagate to:
+          pallet-babe
+    crate 'polkadot-runtime-parachains' (<workspace>/polkadot/runtime/parachains/Cargo.toml)
+      feature 'std'
+        must propagate to:
+          sp-tracing
+    Found 6 issues.
+    Error: Command 'lint propagate-feature' failed with exit code 1
+
+    Polkadot-SDK uses the Zepter CLI to detect abnormalities in the feature configuration.
+    It looks like one more more checks failed; please check the console output. You can try to automatically address them by running `zepter`.
+    Otherwise please ask directly in the Merge Request, GitHub Discussions or on Matrix Chat, thank you.
+
+    For more information, see:
+      - https://github.com/paritytech/polkadot-sdk/issues/1831
+      - https://github.com/ggwpez/zepter
   stderr: |
     [INFO] Running workflow 'check'
-    [INFO] 1/2 lint propagate-feature
-    [INFO] 2/2 format features
-  code: 0
+  code: 1
 - cmd: run default
+  stdout: |
+    crate 'cumulus-pallet-parachain-system' (<workspace>/cumulus/pallets/parachain-system/Cargo.toml)
+      feature 'std'
+        must propagate to:
+          sp-version
+    crate 'pallet-session-benchmarking' (<workspace>/substrate/frame/session/benchmarking/Cargo.toml)
+      feature 'std'
+        must propagate to:
+          codec (renamed from parity-scale-codec)
+    crate 'pallet-staking' (<workspace>/substrate/frame/staking/Cargo.toml)
+      feature 'std'
+        must propagate to:
+          rand_chacha
+    crate 'pallet-xcm-benchmarks' (<workspace>/polkadot/xcm/pallet-xcm-benchmarks/Cargo.toml)
+      feature 'std'
+        must propagate to:
+          xcm (renamed from staging-xcm)
+    crate 'polkadot-runtime-common' (<workspace>/polkadot/runtime/common/Cargo.toml)
+      feature 'std'
+        must propagate to:
+          pallet-babe
+    crate 'polkadot-runtime-parachains' (<workspace>/polkadot/runtime/parachains/Cargo.toml)
+      feature 'std'
+        must propagate to:
+          sp-tracing
+    Found 6 issues and fixed 6 (all fixed).
+    Found 6 crates with unformatted features:
+      pallet-staking
+      pallet-session-benchmarking
+      polkadot-runtime-parachains
+      polkadot-runtime-common
+      pallet-xcm-benchmarks
+      cumulus-pallet-parachain-system
+    Formatted 6 crates (all fixed).
   stderr: |
     [INFO] Running workflow 'default'
     [INFO] 1/2 lint propagate-feature
     [INFO] 2/2 format features
   code: 0
+  diff: "diff --git cumulus/pallets/parachain-system/Cargo.toml cumulus/pallets/parachain-system/Cargo.toml\nindex d48604d502..bd47d38166 100644\n--- cumulus/pallets/parachain-system/Cargo.toml\n+++ cumulus/pallets/parachain-system/Cargo.toml\n@@ -77,0 +78 @@ std = [\n+\t\"sp-version/std\",\ndiff --git polkadot/runtime/common/Cargo.toml polkadot/runtime/common/Cargo.toml\nindex 18332156d9..68ed973c00 100644\n--- polkadot/runtime/common/Cargo.toml\n+++ polkadot/runtime/common/Cargo.toml\n@@ -84,0 +85 @@ std = [\n+\t\"pallet-babe?/std\",\ndiff --git polkadot/runtime/parachains/Cargo.toml polkadot/runtime/parachains/Cargo.toml\nindex e49c00459d..7f3688e61a 100644\n--- polkadot/runtime/parachains/Cargo.toml\n+++ polkadot/runtime/parachains/Cargo.toml\n@@ -104,0 +105 @@ std = [\n+\t\"sp-tracing?/std\",\ndiff --git polkadot/xcm/pallet-xcm-benchmarks/Cargo.toml polkadot/xcm/pallet-xcm-benchmarks/Cargo.toml\nindex 88df81a3da..b33c4fe83b 100644\n--- polkadot/xcm/pallet-xcm-benchmarks/Cargo.toml\n+++ polkadot/xcm/pallet-xcm-benchmarks/Cargo.toml\n@@ -50,0 +51 @@ std = [\n+\t\"xcm/std\",\ndiff --git substrate/frame/session/benchmarking/Cargo.toml substrate/frame/session/benchmarking/Cargo.toml\nindex 87f0898513..32043d4390 100644\n--- substrate/frame/session/benchmarking/Cargo.toml\n+++ substrate/frame/session/benchmarking/Cargo.toml\n@@ -39,0 +40 @@ std = [\n+\t\"codec/std\",\ndiff --git substrate/frame/staking/Cargo.toml substrate/frame/staking/Cargo.toml\nindex c5cac9fefa..aa8fa312d3 100644\n--- substrate/frame/staking/Cargo.toml\n+++ substrate/frame/staking/Cargo.toml\n@@ -65,0 +66 @@ std = [\n+\t\"rand_chacha?/std\",\n"
 no_default_args: true

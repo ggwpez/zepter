@@ -1,17 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: Oliver Tale-Yazdi <oliver@tasty.limo>
 
-use super::{CrateAndFeature, Dag, Findings, IgnoreSetting, MuteSetting, PropagateFeatureCmd};
-use crate::{
-	cmd::{resolve_dep, RenamedPackage},
-	log,
-};
-use cargo_metadata::{Metadata, Package};
+use super::{CrateAndFeature, Findings, IgnoreSetting, MuteSetting, PropagateFeatureCmd};
+use crate::cmd::{resolve_dep, RenamedPackage};
+use cargo_metadata::{Dependency, Metadata, Package};
 use std::collections::{BTreeMap, BTreeSet};
 
 struct FeatureCheck<'a> {
 	cmd: &'a PropagateFeatureCmd,
-	dag: &'a Dag<CrateAndFeature>,
 	feature: &'a str,
 	ignore_missing: BTreeMap<CrateAndFeature, BTreeSet<CrateAndFeature>>,
 }
@@ -20,16 +16,11 @@ impl PropagateFeatureCmd {
 	pub(super) fn collect_findings(
 		&self,
 		meta: &Metadata,
-		dag: &Dag<CrateAndFeature>,
 		feature: &str,
 		to_check: &[&Package],
 	) -> Result<Findings, String> {
-		let check = FeatureCheck {
-			cmd: self,
-			dag,
-			feature,
-			ignore_missing: self.ignore_missing_propagate()?,
-		};
+		let check =
+			FeatureCheck { cmd: self, feature, ignore_missing: self.ignore_missing_propagate()? };
 		let dep_kinds = self.parse_dep_kinds()?;
 		let mut findings = Findings::default();
 
@@ -39,8 +30,10 @@ impl PropagateFeatureCmd {
 				.iter()
 				.filter(|dep| dep_kinds.get(&dep.kind) != Some(&IgnoreSetting::Ignore));
 			// Unresolved dependencies may be unused or outside the workspace.
-			for dep in deps.filter_map(|dep| resolve_dep(pkg, dep, meta)) {
-				check.record(&mut findings, pkg, dep);
+			for declaration in deps {
+				if let Some(dep) = resolve_dep(pkg, declaration, meta) {
+					check.record(&mut findings, pkg, declaration, dep);
+				}
 			}
 		}
 		Ok(findings)
@@ -53,7 +46,13 @@ impl PropagateFeatureCmd {
 }
 
 impl FeatureCheck<'_> {
-	fn record(&self, findings: &mut Findings, pkg: &Package, dep: RenamedPackage) {
+	fn record(
+		&self,
+		findings: &mut Findings,
+		pkg: &Package,
+		declaration: &Dependency,
+		dep: RenamedPackage,
+	) {
 		let missing = if !dep.pkg.features.contains_key(self.feature) {
 			if !self.needs_non_optional(pkg, &dep) {
 				return
@@ -65,7 +64,7 @@ impl FeatureCheck<'_> {
 			}
 			&mut findings.feature_missing
 		} else {
-			if is_propagated(self.dag, pkg, &dep, self.feature) ||
+			if is_propagated(pkg, declaration, &dep, self.feature) ||
 				is_ignored(&self.ignore_missing, pkg, &dep, self.feature)
 			{
 				return
@@ -81,28 +80,8 @@ impl FeatureCheck<'_> {
 		};
 		let name = dep.manifest_name();
 		requested.iter().any(|(f, d)| f == self.feature && d == name) &&
-			!feature_activates_dependency(pkg, self.feature, name)
+			!crate::cmd::lint::feature_activates_dependency(pkg, self.feature, name)
 	}
-}
-
-fn feature_activates_dependency(pkg: &Package, feature: &str, name: &str) -> bool {
-	let mut next = pkg.features.get(feature);
-	let mut pending = Vec::new();
-	let mut visited = BTreeSet::new();
-	while let Some(entries) = next {
-		for entry in entries {
-			// `name?/feature` only forwards a feature if the dependency is already active.
-			let dependency =
-				entry.strip_prefix("dep:").or_else(|| entry.split_once('/').map(|(dep, _)| dep));
-			match dependency {
-				Some(dep) if dep == name => return true,
-				None if visited.insert(entry) => pending.extend(pkg.features.get(entry)),
-				_ => {},
-			}
-		}
-		next = pending.pop();
-	}
-	false
 }
 
 fn is_ignored(
@@ -118,29 +97,35 @@ fn is_ignored(
 }
 
 fn is_propagated(
-	dag: &Dag<CrateAndFeature>,
 	pkg: &Package,
+	declaration: &Dependency,
 	dep: &RenamedPackage,
 	feature: &str,
 ) -> bool {
-	let target = CrateAndFeature(dep.pkg.id.repr.clone(), feature.into());
-	let want_opt = CrateAndFeature(format!("{}?", &pkg.id), feature.into());
-	let want_req = CrateAndFeature(pkg.id.repr.clone(), feature.into());
-	if dag.adjacent(&want_opt, &target) || dag.adjacent(&want_req, &target) {
+	let alias = dep.manifest_name();
+	// This lint checks a declaration when active. Both strong and weak forwards
+	// satisfy it, independently of what a normal build would activate.
+	if pkg.features[feature].iter().any(|entry| {
+		entry
+			.split_once('/')
+			.is_some_and(|(name, f)| name.trim_end_matches('?') == alias && f == feature)
+	}) {
 		return true
 	}
-	let default_entrypoint = CrateAndFeature(pkg.id.repr.clone(), "#entrypoint".into());
-	let sub_dag = dag.sub(|CrateAndFeature(p, f)| {
-		(p == &pkg.id.repr && f == "#entrypoint") || (p == &dep.pkg.id.repr)
-	});
-	if let Some(p) = sub_dag.any_path(&default_entrypoint, &target) {
-		log::debug!(
-			target: super::super::LOG_TARGET,
-			"Reachable from the default entrypoint: {:?} vis {:?}",
-			target,
-			p.0
-		);
-		return true
+	let mut pending: Vec<&str> = declaration.features.iter().map(String::as_str).collect();
+	if declaration.uses_default_features {
+		pending.push("default");
+	}
+	let mut seen = BTreeSet::new();
+	while let Some(name) = pending.pop() {
+		if name == feature {
+			return true
+		}
+		if seen.insert(name) {
+			if let Some(entries) = dep.pkg.features.get(name) {
+				pending.extend(entries.iter().map(String::as_str));
+			}
+		}
 	}
 	false
 }

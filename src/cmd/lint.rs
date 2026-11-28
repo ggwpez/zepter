@@ -10,13 +10,18 @@ mod propagation;
 mod relationships;
 
 pub use duplicate::DuplicateDepsCmd;
-pub use graph::{build_feature_dag, CrateAndFeature};
+pub(crate) use graph::resolver_one;
+pub use graph::{
+	build_feature_dag, build_feature_dag_with_resolver, CrateAndFeature, FeatureGraph,
+};
 pub use nostd::*;
 pub use propagation::{DepKind, IgnoreSetting, MuteSetting, PropagateFeatureCmd};
 pub use relationships::{NeverEnablesCmd, NeverImpliesCmd, OnlyEnablesCmd, WhyEnabledCmd};
 
 use super::{CommandError, GlobalArgs};
 use crate::grammar::plural;
+use cargo_metadata::Package;
+use std::collections::BTreeSet;
 
 #[cfg(feature = "logging")]
 const LOG_TARGET: &str = module_path!();
@@ -59,6 +64,26 @@ impl LintCmd {
 		}
 		Ok(())
 	}
+}
+
+fn feature_activates_dependency(pkg: &Package, feature: &str, name: &str) -> bool {
+	let mut next = pkg.features.get(feature);
+	let mut pending = Vec::new();
+	let mut visited = BTreeSet::new();
+	while let Some(entries) = next {
+		for entry in entries {
+			// `name?/feature` only forwards a feature if the dependency is already active.
+			let dependency =
+				entry.strip_prefix("dep:").or_else(|| entry.split_once('/').map(|(dep, _)| dep));
+			match dependency {
+				Some(dep) if dep == name => return true,
+				None if visited.insert(entry) => pending.extend(pkg.features.get(entry)),
+				_ => {},
+			}
+		}
+		next = pending.pop();
+	}
+	false
 }
 
 fn error_stats(

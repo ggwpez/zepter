@@ -31,17 +31,18 @@ type ManifestFixers = Map<PathBuf, AutoFixer>;
 fn manifest_fixer<'a>(
 	fixers: &'a mut ManifestFixers,
 	path: &Path,
-) -> Result<&'a mut AutoFixer, String> {
+) -> Result<(PathBuf, &'a mut AutoFixer), String> {
 	let path = path
 		.canonicalize()
 		.map_err(|e| format!("Could not resolve {}: {e}", path.display()))?;
-	match fixers.entry(path) {
-		Entry::Occupied(entry) => Ok(entry.into_mut()),
+	let fixer = match fixers.entry(path.clone()) {
+		Entry::Occupied(entry) => entry.into_mut(),
 		Entry::Vacant(entry) => {
 			let fixer = AutoFixer::from_manifest(entry.key())?;
-			Ok(entry.insert(fixer))
+			entry.insert(fixer)
 		},
-	}
+	};
+	Ok((path, fixer))
 }
 
 /// Lift up a dependency to the workspace and reference it from all packages.
@@ -155,9 +156,6 @@ impl LiftToWorkspaceCmd {
 		// them off.
 		let workspace_default_features_enabled = all_use_default_features;
 
-		let root_manifest_path = meta.workspace_root.join("Cargo.toml");
-		let workspace_fixer = manifest_fixer(fixers, root_manifest_path.as_std_path())?;
-
 		let mut dep = by_version
 			.values()
 			.flatten()
@@ -183,13 +181,9 @@ impl LiftToWorkspaceCmd {
 			SourceLocationSelector::Remote => None,
 		};
 
-		workspace_fixer.add_workspace_dep(
-			&dep,
-			maybe_rename.as_deref(),
-			workspace_default_features_enabled,
-			location.as_deref(),
-		)?;
-
+		// Prepare only the affected TOML entries. Until the workspace edit succeeds,
+		// every cached manifest still contains exactly the previously accepted lifts.
+		let mut member_edits = Vec::new();
 		for (pkg, dep) in by_version.values().flatten() {
 			if !check_can_modify(&meta.workspace_root, &pkg.manifest_path)? {
 				continue
@@ -200,14 +194,30 @@ impl LiftToWorkspaceCmd {
 				}
 			}
 
-			let fixer = manifest_fixer(fixers, pkg.manifest_path.as_std_path())?;
-			Self::configure_member_dependency(
+			let (path, fixer) = manifest_fixer(fixers, pkg.manifest_path.as_std_path())?;
+			if let Some(item) = Self::prepare_member_dependency(
 				fixer,
 				dep,
 				maybe_rename.as_ref(),
 				&source_location,
 				workspace_default_features_enabled,
-			)?;
+			)? {
+				member_edits.push((path, dep, item));
+			}
+		}
+
+		let root = meta.workspace_root.join("Cargo.toml");
+		let (_, workspace_fixer) = manifest_fixer(fixers, root.as_std_path())?;
+		workspace_fixer.add_workspace_dep(
+			&dep,
+			maybe_rename.as_deref(),
+			workspace_default_features_enabled,
+			location.as_deref(),
+		)?;
+		for (path, dep, item) in member_edits {
+			let name = dep.rename.as_ref().unwrap_or(&dep.name);
+			let slot = fixers.get_mut(&path).unwrap().dependency_mut(name, &dep.kind);
+			*slot.expect("prevalidated member dependency") = item;
 		}
 
 		#[cfg(feature = "logging")]
@@ -241,23 +251,25 @@ impl LiftToWorkspaceCmd {
 		Ok(all_use_default_features)
 	}
 
-	fn configure_member_dependency(
+	fn prepare_member_dependency(
 		fixer: &mut AutoFixer,
 		dep: &Dep,
 		maybe_rename: Option<&String>,
 		location: &SourceLocationSelector,
 		workspace_default_features_enabled: bool,
-	) -> Result<(), String> {
+	) -> Result<Option<toml_edit::Item>, String> {
 		// We can safely use the rename here, since we found it with `detect_rename`.
 		let dep_name = dep.rename.as_ref().unwrap_or(&dep.name);
 		if maybe_rename.is_some_and(|rename| rename != dep_name) {
 			return Err(format!("Dependency '{}' has conflicting alias '{dep_name}'", dep.name))
 		}
 
-		if dep.uses_default_features != workspace_default_features_enabled {
-			fixer.lift_dependency(dep_name, &dep.kind, Some(dep.uses_default_features), location)
-		} else {
-			fixer.lift_dependency(dep_name, &dep.kind, None, location)
-		}
+		let Some(mut item) = fixer.dependency_mut(dep_name, &dep.kind).cloned() else {
+			return Ok(None)
+		};
+		let default_feats = (dep.uses_default_features != workspace_default_features_enabled)
+			.then_some(dep.uses_default_features);
+		AutoFixer::lift_some_dependency(&mut item, default_feats, location)?;
+		Ok(Some(item))
 	}
 }

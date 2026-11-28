@@ -42,13 +42,9 @@ impl AutoFixer {
 		}
 		let workspace = doc["workspace"].as_table_mut().unwrap();
 
-		if !workspace.contains_table("dependencies") {
-			workspace.insert("dependencies", table());
-		}
-
-		let deps = workspace["dependencies"].as_table_mut().unwrap();
-		let found_orig = deps.get(dep_name);
-		let found_rename = maybe_rename.and_then(|r| deps.get(r));
+		let deps = workspace.get("dependencies").and_then(Item::as_table);
+		let found_orig = deps.and_then(|deps| deps.get(dep_name));
+		let found_rename = maybe_rename.and_then(|r| deps?.get(r));
 
 		if found_orig.is_some() && found_rename.is_some() {
 			log::warn!(
@@ -91,6 +87,10 @@ impl AutoFixer {
 		};
 
 		let new_name = maybe_rename.unwrap_or(name);
+		if !workspace.contains_table("dependencies") {
+			workspace.insert("dependencies", table());
+		}
+		let deps = workspace["dependencies"].as_table_mut().unwrap();
 		if dep_name != new_name {
 			deps.remove(dep_name);
 		}
